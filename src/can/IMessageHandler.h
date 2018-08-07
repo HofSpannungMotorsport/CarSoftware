@@ -5,14 +5,14 @@
 
 enum msg_build_result_t
 {
-    OK,
-    ERROR
+    MSG_BUILD_OK,
+    MSG_BUILD_ERROR
 };
 
 enum msg_parse_result_t
 {
-    OK,
-    ERROR
+    MSG_PARSE_OK,
+    MSG_PARSE_ERROR
 };
 
 template<class T>

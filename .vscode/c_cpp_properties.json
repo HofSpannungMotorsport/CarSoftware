@@ -4,7 +4,8 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/mbed-os"
+                "${workspaceFolder}/mbed-os",
+                "${workspaceFolder}/src/can"
             ],
             "defines": [
                 "_DEBUG",
