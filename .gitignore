@@ -1,6 +1,7 @@
 # Add any directories, files, or patterns you don't want to be tracked by version control
 # Add any directories, files, or patterns you don't want to be tracked by version control
 #Mbed Folder
+BUILD
 mbed-os
 mbed_settings.py
 *.mbed
@@ -37,3 +38,4 @@ mbed_settings.py
 *.exe
 *.out
 *.app
+mbed_settings.pyc
