@@ -5,7 +5,8 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/mbed-os",
-                "${workspaceFolder}/src/can"
+                "${workspaceFolder}/src/can",
+                "${workspaceFolder}/src/components/interface"
             ],
             "defines": [
                 "_DEBUG",
