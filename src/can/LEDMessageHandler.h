@@ -5,6 +5,8 @@
 #include "ILed.h"
 #include "mbed.h"
 
+#define CAN_LED_PAYLOAD_LEN 1
+
 class LEDMessageHandler : public IMessageHandler<ILed>
 {
     public:
@@ -14,7 +16,7 @@ class LEDMessageHandler : public IMessageHandler<ILed>
     }
     virtual msg_parse_result_t parseMessage(ILed &obj, CANMessage &msg)
     {
-        if(msg.len != 1) // not a valid message for leds
+        if(msg.len != CAN_LED_PAYLOAD_LEN) // not a valid message for leds
             return MSG_PARSE_ERROR;
         
         obj.setState((led_state_t)((msg.data[0] & 0x80u) >> 7));
