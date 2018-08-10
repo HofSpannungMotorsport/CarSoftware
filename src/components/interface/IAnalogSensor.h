@@ -5,6 +5,10 @@
 
 typedef uint16_t analog_sensor_val_t;
 typedef float analog_sensor_normval_t;
+typedef uint8_t analog_sensor_status_t;
+
+#define ANALOG_SENSOR_DISCONNECTED_FLAG 7
+#define ANALOG_SENSOR_SHORT_CIRCUT_FLAG 6
 
 enum analog_sensor_alignment_t
 {
@@ -20,6 +24,7 @@ class IAnalogSensor
         virtual void setAlignment(analog_sensor_alignment_t alignment) = 0;
         virtual analog_sensor_val_t getRawValue() = 0;
         virtual analog_sensor_normval_t getNormalizedValue() = 0;
+        virtual analog_sensor_status_t getStatus() = 0;
 
 };
 
