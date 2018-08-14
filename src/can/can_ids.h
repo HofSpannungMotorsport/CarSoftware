@@ -22,7 +22,8 @@ enum can_telegram_type_t
     ACCELERATION = 0x7,
     TEMPERATURE = 0x1,
     SUSPENSION_TRAVEL = 0x6,
-    LED = 0x4
+    LED = 0x4,
+    SYSTEM = 0xF
 };
 
 enum can_component_t
@@ -54,7 +55,14 @@ enum can_component_t
 
     // Cooling
     COOLING_PUMP = 0x0,
-    COOLING_FANS = 0x1
+    COOLING_FANS = 0x1,
+    
+    // System messages
+    SYSTEM_INIT_REQUEST = 0x0,
+    SYSTEM_INIT_RESPONSE = 0x1,
+    SYSTEM_START_CALIBRATION = 0x2,
+    SYSTEM_FINISH_CALIBRATION = 0x3,
+    SYSTEM_CANCEL_CALIBRATION = 0x4
 };
 
 uint8_t getCompId(can_telegram_type_t teletype, can_component_t comp)
@@ -64,7 +72,8 @@ uint8_t getCompId(can_telegram_type_t teletype, can_component_t comp)
 
 uint16_t getMessageId(uint8_t prio, can_telegram_type_t teletype, can_component_t comp, uint8_t func)
 {
-    return 
+    // TODO calculate func
+    return (prio << 10) & getConpId(teletype, comp);
 }
 
 #endif
