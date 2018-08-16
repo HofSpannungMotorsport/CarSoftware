@@ -12,7 +12,9 @@ class LEDMessageHandler : public IMessageHandler<ILed>
     public:
     virtual msg_build_result_t buildMessage(ILed &obj, CANMessage &msg)
     {
-        return MSG_BUILD_ERROR;
+        msg.data[0] = ((obj.getState() & 0x1u) << 7) | ((obj.getBrightness() & 0x2u) << 5) | ((obj.getBlinking() & 0x2u) << 3);
+        msg.len = CAN_LED_PAYLOAD_LEN;
+        return MSG_BUILD_OK;
     }
     virtual msg_parse_result_t parseMessage(ILed &obj, CANMessage &msg)
     {
