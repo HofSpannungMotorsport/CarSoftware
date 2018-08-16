@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 typedef uint8_t pedal_status_t;
-typedef uint8_t pedal_value_t;
+typedef float pedal_value_t;
 
 #define PEDAL_DEVIANCE_TOO_HIGH 6
 #define PEDAL_SENSOR_PROBLEM 5
