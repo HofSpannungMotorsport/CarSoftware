@@ -4,10 +4,10 @@
 #include "IAnalogSensor.h"
 #include "mbed.h"
 
-class HardwareAnalogSensor : virtual public IAnalogSensor
+
+class HardwareAnalogSensor : public AnalogIn, virtual public IAnalogSensor
 {
     private:
-        AnalogIn *_input;
         analog_sensor_alignment_t _alignment;
         analog_sensor_normval_t _minValue, _maxValue;
 
@@ -18,9 +18,8 @@ class HardwareAnalogSensor : virtual public IAnalogSensor
         }
     public:
 
-        HardwareAnalogSensor(AnalogIn *input)
+        HardwareAnalogSensor(PinName pin) : AnalogIn(pin)
         {
-            _input = input;
         }
 
         virtual void setMinValue(analog_sensor_val_t val)
@@ -40,7 +39,7 @@ class HardwareAnalogSensor : virtual public IAnalogSensor
         
         virtual analog_sensor_val_t getRawValue()
         {
-            return _input->read_u16();
+            return read_u16();
         }
         
         virtual analog_sensor_normval_t getNormalizedValue() 

@@ -4,23 +4,20 @@
 #include "ILed.h"
 
 
-class HardwareLed : public ILed
+class HardwareLed : public DigitalOut, public virtual ILed
 {
-    private:
-        DigitalOut *outPin;
     public:
-        HardwareLed(PinName pin)
+        HardwareLed(PinName pin) : DigitalOut(pin)
         {
-           outPin = new DigitalOut(pin);
         }
         virtual ~HardwareLed()
         {
-            delete outPin;
+            
         }
 
         virtual void setState(led_state_t state)
         {
-            outPin->write(state);
+            write(state);
         }
         virtual void setBrightness(led_brightness_t brightness)
         {
@@ -34,7 +31,7 @@ class HardwareLed : public ILed
         // getters
         virtual led_state_t getState()
         {
-            return (led_state_t)outPin->read();
+            return (led_state_t)read();
         }
 
         virtual led_brightness_t getBrightness()
