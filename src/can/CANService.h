@@ -45,6 +45,9 @@ class CANService
             {
                 // search in _components for right component
                 // call bridge with component pointer
+
+                component_details_t comp = _components[m.id & 0x3FC];
+                comp.handler->parseMessage(comp.component,m);
             }
         }
         void addComponent(uint8_t id, void* component, IMessageHandler<CANMessage>* handler, can_prio_t priority = NORMAL)
