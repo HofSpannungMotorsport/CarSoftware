@@ -2,7 +2,7 @@
 #define LEDMESSAGE_HANDLER_H
 
 #include "IMessageHandler.h"
-#include "ILed.h"
+#include "../components/interface/ILed.h"
 #include "mbed.h"
 
 #define CAN_LED_PAYLOAD_LEN 1

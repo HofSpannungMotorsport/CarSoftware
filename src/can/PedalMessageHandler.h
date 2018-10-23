@@ -7,7 +7,7 @@
 
 #define CAN_PEDAL_PAYLOAD_LEN 2
 
-class PedalMessageHandler : public IMessageHandler<IPedal>
+class PedalMessageHandler : public IMessageHandler<CANMassage>
 {
     public:
     virtual msg_build_result_t buildMessage(void *objV, CANMessage &msg)

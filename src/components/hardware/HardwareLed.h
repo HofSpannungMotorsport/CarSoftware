@@ -1,7 +1,7 @@
 #ifndef HARDWARELED_H
 #define HARDWARELED_H
 #include "mbed.h"
-#include "ILed.h"
+#include "../interface/ILed.h"
 
 
 class HardwareLed : public DigitalOut, public virtual ILed

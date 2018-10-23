@@ -1,8 +1,8 @@
 #ifndef HARDWAREPEDAL_H
 #define HARDWAREPEDAL_H
 
-#include "IPedal.h"
-#include "IAnalogSensor.h"
+#include "../interface/IPedal.h"
+#include "../interface/IAnalogSensor.h"
 #include "mbed.h"
 
 class HardwarePedal : public IPedal
