@@ -33,11 +33,13 @@ class CANService
             }
 
         }
+        
     public:
         CANService()
         {
             _can->attach(this,&msgReceived,CAN::RxIrq);
         }
+
         void processInbound()
         {
             CANMessage m;
@@ -50,6 +52,7 @@ class CANService
                 comp.handler->parseMessage(comp.component,m);
             }
         }
+
         void addComponent(uint8_t id, void* component, IMessageHandler<CANMessage>* handler, can_prio_t priority = NORMAL)
         {
             // add to _components

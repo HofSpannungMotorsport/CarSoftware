@@ -1,7 +1,7 @@
 #ifndef SOFTWAREPEDAL_H
 #define SOFTWAREPEDAL_H
 
-#include "IPedal.h"
+#include "../interface/IPedal.h"
 
 class SoftwarePedal : public IPedal
 {

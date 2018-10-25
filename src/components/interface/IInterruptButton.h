@@ -8,6 +8,11 @@ enum button_state_t {
     STATE_NOT_PRESSED = false
 };
 
+enum button_type_t {
+    NORMALLY_OPEN,
+    NORMALLY_CLOSED
+};
+
 typedef uint16_t button_time_t;
 typedef float button_debounce_time_t;
 

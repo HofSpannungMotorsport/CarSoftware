@@ -1,7 +1,7 @@
 #ifndef SOFTWARELED_H
 #define SOFTWARELED_H
 
-#include "ILed.h"
+#include "../interface/ILed.h"
 
 class SoftwareLed : ILed
 {   

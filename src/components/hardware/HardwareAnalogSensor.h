@@ -1,7 +1,7 @@
 #ifndef HARDWARE_ANALOGSENSOR_H
 #define HARDWARE_ANALOGSENSOR_H
 
-#include "IAnalogSensor.h"
+#include "../interface/IAnalogSensor.h"
 #include "mbed.h"
 
 
@@ -16,6 +16,7 @@ class HardwareAnalogSensor : public AnalogIn, virtual public IAnalogSensor
             float factor = (max-min)/(_maxValue - _minValue);
             return factor * (_alignment==SENSOR_ALIGNMENT_PROPORTIONAL? (val-_minValue) : (_maxValue - val)) + min;
         }
+        
     public:
 
         HardwareAnalogSensor(PinName pin) : AnalogIn(pin)
@@ -45,6 +46,11 @@ class HardwareAnalogSensor : public AnalogIn, virtual public IAnalogSensor
         virtual analog_sensor_normval_t getNormalizedValue() 
         {
             return scale(getRawValue(),0,1);
+        }
+
+        virtual analog_sensor_status_t getStatus()
+        {
+            
         }
         
 };

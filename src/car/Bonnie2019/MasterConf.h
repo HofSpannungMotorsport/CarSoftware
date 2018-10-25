@@ -3,8 +3,9 @@
 
 #include "mbed.h"
 #include "hardware/Pins_Master.h"
-#include "HardwareLed.h"
-#include "SoftwareLed.h"
+#include "../../components/hardware/HardwareLed.h"
+#include "../../components/software/SoftwareLed.h"
+#include "../../components/hardware/HardwareAnalogSensor.h"
 #include "../../can/can_config.h"
 
 CAN can(CAN1_CONF);

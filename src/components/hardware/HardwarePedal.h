@@ -1,9 +1,9 @@
 #ifndef HARDWAREPEDAL_H
 #define HARDWAREPEDAL_H
 
+#include "mbed.h"
 #include "../interface/IPedal.h"
 #include "../interface/IAnalogSensor.h"
-#include "mbed.h"
 
 class HardwarePedal : public IPedal
 {   
@@ -20,7 +20,7 @@ class HardwarePedal : public IPedal
             {
 
                 analog_sensor_normval_t val = _sensors[0].getNormalizedValue();
-                if(_sensors[0].getStatus!=0)
+                if(_sensors[0].getStatus() != 0)
                 {
                     _status |= 1<<PEDAL_SENSOR_PROBLEM;
                     return 0;
@@ -35,7 +35,7 @@ class HardwarePedal : public IPedal
                 analog_sensor_normval_t val1 = _sensors[0].getNormalizedValue();
                 analog_sensor_normval_t val2 = _sensors[1].getNormalizedValue(); 
 
-                if(_sensors[0].getStatus!=0 || _sensors[1].getStatus!=0)
+                if((_sensors[0].getStatus() != 0) || (_sensors[1].getStatus() != 0))
                 {
                     _status |= 1<<PEDAL_SENSOR_PROBLEM;
                     return 0;

@@ -1,6 +1,8 @@
-#define CAR_BONNIE_2019
-#define BOARD_DASHBOARD
-#include "car/Car.h"
+#include "../src/car/Car.h"
+
+#ifdef BOARD_DASHBOARD
+
+HardwareInterruptButton testButton(USER_BUTTON);
 
 int HardwareInterruptButtonUnitTest()
 {
@@ -8,20 +10,22 @@ int HardwareInterruptButtonUnitTest()
     // Printout the different Stats for the Button
     printf("Button Unit Test\n");
     while(1) {
-        if (buttonLower.getClick()) {
+        if (testButton.getClick()) {
             printf("Clicked!\n");
         }
 
-        if (buttonLower.getLongClick()) {
+        if (testButton.getLongClick()) {
             printf("LongClicked!\n");
         }
 
-        if (buttonLower.getPress()) {
+        if (testButton.getPress()) {
             printf("Pressed!\n");
         }
 
-        if (buttonLower.getLongClickStart()) {
+        if (testButton.getLongClickStart()) {
             printf("LongClick started!\n");
         }
     }
 }
+
+#endif

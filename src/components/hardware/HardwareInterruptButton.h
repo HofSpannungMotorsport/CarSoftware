@@ -5,7 +5,7 @@
 #include "../interface/IInterruptButton.h"
 
 #define STD_DEBOUNCE_TIME 0.010 //  s
-#define STD_CLICK_TIME      200 // ms
+#define STD_CLICK_TIME       11 // ms
 #define STD_LONG_CLICK_TIME 800 // ms
 
 typedef uint8_t button_count_t;
@@ -13,7 +13,7 @@ typedef uint8_t button_count_t;
 class HardwareInterruptButton : public IInterruptButton
 {
     public:
-        HardwareInterruptButton(PinName pin) : _interruptPin(pin)
+        HardwareInterruptButton(PinName pin, button_type_t buttonType = NORMALLY_OPEN) : _interruptPin(pin)
         {
             _counter.pressed = 0;
             _counter.clicked = 0;
@@ -29,8 +29,16 @@ class HardwareInterruptButton : public IInterruptButton
             _debounced = false;
 
             // Assign the Function/Method to a state (Rising/Falling) after initializing all variables
-            _interruptPin.rise(callback(this, &HardwareInterruptButton::_pressed));
-            _interruptPin.fall(callback(this, &HardwareInterruptButton::_released));
+            if (buttonType == NORMALLY_CLOSED){
+                _interruptPin.fall(callback(this, &HardwareInterruptButton::_pressed));
+                _interruptPin.rise(callback(this, &HardwareInterruptButton::_released));
+            } else if (buttonType == NORMALLY_OPEN) {
+                _interruptPin.rise(callback(this, &HardwareInterruptButton::_pressed));
+                _interruptPin.fall(callback(this, &HardwareInterruptButton::_released));
+            } else {
+                printf("Cannot assign method to a button-state. Wrong button-type choosen?");
+            }
+
         }
 
         virtual ~HardwareInterruptButton()
@@ -123,7 +131,7 @@ class HardwareInterruptButton : public IInterruptButton
             _debouncing = false;
 
             if (_lastStatus) {
-                _ticker.attach(callback(this, &HardwareInterruptButton::_checkLongClick), (float)((float)_time.longClick - _time.debounce));
+                _ticker.attach(callback(this, &HardwareInterruptButton::_checkLongClick), (float)(((float)_time.longClick/1000.0) - _time.debounce));
                 _debounced = true;
                 _counter.pressed++;
             } else {
@@ -131,7 +139,8 @@ class HardwareInterruptButton : public IInterruptButton
             }
         }
 
-        void _checkLongClick(){
+        void _checkLongClick()
+        {
             _ticker.detach();
             _counter.longClickStarted++;
         }
