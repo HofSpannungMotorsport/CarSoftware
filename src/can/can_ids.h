@@ -6,14 +6,12 @@
 #define COMP_LEN 4
 #define TELEFUNC_LEN 2
 
-enum can_prio_t
-{ 
+enum can_prio_t { 
     NORMAL = 0x1, 
     HIGH = 0x0 // high has to be zero because the first zero wins when a collision occurs
 };
 
-enum can_telegram_type_t
-{
+enum can_telegram_type_t {
     RPM = 0x5,
     PEDAL = 0x0,
     BUTTON = 0x3,
@@ -26,8 +24,7 @@ enum can_telegram_type_t
     SYSTEM = 0xF
 };
 
-enum can_component_t
-{
+enum can_component_t {
     // RPM sensors
     RPM_TIRE_FR = 0x0,
     RPM_TIRE_FL = 0x1,
@@ -65,13 +62,11 @@ enum can_component_t
     SYSTEM_CANCEL_CALIBRATION = 0x4
 };
 
-uint8_t getCompId(can_telegram_type_t teletype, can_component_t comp)
-{
+uint8_t getCompId(can_telegram_type_t teletype, can_component_t comp) {
     return (teletype << 4) & comp; 
 }
 
-uint16_t getMessageId(uint8_t prio, can_telegram_type_t teletype, can_component_t comp, uint8_t func)
-{
+uint16_t getMessageId(uint8_t prio, can_telegram_type_t teletype, can_component_t comp, uint8_t func) {
     // TODO calculate func
     return (prio << 10) & getConpId(teletype, comp);
 }

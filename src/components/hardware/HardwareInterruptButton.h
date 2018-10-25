@@ -10,11 +10,9 @@
 
 typedef uint8_t button_count_t;
 
-class HardwareInterruptButton : public IInterruptButton
-{
+class HardwareInterruptButton : public IInterruptButton {
     public:
-        HardwareInterruptButton(PinName pin, button_type_t buttonType = NORMALLY_OPEN) : _interruptPin(pin)
-        {
+        HardwareInterruptButton(PinName pin, button_type_t buttonType = NORMALLY_OPEN) : _interruptPin(pin) {
             _counter.pressed = 0;
             _counter.clicked = 0;
             _counter.longClicked = 0;
@@ -29,7 +27,7 @@ class HardwareInterruptButton : public IInterruptButton
             _debounced = false;
 
             // Assign the Function/Method to a state (Rising/Falling) after initializing all variables
-            if (buttonType == NORMALLY_CLOSED){
+            if (buttonType == NORMALLY_CLOSED) {
                 _interruptPin.fall(callback(this, &HardwareInterruptButton::_pressed));
                 _interruptPin.rise(callback(this, &HardwareInterruptButton::_released));
             } else if (buttonType == NORMALLY_OPEN) {
@@ -41,8 +39,7 @@ class HardwareInterruptButton : public IInterruptButton
 
         }
 
-        virtual ~HardwareInterruptButton()
-        {
+        virtual ~HardwareInterruptButton() {
 
         }
 
@@ -111,20 +108,17 @@ class HardwareInterruptButton : public IInterruptButton
             button_debounce_time_t debounce;
         } _time;
 
-        void _resetTimer(Timer &timer)
-        {
+        void _resetTimer(Timer &timer) {
             timer.stop();
             timer.reset();
         }
 
-        void _restartTimer(Timer &timer)
-        {
+        void _restartTimer(Timer &timer) {
             _resetTimer(timer);
             timer.start();
         }
 
-        void _debounce()
-        {
+        void _debounce() {
             // Called after the set time.debounce. To check if the first rising edge was just a false mesurement
             // or a correct press
             _ticker.detach();
@@ -139,14 +133,12 @@ class HardwareInterruptButton : public IInterruptButton
             }
         }
 
-        void _checkLongClick()
-        {
+        void _checkLongClick() {
             _ticker.detach();
             _counter.longClickStarted++;
         }
 
-        void _pressed()
-        {
+        void _pressed() {
             _lastStatus = true;
             if (!_debouncing && !_debounced) {
                 _debouncing = true;
@@ -155,8 +147,7 @@ class HardwareInterruptButton : public IInterruptButton
             }
         }
 
-        void _released()
-        {
+        void _released() {
             _lastStatus = false;
             if (_debounced)  {
                 _ticker.detach();

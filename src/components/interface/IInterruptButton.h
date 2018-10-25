@@ -16,8 +16,7 @@ enum button_type_t {
 typedef uint16_t button_time_t;
 typedef float button_debounce_time_t;
 
-class IInterruptButton
-{
+class IInterruptButton {
     public:
         virtual void setClickTime(button_time_t time) = 0;
         virtual void setLongClickTime(button_time_t time) = 0;

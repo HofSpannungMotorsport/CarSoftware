@@ -3,35 +3,27 @@
 
 #include "../interface/IPedal.h"
 
-class SoftwarePedal : public IPedal
-{
-    private:
-        pedal_status_t _status;
-        pedal_value_t _value;
-
+class SoftwarePedal : public IPedal {
     public:
-        virtual pedal_status_t getStatus()
-        {
+        virtual pedal_status_t getStatus() {
             return _status;
         }
 
-        virtual pedal_value_t getValue()
-        {
+        virtual pedal_value_t getValue() {
             return _value;
         }
         
-        virtual void setStatus(pedal_status_t status)
-        {
+        virtual void setStatus(pedal_status_t status) {
             _status = status;
         }
         
-        virtual void setValue(pedal_value_t value)
-        {
+        virtual void setValue(pedal_value_t value) {
             _value = value;
         }
 
-        
-        
+    private:
+        pedal_status_t _status;
+        pedal_value_t _value;
 };
 
 #endif
