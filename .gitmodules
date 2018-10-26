@@ -1,0 +1,3 @@
+[submodule "lib/Bamocar-CAN"]
+	path = lib/Bamocar-CAN
+	url = https://github.com/timoxd7/Bamocar-CAN.git
