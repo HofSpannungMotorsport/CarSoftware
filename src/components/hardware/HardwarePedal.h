@@ -17,6 +17,11 @@ class HardwarePedal : public IPedal {
             
         }
 
+        virtual execution_result_t execute()
+        {
+            // TODO read values
+        }
+
         virtual pedal_status_t getStatus() {
             return _status;
         }

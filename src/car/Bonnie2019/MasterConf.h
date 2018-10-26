@@ -19,7 +19,8 @@ HardwareLed brakeLight(MASTER_PIN_BRAKE_LIGHT); // change pin
 HardwareAnalogSensor springTravelSensorHL(MASTER_PIN_SPRING_TRAVEL_SENSOR_HL);
 HardwareAnalogSensor springTravelSensorHR(MASTER_PIN_SPRING_TRAVEL_SENSOR_HR);
 
-void initBoardHardware() {
+void initBoardHardware(shared_ptr<RuntimeContext> context)
+{
     // assign the components to CANService here
     
 }

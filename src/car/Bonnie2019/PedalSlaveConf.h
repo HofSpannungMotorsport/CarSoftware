@@ -15,7 +15,8 @@ HardwarePedal brakePedal(1, {HardwareAnalogSensor(PEDAL_PIN_ROTATION_ANGLE_BRAKE
 HardwareAnalogSensor springTravelSensorFL(PEDAL_PIN_SPRING_TRAVEL_SENSOR_FL);
 HardwareAnalogSensor springTravelSensorFR(PEDAL_PIN_SPRING_TRAVEL_SENSOR_FR);
 
-void initBoardHardware() {
+void initBoardHardware(shared_ptr<RuntimeContext> context)
+{
     // assign the components to CANService here
     
 }

@@ -24,8 +24,11 @@ HardwareLed ledRed(DASHBOARD_PIN_LED_3);
 HardwareInterruptButton buttonLower(DASHBOARD_PIN_BUTTON_LOWER);
 HardwareInterruptButton buttonUpper(DASHBOARD_PIN_BUTTON_UPPER);
 
-void initBoardHardware() {
+void initBoardHardware(shared_ptr<RuntimeContext> context)
+{
     // assign the components to CANService here
+
+    
     
 }
 
