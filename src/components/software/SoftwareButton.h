@@ -8,7 +8,7 @@
 class SoftwareButton : public IButton {
     public:
         SoftwareButton() {
-            _status = BUTTON_OK;
+            _status = 0;
             _lastState = NOT_PRESSED;
         }
 
@@ -42,7 +42,7 @@ class SoftwareButton : public IButton {
             if (lastState == state) {
                 // The new state to add is the same as the last saved state
                 // -> Physically unpossible
-                _status = ADDED_SAME_STATE_AS_LAST_TIME;
+                _status |= ADDED_SAME_STATE_AS_LAST_TIME;
             } else {
                 // The new state to add is different to the last one in the buffer
                 // -> Add it
@@ -85,14 +85,14 @@ class SoftwareButton : public IButton {
             _stateBuffer.pop(state);
 
             if (state == WRONG) {
-                _status = WRONG_STATE;
+                _status |= WRONG_STATE;
             }
 
             return state;
         }
 
         void _stateBufferFull() {
-            _status = STATE_BUFFER_FULL;
+            _status |= STATE_BUFFER_FULL;
         }
 };
 

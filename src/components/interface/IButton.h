@@ -3,12 +3,13 @@
 
 #include <stdint.h>
 
-enum button_status_t : uint8_t {
-    BUTTON_OK = 1,
-    BUTTON_ERROR = 0,
-    STATE_BUFFER_FULL = 2,
-    WRONG_STATE = 3,
-    ADDED_SAME_STATE_AS_LAST_TIME = 4
+typedef uint8_t button_status_t
+
+enum button_error_type_t : uint8_t {
+    BUTTON_ERROR =                  00000001b,
+    STATE_BUFFER_FULL =             00000010b,
+    WRONG_STATE =                   00000100b,
+    ADDED_SAME_STATE_AS_LAST_TIME = 00001000b
 };
 
 enum button_state_t : uint8_t {

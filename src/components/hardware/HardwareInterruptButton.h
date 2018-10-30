@@ -22,7 +22,7 @@ class HardwareInterruptButton : public IButton {
             _debouncing = false;
             _debounced = false;
 
-            _status = BUTTON_OK;
+            _status = 0;
             _lastState = NOT_PRESSED;
 
             // Assign the Function/Method to a state (Rising/Falling) after initializing all variables
@@ -144,14 +144,14 @@ class HardwareInterruptButton : public IButton {
             _stateBuffer.pop(state);
 
             if (state == WRONG) {
-                _status = WRONG_STATE;
+                _status |= WRONG_STATE;
             }
 
             return state;
         }
 
         void _stateBufferFull() {
-            _status = STATE_BUFFER_FULL;
+            _status |= STATE_BUFFER_FULL;
         }
 };
 
