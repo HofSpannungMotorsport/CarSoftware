@@ -5,8 +5,7 @@
 HardwareInterruptButton testButton = HardwareInterruptButton(USER_BUTTON, NORMALLY_CLOSED);
 SoftwareButton testSoftwareButton = SoftwareButton();
 
-ButtonMessageHandler<HardwareInterruptButton> hardwareInterruptButtonHandler;
-ButtonMessageHandler<SoftwareButton> softwareButtonHandler;
+ButtonMessageHandler buttonHandler;
 
 void ButtonUnitTest() {
     // Button Unit Test
@@ -19,8 +18,11 @@ void ButtonUnitTest() {
         if (testButton.getStateChanged()) {
             CANMessage message = CANMessage();
 
-            hardwareInterruptButtonHandler.buildMessage(testButton, message);
-            softwareButtonHandler.parseMessage(testSoftwareButton, message);
+            void *hardwareInterruptButtonToHandle = &testButton;
+            void *softwareButtonToHandle = &testSoftwareButton;
+
+            buttonHandler.buildMessage(hardwareInterruptButtonToHandle, message);
+            buttonHandler.parseMessage(softwareButtonToHandle, message);
         }
         test.stop();
 
