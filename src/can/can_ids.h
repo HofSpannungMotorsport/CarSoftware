@@ -51,8 +51,8 @@ enum can_component_t : uint8_t {
     COOLING_FANS = 0x1,
 
     // Buttons
-    BTN_RESET = 0x0,
-    BTN_START = 0x1,
+    BUTTON_RESET = 0x0,
+    BUTTON_START = 0x1,
 
     // LEDs
     LED_ERROR = 0x0, //red LED dashboard
@@ -79,8 +79,8 @@ enum can_component_t : uint8_t {
     SYSTEM_CANCEL_CALIBRATION = 0x4
 };
 
-typedef component_id_t uint8_t;
-typedef message_id_t uint16_t;
+typedef uint8_t component_id_t;
+typedef uint16_t message_id_t;
 
 namespace ID {
     component_id_t getComponentId(can_telegram_type_t teletype, can_component_t comp) {
@@ -89,12 +89,17 @@ namespace ID {
         return componentID; 
     }
 
-    message_id_t getMessageId(can_priority_t priority, can_telegram_type_t telegramType, can_component_t component, uint8_t function) {
+    message_id_t getMessageId(can_priority_t priority, component_id_t componentId, uint8_t function) {
         // TODO calculate func
         message_id_t messageID = 0;
         messageID |= priority << (TELEGRAM_FUNCTION_LENGTH + COMPONENT_LENGTH + TELEGRAM_TYPE_LENGTH); // Put priority at the beginning
-        messageID |= getComponentId(telegramType, component) << TELEGRAM_FUNCTION_LENGTH; // Add Component ID
+        messageID |= componentId << TELEGRAM_FUNCTION_LENGTH; // Add Component ID
         return messageID;
+    }
+
+    message_id_t getMessageId(can_priority_t priority, can_telegram_type_t telegramType, can_component_t component, uint8_t function) {
+        component_id_t componentId = getComponentId(telegramType, component);
+        return getMessageId(priority, componentId, function);
     }
 };
 

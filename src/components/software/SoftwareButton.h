@@ -13,6 +13,11 @@ class SoftwareButton : public IButton {
             _telegramTypeId = BUTTON;
         }
 
+        SoftwareButton(can_component_t componentId)
+            : SoftwareButton() {
+                _componentId = componentId;
+            }
+
         virtual void setLongClickTime(button_time_t time) {
             // No Implementation needed
         }

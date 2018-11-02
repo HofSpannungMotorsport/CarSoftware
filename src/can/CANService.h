@@ -14,27 +14,29 @@
 struct component_details_t {
     IMessageHandler<CANMessage>* handler;
     void* component;
-    can_prio_t priority;
+    can_priority_t priority;
 };
 
 class CANService {
     public:
         CANService(PinName RX, PinName TX) : _can(RX, TX) {
-            _can.attach(this, &_messageReceived, CAN::RxIrq);
+            _can.attach(callback(this, &CANService::_messageReceived), CAN::RxIrq);
         }
 
         CANService(PinName RX, PinName TX, int frequency) : _can(RX, TX, frequency) {
-            _can.attach(this, &_messageReceived, CAN::RxIrq);
+            _can.attach(callback(this, &CANService::_messageReceived), CAN::RxIrq);
         }
 
         bool sendMessage(component_id_t id) {
-            CANMessage m = CANMessage;
+            CANMessage m = CANMessage();
             component_details_t component = _components[id];
 
-            if (component.handler->buildMessage(m))
-                return false;
+            if (component.handler->buildMessage(component.component, m)) return false;
+
+            m.id = ID::getMessageId(component.priority, id, 0);
 
             if (_can.write(m) > 0) return true;
+            else return false;
         }
 
         bool sendMessage(void* component) {
@@ -53,7 +55,7 @@ class CANService {
             }
         }
 
-        void addComponent(component_id_t id, void* component, IMessageHandler<CANMessage>* handler, can_prio_t priority = NORMAL) {
+        void addComponent(component_id_t id, void* component, IMessageHandler<CANMessage>* handler, can_priority_t priority = NORMAL) {
             // Create new component to process Messages for it
             component_details_t newComponent;
             newComponent.handler = handler;
@@ -63,7 +65,7 @@ class CANService {
             _components.emplace(id, newComponent);
         }
 
-        void addComponent(void* component, IMessageHandler<CANMessage>* handler, can_prio_t priority = NORMAL) {
+        void addComponent(void* component, IMessageHandler<CANMessage>* handler, can_priority_t priority = NORMAL) {
             addComponent(_calculateComponentId(component), component, handler, priority);
         }
         

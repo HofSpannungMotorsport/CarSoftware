@@ -41,7 +41,9 @@ class HardwareInterruptButton : public IButton {
         }
 
         HardwareInterruptButton(PinName pin, can_component_t componentId, button_type_t buttonType = NORMALLY_OPEN)
-            : HardwareInterruptButton(pin, buttonType), IID(componentId) {}
+            : HardwareInterruptButton(pin, buttonType) {
+                _componentId = componentId;
+            }
 
         virtual void setLongClickTime(button_time_t time) {
             _time.longClick = time;

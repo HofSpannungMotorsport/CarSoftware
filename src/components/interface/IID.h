@@ -22,7 +22,7 @@ class IID {
             return _telegramTypeId;
         }
     
-    private:
+    protected:
         can_component_t _componentId;
         can_telegram_type_t _telegramTypeId;
 };
