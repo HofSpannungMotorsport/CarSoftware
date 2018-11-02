@@ -2,6 +2,7 @@
 #define IANALOG_SENSOR_H
 
 #include <stdint.h>
+#include "IID.h"
 
 typedef uint16_t analog_sensor_val_t;
 typedef float analog_sensor_normval_t;
@@ -15,7 +16,7 @@ enum analog_sensor_alignment_t {
     SENSOR_ALIGNMENT_INPROPORTIONAL // value decreases when meassured size increases
 };
 
-class IAnalogSensor {
+class IAnalogSensor : public IID {
     public:
         virtual void setMinValue(analog_sensor_val_t val) = 0;
         virtual void setMaxValue(analog_sensor_val_t val) = 0;

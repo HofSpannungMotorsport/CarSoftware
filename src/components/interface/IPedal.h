@@ -2,6 +2,7 @@
 #define IPEDAL_H
 
 #include <stdint.h>
+#include "IID.h"
 
 typedef uint8_t pedal_status_t;
 typedef float pedal_value_t;
@@ -9,7 +10,7 @@ typedef float pedal_value_t;
 #define PEDAL_DEVIANCE_TOO_HIGH 6
 #define PEDAL_SENSOR_PROBLEM 5
 
-class IPedal {
+class IPedal : public IID {
     public:
         virtual pedal_status_t getStatus() = 0;
         virtual pedal_value_t getValue() = 0;

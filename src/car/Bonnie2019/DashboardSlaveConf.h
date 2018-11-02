@@ -5,14 +5,10 @@
 #include "hardware/Pins_Dashboard.h"
 #include "../../components/hardware/HardwareInterruptButton.h"
 #include "../../components/hardware/HardwareLed.h"
-#include "../../can/can_config.h"
 #include "../../can/LEDMessageHandler.h"
 
 static LEDMessageHandler ledBridge;
 //static ButtonMessageHandler ledBridge;
-
-CAN can(CAN1_CONF);
-//CANService canService...
 
 HardwareLed ledGreen(DASHBOARD_PIN_LED_1);
 HardwareLed ledYellow(DASHBOARD_PIN_LED_2);

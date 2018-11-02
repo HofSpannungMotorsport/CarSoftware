@@ -6,9 +6,6 @@
 #include "../../components/hardware/HardwareLed.h"
 #include "../../components/software/SoftwareLed.h"
 #include "../../components/hardware/HardwareAnalogSensor.h"
-#include "../../can/can_config.h"
-
-CAN can(CAN1_CONF);
 
 SoftwareLed greenLed;
 SoftwareLed yellowLed;

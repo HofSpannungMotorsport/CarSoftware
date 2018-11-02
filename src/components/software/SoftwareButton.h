@@ -10,6 +10,7 @@ class SoftwareButton : public IButton {
         SoftwareButton() {
             _status = 0;
             _lastState = NOT_PRESSED;
+            _telegramTypeId = BUTTON;
         }
 
         virtual void setLongClickTime(button_time_t time) {

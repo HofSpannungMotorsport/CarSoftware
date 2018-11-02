@@ -2,6 +2,7 @@
 #define ILED_H
 
 #include <stdint.h>
+#include "IID.h"
 
 enum led_state_t {
     STATE_ON = 0x1,
@@ -19,7 +20,7 @@ enum led_blinking_t {
 typedef uint8_t led_brightness_t;
 
 
-class ILed {
+class ILed : public IID {
     public:
         // setters
         virtual void setState(led_state_t state) = 0;

@@ -5,9 +5,6 @@
 #include "hardware/Pins_Pedal.h"
 #include "../../components/hardware/HardwarePedal.h"
 #include "../../components/hardware/HardwareAnalogSensor.h"
-#include "../../can/can_config.h"
-
-CAN can(CAN1_CONF);
 
 HardwarePedal gasPedal(2, {HardwareAnalogSensor(PEDAL_PIN_ROTATION_ANGLE_GAS_1),HardwareAnalogSensor(PEDAL_PIN_ROTATION_ANGLE_GAS_2)});
 HardwarePedal brakePedal(1, {HardwareAnalogSensor(PEDAL_PIN_ROTATION_ANGLE_BRAKE)});

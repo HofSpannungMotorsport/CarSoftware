@@ -25,6 +25,8 @@ class HardwareInterruptButton : public IButton {
             _status = 0;
             _lastState = NOT_PRESSED;
 
+            _telegramTypeId = BUTTON;
+
             // Assign the Function/Method to a state (Rising/Falling) after initializing all variables
             if (buttonType == NORMALLY_CLOSED) {
                 _interruptPin.fall(callback(this, &HardwareInterruptButton::_pressed));
@@ -37,6 +39,9 @@ class HardwareInterruptButton : public IButton {
             }
 
         }
+
+        HardwareInterruptButton(PinName pin, can_component_t componentId, button_type_t buttonType = NORMALLY_OPEN)
+            : HardwareInterruptButton(pin, buttonType), IID(componentId) {}
 
         virtual void setLongClickTime(button_time_t time) {
             _time.longClick = time;
