@@ -1,7 +1,9 @@
 #ifndef CANSERVICE_H
 #define CANSERVICE_H
 
-#define DEVICE_CAN
+#ifndef DEVICE_CAN
+    #define DEVICE_CAN
+#endif
 
 #include "mbed.h"
 #include <CircularBuffer.h>

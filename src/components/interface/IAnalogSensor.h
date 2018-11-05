@@ -4,28 +4,31 @@
 #include <stdint.h>
 #include "IID.h"
 
-typedef uint16_t analog_sensor_val_t;
-typedef float analog_sensor_normval_t;
+typedef float analog_sensor_t;
+typedef uint16_t analog_sensor_raw_t;
+typedef float analog_sensor_boundary_t;
+
 typedef uint8_t analog_sensor_status_t;
-
-#define ANALOG_SENSOR_DISCONNECTED_FLAG 7
-#define ANALOG_SENSOR_SHORT_CIRCUT_FLAG 6
-
-enum analog_sensor_alignment_t {
-    SENSOR_ALIGNMENT_PROPORTIONAL, // value increases when meassured size increases
-    SENSOR_ALIGNMENT_INPROPORTIONAL // value decreases when meassured size increases
+enum analog_sensor_error_type_t : uint8_t {
+    UNDEFINED_ANALOG_SENSOR_ERROR = 0x1,
+    DISCONNECTED =                  0x2,
+    SHORT_CIRCUIT =                 0x4,
+    OUT_OF_BOUNDARY =               0x8,
+    BOUNDARY_CHECK_FAIL =          0x10
 };
 
 class IAnalogSensor : public IID {
     public:
-        virtual void setMinValue(analog_sensor_val_t val) = 0;
-        virtual void setMaxValue(analog_sensor_val_t val) = 0;
-        virtual void setAlignment(analog_sensor_alignment_t alignment) = 0;
+        virtual bool setMapping(analog_sensor_raw_t minIn, analog_sensor_raw_t maxIn, analog_sensor_t minOut, analog_sensor_t maxOut);
         
-        virtual analog_sensor_val_t getRawValue() = 0;
-        virtual analog_sensor_normval_t getNormalizedValue() = 0;
-        virtual analog_sensor_status_t getStatus() = 0;
+        virtual bool setRawBoundary(analog_sensor_raw_t lowerEnd, analog_sensor_raw_t upperEnd);
+        virtual void setRawBoundaryOutTime(uint16_t time);
+        virtual void setBoundary(analog_sensor_boundary_t bounderyPercentage);
+        virtual void setBoundaryOutTime(uint16_t time);
 
+        virtual analog_sensor_raw_t getRawValue() = 0;
+        virtual analog_sensor_t getValue() = 0;
+        virtual analog_sensor_status_t getStatus() = 0;
 };
 
 #endif

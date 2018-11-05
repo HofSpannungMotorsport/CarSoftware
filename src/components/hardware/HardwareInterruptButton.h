@@ -82,7 +82,7 @@ class HardwareInterruptButton : public IButton {
                 return true;
         }
 
-    private:
+    protected:
         InterruptIn _interruptPin;
         Ticker _ticker;
         bool _lastHardwareState, _debouncing, _debounced;
