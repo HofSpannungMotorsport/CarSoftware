@@ -14,11 +14,15 @@ HardwareInterruptButton testButton = HardwareInterruptButton(USER_BUTTON, BUTTON
 SoftwareButton testButton = SoftwareButton(BUTTON_START);
 #endif
 
+#ifndef MESSAGE_REPORT
+    Serial pcSerial(USBTX, USBRX); // Connection to PC over Serial
+#endif
+
 void CANServiceUnitTest() {
 
     // CANService Unit Test
     // Printout the different Stats for the Button
-    printf("Button Unit Test\n");
+    pcSerial.printf("Button Unit Test\n");
 
     void* testButtonPointer = &testButton;
     IMessageHandler<CANMessage>* buttonHandlerPointer = &buttonHandler;
@@ -39,18 +43,18 @@ void CANServiceUnitTest() {
     if (testButton.getStateChanged()) {
             button_state_t currentState = testButton.getState();
 
-            printf("Button ");
+            pcSerial.printf("Button ");
 
             if (currentState == NOT_PRESSED) {
-                printf("Released!\n");
+                pcSerial.printf("Released!\n");
             }
 
             if (currentState == LONG_CLICKED) {
-                printf("LongClickStarted!\n");
+                pcSerial.printf("LongClickStarted!\n");
             }
 
             if (currentState == PRESSED) {
-                printf("Pressed!\n");
+                pcSerial.printf("Pressed!\n");
             }
         }
 #endif

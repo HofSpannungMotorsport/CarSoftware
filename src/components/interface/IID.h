@@ -14,6 +14,16 @@ class IID {
             _componentId = componentId;
         }
 
+        /*  Should be set directly by the object
+        virtual void setTelegramTypeId(can_telegram_type_t telegramTypeId) {
+            _telegramTypeId = telegramTypeId;
+        }
+
+        virtual void setObjectType(can_object_type_t objectType) {
+            _objectType = objectType;
+        }
+        */
+
         virtual can_component_t getComponentId() {
             return _componentId;
         }
@@ -21,10 +31,15 @@ class IID {
         virtual can_telegram_type_t getTelegramTypeId() {
             return _telegramTypeId;
         }
+
+        virtual can_object_type_t getObjectType() {
+            return _objectType;
+        }
     
     protected:
         can_component_t _componentId;
         can_telegram_type_t _telegramTypeId;
+        can_object_type_t _objectType;
 };
 
 #endif // IID_H

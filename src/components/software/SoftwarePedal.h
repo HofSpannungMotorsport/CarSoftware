@@ -5,6 +5,21 @@
 
 class SoftwarePedal : public IPedal {
     public:
+        SoftwarePedal() {
+            _telegramTypeId = PEDAL;
+            _objectType = SOFTWARE_OBJECT;
+        }
+
+        SoftwarePedal(can_component_t componentId)
+            : SoftwarePedal() {
+            _componentId = componentId;
+        }
+
+        virtual void setProportionality(pedal_sensor_type_t proportionality, uint16_t sensorNumber = 0) {
+            // implementing later...
+            // [il]
+        }
+
         virtual pedal_status_t getStatus() {
             return _status;
         }
@@ -12,7 +27,28 @@ class SoftwarePedal : public IPedal {
         virtual pedal_value_t getValue() {
             return _value;
         }
-        
+
+        virtual void setCalibrationStatus(pedal_calibration_t calibrationStatus) {
+            if (calibrationStatus != _calibrationStatus) {
+                _calibrationStatus = calibrationStatus;
+                _calibrationStatusChanged = true;
+            }
+        }
+
+        virtual pedal_calibration_t getCalibrationStatus() {
+            return _calibrationStatus;
+        }
+
+        virtual void setMaxDeviance(pedal_value_t deviance) {
+            // implementing later...
+            // [il]
+        }
+
+        virtual void setMaxDevianceTime(uint16_t time) {
+            // implementing later...
+            // [il]
+        }
+
         virtual void setStatus(pedal_status_t status) {
             _status = status;
         }
@@ -24,6 +60,9 @@ class SoftwarePedal : public IPedal {
     private:
         pedal_status_t _status;
         pedal_value_t _value;
+
+        pedal_calibration_t _calibrationStatus = CURRENTLY_NOT_CALIBRATING;
+        bool _calibrationStatusChanged = false;
 };
 
 #endif

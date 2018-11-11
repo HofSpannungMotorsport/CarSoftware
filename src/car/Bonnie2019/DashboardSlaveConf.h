@@ -4,15 +4,15 @@
 #include "mbed.h"
 #include "hardware/Pins_Dashboard.h"
 #include "../../components/hardware/HardwareInterruptButton.h"
-#include "../../components/hardware/HardwareLed.h"
-#include "../../can/LEDMessageHandler.h"
+//#include "../../components/hardware/HardwareLed.h"
+//#include "../../can/LEDMessageHandler.h"
 
-static LEDMessageHandler ledBridge;
+//static LEDMessageHandler ledBridge;
 //static ButtonMessageHandler ledBridge;
 
-HardwareLed ledGreen(DASHBOARD_PIN_LED_1);
-HardwareLed ledYellow(DASHBOARD_PIN_LED_2);
-HardwareLed ledRed(DASHBOARD_PIN_LED_3);
+//HardwareLed ledGreen(DASHBOARD_PIN_LED_1);
+//HardwareLed ledYellow(DASHBOARD_PIN_LED_2);
+//HardwareLed ledRed(DASHBOARD_PIN_LED_3);
 
 
 // Buttons

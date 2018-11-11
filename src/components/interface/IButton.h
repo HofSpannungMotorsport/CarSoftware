@@ -5,9 +5,8 @@
 #include "IID.h"
 
 typedef uint8_t button_status_t;
-
 enum button_error_type_t : uint8_t {
-    BUTTON_ERROR =                  0x1,
+    UNDEFINED_BUTTON_ERROR =        0x1,
     STATE_BUFFER_FULL =             0x2,
     WRONG_STATE =                   0x4,
     ADDED_SAME_STATE_AS_LAST_TIME = 0x8
