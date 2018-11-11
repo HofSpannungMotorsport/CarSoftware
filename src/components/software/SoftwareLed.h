@@ -5,6 +5,17 @@
 
 class SoftwareLed : ILed {
     public:
+        SoftwareLed() {
+            _telegramTypeId = LED;
+            _objectType = SOFTWARE_OBJECT;
+        }
+
+        SoftwareLed(can_component_t componentId)
+            : SoftwareLed() {
+            _componentId = componentId;
+        }
+
+
         virtual void setState(led_state_t state) {
             _state = state;
         }

@@ -17,7 +17,7 @@ enum analog_sensor_error_type_t : uint8_t {
     BOUNDARY_CHECK_FAIL =          0x10
 };
 
-class IAnalogSensor : public IID {
+class IAnalogSensor {
     public:
         virtual bool setMapping(analog_sensor_raw_t minIn, analog_sensor_raw_t maxIn, analog_sensor_t minOut, analog_sensor_t maxOut);
         

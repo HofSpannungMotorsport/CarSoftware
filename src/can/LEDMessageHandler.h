@@ -30,4 +30,4 @@ class LEDMessageHandler : public IMessageHandler<CANMessage> {
         }
 };
 
-#endif
+#endif // LEDMESSAGE_HANDLER_H

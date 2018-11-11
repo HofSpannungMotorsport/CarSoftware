@@ -26,6 +26,7 @@ class HardwareInterruptButton : public IButton {
             _lastState = NOT_PRESSED;
 
             _telegramTypeId = BUTTON;
+            _objectType = HARDWARE_OBJECT;
 
             // Assign the Function/Method to a state (Rising/Falling) after initializing all variables
             if (buttonType == NORMALLY_CLOSED) {
@@ -35,15 +36,16 @@ class HardwareInterruptButton : public IButton {
                 _interruptPin.fall(callback(this, &HardwareInterruptButton::_released));
                 _interruptPin.rise(callback(this, &HardwareInterruptButton::_pressed));
             } else {
-                printf("Cannot assign method to a button-state. Wrong button-type choosen?");
+                #ifdef MESSAGE_REPORT
+                    pcSerial.printf("Cannot assign method to a button-state. Wrong button-type choosen?");
+                #endif
             }
-
         }
 
         HardwareInterruptButton(PinName pin, can_component_t componentId, button_type_t buttonType = NORMALLY_OPEN)
             : HardwareInterruptButton(pin, buttonType) {
-                _componentId = componentId;
-            }
+            _componentId = componentId;
+        }
 
         virtual void setLongClickTime(button_time_t time) {
             _time.longClick = time;

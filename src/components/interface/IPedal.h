@@ -20,6 +20,11 @@ enum pedal_sensor_type_t : bool {
     INDIRECT_PROPORTIONAL =  true
 };
 
+enum pedal_calibration_t : bool {
+    CURRENTLY_CALIBRATING = true,
+    CURRENTLY_NOT_CALIBRATING = false
+};
+
 class IPedal : public IID {
     public:
         virtual void setProportionality(pedal_sensor_type_t proportionality, uint16_t sensorNumber = 0) = 0;
@@ -27,11 +32,11 @@ class IPedal : public IID {
         virtual pedal_status_t getStatus() = 0;
         virtual pedal_value_t getValue() = 0;
 
-        virtual void beginCalibration() = 0;
-        virtual void endCalibration() = 0;
+        virtual void setCalibrationStatus(pedal_calibration_t calibrationStatus) = 0;
+        virtual pedal_calibration_t getCalibrationStatus() = 0;
 
-        virtual void setMaxDeviance(pedal_value_t deviance);
-        virtual void setMaxDevianceTime(uint16_t time);
+        virtual void setMaxDeviance(pedal_value_t deviance) = 0;
+        virtual void setMaxDevianceTime(uint16_t time) = 0;
 
         virtual void setStatus(pedal_status_t status) = 0;
         virtual void setValue(pedal_value_t value) = 0;

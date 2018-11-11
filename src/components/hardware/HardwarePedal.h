@@ -14,6 +14,8 @@
 #define STD_ANALOG_LOWER_BOUNDARY   655 // uint16_t min ->     0
 #define STD_ANALOG_UPPER_BOUNDARY 64880 // uint16_t max -> 65535
 
+#define STD_PEDAL_THRESHHOLD 0.05 // 5%
+
 class HardwarePedal : public IPedal {
     public:
         HardwarePedal(PinName inputPin)
@@ -22,10 +24,20 @@ class HardwarePedal : public IPedal {
             _init();
         }
 
+        HardwarePedal(PinName inputPin, can_component_t componentId)
+            : HardwarePedal(inputPin) {
+            _componentId = componentId;
+        }
+
         HardwarePedal(PinName inputPin1, PinName inputPin2)
             : _pin1(inputPin1), _pin2(inputPin2) {
             _secondSensor = true;
             _init();
+        }
+
+        HardwarePedal(PinName inputPin1, PinName inputPin2, can_component_t componentId)
+            : HardwarePedal(inputPin1, inputPin2) {
+            _componentId = componentId;
         }
 
         virtual void setProportionality(pedal_sensor_type_t proportionality, uint16_t sensorNumber = 0) {
@@ -95,6 +107,11 @@ class HardwarePedal : public IPedal {
                     }
                 }
 
+                // Add Threshhold
+                pedal_value_t returnValue = (returnValue * (1 - _pedalThreshhold)) + _pedalThreshhold;
+                if (returnValue < 0)
+                    returnValue = 0;
+
                 _last = returnValue;
                 return returnValue;
             }
@@ -102,58 +119,20 @@ class HardwarePedal : public IPedal {
             return 0;
         }
 
-        virtual void beginCalibration() {
-            analog_sensor_raw_t sensorValue = _pin1.getRawValue();
-            _calibration.sensor1.min = sensorValue;
-            _calibration.sensor1.max = sensorValue;
-
-            if (_secondSensor) {
-                sensorValue = _pin2.getRawValue();
-                _calibration.sensor2.min = sensorValue;
-                _calibration.sensor2.max = sensorValue;
+        virtual void setCalibrationStatus(pedal_calibration_t calibrationStatus) {
+            if (calibrationStatus != _calibrationStatus) {
+                if (calibrationStatus == CURRENTLY_CALIBRATING) {
+                    _beginCalibration();
+                } else if (calibrationStatus == CURRENTLY_NOT_CALIBRATING) {
+                    _endCalibration();
+                }
+                _calibrationStatus = calibrationStatus;
+                _calibrationStatusChanged = true;
             }
-
-            _calibrationTicker.attach(callback(this, &HardwarePedal::_calibrationLoop), _calibrationRefreshTime);
         }
 
-        virtual void endCalibration() {
-            _calibrationTicker.detach();
-            bool devianceTooLow = false;
-
-            if ((_calibration.sensor1.max - _calibration.sensor1.min) >= _calibrationMinDeviance) {
-                if (_pin1Proportionality == DIRECT_PROPORTIONAL) {
-                    _pin1.setMapping(_calibration.sensor1.min, _calibration.sensor1.max, 0.0, 1.0);
-                } else if (_pin1Proportionality == INDIRECT_PROPORTIONAL) {
-                    _pin1.setMapping(_calibration.sensor1.max, _calibration.sensor1.min, 0.0, 1.0);
-                } else {
-                    pedal_error_type_t calibrationFailedWrongConfigError = CALIBRATION_FAILED_WRONG_CONFIG;
-                    _status |= calibrationFailedWrongConfigError;
-                }
-            } else {
-                devianceTooLow = true;
-            }
-
-            if (_secondSensor) {
-                if ((_calibration.sensor2.max - _calibration.sensor2.min) >= _calibrationMinDeviance) {
-                    if (_pin2Proportionality == DIRECT_PROPORTIONAL) {
-                        _pin2.setMapping(_calibration.sensor2.min, _calibration.sensor2.max, 0.0, 1.0);
-                    } else if (_pin2Proportionality == INDIRECT_PROPORTIONAL) {
-                        _pin2.setMapping(_calibration.sensor2.max, _calibration.sensor2.min, 0.0, 1.0);
-                    } else {
-                        pedal_error_type_t calibrationFailedWrongConfigError = CALIBRATION_FAILED_WRONG_CONFIG;
-                        _status |= calibrationFailedWrongConfigError;
-                    }
-                } else {
-                    devianceTooLow = true;
-                }
-            }
-
-            if (devianceTooLow) {
-                pedal_error_type_t calibrationFailedTooLowDevianceError = CALIBRATION_FAILED_TOO_LOW_DEVIANCE;
-                _status |= calibrationFailedTooLowDevianceError;
-            } else {
-                _ready = true;
-            }
+        virtual pedal_calibration_t getCalibrationStatus() {
+            return _calibrationStatus;
         }
 
         virtual void setMaxDeviance(pedal_value_t deviance) {
@@ -187,7 +166,10 @@ class HardwarePedal : public IPedal {
         analog_sensor_raw_t _analogLowerBoundary = STD_ANALOG_LOWER_BOUNDARY;
         analog_sensor_raw_t _analogUpperBoundary = STD_ANALOG_UPPER_BOUNDARY;
 
+        float _pedalThreshhold = STD_PEDAL_THRESHHOLD;
+
         Ticker _calibrationTicker;
+        pedal_calibration_t _calibrationStatus = CURRENTLY_NOT_CALIBRATING;
 
         struct _calibration {
             struct sensor1 {
@@ -207,6 +189,9 @@ class HardwarePedal : public IPedal {
         } _deviance;
 
         void _init() {
+            _telegramTypeId = PEDAL;
+            _objectType = HARDWARE_OBJECT;
+
             _pin1.setRawBoundary(_analogLowerBoundary, _analogUpperBoundary);
             _pin1.setRawBoundaryOutTime(STD_MAX_DEVIANCE_TIME);
             _pin1.setBoundary(STD_MAX_DEVIANCE);
@@ -236,11 +221,69 @@ class HardwarePedal : public IPedal {
             }
         }
 
+        virtual void _beginCalibration() {
+            analog_sensor_raw_t sensorValue = _pin1.getRawValue();
+            _calibration.sensor1.min = sensorValue;
+            _calibration.sensor1.max = sensorValue;
+
+            if (_secondSensor) {
+                sensorValue = _pin2.getRawValue();
+                _calibration.sensor2.min = sensorValue;
+                _calibration.sensor2.max = sensorValue;
+            }
+
+            _calibrationTicker.attach(callback(this, &HardwarePedal::_calibrationLoop), _calibrationRefreshTime);
+        }
+
+        virtual void _endCalibration() {
+            _calibrationTicker.detach();
+            bool devianceTooLow = false;
+
+            if ((_calibration.sensor1.max - _calibration.sensor1.min) >= _calibrationMinDeviance) {
+                if (_pin1Proportionality == DIRECT_PROPORTIONAL) {
+                    _pin1.setMapping(_calibration.sensor1.min, _calibration.sensor1.max, 0.0, 1.0);
+                } else if (_pin1Proportionality == INDIRECT_PROPORTIONAL) {
+                    _pin1.setMapping(_calibration.sensor1.max, _calibration.sensor1.min, 0.0, 1.0);
+                } else {
+                    pedal_error_type_t calibrationFailedWrongConfigError = CALIBRATION_FAILED_WRONG_CONFIG;
+                    _status |= calibrationFailedWrongConfigError;
+                    return;
+                }
+            } else {
+                devianceTooLow = true;
+            }
+
+            if (_secondSensor) {
+                if ((_calibration.sensor2.max - _calibration.sensor2.min) >= _calibrationMinDeviance) {
+                    if (_pin2Proportionality == DIRECT_PROPORTIONAL) {
+                        _pin2.setMapping(_calibration.sensor2.min, _calibration.sensor2.max, 0.0, 1.0);
+                    } else if (_pin2Proportionality == INDIRECT_PROPORTIONAL) {
+                        _pin2.setMapping(_calibration.sensor2.max, _calibration.sensor2.min, 0.0, 1.0);
+                    } else {
+                        pedal_error_type_t calibrationFailedWrongConfigError = CALIBRATION_FAILED_WRONG_CONFIG;
+                        _status |= calibrationFailedWrongConfigError;
+                        return;
+                    }
+                } else {
+                    devianceTooLow = true;
+                }
+            }
+
+            if (devianceTooLow) {
+                pedal_error_type_t calibrationFailedTooLowDevianceError = CALIBRATION_FAILED_TOO_LOW_DEVIANCE;
+                _status |= calibrationFailedTooLowDevianceError;
+            } else {
+                _ready = true;
+            }
+        }
+
         void _restartTimer(Timer &timer) {
             timer.stop();
             timer.reset();
             timer.start();
         }
+
+        // Uff, too much text! Thanks error checking...
 };
 
 #endif
