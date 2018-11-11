@@ -100,7 +100,7 @@ class CANService {
             newComponentExist.exists = true;
 
             // Using emplace if a component gets registered twice on the same ID -> overwrite it
-            // (otherwise it woult be added at the next free key -> not good...)
+            // (otherwise it would be added at the next free key -> not good...)
             _registeredAddresses.emplace(id, newComponentExist);
             _components.emplace(id, newComponent);
         }
