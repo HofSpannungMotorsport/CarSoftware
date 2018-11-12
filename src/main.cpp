@@ -1,10 +1,10 @@
 #include "mbed.h"
 #include "car/Car.h"
 
-#include "../test/CANServiceUnitTest.cpp"
+#include "../test/RPMSensorUnitTest.cpp"
 
 int main() {
-    CANServiceUnitTest();
+    RPMSensorUnitTest();
     
     while(1) {
         
