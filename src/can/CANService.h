@@ -12,6 +12,7 @@
 #include <vector>
 #include "can_ids.h"
 #include "../components/interface/IID.h"
+#include "../components/service/IService.h"
 
 #define TELEGRAM_IN_BUFFER_SIZE 64
 
@@ -27,7 +28,7 @@ struct component_exist_t {
          sendLoop = false;
 };
 
-class CANService {
+class CANService : public IService {
     public:
         CANService(PinName RX, PinName TX) : _can(RX, TX) {
             _can.attach(callback(this, &CANService::_messageReceived), CAN::RxIrq);
@@ -148,14 +149,9 @@ class CANService {
             return success;
         }
 
-        uint8_t run() {
-            bool sendSuccess = processSendLoop();
-
-            if (sendSuccess) {
-                return 0;
-            } else {
-                return 1;
-            }
+        virtual void run() {
+            processInbound();
+            processSendLoop();
         }
 
     private:
