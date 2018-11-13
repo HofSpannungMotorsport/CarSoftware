@@ -2,12 +2,13 @@
 #define SERVICELIST_H
 
 #include <vector>
+#include <memory>
 #include "IService.h"
 
 class ServiceList : public IService {
     public:
         virtual void run() {
-            for (auto service : _services) {
+            for (auto &service : _services) {
                 service->run();
             }
         }
