@@ -9,12 +9,12 @@
 
 class ServiceSchedule {
     public:
-        ServiceSchedule(shared_ptr<IService> servicePointer, float serviceRefreshRate) {
-            service = servicePointer;
+        ServiceSchedule(void* servicePointer, float serviceRefreshRate) {
+            service = (IService*)servicePointer;
             refreshRate = serviceRefreshRate;
         }
 
-        shared_ptr<IService> service;
+        IService *service;
         float refreshRate = STD_SCHEDULER_REFRESH_RATE;
         Timer lastRun = Timer(); // Time since service last run
         bool running = false;
@@ -38,16 +38,16 @@ class ServiceScheduler : public IService {
             }
         }
 
-        void addService(shared_ptr<IService> service, float refreshRate = STD_SCHEDULER_REFRESH_RATE) {
+        void addService(IService* service, float refreshRate = STD_SCHEDULER_REFRESH_RATE) {
             addService(ServiceSchedule(service, refreshRate));
         }
 
         void addService(ServiceSchedule serviceSchedule) {
-            vector.emplace_back(serviceSchedule);
+            _services.emplace_back(serviceSchedule);
         }
 
     protected:
-        vector<shared_ptr<ServiceSchedule>> _services;
+        vector<ServiceSchedule> _services;
 };
 
 #endif // SERVICESCHEDULER_H

@@ -8,17 +8,17 @@
 class ServiceList : public IService {
     public:
         virtual void run() {
-            for (auto &service : _services) {
+            for (auto service : _services) {
                 service->run();
             }
         }
 
-        void addService(shared_ptr<IService> service) {
-            vector.emplace_back(service);
+        void addService(IService* service) {
+            _services.emplace_back(service);
         }
 
     protected:
-        vector<shared_ptr<IService>> _services;
+        vector<IService*> _services;
 };
 
 #endif // SERVICELIST_H
