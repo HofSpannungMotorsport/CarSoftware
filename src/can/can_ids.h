@@ -30,14 +30,15 @@ enum can_priority_t : uint8_t {
 enum can_telegram_type_t : uint8_t {
     // More important Values have to be smaller
     PEDAL =             0x0,
-    TEMPERATURE =       0x1,
-    COOLING =           0x2,
-    BUTTON =            0x3,
-    LED =               0x4,
-    RPM =               0x5,
-    SUSPENSION_TRAVEL = 0x6,
-    ACCELERATION =      0x7,
-    GYROSCOPE =         0x8,
+    RPM_SENSOR =        0x1,
+    TEMPERATURE =       0x2,
+    COOLING =           0x3,
+    BUTTON =            0x4,
+    LED =               0x5,
+    RPM =               0x6,
+    SUSPENSION_TRAVEL = 0x7,
+    ACCELERATION =      0x8,
+    GYROSCOPE =         0x9,
     SYSTEM =            0xF
 };
 
@@ -45,6 +46,12 @@ enum can_component_t : uint8_t {
     // Pedals
     PEDAL_BRAKE = 0x0,
     PEDAL_GAS =   0x1,
+
+    // RPM Sensors
+    RPM_FRONT_LEFT =  0x0,
+    RPM_FRONT_RIGHT = 0x1,
+    RPM_REAR_LEFT =   0x2,
+    RPM_REAR_RIGHT =  0x3,
 
     // Cooling
     COOLING_PUMP = 0x0,
