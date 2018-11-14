@@ -11,7 +11,7 @@ class LEDMessageHandler : public IMessageHandler<CANMessage> {
     public:
         virtual msg_build_result_t buildMessage(void *objV, CANMessage &msg) {
             ILed *obj = (ILed*)objV;
-            msg.data[0] = ((obj->getState() & 0x1u) << 7) | ((obj->getBrightness() & 0x2u) << 5) | ((obj->getBlinking() & 0x2u) << 3);
+            msg.data[0] = ((obj->getState() & 0x1u) << 7) | (( (uint8_t)(obj->getBrightness() * 4) & 0x2u) << 5) | ((obj->getBlinking() & 0x2u) << 3);
             msg.len = CAN_LED_PAYLOAD_LEN;
             return MSG_BUILD_OK;
         }
@@ -23,7 +23,7 @@ class LEDMessageHandler : public IMessageHandler<CANMessage> {
                 return MSG_PARSE_ERROR;
         
             obj->setState((led_state_t)((msg.data[0] & 0x80u) >> 7));
-            obj->setBrightness((msg.data[0] & 0x60u) >> 5);
+            obj->setBrightness( (float)((msg.data[0] & 0x60u) >> 5) / 4);
             obj->setBlinking((led_blinking_t)((msg.data[0] & 0x18u) >> 3));
 
             return MSG_PARSE_OK;

@@ -63,7 +63,7 @@ enum can_component_t : uint8_t {
 
     // LEDs
     LED_ERROR =          0x0, //red LED dashboard
-    LED_WARNING =        0x1, // yellow LED dashboard
+    LED_ISSUE =          0x1, // yellow LED dashboard
     LED_READY_TO_DRIVE = 0x2, // greed LED dashboard
     LED_MASTER =         0x3, // green LED on the board PCB (master)
     LED_DASHBOARD =      0x4, // green LED on the board PCB (dashboard)
@@ -94,7 +94,8 @@ enum can_component_t : uint8_t {
     */
 };
 
-enum can_object_type_t : uint8_t {
+typedef uint8_t can_object_type_datatype_t;
+enum can_object_type_t : can_object_type_datatype_t {
     UNDEFINED_OBJECT = 0x0,
     HARDWARE_OBJECT = 0x1,
     SOFTWARE_OBJECT = 0x2,

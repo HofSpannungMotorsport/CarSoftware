@@ -4,17 +4,36 @@
 #include "mbed.h"
 #include "hardware/Pins_Pedal.h"
 #include "../../components/hardware/HardwarePedal.h"
-#include "../../components/hardware/HardwareAnalogSensor.h"
+#include "../../can/PedalMessageHandler.h"
 
-HardwarePedal gasPedal(2, {HardwareAnalogSensor(PEDAL_PIN_ROTATION_ANGLE_GAS_1),HardwareAnalogSensor(PEDAL_PIN_ROTATION_ANGLE_GAS_2)});
-HardwarePedal brakePedal(1, {HardwareAnalogSensor(PEDAL_PIN_ROTATION_ANGLE_BRAKE)});
+#define PEDAL_SEND_RATE 60 // Hz
 
-HardwareAnalogSensor springTravelSensorFL(PEDAL_PIN_SPRING_TRAVEL_SENSOR_FL);
-HardwareAnalogSensor springTravelSensorFR(PEDAL_PIN_SPRING_TRAVEL_SENSOR_FR);
+HardwarePedal gasPedal(PEDAL_PIN_ROTATION_ANGLE_GAS_1, PEDAL_PIN_ROTATION_ANGLE_GAS_2, PEDAL_GAS);
+HardwarePedal brakePedal(PEDAL_PIN_ROTATION_ANGLE_BRAKE, PEDAL_BRAKE);
+PedalMessageHandler pedalMessageHandler;
 
-void initBoardHardware() {
-    // assign the components to CANService here
+class Pedal {
+    public:
+        // Called once at bootup
+        void setup() {
+            canService.addComponent((void*)&gasPedal, (IMessageHandler<CANMessage>*)&pedalMessageHandler, NORMAL);
+            canService.addComponent((void*)&brakePedal, (IMessageHandler<CANMessage>*)&pedalMessageHandler, NORMAL);
+            canService.addComponentToSendLoop((void*)&gasPedal);
+            canService.addComponentToSendLoop((void*)&brakePedal);
+        }
     
-}
+        // Called repeately after bootup
+        void loop() {
+            Timer refreshTimer;
+            refreshTimer.reset();
+            refreshTimer.start();
+        
+            canService.run();
+
+            while(refreshTimer.read() < (1 / PEDAL_SEND_RATE));
+        }
+};
+
+Pedal runtime;
 
 #endif
