@@ -131,16 +131,16 @@ class CarService : public IService {
 
             _state == BOOT;
 
-            _pedal.gas.setCalibrationStatus(CURRENTLY_CALIBRATING);
-            _pedal.brake.setCalibrationStatus(CURRENTLY_CALIBRATING);
+            _pedal.gas->setCalibrationStatus(CURRENTLY_CALIBRATING);
+            _pedal.brake->setCalibrationStatus(CURRENTLY_CALIBRATING);
         }
 
         void setCarReady() {
             if (_state == BOOT) {
-                _led.green.setBlinking(BLINKING_OFF);
+                _led.green->setBlinking(BLINKING_OFF);
 
-                _pedal.gas.setCalibrationStatus(CURRENTLY_NOT_CALIBRATING);
-                _pedal.brake.setCalibrationStatus(CURRENTLY_NOT_CALIBRATING);
+                _pedal.gas->setCalibrationStatus(CURRENTLY_NOT_CALIBRATING);
+                _pedal.brake->setCalibrationStatus(CURRENTLY_NOT_CALIBRATING);
 
                 _state = READY_TO_DRIVE;
             }
@@ -166,7 +166,7 @@ class CarService : public IService {
         } _pedal;
 
         component_id_t _calculateComponentId(IID* component) {
-            component_id_t id = ID::getComponentId(componentId->getTelegramTypeId(), componentId->getComponentId());
+            component_id_t id = ID::getComponentId(component->getTelegramTypeId(), component->getComponentId());
             return id;
         }
 };
