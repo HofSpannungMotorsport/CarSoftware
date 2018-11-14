@@ -16,7 +16,7 @@ class Master {
     public:
         // Called once at bootup
         void setup() {
-
+            carService.startUp();
         }
 
         // Called repeately after bootup

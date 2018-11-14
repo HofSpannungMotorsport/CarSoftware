@@ -9,6 +9,8 @@
 #include "../../can/can_ids.h"
 
 #define ERROR_REGISTER_SIZE 64
+#define BOOT_ROUTINE_TEST_TIME 2
+#define BRAKE_START_THRESHHOLD 0.75
 
 enum car_state_t : uint8_t {
     CAR_OFF = 0x0,
@@ -74,7 +76,7 @@ class CarService : public IService {
             while(!_error.register.empty()) {
                 Error error;
                 _error.register.pop(error);
-                if (error.type >= ERROR_ISSUE) {
+                if (error.type >= ERROR_UNDEFINED) {
                     if (error.type >= ERROR_SYSTEM) {
                         if (error.type >= ERROR_CRITICAL) {
                             // Critical Error
@@ -86,20 +88,22 @@ class CarService : public IService {
 
                             _led.green->setState(LED_OFF);
                             _state = ERROR;
+                        } else {
+                            // System Error
+                            // Yellow -> Fast Blinking
+                            _led.yellow->setState(LED_ON);
+                            _led.yellow->setBrightness(1);
+                            _led.yellow->setBlinking(BLINKING_FAST);
                         }
                     } else {
-                        // System Error
-                        // Yellow -> Fast Blinking
+                        // Issue / Undefined
+                        // Yellow -> On @ 70%
                         _led.yellow->setState(LED_ON);
-                        _led.yellow->setBrightness(1);
-                        _led.yellow->setBlinking(BLINKING_FAST);
+                        _led.yellow->setBrightness(0.51);
+                        _led.yellow->setBlinking(BLINKING_OFF);
                     }
-                } else {
-                    // Issue / Undefined
-                    // Yellow -> On @ 70%
-                    _led.yellow->setState(LED_ON);
-                    _led.yellow->setBrightness(0.7);
-                    _led.yellow->setBlinking(BLINKING_OFF);
+
+                    _sendLedsOverCan();
                 }
             }
         }
@@ -108,42 +112,87 @@ class CarService : public IService {
             return _state;
         }
 
-        void testLed() {
-            _led.red->setBrightness(1);
-            _led.yellow->setBrightness(1);
-            _led.green->setBrightness(1);
+        void startUp() {
+            _startTestOutputs();
+            Timer waitTimer;
+            waitTimer.reset();
+            waitTimer.start();
+            // Wait some time to test the outputs for a given time
+            while(waitTimer.read() < (float)BOOT_ROUTINE_TEST_TIME) {
+                canService.processInbound();
+            }
+            _stopTestOutputs();
 
-            _led.red->setState(LED_ON);
+
+            // Start bootup/calibration
+            _state == BOOT;
             _led.yellow->setState(LED_ON);
             _led.green->setState(LED_ON);
-        }
 
-        void testOutputs() {
-            testLed();
-        }
-
-        void boot() {
-            _led.red->setState(LED_OFF);
-            _led.yellow->setState(LED_OFF);
-            _led.green->setState(LED_ON);
-
+            _led.yellow->setBlinking(BLINKING_OFF);
+            _led.yellow->setBrightness(0.76);
             _led.green->setBlinking(BLINKING_NORMAL);
-
-            _state == BOOT;
 
             _pedal.gas->setCalibrationStatus(CURRENTLY_CALIBRATING);
             _pedal.brake->setCalibrationStatus(CURRENTLY_CALIBRATING);
-        }
 
-        void setCarReady() {
-            if (_state == BOOT) {
-                _led.green->setBlinking(BLINKING_OFF);
+            _sendComponentsOverCan();
 
-                _pedal.gas->setCalibrationStatus(CURRENTLY_NOT_CALIBRATING);
-                _pedal.brake->setCalibrationStatus(CURRENTLY_NOT_CALIBRATING);
 
-                _state = READY_TO_DRIVE;
+            // Calibrate pedal until pressed Start once for long time
+            while(buttonStart.getStateChanged() || (buttonStart.getState() != LONG_CLICKED)) {
+                canService.processInbound();
             }
+
+
+            // Stop calibration
+            _pedal.gas->setCalibrationStatus(CURRENTLY_NOT_CALIBRATING);
+            _pedal.brake->setCalibrationStatus(CURRENTLY_NOT_CALIBRATING);
+            _sendPedalsOverCan();
+
+
+            // Wait till the Button got released again
+            while(buttonStart.getStateChanged() || (buttonStart.getState() != RELEASED)) {
+                canService.processInbound();
+            }
+            _led.yellow->setState(LED_OFF);
+            _sendLedsOverCan();
+
+
+            // Check for Errors at Calibration
+            canService.processInbount();
+            if ((_pedal.gas->getStatus() > 0) || (_pedal.brake->getStatus() > 0)) {
+                _state = ERROR;
+            }
+
+
+            // If all OK, go into Ready to drive
+            if (_state == BOOT) {
+                _state = READY_TO_DRIVE;
+            } else {
+                // If an Error occured, stop continuing and glow Red
+                _led.red->setState(LED_ON);
+                _led.red->setBlinking(BLINKING_OFF);
+                _led.green->setState(LED_OFF);
+                _sendLedsOverCan();
+                while(1);
+            }
+
+
+            // If no Error, start blinking fast to show ready, but need to start car
+            _led.green->setBlinking(BLINKING_FAST);
+            _sendLedsOverCan();
+
+
+            // Wait till Car got started (Brake Pedal + Start Button long press)
+            while(buttonStart.getStateChanged() || (buttonStart.getState() != LONG_CLICKED) || (brakePedal.getValue() < BRAKE_START_THRESHHOLD)) {
+                canService.processInbound();
+            }
+
+
+            // Stop blinking greed to show car is primed
+            _led.green->setBlinking(BLINKING_OFF);
+            _sendLedsOverCan();
         }
 
     private:
@@ -168,6 +217,52 @@ class CarService : public IService {
         component_id_t _calculateComponentId(IID* component) {
             component_id_t id = ID::getComponentId(component->getTelegramTypeId(), component->getComponentId());
             return id;
+        }
+
+        void _sendLedsOverCan() {
+            // LED's
+            canService.sendMessage((void*)&_led.red);
+            canService.sendMessage((void*)&_led.yellow);
+            canService.sendMessage((void*)&_led.green);
+        }
+
+        void _sendPedalsOverCan() {
+            // Pedals
+            canService.sendMessage((void*)&_pedal.gas);
+            canService.sendMessage((void*)&_pedal.brake);
+        }
+
+        void _sendComponentsOverCan() {
+            _sendLedsOverCan();
+            _sendPedalsOverCan();
+        }
+
+        void _turnOnLed() {
+            _led.red->setBrightness(1);
+            _led.yellow->setBrightness(1);
+            _led.green->setBrightness(1);
+
+            _led.red->setState(LED_ON);
+            _led.yellow->setState(LED_ON);
+            _led.green->setState(LED_ON);
+
+            _sendComponentsOverCan();
+        }
+
+        void _turnOffLed() {
+            _led.red->setState(LED_OFF);
+            _led.yellow->setState(LED_OFF);
+            _led.green->setState(LED_OFF);
+
+            _sendComponentsOverCan();
+        }
+
+        void _startTestOutputs() {
+            _turnOnLed();
+        }
+
+        void _stopTestOutputs() {
+            _turnOffLed();
         }
 };
 
