@@ -2,11 +2,11 @@
 #define IINTERRUPTBUTTON_H
 
 #include <stdint.h>
+#include "IID.h"
 
 typedef uint8_t button_status_t;
-
 enum button_error_type_t : uint8_t {
-    BUTTON_ERROR =                  0x1,
+    UNDEFINED_BUTTON_ERROR =        0x1,
     STATE_BUFFER_FULL =             0x2,
     WRONG_STATE =                   0x4,
     ADDED_SAME_STATE_AS_LAST_TIME = 0x8
@@ -36,7 +36,7 @@ typedef float button_debounce_time_t;
 #define STD_LONG_CLICK_TIME 800 // ms
 #define STATE_BUFFER_SIZE 100
 
-class IButton {
+class IButton : public IID {
     public:
         // Set the time for each Event. If not set, the standard Values will be used.
         virtual void setLongClickTime(button_time_t time) = 0;

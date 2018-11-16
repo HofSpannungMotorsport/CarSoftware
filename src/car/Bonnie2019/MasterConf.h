@@ -5,10 +5,6 @@
 #include "hardware/Pins_Master.h"
 #include "../../components/hardware/HardwareLed.h"
 #include "../../components/software/SoftwareLed.h"
-#include "../../components/hardware/HardwareAnalogSensor.h"
-#include "../../can/can_config.h"
-
-CAN can(CAN1_CONF);
 
 SoftwareLed greenLed;
 SoftwareLed yellowLed;
@@ -16,12 +12,19 @@ SoftwareLed redLed;
 
 HardwareLed brakeLight(MASTER_PIN_BRAKE_LIGHT); // change pin
 
-HardwareAnalogSensor springTravelSensorHL(MASTER_PIN_SPRING_TRAVEL_SENSOR_HL);
-HardwareAnalogSensor springTravelSensorHR(MASTER_PIN_SPRING_TRAVEL_SENSOR_HR);
+class Master {
+    public:
+        // Called once at bootup
+        void setup() {
+            carService.startUp();
+        }
 
-void initBoardHardware() {
-    // assign the components to CANService here
-    
-}
+        // Called repeately after bootup
+        void loop() {
+
+        }
+};
+
+Master runtime;
 
 #endif
