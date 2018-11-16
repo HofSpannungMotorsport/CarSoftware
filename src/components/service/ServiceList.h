@@ -2,6 +2,7 @@
 #define SERVICELIST_H
 
 #include <vector>
+#include <memory>
 #include "IService.h"
 
 class ServiceList : public IService {
@@ -12,12 +13,12 @@ class ServiceList : public IService {
             }
         }
 
-        void addService(shared_ptr<IService> service) {
-            vector.emplace_back(service);
+        void addService(IService* service) {
+            _services.emplace_back(service);
         }
 
     protected:
-        vector<shared_ptr<IService>> _services;
+        vector<IService*> _services;
 };
 
 #endif // SERVICELIST_H

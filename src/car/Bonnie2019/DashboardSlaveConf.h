@@ -4,25 +4,47 @@
 #include "mbed.h"
 #include "hardware/Pins_Dashboard.h"
 #include "../../components/hardware/HardwareInterruptButton.h"
-//#include "../../components/hardware/HardwareLed.h"
-//#include "../../can/LEDMessageHandler.h"
+#include "../../can/ButtonMessageHandler.h"
+#include "../../components/hardware/HardwareLed.h"
+#include "../../can/LEDMessageHandler.h"
 
-//static LEDMessageHandler ledBridge;
-//static ButtonMessageHandler ledBridge;
-
-//HardwareLed ledGreen(DASHBOARD_PIN_LED_1);
-//HardwareLed ledYellow(DASHBOARD_PIN_LED_2);
-//HardwareLed ledRed(DASHBOARD_PIN_LED_3);
+//LED's
+HardwareLed ledRed(DASHBOARD_PIN_LED_RED, LED_ERROR);
+HardwareLed ledYellow(DASHBOARD_PIN_LED_YELLOW, LED_ISSUE);
+HardwareLed ledGreen(DASHBOARD_PIN_LED_GREEN, LED_READY_TO_DRIVE);
+LEDMessageHandler ledMessageHandler;
 
 
 // Buttons
-//BTN-Oins: D9, D7
-HardwareInterruptButton buttonLower(DASHBOARD_PIN_BUTTON_LOWER);
-HardwareInterruptButton buttonUpper(DASHBOARD_PIN_BUTTON_UPPER);
+HardwareInterruptButton buttonReset(DASHBOARD_PIN_BUTTON_RESET, BUTTON_RESET);
+HardwareInterruptButton buttonStart(DASHBOARD_PIN_BUTTON_START, BUTTON_START);
+ButtonMessageHandler buttonMessageHandler;
 
-void initBoardHardware() {
-    // assign the components to CANService here
-    
-}
+class Dashboard {
+    public:
+        // Called once at bootup
+        void setup() {
+            canService.addComponent((void*)&ledGreen, (IMessageHandler<CANMessage>*)&ledMessageHandler, NORMAL);
+            canService.addComponent((void*)&ledGreen, (IMessageHandler<CANMessage>*)&ledMessageHandler, NORMAL);
+            canService.addComponent((void*)&ledGreen, (IMessageHandler<CANMessage>*)&ledMessageHandler, NORMAL);
+            canService.addComponent((void*)&buttonReset, (IMessageHandler<CANMessage>*)&buttonMessageHandler, NORMAL);
+            canService.addComponent((void*)&buttonStart, (IMessageHandler<CANMessage>*)&buttonMessageHandler, NORMAL);
+        }
+
+        // Called repeately after bootup
+        void loop() {
+            canService.run();
+
+            if (buttonReset.getStateChanged()) {
+                canService.sendMessage((void*)&buttonReset);
+            }
+
+            if (buttonStart.getStateChanged()) {
+                canService.sendMessage((void*)&buttonStart);
+            }
+        }
+};
+
+Dashboard runtime;
 
 #endif

@@ -108,7 +108,7 @@ class HardwarePedal : public IPedal {
                 }
 
                 // Add Threshhold
-                pedal_value_t returnValue = (returnValue * (1 - _pedalThreshhold)) + _pedalThreshhold;
+                returnValue = (returnValue * (1 - _pedalThreshhold)) + _pedalThreshhold;
                 if (returnValue < 0)
                     returnValue = 0;
 
@@ -127,7 +127,6 @@ class HardwarePedal : public IPedal {
                     _endCalibration();
                 }
                 _calibrationStatus = calibrationStatus;
-                _calibrationStatusChanged = true;
             }
         }
 

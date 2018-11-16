@@ -1,12 +1,10 @@
 #include "mbed.h"
 #include "car/Car.h"
 
-#include "../test/RPMSensorUnitTest.cpp"
-
 int main() {
-    RPMSensorUnitTest();
-    
+    runtime.setup();
+
     while(1) {
-        
+        runtime.loop();
     }
 }
