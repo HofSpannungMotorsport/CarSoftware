@@ -12,29 +12,26 @@
 class BrakeLightService : public IService {
     public:
         BrakeLightService(CarService &carService, IPedal* brakePedal, ILed* brakeLight)
-            : _carService(carService), _brakePedal(brakePedal), _brakeLight(brakeLight) {}
+            : _carService(carService), _brakePedal(brakePedal), _brakeLight(brakeLight) {
+            _brakeLight->setBlinking(BLINKING_OFF);
+            _brakeLight->setBrightness(1);
+        }
 
         virtual void run() {
+            // If Brakeing -> light on
+            // If not Brakeing -> light off
+            // If Error or something else -> light on
             if (_carService.getState() == READY_TO_DRIVE) {
                 if (_brakePedal->getValue() >= STD_BRAKE_LIGHT_THRESHHOLD) {
-                    _brakeLight->setBrightness(1);
                     _brakeLight->setState(LED_ON);
-
-                    if (_brakePedal->getValue() >= STD_HARD_BRAKE_LIGHT_FLASH_THRESHHOLD) {
-                        _brakeLight->setBlinking(BLINKING_FAST);
-                    } else {
-                        _brakeLight->setBlinking(BLINKING_OFF);
-                    }
                 } else {
                     _brakeLight->setState(LED_OFF);
                 }
             } else {
-                _brakeLight->setBrightness(1);
                 _brakeLight->setState(LED_ON);
-                _brakeLight->setBlinking(BLINKING_NORMAL);
             }
         }
-    
+
     protected:
         CarService &_carService;
         IPedal* _brakePedal;
