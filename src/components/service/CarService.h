@@ -31,7 +31,7 @@ class Error {
     public:
         Error(){}
         Error(component_id_t ComponentId, uint8_t Code, error_type_t Type)
-            : componentId(ComponentId), code(Code) {}
+            : componentId(ComponentId), code(Code), type(Type) {}
 
         component_id_t componentId;
         uint8_t code = 0;
