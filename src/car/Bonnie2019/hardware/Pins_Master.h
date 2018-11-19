@@ -7,5 +7,7 @@
 #define MASTER_PIN_PUMP_PWM                 PE_10
 #define MASTER_PIN_SPRING_TRAVEL_SENSOR_HL  PF_4
 #define MASTER_PIN_SPRING_TRAVEL_SENSOR_HR  PB_1
+#define MASTER_PIN_RPM_SENSOR_HL            PC_4
+#define MASTER_PIN_RPM_SENSOR_HR            PC_5
 
 #endif // PINS_MASTER_H
