@@ -29,20 +29,24 @@ enum can_priority_t : uint8_t {
 
 enum can_telegram_type_t : uint8_t {
     // More important Values have to be smaller
-    PEDAL =             0x0,
-    RPM_SENSOR =        0x1,
-    TEMPERATURE =       0x2,
-    COOLING =           0x3,
-    BUTTON =            0x4,
-    LED =               0x5,
-    RPM =               0x6,
-    SUSPENSION_TRAVEL = 0x7,
-    ACCELERATION =      0x8,
-    GYROSCOPE =         0x9,
+    MOTOR =             0x0,
+    PEDAL =             0x1,
+    RPM_SENSOR =        0x2,
+    TEMPERATURE =       0x3,
+    COOLING =           0x4,
+    BUTTON =            0x5,
+    LED =               0x6,
+    RPM =               0x7,
+    SUSPENSION_TRAVEL = 0x8,
+    ACCELERATION =      0x9,
+    GYROSCOPE =         0xA,
     SYSTEM =            0xF
 };
 
 enum can_component_t : uint8_t {
+    // Motor
+    MOTOR_MAIN = 0x0,
+
     // Pedals
     PEDAL_BRAKE = 0x0,
     PEDAL_GAS =   0x1,

@@ -10,6 +10,7 @@
 #include "../interface/IMotorController.h"
 #include "../interface/IPedal.h"
 #include "../interface/IRpmSensor.h"
+#include "../software/SoftwareRpmSensor.h"
 
 #define STD_MAX_POWER 80 // kW
 #define STD_POWER_SET_ON_MOTOR_CONTROLLER 80 // kW
@@ -21,16 +22,20 @@ class MotorControllerService : public IService {
     public:
         MotorControllerService(CarService &carService,
                                IMotorController* motorController,
-                               IPedal* gasPedal, IPedal* brakePedal) {
-            _carService = carService;
+                               IPedal* gasPedal, IPedal* brakePedal)
+            : _carService(carService) {
             _setBasicComponents(motorController, gasPedal, brakePedal);
+
+            SoftwareRpmSensor emptyRpmSensor;
+            IRpmSensor* emptyRpmSensorPointer = (IRpmSensor*)&emptyRpmSensor;
+            _setASRComponents(emptyRpmSensorPointer, emptyRpmSensorPointer, emptyRpmSensorPointer, emptyRpmSensorPointer);
         }
 
-        MotorCOntrollerService(CarService &carService,
+        MotorControllerService(CarService &carService,
                                IMotorController* motorController,
                                IPedal* gasPedal, IPedal* brakePedal,
-                               IRpmSensor* frontLeftWheel, IRpmSensor* frontRightWheel, IRpmSensor* rearLeftWheel, IRpmSensor* rearRightWheel) {
-            _carService = carService;
+                               IRpmSensor* frontLeftWheel, IRpmSensor* frontRightWheel, IRpmSensor* rearLeftWheel, IRpmSensor* rearRightWheel)
+            : _carService(carService) {
             _setBasicComponents(motorController, gasPedal, brakePedal);
             _setASRComponents(frontLeftWheel, frontRightWheel, rearLeftWheel, rearRightWheel);
         }
@@ -104,7 +109,7 @@ class MotorControllerService : public IService {
 
         void _checkErrors() {
             if (_motorController->getStatus() > 0) {
-                carService->addError(Error(ID::getComponentId(_motorController->getTelegramTypeId(), _motorController->getComponentId()), _motorController->getStatus(), ERROR_CRITICAL));
+                _carService.addError(Error(ID::getComponentId(_motorController->getTelegramTypeId(), _motorController->getComponentId()), _motorController->getStatus(), ERROR_CRITICAL));
             }
 
             if (_asrActive) {
@@ -128,8 +133,8 @@ class MotorControllerService : public IService {
                 _pedalError(_brakePedal.object);
             }
 
-            carService.run();
-            if (carService.getState() == READY_TO_DRIVE) {
+            _carService.run();
+            if (_carService.getState() == READY_TO_DRIVE) {
                 _ready = true;
             } else {
                 _ready = false;
@@ -137,12 +142,12 @@ class MotorControllerService : public IService {
         }
 
         void _pedalError(IPedal* sensorId) {
-            carService->addError(Error(ID::getComponentId(sensorId->getTelegramTypeId(), sensorId->getComponentId()), sensor->getStatus(), ERROR_CRITICAL));
+            _carService.addError(Error(ID::getComponentId(sensorId->getTelegramTypeId(), sensorId->getComponentId()), sensorId->getStatus(), ERROR_CRITICAL));
         }
 
         void _asrError() {
             _asrActive = false;
-            carService->addError(Error(ID::getComponentId(SYSTEM, SYSTEM_MASTER), 0x0, ERROR_ISSUE));
+            _carService.addError(Error(ID::getComponentId(SYSTEM, SYSTEM_MASTER), 0x0, ERROR_ISSUE));
         }
 
         float _getAge(_rpmSensorStruct_t &sensor) {
@@ -165,10 +170,12 @@ class MotorControllerService : public IService {
             _update(_gasPedal);
             _update(_brakePedal);
 
-            _update(_frontLeftWheel);
-            _update(_frontRightWheel);
-            _update(_rearLeftWheel);
-            _update(_rearRightWheel);
+            if (_asrActive) {
+                _update(_frontLeftWheel);
+                _update(_frontRightWheel);
+                _update(_rearLeftWheel);
+                _update(_rearRightWheel);
+            }
         }
 
         void _update(_pedalStruct_t &pedal) {
@@ -189,7 +196,7 @@ class MotorControllerService : public IService {
 
         void _update(_rpmSensorStruct_t &rpmSensor) {
             // Update value and age of RPM Sensor
-            pedal_value_t newRpmSensorValue = rpmSensor.object->getValue();
+            pedal_value_t newRpmSensorValue = rpmSensor.object->getFrequency();
             if ((newRpmSensorValue != rpmSensor.lastValue) || newRpmSensorValue == 0) {
                 if (rpmSensor.ageStarted) {
                     rpmSensor.age.reset();
@@ -245,7 +252,7 @@ class MotorControllerService : public IService {
            return returnValue;
         }
 
-        void _ASR(float returnValue) {
+        float _ASR(float returnValue) {
             return returnValue;
         }
 };

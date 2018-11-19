@@ -9,7 +9,15 @@
 class HardwareMotorController : public IMotorController {
     public:
         HardwareMotorController(PinName canRD, PinName canTD)
-            : _bamocar(canRD, canTD) {}
+            : _bamocar(canRD, canTD) {
+            _telegramTypeId = MOTOR;
+            _objectType = HARDWARE_OBJECT;
+        }
+
+        HardwareMotorController(PinName canRD, PinName canTD, can_component_t componentId)
+            : HardwareMotorController(canRD, canTD) {
+            _componentId = componentId;
+        }
         
         virtual motor_controller_status_t getStatus() {
             return _status;
