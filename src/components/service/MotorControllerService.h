@@ -15,7 +15,7 @@
 #define STD_MAX_POWER 80 // kW
 #define STD_POWER_SET_ON_MOTOR_CONTROLLER 80 // kW
 #define STD_AGE_LIMIT 0.1 // s
-
+#define STD_GAS_PEDAL_PRIME_MIN 0.01 // 1% -> Gas Pedal has to be lower than that to be primed first -> preventing full throttle after calibraton
 #define STD_BRAKE_POWER_LOCK_THRESHHOLD 0.02 // 2% -> if brake is put down only this amount, the Gas Pedal will be blocked
 
 class MotorControllerService : public IService {
@@ -25,10 +25,6 @@ class MotorControllerService : public IService {
                                IPedal* gasPedal, IPedal* brakePedal)
             : _carService(carService) {
             _setBasicComponents(motorController, gasPedal, brakePedal);
-
-            SoftwareRpmSensor emptyRpmSensor;
-            IRpmSensor* emptyRpmSensorPointer = (IRpmSensor*)&emptyRpmSensor;
-            _setASRComponents(emptyRpmSensorPointer, emptyRpmSensorPointer, emptyRpmSensorPointer, emptyRpmSensorPointer);
         }
 
         MotorControllerService(CarService &carService,
@@ -87,6 +83,8 @@ class MotorControllerService : public IService {
 
         _pedalStruct_t _gasPedal,
                        _brakePedal;
+
+        bool _gasPedalPrimed = false;
 
         struct _rpmSensorStruct_t {
             IRpmSensor* object;
@@ -229,6 +227,14 @@ class MotorControllerService : public IService {
         pedal_value_t _getPedalPower() {
             pedal_value_t returnValue = _gasPedal.lastValue;
 
+            if (!_gasPedalPrimed) {
+                if (returnValue <= STD_GAS_PEDAL_PRIME_MIN) {
+                    _gasPedalPrimed = true;
+                } else {
+                    returnValue = 0;
+                }
+            }
+
             if (_brakePedal.lastValue >= STD_BRAKE_POWER_LOCK_THRESHHOLD) {
                 returnValue = 0;
             }
@@ -253,6 +259,8 @@ class MotorControllerService : public IService {
         }
 
         float _ASR(float returnValue) {
+            // Implementing later
+            // [il]
             return returnValue;
         }
 };

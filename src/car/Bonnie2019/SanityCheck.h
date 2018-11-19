@@ -21,4 +21,23 @@
     #endif
 #endif
 
+// Check if Accidantially more than one Board is active at a time
+#ifdef BOARD_DASHBOARD
+    #ifdef BOARD_MASTER
+        #error "Two or more Boards are selected at the same Time. Check platformio.ini"
+    #endif
+    #ifdef BOARD_PEDAL
+        #error "Two or more Boards are selected at the same Time. Check platformio.ini"
+    #endif
+#endif
+
+#ifdef BOARD_PEDAL
+    #ifdef BOARD_MASTER
+        #error "Two or more Boards are selected at the same Time. Check platformio.ini"
+    #endif
+    #ifdef BOARD_DASHBOARD
+        #error "Two or more Boards are selected at the same Time. Check platformio.ini"
+    #endif
+#endif
+
 #endif // SANITYCHECK_H

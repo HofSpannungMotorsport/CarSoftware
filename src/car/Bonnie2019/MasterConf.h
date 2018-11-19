@@ -73,6 +73,9 @@ class Master {
             highDemandServices.addService((IService*)&motorControllerService);
             highDemandServices.addService((IService*)&brakeLightService);
 
+            // Add all low demand Services to our Service list
+            // At the Moment, there are no low demand services...
+
             // Add all Services and ServiceLists to our ServiceScheduler
             services.addService((IService*)&highDemandServices, HIGH_DEMAND_SERVICE_REFRESH_RATE);
 
