@@ -16,7 +16,7 @@ enum car_state_t : uint8_t {
     CAR_OFF = 0x0,
     BOOT = 0x1,
     READY_TO_DRIVE = 0x2,
-    ERROR = 0x3
+    CAR_ERROR = 0x3
 };
 
 enum error_type_t : uint8_t {
@@ -31,7 +31,7 @@ class Error {
     public:
         Error(){}
         Error(component_id_t ComponentId, uint8_t Code, error_type_t Type)
-            : componentId(ComponentId), code(Code) {}
+            : componentId(ComponentId), code(Code), type(Type) {}
 
         component_id_t componentId;
         uint8_t code = 0;
@@ -56,26 +56,26 @@ class CarService : public IService {
 
         virtual void run() {
             if (_button.reset->getStatus() > 0) {
-                addError(Error(_calculateComponentId((IID*)_button.reset), _button.reses->getStatus(), ERROR_SYSTEM));
+                addError(Error(_calculateComponentId((IID*)_button.reset), _button.reset->getStatus(), ERROR_SYSTEM));
             }
 
             if (_button.start->getStatus() > 0) {
                 addError(Error(_calculateComponentId((IID*)_button.start), _button.start->getStatus(), ERROR_SYSTEM));
             }
 
-            if (!_error.register.empty()) {
+            if (!(_errorRegister.empty())) {
                 processErrors();
             }
         }
 
         void addError(Error error) {
-            _error.register.push(error);
+            _errorRegister.push(error);
         }
 
         void processErrors() {
-            while(!_error.register.empty()) {
+            while(!_errorRegister.empty()) {
                 Error error;
-                _error.register.pop(error);
+                _errorRegister.pop(error);
                 if (error.type >= ERROR_UNDEFINED) {
                     if (error.type >= ERROR_SYSTEM) {
                         if (error.type >= ERROR_CRITICAL) {
@@ -87,7 +87,7 @@ class CarService : public IService {
                             _led.red->setBlinking(BLINKING_FAST);
 
                             _led.green->setState(LED_OFF);
-                            _state = ERROR;
+                            _state = CAR_ERROR;
                         } else {
                             // System Error
                             // Yellow -> Fast Blinking
@@ -125,7 +125,7 @@ class CarService : public IService {
 
 
             // Start bootup/calibration
-            _state == BOOT;
+            _state = BOOT;
             _led.yellow->setState(LED_ON);
             _led.green->setState(LED_ON);
 
@@ -140,7 +140,7 @@ class CarService : public IService {
 
 
             // Calibrate pedal until pressed Start once for long time
-            while(buttonStart.getStateChanged() || (buttonStart.getState() != LONG_CLICKED)) {
+            while(_button.start->getStateChanged() || (_button.start->getState() != LONG_CLICKED)) {
                 canService.processInbound();
             }
 
@@ -152,7 +152,7 @@ class CarService : public IService {
 
 
             // Wait till the Button got released again
-            while(buttonStart.getStateChanged() || (buttonStart.getState() != RELEASED)) {
+            while(_button.start->getStateChanged() || (_button.start->getState() != NOT_PRESSED)) {
                 canService.processInbound();
             }
             _led.yellow->setState(LED_OFF);
@@ -160,9 +160,9 @@ class CarService : public IService {
 
 
             // Check for Errors at Calibration
-            canService.processInbount();
+            canService.processInbound();
             if ((_pedal.gas->getStatus() > 0) || (_pedal.brake->getStatus() > 0)) {
-                _state = ERROR;
+                _state = CAR_ERROR;
             }
 
 
@@ -185,7 +185,7 @@ class CarService : public IService {
 
 
             // Wait till Car got started (Brake Pedal + Start Button long press)
-            while(buttonStart.getStateChanged() || (buttonStart.getState() != LONG_CLICKED) || (brakePedal.getValue() < BRAKE_START_THRESHHOLD)) {
+            while(_button.start->getStateChanged() || (_button.start->getState() != LONG_CLICKED) || (_pedal.brake->getValue() < BRAKE_START_THRESHHOLD)) {
                 canService.processInbound();
             }
 
@@ -196,22 +196,24 @@ class CarService : public IService {
         }
 
     private:
-        struct _error {
-            CircularBuffer<Error, 64, uint8_t> register;
-        } _error;
+        CircularBuffer<Error, 64, uint8_t> _errorRegister;
 
         car_state_t _state = BOOT;
 
         struct _button {
-            IButton* reset, start;
+            IButton* reset;
+            IButton* start;
         } _button;
 
         struct _led {
-            ILed* red, yellow, green;
+            ILed* red;
+            ILed* yellow;
+            ILed* green;
         } _led;
 
         struct _pedal {
-            IPedal* gas, brake;
+            IPedal* gas;
+            IPedal* brake;
         } _pedal;
 
         component_id_t _calculateComponentId(IID* component) {
