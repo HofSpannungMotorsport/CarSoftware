@@ -24,6 +24,7 @@
 // Include for Services
 #include "../../components/service/CarService.h"
 #include "../../components/service/MotorControllerService.h"
+#include "../../components/service/BrakeLightService.h"
 #include "../../components/service/ServiceList.h"
 #include "../../components/service/ServiceScheduler.h"
 
@@ -60,6 +61,8 @@ MotorControllerService motorControllerService(carService,
                                               (IMotorController*)&motorController,
                                               (IPedal*)&gasPedal, (IPedal*)&brakePedal);
 
+BrakeLightService brakeLightService(carService, (IPedal*)&brakePedal, (ILed*)&brakeLight);
+
 class Master {
     public:
         // Called once at bootup
@@ -68,6 +71,7 @@ class Master {
             highDemandServices.addService((IService*)&canService);
             highDemandServices.addService((IService*)&carService);
             highDemandServices.addService((IService*)&motorControllerService);
+            highDemandServices.addService((IService*)&brakeLightService);
 
             // Add all Services and ServiceLists to our ServiceScheduler
             services.addService((IService*)&highDemandServices, HIGH_DEMAND_SERVICE_REFRESH_RATE);
