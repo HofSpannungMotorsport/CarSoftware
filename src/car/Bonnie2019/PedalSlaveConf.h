@@ -5,12 +5,20 @@
 #include "hardware/Pins_Pedal.h"
 #include "../../components/hardware/HardwarePedal.h"
 #include "../../can/PedalMessageHandler.h"
+#include "../../components/hardware/HardwareRpmSensor.h"
+#include "../../can/RpmSensorMessageHandler.h"
 
-#define PEDAL_SEND_RATE 60 // Hz
+#define PEDAL_SEND_RATE 120 // Hz
 
+// Pedals
 HardwarePedal gasPedal(PEDAL_PIN_ROTATION_ANGLE_GAS_1, PEDAL_PIN_ROTATION_ANGLE_GAS_2, PEDAL_GAS);
 HardwarePedal brakePedal(PEDAL_PIN_ROTATION_ANGLE_BRAKE, PEDAL_BRAKE);
 PedalMessageHandler pedalMessageHandler;
+
+// RPM Sensor
+HardwareRpmSensor rpmFrontLeft(PEDAL_PIN_RPM_SENSOR_FL, RPM_FRONT_LEFT);
+HardwareRpmSensor rpmFrontRight(PEDAL_PIN_RPM_SENSOR_FR, RPM_FRONT_RIGHT);
+RpmSensorMessageHandler rpmSensorMessageHandler;
 
 class Pedal {
     public:

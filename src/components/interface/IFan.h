@@ -3,12 +3,15 @@
 
 #include "IID.h"
 
-typedef float fan_speed_t;
+enum fan_state_t : bool {
+    FAN_OFF = false,
+    FAN_ON  = true
+};
 
 class IFan : public IID {
     public:
-        virtual void setSpeed(fan_speed_t speed) = 0;
-        virtual fan_speed_t getSpeed() = 0;
+        virtual void setState(fan_state_t state) = 0;
+        virtual fan_state_t getState() = 0;
 };
 
 #endif // IFAN_H

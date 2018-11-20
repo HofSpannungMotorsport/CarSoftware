@@ -59,19 +59,20 @@ enum can_component_t : uint8_t {
 
     // Cooling
     COOLING_PUMP = 0x0,
-    COOLING_FANS = 0x1,
+    COOLING_FAN  = 0x1,
 
     // Buttons
     BUTTON_RESET = 0x0,
     BUTTON_START = 0x1,
 
     // LEDs
-    LED_ERROR =          0x0, //red LED dashboard
-    LED_ISSUE =          0x1, // yellow LED dashboard
-    LED_READY_TO_DRIVE = 0x2, // greed LED dashboard
-    LED_MASTER =         0x3, // green LED on the board PCB (master)
-    LED_DASHBOARD =      0x4, // green LED on the board PCB (dashboard)
-    LED_PEDAL =          0x5, // green LED on the board PCB (pedal)
+    LED_BRAKE =          0x0,
+    LED_ERROR =          0x1, //red LED dashboard
+    LED_ISSUE =          0x2, // yellow LED dashboard
+    LED_READY_TO_DRIVE = 0x3, // greed LED dashboard
+    LED_MASTER =         0x4, // green LED on the board PCB (master)
+    LED_DASHBOARD =      0x5, // green LED on the board PCB (dashboard)
+    LED_PEDAL =          0x6, // green LED on the board PCB (pedal)
 
     // RPM sensors
     RPM_TIRE_FR = 0x0,
