@@ -1,6 +1,8 @@
 #ifndef IRPMSENSOR_H
 #define IRPMSENSOR_H
 
+#include "IID.h"
+
 typedef uint8_t rpm_sensor_status_t;
 struct rpm_sensor_error_type_t {
     
