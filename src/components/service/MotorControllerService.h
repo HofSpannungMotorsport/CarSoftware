@@ -295,11 +295,11 @@ class MotorControllerService : public IService {
                 one set on the Motor Controller (obvious). Else, we have to map our value.
             */
 
-           if (_power.max < _power.setOnController) {
-               returnValue = (_power.max / _power.setOnController) * returnValue;
-           }
+            if (_power.max < _power.setOnController) {
+                returnValue = (_power.max / _power.setOnController) * returnValue;
+            }
 
-           return returnValue;
+            return returnValue;
         }
 
         float _ASR(float returnValue) {
