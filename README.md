@@ -16,6 +16,7 @@ Master Controller
 - Fan
 - Pump
 - Spring-Travel-Sensor Rear left and right
+- RPM-Sensor Rear left and right
 
 Dash-Panel-Slave
 - LED 1 to 3
@@ -26,6 +27,7 @@ Pedal-Slave
 - Brake Pedal
 - Spring-Travel-Sensor Front left and right
 - Steering-Angle-Sensor
+- RPM-Sensor Front left and right
 
 ## Current Schedule
 ### November 2018
