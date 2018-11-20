@@ -14,9 +14,16 @@
 
 #define STD_MAX_POWER 80 // kW
 #define STD_POWER_SET_ON_MOTOR_CONTROLLER 80 // kW
+
 #define STD_AGE_LIMIT 0.1 // s
-#define STD_GAS_PEDAL_PRIME_MIN 0.01 // 1% -> Gas Pedal has to be lower than that to be primed first -> preventing full throttle after calibraton
 #define STD_BRAKE_POWER_LOCK_THRESHHOLD 0.02 // 2% -> if brake is put down only this amount, the Gas Pedal will be blocked
+
+// FSG Rules relevant
+#define STD_GAS_PEDAL_PRIME_MIN 0.05 // 5% -> Gas Pedal has to be lower than that to be primed first -> preventing full throttle after calibraton
+#define STD_HARD_BRAKE_THRESHHOLD 0.75 // 75%
+#define STD_HARD_BRAKE_CUTOFF_TIME 0.5 // 500 ms -> unprime gas pedal if braked hard for longer than this
+#define STD_HARD_BRAKE_CUTOFF_APPS_POSITION 0.25 // 25% -> If equal or higher than that while hard brake, gas pedal will be unprimed
+#define STD_HARD_BRAKE_CUTOFF_POWER 25 // kW -> If Power at Output highter than that while hard brake, gas pedal will be unprimed
 
 class MotorControllerService : public IService {
     public:
@@ -85,6 +92,8 @@ class MotorControllerService : public IService {
                        _brakePedal;
 
         bool _gasPedalPrimed = false;
+        Timer _hardBrakeingSince = Timer();
+        bool _hardBrakeingStarted = false;
 
         struct _rpmSensorStruct_t {
             IRpmSensor* object;
@@ -227,6 +236,40 @@ class MotorControllerService : public IService {
         pedal_value_t _getPedalPower() {
             pedal_value_t returnValue = _gasPedal.lastValue;
 
+            /*
+                Because of FSG Rules, the APPS (gas pedal) has to be locked if
+                    - APPS >= 25% || Motor Output >= 5 kW
+                &&  - Hard Brakeing >= 500ms
+
+                To Unlock it, the Pedal has to be returned to (regardlessly if brakeing or not)
+                    - APPS < 5%
+            */
+            if (_brakePedal.lastValue >= STD_HARD_BRAKE_THRESHHOLD) {
+                if (_hardBrakeingStarted) {
+                    if (_gasPedalPrimed) {
+                        if (_hardBrakeingSince.read() >= STD_HARD_BRAKE_CUTOFF_TIME) {
+                            if (_gasPedal.lastValue >= STD_HARD_BRAKE_CUTOFF_APPS_POSITION) {
+                                _gasPedalPrimed = false;
+                            }
+
+                            float currentPower = _mapToPowerLimit(returnValue) * _power.setOnController;
+                            if (currentPower >= STD_HARD_BRAKE_CUTOFF_POWER) {
+                                _gasPedalPrimed = false;
+                            }
+                        }
+                    }
+                } else {
+                    _hardBrakeingStarted = true;
+                    _hardBrakeingSince.reset();
+                    _hardBrakeingSince.start();
+                }
+            } else {
+                if (_hardBrakeingStarted) {
+                    _hardBrakeingStarted = false;
+                }
+            }
+
+            // Check if pedal is primed, otherwise lock it
             if (!_gasPedalPrimed) {
                 if (returnValue <= STD_GAS_PEDAL_PRIME_MIN) {
                     _gasPedalPrimed = true;
@@ -235,6 +278,7 @@ class MotorControllerService : public IService {
                 }
             }
 
+            // If brakeing, no current should go to the Motor
             if (_brakePedal.lastValue >= STD_BRAKE_POWER_LOCK_THRESHHOLD) {
                 returnValue = 0;
             }
@@ -243,7 +287,7 @@ class MotorControllerService : public IService {
         }
 
         float _mapToPowerLimit(float returnValue) {
-            /*  We have to values:
+            /*  We have two values:
                 _power.max:             The maximum Power to be applied on our Motor (absolut)
                 _power.setOnController: The Power Maximum set on our Motor Controller.
 
