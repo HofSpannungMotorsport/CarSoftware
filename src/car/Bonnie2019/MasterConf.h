@@ -92,6 +92,22 @@ class Master {
     public:
         // Called once at bootup
         void setup() {
+            // Add all Software Components to the CAN Service
+            // Dashboard
+            canService.addComponent((void*)&ledRed, (IMessageHandler<CANMessage>*)&ledMessageHandler, NORMAL);
+            canService.addComponent((void*)&ledYellow, (IMessageHandler<CANMessage>*)&ledMessageHandler, NORMAL);
+            canService.addComponent((void*)&ledGreen, (IMessageHandler<CANMessage>*)&ledMessageHandler, NORMAL);
+            canService.addComponent((void*)&buttonReset, (IMessageHandler<CANMessage>*)&buttonMessageHandler, NORMAL);
+            canService.addComponent((void*)&buttonStart, (IMessageHandler<CANMessage>*)&buttonMessageHandler, NORMAL);
+
+            // Pedal
+            canService.addComponent((void*)&gasPedal, (IMessageHandler<CANMessage>*)&pedalMessageHandler, NORMAL);
+            canService.addComponent((void*)&brakePedal, (IMessageHandler<CANMessage>*)&pedalMessageHandler, NORMAL);
+            canService.addComponent((void*)&rpmFrontLeft, (IMessageHandler<CANMessage>*)&rpmSensorMessageHandler, NORMAL);
+            canService.addComponent((void*)&rpmFrontRight, (IMessageHandler<CANMessage>*)&rpmSensorMessageHandler, NORMAL);
+
+
+
             // Add all high demand Services to our Service list
             highDemandServices.addService((IService*)&canService);
             highDemandServices.addService((IService*)&carService);
