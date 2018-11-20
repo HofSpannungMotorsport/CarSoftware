@@ -20,8 +20,8 @@
 
 // FSG Rules relevant
 // EV2.3 -> APPS / Brake Pedal Plausibility Check
-#define STD_GAS_PEDAL_PRIME_MIN 0.05 // 5% -> Gas Pedal has to be lower than that to be primed first -> preventing full throttle after calibraton
-#define STD_HARD_BRAKE_THRESHHOLD 0.75 // 75%
+#define STD_GAS_PEDAL_PRIME_MIN 0.05 // 5% -> Gas Pedal has to be lower than that to be primed (if unprimed)
+#define STD_HARD_BRAKE_THRESHHOLD 0.75 // 75% (it has to be 30 bar pressure in the brake circuit, but we don't have a Sensor connected to our Microcontrollers)
 #define STD_HARD_BRAKE_CUTOFF_TIME 0.5 // 500 ms -> unprime gas pedal if braked hard for longer than this
 #define STD_HARD_BRAKE_CUTOFF_APPS_POSITION 0.25 // 25% -> If equal or higher than that while hard brake, gas pedal will be unprimed
 #define STD_HARD_BRAKE_CUTOFF_POWER 25 // kW -> If Power at Output highter than that while hard brake, gas pedal will be unprimed
