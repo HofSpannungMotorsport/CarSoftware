@@ -2,6 +2,9 @@
 #define SPEEDSERVICE_H
 
 #include "IService.h"
+#include "CarService.h"
+#include "../interface/IRpmSensor.h"
+#include "../interface/IMotorController.h"
 
 #define STD_SPEED_DEVIANCE_THRESHHOLD 3 // kM/h -> if one sensor gives a higher Value than this, the other one will be compared
 #define STD_MAX_SPEED_DEVIANCE 0.1 // 10%
@@ -14,8 +17,12 @@
     If the Sensors in the back have a problem too, the Speed of the Motor will be used.
 */
 
-typedef float speed_value_t;
+enum speed_service_error_types_t : uint8_t {
+    SPEED_SERVICE_NO_SENSOR_WORKING = 0x1,
+    SPEED_SERVICE_USING_MOTOR =       0x2
+};
 
+typedef float speed_value_t;
 class SpeedService : public IService {
     public:
         SpeedService(CarService &carService,
@@ -42,7 +49,7 @@ class SpeedService : public IService {
                     // One of the rear Sensors has a problem too
                     if (_motorController->getStatus() > 0) {
                         _speed = 0;
-                        _carService.addError(Error(ID::getComponentId(SYSTEM, SYSTEM_SPEED), 0x0, ERROR_ISSUE));
+                        _carService.addError(Error(ID::getComponentId(SYSTEM, SYSTEM_SPEED), SPEED_SERVICE_NO_SENSOR_WORKING, ERROR_ISSUE));
                         return;
                     } else {
                         useSensor = MOTOR;
@@ -77,7 +84,7 @@ class SpeedService : public IService {
 
             if (useSensor == MOTOR) {
                 _speed = 0;
-                _carService.addError(Error(ID::getComponentId(SYSTEM, SYSTEM_SPEED), 0x0, ERROR_ISSUE));
+                _carService.addError(Error(ID::getComponentId(SYSTEM, SYSTEM_SPEED), SPEED_SERVICE_USING_MOTOR, ERROR_ISSUE));
             }
         }
 
@@ -112,7 +119,15 @@ class SpeedService : public IService {
                           sensor2speed = _getSpeed(sensor2);
             
             if ((sensor1speed > STD_SPEED_DEVIANCE_THRESHHOLD) || (sensor2speed > STD_SPEED_DEVIANCE_THRESHHOLD)) {
-                if (((sensor1speed / sensor2speed) > STD_MAX_SPEED_DEVIANCE)  ||  ((sensor2speed / sensor1speed) > STD_MAX_SPEED_DEVIANCE)) {
+                float deviance = 0;
+
+                if (sensor1speed > sensor2speed) {
+                    deviance = 1 - (sensor2speed / sensor1speed)
+                } else if (sensor2speed > sensor1speed) {
+                    deviance = 1 - (sensor1speed / sensor2speed);
+                }
+
+                if (deviance > STD_MAX_SPEED_DEVIANCE) {
                     return false;
                 }
             }
