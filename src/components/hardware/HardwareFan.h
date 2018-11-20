@@ -12,7 +12,7 @@ class HardwareFan : public IFan {
             _objectType = HARDWARE_OBJECT;
         }
 
-        HardwareFan(PinName port, can_component_t componentId) : HardwareFan(PinName port) {
+        HardwareFan(PinName port, can_component_t componentId) : HardwareFan(port) {
             _componentId = componentId;
         }
 
@@ -21,7 +21,11 @@ class HardwareFan : public IFan {
         }
 
         virtual fan_state_t getState() {
-            return (fan_state_t)_port;
+            if (_port) {
+                return FAN_ON;
+            } else {
+                return FAN_OFF;
+            }
         }
 
     protected:

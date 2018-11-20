@@ -26,7 +26,7 @@ typedef float speed_value_t;
 class SpeedService : public IService {
     public:
         SpeedService(CarService &carService,
-                     IRpmSensor* rpmFrontLeft, IRpmSensor* rpmFrontRight, IRpmSensor* rpmRearLeft, IRpmSensor* rpmRearRight
+                     IRpmSensor* rpmFrontLeft, IRpmSensor* rpmFrontRight, IRpmSensor* rpmRearLeft, IRpmSensor* rpmRearRight,
                      IMotorController* motorController)
             : _carService(carService) {
             _rpm.front.left = rpmFrontLeft;
@@ -114,15 +114,15 @@ class SpeedService : public IService {
             return (sensor->getFrequency() * STD_DISTANCE_PER_REVOLUTION * 0.06);
         }
 
-        void _checkPlausibility(IRpmSensor* sensor1, IRpmSensor* sensor2) {
-            speed_value_t sensor1speed = _getSpeed(sensor1);
+        bool _checkPlausibility(IRpmSensor* sensor1, IRpmSensor* sensor2) {
+            speed_value_t sensor1speed = _getSpeed(sensor1),
                           sensor2speed = _getSpeed(sensor2);
             
             if ((sensor1speed > STD_SPEED_DEVIANCE_THRESHHOLD) || (sensor2speed > STD_SPEED_DEVIANCE_THRESHHOLD)) {
                 float deviance = 0;
 
                 if (sensor1speed > sensor2speed) {
-                    deviance = 1 - (sensor2speed / sensor1speed)
+                    deviance = 1 - (sensor2speed / sensor1speed);
                 } else if (sensor2speed > sensor1speed) {
                     deviance = 1 - (sensor1speed / sensor2speed);
                 }

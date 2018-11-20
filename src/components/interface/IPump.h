@@ -3,7 +3,7 @@
 
 #include "IID.h"
 
-typedef float pump_speed_t
+typedef float pump_speed_t;
 
 class IPump : public IID {
     public:

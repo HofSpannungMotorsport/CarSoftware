@@ -12,7 +12,7 @@ class HardwarePump : public IPump {
             _objectType = HARDWARE_OBJECT;
         }
 
-        HardwarePump(PinName port, can_component_t componentId) : HardwarePump(PinName port) {
+        HardwarePump(PinName port, can_component_t componentId) : HardwarePump(port) {
             _componentId = componentId;
         }
 
