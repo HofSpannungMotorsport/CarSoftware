@@ -9,5 +9,6 @@
 #define MASTER_PIN_SPRING_TRAVEL_SENSOR_HR  PB_1
 #define MASTER_PIN_RPM_SENSOR_HL            PC_4
 #define MASTER_PIN_RPM_SENSOR_HR            PC_5
+#define MASTER_PIN_HV_ENABLED               PC_14
 
 #endif // PINS_MASTER_H
