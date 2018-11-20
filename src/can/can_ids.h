@@ -86,9 +86,12 @@ enum can_component_t : uint8_t {
     STS_RL = 0x3,
     
     // System messages
-    SYSTEM_MASTER =    0x0,
-    SYSTEM_DASHBOARD = 0x1,
-    SYSTEM_PEDAL =     0x2
+    SYSTEM_MASTER =           0x0,
+    SYSTEM_DASHBOARD =        0x1,
+    SYSTEM_PEDAL =            0x2,
+    SYSTEM_MOTOR_CONTROLLER = 0x3,
+    SYSTEM_SPEED =            0x4,
+    SYSTEM_COOLING =          0x5
     /*
     SYSTEM_INIT_REQUEST = 0x0,
     SYSTEM_INIT_RESPONSE = 0x1,
