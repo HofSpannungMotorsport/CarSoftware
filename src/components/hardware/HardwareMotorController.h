@@ -4,7 +4,10 @@
 #include "bamocar-can.h"
 #include "../interface/IMotorController.h"
 
-#define MAX_REVERSE_TORQUE 0.1 // %
+#define STD_SPEED_REFRESH_TIME 40
+#define STD_CURRENT_REFRESH_TIME 10
+#define STD_MOTOR_TEMP_REFRESH_TIME 100
+#define STD_CONTROLLER_TEMP_REFRESH_TIME 100
 
 class HardwareMotorController : public IMotorController {
     public:

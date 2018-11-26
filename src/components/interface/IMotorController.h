@@ -15,7 +15,11 @@ class IMotorController : public IID {
         virtual motor_controller_status_t getStatus() = 0;
         virtual void setStatus() = 0;
 
+        virtual float getTorque() = 0;
         virtual void setTorque(float torque) = 0; // from 0 to 1.0
+
+        virtual int16_t getSpeed() = 0;
+        virtual int16_t getTemp() = 0;
 };
 
 #endif // IMOTORCONTROLLER_H
