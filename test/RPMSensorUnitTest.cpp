@@ -17,12 +17,9 @@ void RPMSensorUnitTest() {
     pcSerial.printf("RPM Sensor Unit Test\n\n");
 
     while(1) {
-        void *rpmSensorPointer = &rpmSensor;
-        void *softwareRpmSensorPointer = &softwareRpmSensor;
-
         CANMessage message = CANMessage();
-        rpmSensorMessageHandler.buildMessage(rpmSensorPointer, message);
-        rpmSensorMessageHandler.parseMessage(softwareRpmSensorPointer, message);
+        rpmSensorMessageHandler.buildMessage((void*)&rpmSensor, message);
+        rpmSensorMessageHandler.parseMessage((void*)&softwareRpmSensor, message);
 
         pcSerial.printf("Speed: %.6f\n", softwareRpmSensor.getFrequency());
         wait(1.0/(float)REFRESH_RATE);

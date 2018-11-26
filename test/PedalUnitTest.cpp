@@ -9,7 +9,9 @@
 #define PEDAL_PIN1 A3
 #define PEDAL_PIN2 A4
 
-#define REFRESH_TIME 28 // ms
+#define REFRESH_TIME 333 // ms
+
+HardwareInterruptButton calibrationButton(USER_BUTTON);
 
 HardwarePedal hardwarePedal(PEDAL_PIN1, PEDAL_PIN2, PEDAL_GAS);
 SoftwarePedal softwarePedal(PEDAL_GAS);
@@ -37,9 +39,9 @@ void PedalUnitTest() {
     softwarePedal.setCalibrationStatus(CURRENTLY_CALIBRATING);
     {
         CANMessage m = CANMessage();
-        m.id = calculateComponentId(softwarePedal);
-        pedalMessageHandler.buildMessage(softwarePedal, m);
-        pedalMessageHandler.parseMessage(hardwarePedal, m);
+        m.id = calculateComponentId((void*)&softwarePedal);
+        pedalMessageHandler.buildMessage((void*)&softwarePedal, m);
+        pedalMessageHandler.parseMessage((void*)&hardwarePedal, m);
     }
 
     while (calibrationButton.getState() != NOT_PRESSED);
@@ -49,16 +51,16 @@ void PedalUnitTest() {
     softwarePedal.setCalibrationStatus(CURRENTLY_NOT_CALIBRATING);
     {
         CANMessage m = CANMessage();
-        m.id = calculateComponentId(softwarePedal);
-        pedalMessageHandler.buildMessage(softwarePedal, m);
-        pedalMessageHandler.parseMessage(hardwarePedal, m);
+        m.id = calculateComponentId((void*)&softwarePedal);
+        pedalMessageHandler.buildMessage((void*)&softwarePedal, m);
+        pedalMessageHandler.parseMessage((void*)&hardwarePedal, m);
     }
 
     {
         CANMessage m = CANMessage();
-        m.id = calculateComponentId(hardwarePedal);
-        pedalMessageHandler.buildMessage(hardwarePedal, m);
-        pedalMessageHandler.parseMessage(softwarePedal, m);
+        m.id = calculateComponentId((void*)&hardwarePedal);
+        pedalMessageHandler.buildMessage((void*)&hardwarePedal, m);
+        pedalMessageHandler.parseMessage((void*)&softwarePedal, m);
     }
 
     if (softwarePedal.getStatus() > 0) {
@@ -70,11 +72,11 @@ void PedalUnitTest() {
             refreshTimer.reset();
             {
                 CANMessage m = CANMessage();
-                m.id = calculateComponentId(hardwarePedal);
-                pedalMessageHandler.buildMessage(hardwarePedal, m);
-                pedalMessageHandler.parseMessage(softwarePedal, m);
+                m.id = calculateComponentId((void*)&hardwarePedal);
+                pedalMessageHandler.buildMessage((void*)&hardwarePedal, m);
+                pedalMessageHandler.parseMessage((void*)&softwarePedal, m);
             }
-            pcSerial.printf("Pedal Value: %.3f", softwarePedal.getValue());
+            pcSerial.printf("Pedal Value: %.3f\n", softwarePedal.getValue());
             while(refreshTimer.read_ms() < REFRESH_TIME);
         }
 
