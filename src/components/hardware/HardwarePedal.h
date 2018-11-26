@@ -153,7 +153,7 @@ class HardwarePedal : public IPedal {
         HardwareAnalogSensor _pin1;
         HardwareAnalogSensor _pin2;
         pedal_sensor_type_t _pin1Proportionality = DIRECT_PROPORTIONAL,
-                            _pin2Proportionality = INDIRECT_PROPORTIONAL;
+                            _pin2Proportionality = DIRECT_PROPORTIONAL;
         bool _secondSensor;
         pedal_status_t _status = 0;
         bool _ready = false;

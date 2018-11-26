@@ -9,8 +9,8 @@
 
 class ServiceSchedule {
     public:
-        ServiceSchedule(void* servicePointer, float serviceRefreshRate) {
-            service = (IService*)servicePointer;
+        ServiceSchedule(IService* servicePointer, float serviceRefreshRate) {
+            service = servicePointer;
             refreshRate = serviceRefreshRate;
         }
 

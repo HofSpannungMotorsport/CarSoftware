@@ -4,16 +4,16 @@
 
 // Currently using RPM Unit Test
 
-#include "RPMSensorUnitTest.cpp"
+#include "FreeTest.cpp"
 
 class UnitTest {
     public:
         void setup() {
-            RPMSensorUnitTest();
+
         }
 
         void loop() {
-
+            FreeTest();
         }
 };
 
