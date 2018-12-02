@@ -1,8 +1,8 @@
-#include "mbed.h"
-#include "car/Car.h"
-
 #ifdef TESTING_MODE
-#include "../test/UnitTest.h"
+    #include "../hardwareTest/UnitTest.h"
+#else
+    #include "mbed.h"
+    #include "car/Car.h"
 #endif // TESTING_MODE
 
 int main() {

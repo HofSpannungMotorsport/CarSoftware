@@ -4,16 +4,16 @@
 
 // Currently using RPM Unit Test
 
-#include "FreeTest.cpp"
+#include "CANFunctionalityTest.cpp"
 
 class UnitTest {
     public:
         void setup() {
-
+            CANFunctionalityTest();
         }
 
         void loop() {
-            FreeTest();
+
         }
 };
 
