@@ -1,17 +1,38 @@
+/*
+    Small CAN-Service test to test its functionality
+    The type of the controller (Transmitter/Receiver) is set by the CONTROLLER define
+
+    This Test will send the button States from Transmitter to Receiver while the 
+    Receiver will answer with the Control of the LED.
+*/
+#define CONTROLLER 1 // 1 = Transmitter/2 = Receiver
+
+
+#include "../src/can/can_config.h"
+#include "../src/can/CANService.h"
+
+// Includes for Button
 #include "../src/components/hardware/HardwareInterruptButton.h"
 #include "../src/components/software/SoftwareButton.h"
 #include "../src/can/ButtonMessageHandler.h"
 
-#define CONTROLLER 1 // 1 = Transmitter/2 = Receiver
+// Includes for LED
+#include "../src/components/hardware/HardwareLed.h"
+#include "../src/components/software/SoftwareLed.h"
+#include "../src/can/LEDMessageHandler.h"
 
 
+CANService canService(CAN1_CONF);
+LEDMessageHandler ledMessageHandler;
 ButtonMessageHandler buttonHandler;
 
 #if CONTROLLER == 1
-HardwareInterruptButton testButton = HardwareInterruptButton(USER_BUTTON, BUTTON_START, NORMALLY_CLOSED);
+    HardwareInterruptButton testButton = HardwareInterruptButton(USER_BUTTON, BUTTON_START, NORMALLY_CLOSED);
+    HardwareLed led(LED2, LED_READY_TO_DRIVE);
 #endif
 #if CONTROLLER == 2
-SoftwareButton testButton = SoftwareButton(BUTTON_START);
+    SoftwareButton testButton = SoftwareButton(BUTTON_START);
+    SoftwareLed led(LED_READY_TO_DRIVE);
 #endif
 
 #ifndef MESSAGE_REPORT
@@ -21,42 +42,55 @@ SoftwareButton testButton = SoftwareButton(BUTTON_START);
 void CANServiceUnitTest() {
 
     // CANService Unit Test
-    // Printout the different Stats for the Button
-    pcSerial.printf("Button Unit Test\n");
+    // Printout the different States for the Button
+    pcSerial.printf("Button Unit Test with LED Output\n\n");
 
-    void* testButtonPointer = &testButton;
-    IMessageHandler<CANMessage>* buttonHandlerPointer = &buttonHandler;
-    canService.addComponent(testButtonPointer, buttonHandlerPointer);
+    canService.addComponent((void*)&testButton, (IMessageHandler<CANMessage>*)&buttonHandler);
+    canService.addComponent((void*)&led, (IMessageHandler<CANMessage>*)&ledMessageHandler);
 
+    #if CONTROLLER == 2
+        canService.addComponentToSendLoop((void*)&led);
+        led.setState(LED_OFF);
+        wait(2);
+        canService.run();
+    #endif
 
     while(1) {
+        #if CONTROLLER == 1
+            canService.run();
+            if (testButton.getStateChanged()) {
+                canService.sendMessage((void*)&testButton);
+            }
+        #endif
+        #if CONTROLLER == 2
+            canService.run();
 
-#if CONTROLLER == 1
-        if (testButton.getStateChanged()) {
-            canService.sendMessage(testButtonPointer);
-        }
-#endif
-#if CONTROLLER == 2
+            while (testButton.getStateChanged()) {
+                button_state_t currentState = testButton.getState();
 
-    canService.processInbound();
+                pcSerial.printf("Button ");
 
-    if (testButton.getStateChanged()) {
-            button_state_t currentState = testButton.getState();
+                if (currentState == NOT_PRESSED) {
+                    pcSerial.printf("NOT_PRESSED!\n");
+                    led.setState(LED_OFF);
+                }
 
-            pcSerial.printf("Button ");
+                if (currentState == PRESSED) {
+                    pcSerial.printf("PRESSED!\n");
+                    led.setState(LED_ON);
+                    led.setBlinking(BLINKING_OFF);
+                }
 
-            if (currentState == NOT_PRESSED) {
-                pcSerial.printf("Released!\n");
+                if (currentState == LONG_CLICKED) {
+                    pcSerial.printf("LONG_CLICKED!\n");
+                    led.setState(LED_ON);
+                    led.setBlinking(BLINKING_FAST);
+                }
             }
 
-            if (currentState == LONG_CLICKED) {
-                pcSerial.printf("LongClickStarted!\n");
-            }
+            canService.run();
 
-            if (currentState == PRESSED) {
-                pcSerial.printf("Pressed!\n");
-            }
-        }
-#endif
+            wait(0.1);
+        #endif
     }
 }
