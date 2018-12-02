@@ -88,6 +88,14 @@ class HardwareMotorController : public IMotorController {
 
             // Set the torque to a 16-bit integer
             int16_t torqueValue = (int16_t)((float)setTorqueTo * (float)0x7FFF);
+
+            // To prevent the torqueValue to get somehow over or below the 16-bit boundary, just to be sure...
+            if (torqueValue > 0x7FFF) {
+                torqueValue = 0x7FFF;
+            } else if (torqueValue < 0) {
+                torqueValue = 0;
+            }
+
             _bamocar.setTorque(torqueValue);
         }
 
