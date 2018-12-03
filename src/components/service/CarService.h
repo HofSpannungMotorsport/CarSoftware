@@ -47,7 +47,9 @@ class CarService : public IService {
         CarService(IButton* buttonReset, IButton* buttonStart,
                    ILed* ledRed, ILed* ledYellow, ILed* ledGreen,
                    IPedal* gasPedal, IPedal* brakePedal,
-                   IBuzzer* buzzer) {
+                   IBuzzer* buzzer,
+                   DigitalIn &hvEnabled)
+            : _hvEnabled(hvEnabled) {
             _button.reset = buttonReset;
             _button.start = buttonStart;
 
@@ -62,6 +64,9 @@ class CarService : public IService {
         }
 
         virtual void run() {
+            _checkBuzzer();
+            _checkHvEnabled();
+
             if (_button.reset->getStatus() > 0) {
                 addError(Error(_calculateComponentId((IID*)_button.reset), _button.reset->getStatus(), ERROR_SYSTEM));
             }
@@ -73,8 +78,6 @@ class CarService : public IService {
             if (!(_errorRegister.empty())) {
                 processErrors();
             }
-
-            _checkBuzzer();
         }
 
         void addError(Error error) {
@@ -132,8 +135,20 @@ class CarService : public IService {
             }
             _stopTestOutputs();
 
+            // Turn on red LED while HV-Circuite is off
+            _led.red->setState(LED_ON);
+            _sendLedsOverCan();
+
+            while(!_hvEnabled) {
+                canService.processInbound();
+            }
+
+            _led.red->setState(LED_OFF);
+            _sendLedsOverCan();
 
             // Start bootup/calibration
+            // Yellow -> On
+            // Green  -> Normal Blinking
             _state = BOOT;
             _led.yellow->setState(LED_ON);
             _led.green->setState(LED_ON);
@@ -161,6 +176,7 @@ class CarService : public IService {
 
 
             // Wait till the Button got released again
+            // Yellow -> Off
             while(_button.start->getStateChanged() || (_button.start->getState() != NOT_PRESSED)) {
                 canService.processInbound();
             }
@@ -180,8 +196,10 @@ class CarService : public IService {
                 _state = ALMOST_READY_TO_DRIVE;
             } else {
                 // If an Error occured, stop continuing and glow Red
+                // Red   -> Blinkinf Slow
+                // Green -> Off
                 _led.red->setState(LED_ON);
-                _led.red->setBlinking(BLINKING_OFF);
+                _led.red->setBlinking(BLINKING_SLOW);
                 _led.green->setState(LED_OFF);
                 _sendLedsOverCan();
                 while(1);
@@ -189,6 +207,7 @@ class CarService : public IService {
 
 
             // If no Error, start blinking fast to show ready, but need to start car
+            // Green -> Fast Blinking
             _led.green->setBlinking(BLINKING_FAST);
             _sendLedsOverCan();
 
@@ -215,7 +234,7 @@ class CarService : public IService {
     private:
         CircularBuffer<Error, 64, uint8_t> _errorRegister;
 
-        car_state_t _state = BOOT;
+        car_state_t _state = CAR_OFF;
         Timer _readyToDriveFor;
 
         struct _button {
@@ -235,6 +254,8 @@ class CarService : public IService {
         } _pedal;
 
         IBuzzer* _buzzer;
+
+        DigitalIn &_hvEnabled;
 
         component_id_t _calculateComponentId(IID* component) {
             component_id_t id = ID::getComponentId(component->getTelegramTypeId(), component->getComponentId());
@@ -297,6 +318,12 @@ class CarService : public IService {
                 if (_buzzer->getState() != BUZZER_OFF) {
                     _buzzer->setState(BUZZER_OFF);
                 }
+            }
+        }
+
+        void _checkHvEnabled() {
+            if (!_hvEnabled) {
+                addError(Error(ID::getComponentId(SYSTEM, SYSTEM_HV_ENABLED), 0x1, ERROR_CRITICAL));
             }
         }
 };

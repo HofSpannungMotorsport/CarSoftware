@@ -69,12 +69,14 @@ HardwareRpmSensor rpmRearRight(MASTER_PIN_RPM_SENSOR_HR, RPM_REAR_RIGHT);
 HardwareFan coolingFan(MASTER_PIN_FAN, COOLING_FAN);
 HardwarePump coolingPump(MASTER_PIN_PUMP_PWM, COOLING_PUMP);
 HardwareBuzzer buzzer(MASTER_PIN_BUZZER, BUZZER_ALARM);
+DigitalIn hvEnabled(MASTER_PIN_HV_ENABLED);
 
 // Services
 CarService carService((IButton*)&buttonReset, (IButton*)&buttonStart,
                       (ILed*)&ledRed, (ILed*)&ledYellow, (ILed*)&ledGreen,
                       (IPedal*)&gasPedal, (IPedal*)&brakePedal,
-                      (IBuzzer*)&buzzer);
+                      (IBuzzer*)&buzzer,
+                      hvEnabled);
 
 MotorControllerService motorControllerService(carService,
                                               (IMotorController*)&motorController,

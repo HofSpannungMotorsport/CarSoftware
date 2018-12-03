@@ -96,7 +96,8 @@ enum can_component_t : uint8_t {
     SYSTEM_PEDAL =            0x2,
     SYSTEM_MOTOR_CONTROLLER = 0x3,
     SYSTEM_SPEED =            0x4,
-    SYSTEM_COOLING =          0x5
+    SYSTEM_COOLING =          0x5,
+    SYSTEM_HV_ENABLED =       0x6
     /*
     SYSTEM_INIT_REQUEST = 0x0,
     SYSTEM_INIT_RESPONSE = 0x1,
