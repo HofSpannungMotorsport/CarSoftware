@@ -6,17 +6,21 @@
 #include "IService.h"
 #include "../interface/IButton.h"
 #include "../interface/ILed.h"
+#include "../interface/IBuzzer.h"
 #include "../../can/can_ids.h"
 
 #define ERROR_REGISTER_SIZE 64
 #define BOOT_ROUTINE_TEST_TIME 2
 #define BRAKE_START_THRESHHOLD 0.75
 
+#define BEEP_AFTER_READY_TO_DRIVE_TIME 2.2 // s
+
 enum car_state_t : uint8_t {
     CAR_OFF = 0x0,
     BOOT = 0x1,
-    READY_TO_DRIVE = 0x2,
-    CAR_ERROR = 0x3
+    ALMOST_READY_TO_DRIVE = 0x2,
+    READY_TO_DRIVE = 0x3,
+    CAR_ERROR = 0x4
 };
 
 enum error_type_t : uint8_t {
@@ -42,7 +46,8 @@ class CarService : public IService {
     public:
         CarService(IButton* buttonReset, IButton* buttonStart,
                    ILed* ledRed, ILed* ledYellow, ILed* ledGreen,
-                   IPedal* gasPedal, IPedal* brakePedal) {
+                   IPedal* gasPedal, IPedal* brakePedal,
+                   IBuzzer* buzzer) {
             _button.reset = buttonReset;
             _button.start = buttonStart;
 
@@ -52,6 +57,8 @@ class CarService : public IService {
 
             _pedal.gas = gasPedal;
             _pedal.brake = brakePedal;
+
+            _buzzer = buzzer;
         }
 
         virtual void run() {
@@ -66,6 +73,8 @@ class CarService : public IService {
             if (!(_errorRegister.empty())) {
                 processErrors();
             }
+
+            _checkBuzzer();
         }
 
         void addError(Error error) {
@@ -168,7 +177,7 @@ class CarService : public IService {
 
             // If all OK, go into Ready to drive
             if (_state == BOOT) {
-                _state = READY_TO_DRIVE;
+                _state = ALMOST_READY_TO_DRIVE;
             } else {
                 // If an Error occured, stop continuing and glow Red
                 _led.red->setState(LED_ON);
@@ -189,6 +198,14 @@ class CarService : public IService {
                 canService.processInbound();
             }
 
+            // Set car ready to drive (-> pressing the gas-pedal will move the car -> fun)
+            _state = READY_TO_DRIVE;
+            _readyToDriveFor.reset();
+            _readyToDriveFor.start();
+
+            // Start BEEEEEEP!!! to signalize the car is primed now (really loud :D )
+            _buzzer->setBeep(BUZZER_MONO_TONE);
+            _buzzer->setState(BUZZER_ON);
 
             // Stop blinking greed to show car is primed
             _led.green->setBlinking(BLINKING_OFF);
@@ -199,6 +216,7 @@ class CarService : public IService {
         CircularBuffer<Error, 64, uint8_t> _errorRegister;
 
         car_state_t _state = BOOT;
+        Timer _readyToDriveFor;
 
         struct _button {
             IButton* reset;
@@ -215,6 +233,8 @@ class CarService : public IService {
             IPedal* gas;
             IPedal* brake;
         } _pedal;
+
+        IBuzzer* _buzzer;
 
         component_id_t _calculateComponentId(IID* component) {
             component_id_t id = ID::getComponentId(component->getTelegramTypeId(), component->getComponentId());
@@ -265,6 +285,19 @@ class CarService : public IService {
 
         void _stopTestOutputs() {
             _turnOffLed();
+        }
+
+        void _checkBuzzer() {
+            if (_readyToDriveFor.read() <= BEEP_AFTER_READY_TO_DRIVE_TIME) {
+                if (_buzzer->getState() != BUZZER_ON || _buzzer->getBeep() != BUZZER_MONO_TONE) {
+                    _buzzer->setBeep(BUZZER_MONO_TONE);
+                    _buzzer->setState(BUZZER_ON);
+                }
+            } else {
+                if (_buzzer->getState() != BUZZER_OFF) {
+                    _buzzer->setState(BUZZER_OFF);
+                }
+            }
         }
 };
 

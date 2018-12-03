@@ -25,6 +25,7 @@
 #include "../../components/hardware/HardwareRpmSensor.h"
 #include "../../components/hardware/HardwareFan.h"
 #include "../../components/hardware/HardwarePump.h"
+#include "../../components/hardware/HardwareBuzzer.h"
 
 // Include for Services
 #include "../../components/service/CarService.h"
@@ -67,11 +68,13 @@ HardwareRpmSensor rpmRearLeft(MASTER_PIN_RPM_SENSOR_HL, RPM_REAR_LEFT);
 HardwareRpmSensor rpmRearRight(MASTER_PIN_RPM_SENSOR_HR, RPM_REAR_RIGHT);
 HardwareFan coolingFan(MASTER_PIN_FAN, COOLING_FAN);
 HardwarePump coolingPump(MASTER_PIN_PUMP_PWM, COOLING_PUMP);
+HardwareBuzzer buzzer(MASTER_PIN_BUZZER, BUZZER_ALARM);
 
 // Services
 CarService carService((IButton*)&buttonReset, (IButton*)&buttonStart,
                       (ILed*)&ledRed, (ILed*)&ledYellow, (ILed*)&ledGreen,
-                      (IPedal*)&gasPedal, (IPedal*)&brakePedal);
+                      (IPedal*)&gasPedal, (IPedal*)&brakePedal,
+                      (IBuzzer*)&buzzer);
 
 MotorControllerService motorControllerService(carService,
                                               (IMotorController*)&motorController,

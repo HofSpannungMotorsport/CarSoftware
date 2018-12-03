@@ -2,16 +2,16 @@
 // runtime.setup() gets called at the beginning,
 // runtime.loop() gets called then over and over again...
 
-#include "AnalogRead.cpp"
+#include "HardwareBuzzerUnitTest.cpp"
 
 class UnitTest {
     public:
         void setup() {
-            AnalogRead();
+            wait(2);
         }
 
         void loop() {
-            
+            HardwareBuzzerUnitTest();
         }
 };
 

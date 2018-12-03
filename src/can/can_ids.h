@@ -40,6 +40,7 @@ enum can_telegram_type_t : uint8_t {
     SUSPENSION_TRAVEL = 0x8,
     ACCELERATION =      0x9,
     GYROSCOPE =         0xA,
+    BUZZER =            0xB,
     SYSTEM =            0xF
 };
 
@@ -85,6 +86,9 @@ enum can_component_t : uint8_t {
     STS_FL = 0x1,
     STS_RR = 0x2,
     STS_RL = 0x3,
+
+    // Buzzer
+    BUZZER_ALARM = 0x0,
     
     // System messages
     SYSTEM_MASTER =           0x0,
