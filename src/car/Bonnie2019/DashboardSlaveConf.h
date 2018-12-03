@@ -2,7 +2,7 @@
 #define BONNIE_2019_DASHBOARD_CONF_H
 
 #include "mbed.h"
-#include "hardware/Pins_Dashboard.h"
+#include "hardware/Pins_Dashboard_PCB.h"
 #include "../../components/hardware/HardwareInterruptButton.h"
 #include "../../can/ButtonMessageHandler.h"
 #include "../../components/hardware/HardwareLed.h"
