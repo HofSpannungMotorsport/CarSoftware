@@ -11,7 +11,10 @@
 class HardwareBuzzer : public IBuzzer {
     public:
         HardwareBuzzer(PinName port)
-            : _port(port) {}
+            : _port(port) {
+            _telegramTypeId = BUZZER;
+            _objectType = HARDWARE_OBJECT;
+        }
         
         HardwareBuzzer(PinName port, can_component_t componentId)
             : HardwareBuzzer(port) {

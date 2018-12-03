@@ -17,7 +17,10 @@
 class HardwarePwmBuzzer : public IBuzzer {
     public:
         HardwarePwmBuzzer(PinName port) 
-            : _port(port) {}
+            : _port(port) {
+            _telegramTypeId = BUZZER;
+            _objectType = HARDWARE_OBJECT;
+        }
         
         HardwarePwmBuzzer(PinName port, can_component_t componentId)
             : HardwarePwmBuzzer(port) {
