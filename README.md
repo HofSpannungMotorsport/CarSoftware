@@ -1,4 +1,4 @@
-# Car Software
+# Car Software  [![Travis Build Status](https://travis-ci.org/HofSpannungMotorsport/CarSoftware.svg?branch=master)](https://travis-ci.org/HofSpannungMotorsport/CarSoftware)
 This is the Software for our Cars at HofSpannung Motorsport e. V.
 
 ## Development
