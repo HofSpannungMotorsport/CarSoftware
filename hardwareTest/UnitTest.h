@@ -2,16 +2,16 @@
 // runtime.setup() gets called at the beginning,
 // runtime.loop() gets called then over and over again...
 
-#include "HardwarePwmBuzzerUnitTest.cpp"
+#include "HardwareBuzzerUnitTest.cpp"
 
 class UnitTest {
     public:
         void setup() {
-
+            wait(2);
         }
 
         void loop() {
-            HardwarePwmBuzzerUnitTest();
+            HardwareBuzzerUnitTest();
         }
 };
 
