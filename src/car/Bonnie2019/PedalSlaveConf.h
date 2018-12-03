@@ -2,7 +2,7 @@
 #define BONNIE_2019_PEDAL_CONF_H
 
 #include "mbed.h"
-#include "hardware/Pins_Pedal.h"
+#include "hardware/Pins_Pedal_PCB.h"
 #include "../../components/hardware/HardwarePedal.h"
 #include "../../can/PedalMessageHandler.h"
 #include "../../components/hardware/HardwareRpmSensor.h"

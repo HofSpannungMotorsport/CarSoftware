@@ -1,6 +1,6 @@
-#ifndef SANITYCHECK_H
-#define SANITYCHECK_H
-
+// #ifndef SANITYCHECK_H
+// #define SANITYCHECK_H
+// SanityCheck can be used multiple times -> no sanitycheck define needed
 
 // Check if the right board is selected before compiling (to avoid compiling errors and compiling for the wrong board)
 #ifdef BOARD_DASHBOARD
@@ -40,4 +40,4 @@
     #endif
 #endif
 
-#endif // SANITYCHECK_H
+// #endif // SANITYCHECK_H
