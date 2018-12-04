@@ -1,7 +1,7 @@
 #ifndef DISPLAYSLAVECONF_H
 #define DISPLAYSLAVECONF_H
 
-#include <arduino.h>
+#include <Arduino.h>
 
 class Display {
     public:
