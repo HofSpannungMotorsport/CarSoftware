@@ -54,7 +54,7 @@ class MotorControllerService : public IService {
             _checkErrors();
 
             float returnValue = 0;
-            // Only if ready, set calculate Power
+            // Only if ready, set calculated Power
             if (_ready) {
                 // Get pedal status (if brake is pushed -> gas pedal will be locked -> returns 0)
                 float returnValue = (float)_getPedalPower();
