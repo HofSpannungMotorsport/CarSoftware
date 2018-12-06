@@ -7,6 +7,13 @@
 */
 #define CONTROLLER 1 // 1 = Transmitter/2 = Receiver
 
+#include "mbed.h"
+
+#ifndef MESSAGE_REPORT
+    Serial pcSerial(USBTX, USBRX); // Connection to PC over Serial
+#endif
+
+#define CAN_DEBUG
 
 #include "../src/can/can_config.h"
 #include "../src/can/CANService.h"
@@ -35,15 +42,11 @@ ButtonMessageHandler buttonHandler;
     SoftwareLed led(LED_READY_TO_DRIVE);
 #endif
 
-#ifndef MESSAGE_REPORT
-    Serial pcSerial(USBTX, USBRX); // Connection to PC over Serial
-#endif
-
 void CANServiceUnitTest() {
 
     // CANService Unit Test
     // Printout the different States for the Button
-    pcSerial.printf("Button Unit Test with LED Output\n\n");
+    pcSerial.printf("CANService Button Unit Test with LED Output\n\n");
 
     canService.addComponent((void*)&testButton, (IMessageHandler<CANMessage>*)&buttonHandler);
     canService.addComponent((void*)&led, (IMessageHandler<CANMessage>*)&ledMessageHandler);
