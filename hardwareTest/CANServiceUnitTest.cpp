@@ -10,7 +10,7 @@
 #include "mbed.h"
 
 #ifndef MESSAGE_REPORT
-    Serial pcSerial(USBTX, USBRX); // Connection to PC over Serial
+    Serial pcSerial(USBTX, USBRX, 1000000); // Connection to PC over Serial
 #endif
 
 #define CAN_DEBUG

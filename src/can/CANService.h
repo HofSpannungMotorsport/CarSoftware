@@ -38,7 +38,7 @@ class CANService : public IService {
         bool sendMessage(component_id_t id, can_object_type_t objectType) {
             component_exist_t componentExist = _registeredAddresses[id];
 
-            #if defined(MESSAGE_REPORT) && defined(TESTING_MODE) && defined(CAN_DEBUG)
+            #ifdef CAN_DEBUG
                 pcSerial.printf("[CANService]@sendMessage: Try to send Message for ComponentID: 0x%x\tObjectType: 0x%x\n", id, objectType);
             #endif
 
@@ -49,7 +49,7 @@ class CANService : public IService {
                 m.id = ID::getMessageId(component.priority, id, objectType);
                 msg_build_result_t msgBuildResult = component.handler->buildMessage(component.component, m);
 
-                #if defined(MESSAGE_REPORT) && defined(TESTING_MODE) && defined(CAN_DEBUG)
+                #ifdef CAN_DEBUG
                     if (msgBuildResult == MSG_BUILD_OK) {
                         pcSerial.printf("[CANService]@sendMessage: Component 0x%x Message Build success\n", id);
                     } else {
@@ -57,17 +57,17 @@ class CANService : public IService {
                     }
                 #endif
 
-                if (msgBuildResult == MSG_BUILD_OK) return false;
+                if (msgBuildResult == MSG_BUILD_ERROR) return false;
 
                 int msgSendResult = _can.write(m);
-                #if defined(MESSAGE_REPORT) && defined(TESTING_MODE) && defined(CAN_DEBUG)
-                    pcSerial.printf("[CANService]@sendMessage: Message for Component 0x%x write result: %i (1 == Succes, 0 == Failed)\n"id, msgSendResult);
+                #ifdef CAN_DEBUG
+                    pcSerial.printf("[CANService]@sendMessage: Message for Component 0x%x write result: %i (1 == Succes, 0 == Failed)\n", id, msgSendResult);
                 #endif
 
                 if (msgSendResult > 0) return true;
                 else return false;
             } else { // else do nothing (component not registered before -> can't send messages for it == obvious)
-                #if defined(MESSAGE_REPORT) && defined(TESTING_MODE) && defined(CAN_DEBUG)
+                #ifdef CAN_DEBUG
                     pcSerial.printf("[CANService]@sendMessage: Can't send Message for Component 0x%x -> component not registered before (componentExist.exists == false)\n", id);
                 #endif
             }
@@ -87,7 +87,7 @@ class CANService : public IService {
 
         bool processInbound() {
             bool success = true;
-            #if defined(MESSAGE_REPORT) && defined(TESTING_MODE) && defined(CAN_DEBUG)
+            #ifdef CAN_DEBUG
                 pcSerial.printf("[CANService]@processInbound: Processing Inbound. Telegrams in Buffer: %i\n", _telegramsIn.size());
             #endif
 
@@ -99,7 +99,7 @@ class CANService : public IService {
                 // check before if the component was registered before
                 uint8_t id = (uint8_t)((m.id & 0x3FC) >> 2); // Filter out ComponentID and "convert" it to 8-Bit ID
 
-                #if defined(MESSAGE_REPORT) && defined(TESTING_MODE) && defined(CAN_DEBUG)
+                #ifdef CAN_DEBUG
                     pcSerial.printf("[CANService]@processInbound: Processing Message with ID: 0x%x\n", id);
                 #endif
 
@@ -109,18 +109,18 @@ class CANService : public IService {
                     msg_parse_result_t msgParseResult = component.handler->parseMessage(component.component, m);
 
                     if (msgParseResult == MSG_PARSE_OK) {
-                        #if defined(MESSAGE_REPORT) && defined(TESTING_MODE) && defined(CAN_DEBUG)
+                        #ifdef CAN_DEBUG
                             pcSerial.printf("[CANService]@processInbound: Message with ID 0x%x parsed successfully\n", id);
                         #endif
                     } else {
                         success = false;
-                        #if defined(MESSAGE_REPORT) && defined(TESTING_MODE) && defined(CAN_DEBUG)
+                        #ifdef CAN_DEBUG
                             pcSerial.printf("[CANService]@processInbound: Message with ID 0x%x parsing failed!\n", id);
                         #endif
                     }
 
                 } else { // else do nothing (because it could just be a message for a component on another device)
-                    #if defined(MESSAGE_REPORT) && defined(TESTING_MODE) && defined(CAN_DEBUG)
+                    #ifdef CAN_DEBUG
                         pcSerial.printf("[CANService]@processInbound: Message not processed, component with ID 0x%x not registered before\n", id);
                     #endif
                 }
@@ -149,10 +149,10 @@ class CANService : public IService {
 
             // Using emplace if a component gets registered twice on the same ID -> overwrite it
             // (otherwise it would be added at the next free key -> not good...)
-            _registeredAddresses.emplace(id, newComponentExist);
-            _components.emplace(id, newComponent);
+            _registeredAddresses[id] = newComponentExist;
+            _components[id] = newComponent;
 
-            #if defined(MESSAGE_REPORT) && defined(TESTING_MODE) && defined(CAN_DEBUG)
+            #ifdef CAN_DEBUG
                 pcSerial.printf("[CANService]@addComponent: Component added. ComponentID: 0x%x\n", id);
             #endif
         }
@@ -167,7 +167,7 @@ class CANService : public IService {
                 if (componentExist.sendLoop) {
                     _registeredAddresses[id].sendLoop = true;
                     _sendLoopComponents.emplace_back(id);
-                    #if defined(MESSAGE_REPORT) && defined(TESTING_MODE) && defined(CAN_DEBUG)
+                    #ifdef CAN_DEBUG
                         pcSerial.printf("[CANService]@addComponentToSendLoop: Component add to sendLoop. ComponentID: 0x%x\n", id);
                     #endif
                     return true;
@@ -192,7 +192,7 @@ class CANService : public IService {
         bool processSendLoop() {
             bool success = true;
 
-            #if defined(MESSAGE_REPORT) && defined(TESTING_MODE) && defined(CAN_DEBUG)
+            #ifdef CAN_DEBUG
                 pcSerial.printf("[CANService]@processSendLoop: Processing sendLoop. SendLoop size: %i\n", _sendLoopComponents.size());
             #endif
 
@@ -200,19 +200,19 @@ class CANService : public IService {
                 component_exist_t componentExist = _registeredAddresses[componentId];
                 if (componentExist.sendLoop) {
                     if (sendMessage(componentId)) {
-                        #if defined(MESSAGE_REPORT) && defined(TESTING_MODE) && defined(CAN_DEBUG)
+                        #ifdef CAN_DEBUG
                             pcSerial.printf("[CANService]@processSendLoop: Component in sendLoop processed successfully. ComponentID: 0x%x\n", componentId);
                         #endif
                     } else {
                         success = false;
-                        #if defined(MESSAGE_REPORT) && defined(TESTING_MODE) && defined(CAN_DEBUG)
+                        #ifdef CAN_DEBUG
                             pcSerial.printf("[CANService]@processSendLoop: Component in sendLoop prcessing failed. ComponentID: 0x%x\n", componentId);
                         #endif
                     }
                 } else {
                     success = false;
-                    #if defined(MESSAGE_REPORT) && defined(TESTING_MODE) && defined(CAN_DEBUG)
-                        pcSerial.printf("[CANService]@processSendLoop: Unable to process component in sendLoop (componentExist.sendLoop == false). ComponentID: 0x%x\n", id);
+                    #ifdef CAN_DEBUG
+                        pcSerial.printf("[CANService]@processSendLoop: Unable to process component in sendLoop (componentExist.sendLoop == false). ComponentID: 0x%x\n", componentId);
                     #endif
                 }
             }
@@ -221,7 +221,7 @@ class CANService : public IService {
         }
 
         virtual void run() {
-            #if defined(MESSAGE_REPORT) && defined(TESTING_MODE) && defined(CAN_DEBUG)
+            #ifdef CAN_DEBUG
                 pcSerial.printf("[CANService]@run: Start CANService run()\n");
                 if (processInbound())
                     pcSerial.printf("[CANService]@run: Success processInbound() (returned true)\n");
