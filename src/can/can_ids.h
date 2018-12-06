@@ -125,15 +125,15 @@ namespace ID {
         return componentID; 
     }
 
-    message_id_t getMessageId(can_priority_t priority, component_id_t componentId, uint8_t objectType) {
+    message_id_t getMessageId(can_priority_t priority, component_id_t componentId, can_object_type_datatype_t objectType) {
         message_id_t messageID = 0;
-        messageID |= (priority & 0xF) << (OBJECT_TYPE_LENGTH + COMPONENT_LENGTH + TELEGRAM_TYPE_LENGTH); // Put priority at the beginning
-        messageID |= (componentId & 0xF) << OBJECT_TYPE_LENGTH; // Add Component ID
+        messageID |= (priority & 0x1) << (OBJECT_TYPE_LENGTH + COMPONENT_LENGTH + TELEGRAM_TYPE_LENGTH); // Put priority at the beginning
+        messageID |= (componentId & 0xFF) << OBJECT_TYPE_LENGTH; // Add Component ID
         messageID |= (objectType & 0x3);
         return messageID;
     }
 
-    message_id_t getMessageId(can_priority_t priority, can_telegram_type_t telegramType, can_component_t component, uint8_t objectType) {
+    message_id_t getMessageId(can_priority_t priority, can_telegram_type_t telegramType, can_component_t component, can_object_type_datatype_t objectType) {
         return getMessageId(priority, getComponentId(telegramType, component), objectType);
     }
 };

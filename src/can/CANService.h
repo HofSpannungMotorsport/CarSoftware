@@ -61,7 +61,7 @@ class CANService : public IService {
 
                 int msgSendResult = _can.write(m);
                 #ifdef CAN_DEBUG
-                    pcSerial.printf("[CANService]@sendMessage: Message for Component 0x%x write result: %i (1 == Succes, 0 == Failed)\n", id, msgSendResult);
+                    pcSerial.printf("[CANService]@sendMessage: Message for Component 0x%x with m.id 0x%x write result: %i (1 == Succes, 0 == Failed)\n", id, m.id, msgSendResult);
                 #endif
 
                 if (msgSendResult > 0) return true;
@@ -97,7 +97,8 @@ class CANService : public IService {
                 // search in _components for right component
                 // call bridge with component pointer
                 // check before if the component was registered before
-                uint8_t id = (uint8_t)((m.id & 0x3FC) >> 2); // Filter out ComponentID and "convert" it to 8-Bit ID
+                uint16_t id16 = (uint16_t)((m.id & 0x3FC) >> 2); // Filter out ComponentID and "convert" it to 8-Bit ID
+                uint8_t id = id16;
 
                 #ifdef CAN_DEBUG
                     pcSerial.printf("[CANService]@processInbound: Processing Message with ID: 0x%x\n", id);
@@ -164,7 +165,7 @@ class CANService : public IService {
         bool addComponentToSendLoop(component_id_t id) {
             component_exist_t componentExist = _registeredAddresses[id];
             if (componentExist.exists) {
-                if (componentExist.sendLoop) {
+                if (!componentExist.sendLoop) {
                     _registeredAddresses[id].sendLoop = true;
                     _sendLoopComponents.emplace_back(id);
                     #ifdef CAN_DEBUG

@@ -10,10 +10,11 @@
 #include "mbed.h"
 
 #ifndef MESSAGE_REPORT
-    Serial pcSerial(USBTX, USBRX, 1000000); // Connection to PC over Serial
+    #define MESSAGE_REPORT
+    Serial pcSerial(USBTX, USBRX, 9600); // Connection to PC over Serial
 #endif
 
-#define CAN_DEBUG
+//#define CAN_DEBUG
 
 #include "../src/can/can_config.h"
 #include "../src/can/CANService.h"
@@ -29,7 +30,7 @@
 #include "../src/can/LEDMessageHandler.h"
 
 
-CANService canService(CAN1_CONF);
+CANService canService(CAN1_CONF, 250000);
 LEDMessageHandler ledMessageHandler;
 ButtonMessageHandler buttonHandler;
 
@@ -54,7 +55,6 @@ void CANServiceUnitTest() {
     #if CONTROLLER == 2
         canService.addComponentToSendLoop((void*)&led);
         led.setState(LED_OFF);
-        wait(2);
         canService.run();
     #endif
 
@@ -92,8 +92,7 @@ void CANServiceUnitTest() {
             }
 
             canService.run();
-
-            wait(0.1);
         #endif
+        wait(0.01);
     }
 }

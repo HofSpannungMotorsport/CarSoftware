@@ -52,8 +52,12 @@ class HardwareLed : public ILed {
 
     protected:
         DigitalOut _port;
+
         led_state_t _state = LED_OFF;
+        led_state_t _stateLast = LED_OFF;
+
         led_blinking_t _mode = BLINKING_OFF;
+        led_blinking_t _modeLast = BLINKING_OFF;
 
         bool _lastBlinkingState = false;
 
@@ -66,17 +70,19 @@ class HardwareLed : public ILed {
         Ticker _blinkingTicker;
 
         void _refresh() {
-            // Need to turn off the ticker first
-            _blinkingTicker.detach();
-
             if (_state == LED_OFF) {
+                _blinkingTicker.detach();
+                _stateLast = LED_OFF;
+                _modeLast = BLINKING_OFF;
                 _port = LED_OFF;
                 return;
             }
 
             _port = LED_ON;
 
-            if (_mode != BLINKING_OFF) {
+            if (_mode == BLINKING_OFF) {
+                _blinkingTicker.detach();
+            } else if (_mode != _modeLast) {
                 float blinkingTime;
                 switch (_mode){
                     case BLINKING_SLOW:
@@ -92,12 +98,15 @@ class HardwareLed : public ILed {
                         break;
 
                     default:
-                        return;
+                        _blinkingTicker.detach();
                 }
 
                 _lastBlinkingState = true;
                 _blinkingTicker.attach(callback(this, &HardwareLed::_blinkingLoop), blinkingTime);
             }
+
+            _modeLast = _mode;
+            _stateLast = _state;
         }
 
         void _blinkingLoop() {
