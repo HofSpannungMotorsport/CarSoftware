@@ -8,7 +8,7 @@
 
 #define REFRESH_TIME 28 // ms
 
-HardwareInterruptButton calibrationButton = HardwareInterruptButton(USER_BUTTON, NORMALLY_CLOSED);
+HardwareInterruptButton button = HardwareInterruptButton(USER_BUTTON, NORMALLY_CLOSED);
 HardwareLed hardwareLed = HardwareLed(LED_PIN, LED_DASHBOARD);
 SoftwareLed led = SoftwareLed(LED_DASHBOARD);
 LEDMessageHandler ledMessageHandler;
@@ -36,26 +36,26 @@ void LEDUnitTest() {
     ledMessageHandler.parseMessage((void*)&hardwareLed, msg);
 
     while(1) {
-        while (calibrationButton.getState() != NOT_PRESSED);
-        while (calibrationButton.getState() != PRESSED);
+        while (button.getState() != NOT_PRESSED);
+        while (button.getState() != PRESSED);
 
         setLed(BLINKING_SLOW);
         //hardwareLed.setBlinking(BLINKING_SLOW);
 
-        while (calibrationButton.getState() != NOT_PRESSED);
-        while (calibrationButton.getState() != PRESSED);
+        while (button.getState() != NOT_PRESSED);
+        while (button.getState() != PRESSED);
 
         setLed(BLINKING_NORMAL);
         //hardwareLed.setBlinking(BLINKING_NORMAL);
 
-        while (calibrationButton.getState() != NOT_PRESSED);
-        while (calibrationButton.getState() != PRESSED);
+        while (button.getState() != NOT_PRESSED);
+        while (button.getState() != PRESSED);
 
         setLed(BLINKING_FAST);
         //hardwareLed.setBlinking(BLINKING_FAST);
 
-        while (calibrationButton.getState() != NOT_PRESSED);
-        while (calibrationButton.getState() != PRESSED);
+        while (button.getState() != NOT_PRESSED);
+        while (button.getState() != PRESSED);
 
         setLed(BLINKING_OFF);
         //hardwareLed.setBlinking(BLINKING_OFF);

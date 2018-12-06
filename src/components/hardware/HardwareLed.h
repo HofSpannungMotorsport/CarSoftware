@@ -78,47 +78,43 @@ class HardwareLed : public ILed {
                 return;
             }
 
-            _port = LED_ON;
-
             if (_mode == BLINKING_OFF) {
                 _blinkingTicker.detach();
+                _port = LED_ON;
             } else if (_mode != _modeLast) {
-                float blinkingTime;
                 switch (_mode){
                     case BLINKING_SLOW:
-                        blinkingTime = _blinkingTime.slow;
+                        _attachBlinkingTicker(_blinkingTime.slow);
                         break;
                 
                     case BLINKING_NORMAL:
-                        blinkingTime = _blinkingTime.normal;
+                        _attachBlinkingTicker(_blinkingTime.normal);
                         break;
 
                     case BLINKING_FAST:
-                        blinkingTime = _blinkingTime.fast;
+                        _attachBlinkingTicker(_blinkingTime.fast);
                         break;
 
                     default:
                         _blinkingTicker.detach();
+                        _port = LED_ON;
                 }
-
-                _lastBlinkingState = true;
-                _blinkingTicker.attach(callback(this, &HardwareLed::_blinkingLoop), blinkingTime);
             }
 
             _modeLast = _mode;
             _stateLast = _state;
         }
 
-        void _blinkingLoop() {
-            led_state_t newOutput;
-            if (_lastBlinkingState) {
-                newOutput = LED_OFF;
-            } else {
-                newOutput = LED_ON;
-            }
-            _lastBlinkingState = !_lastBlinkingState;
+        void _attachBlinkingTicker(float blinkingTime) {
+            _blinkingTicker.detach();
+            _port = LED_ON;
+            _lastBlinkingState = true;
+            _blinkingTicker.attach(callback(this, &HardwareLed::_blinkingLoop), blinkingTime);
+        }
 
-            _port = newOutput;
+        void _blinkingLoop() {
+            _lastBlinkingState = !_lastBlinkingState;
+            _port = _lastBlinkingState;
         }
 };
 

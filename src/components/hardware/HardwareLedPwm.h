@@ -13,7 +13,7 @@ class HardwareLedPwm : public ILed {
         HardwareLedPwm(PinName port)
             : _port(port) {
             _telegramTypeId = LED;
-            _objectType = HARDWARE;
+            _objectType = HARDWARE_OBJECT;
         }
 
         HardwareLedPwm(PinName port, can_component_t componentId)
@@ -60,8 +60,10 @@ class HardwareLedPwm : public ILed {
     protected:
         PwmOut _port;
         led_state_t _state = LED_OFF;
+        led_state_t _stateLast = LED_OFF;
         led_brightness_t _brightness = 1.0;
         led_blinking_t _mode = BLINKING_OFF;
+        led_blinking_t _modeLast = BLINKING_OFF;
 
         bool _lastBlinkingState = false;
 
@@ -74,38 +76,46 @@ class HardwareLedPwm : public ILed {
         Ticker _blinkingTicker;
 
         void _refresh() {
-            // Need to turn off the ticker first
-            _blinkingTicker.detach();
-
             if (_state == LED_OFF) {
-                _port.write(LED_OFF);
+                _blinkingTicker.detach();
+                _stateLast = LED_OFF;
+                _modeLast = BLINKING_OFF;
+                _port = LED_OFF;
                 return;
             }
 
-            _port.write(_brightness);
-
-            if (_mode != BLINKING_OFF) {
-                float blinkingTime;
+            if (_mode == BLINKING_OFF) {
+                _blinkingTicker.detach();
+                _port.write(_brightness);
+            } else if (_mode != _modeLast) {
                 switch (_mode){
                     case BLINKING_SLOW:
-                        blinkingTime = _blinkingTime.slow;
+                        _attachBlinkingTicker(_blinkingTime.slow);
                         break;
                 
                     case BLINKING_NORMAL:
-                        blinkingTime = _blinkingTime.normal;
+                        _attachBlinkingTicker(_blinkingTime.normal);
                         break;
 
                     case BLINKING_FAST:
-                        blinkingTime = _blinkingTime.fast;
+                        _attachBlinkingTicker(_blinkingTime.fast);
                         break;
 
                     default:
-                        return;
+                        _blinkingTicker.detach();
+                        _port.write(_brightness);
                 }
-
-                _lastBlinkingState = true;
-                _blinkingTicker.attach(callback(this, &HardwareLedPwm::_blinkingLoop), blinkingTime);
             }
+
+            _modeLast = _mode;
+            _stateLast = _state;
+        }
+
+        void _attachBlinkingTicker(float blinkingTime) {
+            _blinkingTicker.detach();
+            _port.write(_brightness);
+            _lastBlinkingState = true;
+            _blinkingTicker.attach(callback(this, &HardwareLedPwm::_blinkingLoop), blinkingTime);
         }
 
         void _blinkingLoop() {
