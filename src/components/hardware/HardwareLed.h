@@ -50,6 +50,11 @@ class HardwareLed : public ILed {
             return _mode;
         }
 
+        virtual bool getSentConfigurationChanged() {
+            // No implementation needed
+            return false;
+        }
+
     protected:
         DigitalOut _port;
 

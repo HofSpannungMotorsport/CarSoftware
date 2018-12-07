@@ -57,6 +57,11 @@ class HardwareLedPwm : public ILed {
             return _mode;
         }
 
+        virtual bool getSentConfigurationChanged() {
+            // No implementation needed
+            return false;
+        }
+
     protected:
         PwmOut _port;
         led_state_t _state = LED_OFF;

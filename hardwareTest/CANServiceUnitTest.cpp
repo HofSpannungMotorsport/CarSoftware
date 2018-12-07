@@ -66,7 +66,7 @@ void CANServiceUnitTest() {
             }
         #endif
         #if CONTROLLER == 2
-            canService.run();
+            canService.processInbound();
 
             while (testButton.getStateChanged()) {
                 button_state_t currentState = testButton.getState();
@@ -89,10 +89,12 @@ void CANServiceUnitTest() {
                     led.setState(LED_ON);
                     led.setBlinking(BLINKING_FAST);
                 }
-            }
 
-            canService.run();
+                if (led.getSentConfigurationChanged()) {
+                    canService.processSendLoop();
+                }
+            }
         #endif
-        wait(0.01);
+        wait(0.001);
     }
 }

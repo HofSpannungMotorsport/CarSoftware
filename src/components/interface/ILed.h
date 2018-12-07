@@ -30,6 +30,7 @@ class ILed : public IID {
         virtual led_state_t getState() = 0;
         virtual led_brightness_t getBrightness() = 0;
         virtual led_blinking_t getBlinking() = 0;
+        virtual bool getSentConfigurationChanged() = 0;
 };
 
 #endif
