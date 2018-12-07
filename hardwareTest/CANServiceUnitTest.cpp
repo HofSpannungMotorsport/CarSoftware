@@ -95,6 +95,6 @@ void CANServiceUnitTest() {
                 }
             }
         #endif
-        wait(0.001);
+        // wait(0.001);
     }
 }
