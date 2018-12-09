@@ -73,7 +73,7 @@ RpmSensorMessageHandler rpmSensorMessageHandler;
 
 //   Hardware
 HardwareLed brakeLight(MASTER_PIN_BRAKE_LIGHT, LED_BRAKE);
-HardwareMotorController motorController(CAN2_CONF, MOTOR_MAIN);
+HardwareMotorController motorController(CAN2_CONF, MASTER_PIN_RFE_ENABLE, MASTER_PIN_RUN_ENABLE, MOTOR_MAIN);
 HardwareRpmSensor rpmRearLeft(MASTER_PIN_RPM_SENSOR_HL, RPM_REAR_LEFT);
 HardwareRpmSensor rpmRearRight(MASTER_PIN_RPM_SENSOR_HR, RPM_REAR_RIGHT);
 HardwareFan coolingFan(MASTER_PIN_FAN, COOLING_FAN);
