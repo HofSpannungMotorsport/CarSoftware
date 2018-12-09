@@ -220,10 +220,22 @@ class CarService : public IService {
             _sendLedsOverCan();
 
 
-            // Wait till Car got started (Brake Pedal + Start Button long press)
-            while(_button.start->getStateChanged() || (_button.start->getState() != LONG_CLICKED) || (_pedal.brake->getValue() < BRAKE_START_THRESHHOLD)) {
+            // Wait till Car got started (Brake Pedal + Start Button long press) and check for Errors/HV disabled
+            do {
                 canService.processInbound();
-            }
+                _checkHvEnabled();
+                processErrors();
+                if (_state != ALMOST_READY_TO_DRIVE) {
+                    // If an Error occured, stop continuing and glow Red
+                    // Red   -> Blinkinf Fast
+                    // Green -> Off
+                    _led.red->setState(LED_ON);
+                    _led.red->setBlinking(BLINKING_FAST);
+                    _led.green->setState(LED_OFF);
+                    _sendLedsOverCan();
+                    while(1);
+                }
+            } while (_button.start->getStateChanged() || (_button.start->getState() != LONG_CLICKED) || (_pedal.brake->getValue() < BRAKE_START_THRESHHOLD));
 
             // Optimize later!!
             // [il]
