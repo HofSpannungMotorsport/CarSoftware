@@ -1,7 +1,17 @@
-#ifndef BONNIE_2019_MASTER_CONF_H
-#define BONNIE_2019_MASTER_CONF_H
+#ifndef MASTERCONF_H
+#define MASTERCONF_H
 
 #include "mbed.h"
+
+#ifndef MESSAGE_REPORT
+    #define MESSAGE_REPORT
+    Serial pcSerial(USBTX, USBRX); // Connection to PC over Serial
+#endif
+
+#include "../../can/can_config.h"
+#include "../../can/CANService.h"
+CANService canService(CAN1_CONF);
+
 #include "hardware/Pins_Master.h"
 
 #define HIGH_DEMAND_SERVICE_REFRESH_RATE 120 // Hz

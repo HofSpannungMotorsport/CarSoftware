@@ -50,10 +50,19 @@ class HardwareLed : public ILed {
             return _mode;
         }
 
+        virtual bool getSentConfigurationChanged() {
+            // No implementation needed
+            return false;
+        }
+
     protected:
         DigitalOut _port;
+
         led_state_t _state = LED_OFF;
+        led_state_t _stateLast = LED_OFF;
+
         led_blinking_t _mode = BLINKING_OFF;
+        led_blinking_t _modeLast = BLINKING_OFF;
 
         bool _lastBlinkingState = false;
 
@@ -66,50 +75,51 @@ class HardwareLed : public ILed {
         Ticker _blinkingTicker;
 
         void _refresh() {
-            // Need to turn off the ticker first
-            _blinkingTicker.detach();
-
             if (_state == LED_OFF) {
+                _blinkingTicker.detach();
+                _stateLast = LED_OFF;
+                _modeLast = BLINKING_OFF;
                 _port = LED_OFF;
                 return;
             }
 
-            _port = LED_ON;
-
-            if (_mode != BLINKING_OFF) {
-                float blinkingTime;
+            if (_mode == BLINKING_OFF) {
+                _blinkingTicker.detach();
+                _port = LED_ON;
+            } else if (_mode != _modeLast) {
                 switch (_mode){
                     case BLINKING_SLOW:
-                        blinkingTime = _blinkingTime.slow;
+                        _attachBlinkingTicker(_blinkingTime.slow);
                         break;
                 
                     case BLINKING_NORMAL:
-                        blinkingTime = _blinkingTime.normal;
+                        _attachBlinkingTicker(_blinkingTime.normal);
                         break;
 
                     case BLINKING_FAST:
-                        blinkingTime = _blinkingTime.fast;
+                        _attachBlinkingTicker(_blinkingTime.fast);
                         break;
 
                     default:
-                        return;
+                        _blinkingTicker.detach();
+                        _port = LED_ON;
                 }
-
-                _lastBlinkingState = true;
-                _blinkingTicker.attach(callback(this, &HardwareLed::_blinkingLoop), blinkingTime);
             }
+
+            _modeLast = _mode;
+            _stateLast = _state;
+        }
+
+        void _attachBlinkingTicker(float blinkingTime) {
+            _blinkingTicker.detach();
+            _port = LED_ON;
+            _lastBlinkingState = true;
+            _blinkingTicker.attach(callback(this, &HardwareLed::_blinkingLoop), blinkingTime);
         }
 
         void _blinkingLoop() {
-            led_state_t newOutput;
-            if (_lastBlinkingState) {
-                newOutput = LED_OFF;
-            } else {
-                newOutput = LED_ON;
-            }
             _lastBlinkingState = !_lastBlinkingState;
-
-            _port = newOutput;
+            _port = _lastBlinkingState;
         }
 };
 

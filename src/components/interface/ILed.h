@@ -4,12 +4,12 @@
 #include <stdint.h>
 #include "IID.h"
 
-enum led_state_t {
+enum led_state_t : uint8_t {
     LED_ON = 0x1,
     LED_OFF = 0x0
 };
 
-enum led_blinking_t {
+enum led_blinking_t : uint8_t {
     BLINKING_OFF = 0x0,
     BLINKING_SLOW = 0x1,
     BLINKING_NORMAL = 0x2,
@@ -30,6 +30,7 @@ class ILed : public IID {
         virtual led_state_t getState() = 0;
         virtual led_brightness_t getBrightness() = 0;
         virtual led_blinking_t getBlinking() = 0;
+        virtual bool getSentConfigurationChanged() = 0;
 };
 
 #endif

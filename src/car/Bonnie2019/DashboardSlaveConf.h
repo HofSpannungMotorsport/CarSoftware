@@ -1,7 +1,17 @@
-#ifndef BONNIE_2019_DASHBOARD_CONF_H
-#define BONNIE_2019_DASHBOARD_CONF_H
+#ifndef DASHBOARDSLAVECONF_H
+#define DASHBOARDSLAVECONF_H
 
 #include "mbed.h"
+
+#ifndef MESSAGE_REPORT
+    #define MESSAGE_REPORT
+    Serial pcSerial(USBTX, USBRX); // Connection to PC over Serial
+#endif
+
+#include "../../can/can_config.h"
+#include "../../can/CANService.h"
+CANService canService(CAN1_CONF);
+
 #include "hardware/Pins_Dashboard_PCB.h"
 #include "../../components/hardware/HardwareInterruptButton.h"
 #include "../../can/ButtonMessageHandler.h"

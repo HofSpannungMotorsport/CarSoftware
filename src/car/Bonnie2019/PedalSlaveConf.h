@@ -1,7 +1,17 @@
-#ifndef BONNIE_2019_PEDAL_CONF_H
-#define BONNIE_2019_PEDAL_CONF_H
+#ifndef PEDALSLAVECONF_H
+#define PEDALSLAVECONF_H
 
 #include "mbed.h"
+
+#ifndef MESSAGE_REPORT
+    #define MESSAGE_REPORT
+    Serial pcSerial(USBTX, USBRX); // Connection to PC over Serial
+#endif
+
+#include "../../can/can_config.h"
+#include "../../can/CANService.h"
+CANService canService(CAN1_CONF);
+
 #include "hardware/Pins_Pedal_PCB.h"
 #include "../../components/hardware/HardwarePedal.h"
 #include "../../can/PedalMessageHandler.h"

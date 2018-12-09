@@ -7,6 +7,14 @@
 */
 #define CONTROLLER 1 // 1 = Transmitter/2 = Receiver
 
+#include "mbed.h"
+
+#ifndef MESSAGE_REPORT
+    #define MESSAGE_REPORT
+    Serial pcSerial(USBTX, USBRX, 9600); // Connection to PC over Serial
+#endif
+
+//#define CAN_DEBUG
 
 #include "../src/can/can_config.h"
 #include "../src/can/CANService.h"
@@ -22,7 +30,7 @@
 #include "../src/can/LEDMessageHandler.h"
 
 
-CANService canService(CAN1_CONF);
+CANService canService(CAN1_CONF, 1000000);
 LEDMessageHandler ledMessageHandler;
 ButtonMessageHandler buttonHandler;
 
@@ -35,15 +43,11 @@ ButtonMessageHandler buttonHandler;
     SoftwareLed led(LED_READY_TO_DRIVE);
 #endif
 
-#ifndef MESSAGE_REPORT
-    Serial pcSerial(USBTX, USBRX); // Connection to PC over Serial
-#endif
-
 void CANServiceUnitTest() {
 
     // CANService Unit Test
     // Printout the different States for the Button
-    pcSerial.printf("Button Unit Test with LED Output\n\n");
+    pcSerial.printf("CANService Button Unit Test with LED Output\n\n");
 
     canService.addComponent((void*)&testButton, (IMessageHandler<CANMessage>*)&buttonHandler);
     canService.addComponent((void*)&led, (IMessageHandler<CANMessage>*)&ledMessageHandler);
@@ -51,7 +55,6 @@ void CANServiceUnitTest() {
     #if CONTROLLER == 2
         canService.addComponentToSendLoop((void*)&led);
         led.setState(LED_OFF);
-        wait(2);
         canService.run();
     #endif
 
@@ -63,7 +66,7 @@ void CANServiceUnitTest() {
             }
         #endif
         #if CONTROLLER == 2
-            canService.run();
+            canService.processInbound();
 
             while (testButton.getStateChanged()) {
                 button_state_t currentState = testButton.getState();
@@ -86,11 +89,12 @@ void CANServiceUnitTest() {
                     led.setState(LED_ON);
                     led.setBlinking(BLINKING_FAST);
                 }
+
+                if (led.getSentConfigurationChanged()) {
+                    canService.processSendLoop();
+                }
             }
-
-            canService.run();
-
-            wait(0.1);
         #endif
+        // wait(0.001);
     }
 }
