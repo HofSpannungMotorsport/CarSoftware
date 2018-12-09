@@ -30,7 +30,7 @@
 #include "../src/can/LEDMessageHandler.h"
 
 
-CANService canService(CAN1_CONF, 250000);
+CANService canService(CAN1_CONF, 1000000);
 LEDMessageHandler ledMessageHandler;
 ButtonMessageHandler buttonHandler;
 
