@@ -35,7 +35,7 @@ void PedalUnitTest() {
 
     while (calibrationButton.getState() != PRESSED);
 
-    pcSerial.printf("Calibration begin");
+    pcSerial.printf("Calibration begin\n");
     softwarePedal.setCalibrationStatus(CURRENTLY_CALIBRATING);
     {
         CANMessage m = CANMessage();
@@ -47,7 +47,7 @@ void PedalUnitTest() {
     while (calibrationButton.getState() != NOT_PRESSED);
     while (calibrationButton.getState() != PRESSED);
 
-    pcSerial.printf("Calibration end");
+    pcSerial.printf("Calibration end\n");
     softwarePedal.setCalibrationStatus(CURRENTLY_NOT_CALIBRATING);
     {
         CANMessage m = CANMessage();
