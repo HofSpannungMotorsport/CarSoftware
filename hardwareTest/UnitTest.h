@@ -2,7 +2,7 @@
 // runtime.setup() gets called at the beginning,
 // runtime.loop() gets called then over and over again...
 
-#include "CANServiceUnitTest.cpp"
+#include "HardwarePedalUnitTest.cpp"
 
 class UnitTest {
     public:
@@ -11,7 +11,7 @@ class UnitTest {
         }
 
         void loop() {
-            CANServiceUnitTest();
+            HardwarePedalUnitTest();
         }
 };
 
