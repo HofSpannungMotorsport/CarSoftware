@@ -86,6 +86,7 @@ CarService carService((IButton*)&buttonReset, (IButton*)&buttonStart,
                       (ILed*)&ledRed, (ILed*)&ledYellow, (ILed*)&ledGreen,
                       (IPedal*)&gasPedal, (IPedal*)&brakePedal,
                       (IBuzzer*)&buzzer,
+                      (IMotorController*)&motorController,
                       hvEnabled);
 
 MotorControllerService motorControllerService(carService,

@@ -7,11 +7,13 @@
 #include "../interface/IButton.h"
 #include "../interface/ILed.h"
 #include "../interface/IBuzzer.h"
+#include "../interface/IMotorController.h"
 #include "../../can/can_ids.h"
 
-#define ERROR_REGISTER_SIZE 64
-#define BOOT_ROUTINE_TEST_TIME 2
-#define BRAKE_START_THRESHHOLD 0.75
+#define ERROR_REGISTER_SIZE 64 // errors
+#define BOOT_ROUTINE_TEST_TIME 2 // s
+#define BRAKE_START_THRESHHOLD 0.75 // %
+#define WAIT_AFTER_RFE_ENABLE 0.51 // s
 
 #define BEEP_AFTER_READY_TO_DRIVE_TIME 2.2 // s
 
@@ -48,6 +50,7 @@ class CarService : public IService {
                    ILed* ledRed, ILed* ledYellow, ILed* ledGreen,
                    IPedal* gasPedal, IPedal* brakePedal,
                    IBuzzer* buzzer,
+                   IMotorController* motorController,
                    DigitalIn &hvEnabled)
             : _hvEnabled(hvEnabled) {
             _button.reset = buttonReset;
@@ -61,6 +64,8 @@ class CarService : public IService {
             _pedal.brake = brakePedal;
 
             _buzzer = buzzer;
+
+            _motorController = motorController;
         }
 
         virtual void run() {
@@ -100,6 +105,9 @@ class CarService : public IService {
 
                             _led.green->setState(LED_OFF);
                             _state = CAR_ERROR;
+
+                            _motorController->setRUN(MOTOR_CONTROLLER_RUN_DISABLE);
+                            _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
                         } else {
                             // System Error
                             // Yellow -> Fast Blinking
@@ -217,6 +225,49 @@ class CarService : public IService {
                 canService.processInbound();
             }
 
+            // Optimize later!!
+            // [il]
+            // Set RFE enable
+            _motorController->setRFE(MOTOR_CONTROLLER_RFE_ENABLE);
+
+            // Wait the set Time until enabling RUN
+            waitTimer.reset();
+            waitTimer.start();
+            do {
+                _checkHvEnabled();
+                processErrors();
+                canService.processInbound();
+                if (_state != ALMOST_READY_TO_DRIVE) {
+                    _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
+                    // If an Error occured, stop continuing and glow Red
+                    // Red   -> Blinkinf Normal
+                    // Green -> Off
+                    _led.red->setState(LED_ON);
+                    _led.red->setBlinking(BLINKING_NORMAL);
+                    _led.green->setState(LED_OFF);
+                    _sendLedsOverCan();
+                    while(1);
+                }
+            } while (waitTimer.read() < (float)WAIT_AFTER_RFE_ENABLE);
+
+            // Set RUN enable if no Error
+            canService.processInbound();
+            _checkHvEnabled();
+            processErrors();
+            if (_state == ALMOST_READY_TO_DRIVE) {
+                _motorController->setRUN(MOTOR_CONTROLLER_RUN_ENABLE);
+            } else {
+                _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
+                // If an Error occured, stop continuing and glow Red
+                // Red   -> Blinkinf Normal
+                // Green -> Off
+                _led.red->setState(LED_ON);
+                _led.red->setBlinking(BLINKING_NORMAL);
+                _led.green->setState(LED_OFF);
+                _sendLedsOverCan();
+                while(1);
+            }
+
             // Set car ready to drive (-> pressing the gas-pedal will move the car -> fun)
             _state = READY_TO_DRIVE;
             _readyToDriveFor.reset();
@@ -254,6 +305,8 @@ class CarService : public IService {
         } _pedal;
 
         IBuzzer* _buzzer;
+
+        IMotorController* _motorController;
 
         DigitalIn &_hvEnabled;
 
