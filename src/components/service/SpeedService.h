@@ -26,13 +26,13 @@ typedef float speed_value_t;
 class SpeedService : public IService {
     public:
         SpeedService(CarService &carService,
-                     IRpmSensor* rpmFrontLeft, IRpmSensor* rpmFrontRight, IRpmSensor* rpmRearLeft, IRpmSensor* rpmRearRight,
+                     IRpmSensor* rpmFrontLeft, IRpmSensor* rpmFrontRight, /* IRpmSensor* rpmRearLeft, IRpmSensor* rpmRearRight, */
                      IMotorController* motorController)
             : _carService(carService) {
             _rpm.front.left = rpmFrontLeft;
             _rpm.front.right = rpmFrontRight;
-            _rpm.rear.left = rpmRearLeft;
-            _rpm.rear.right = rpmRearRight;
+            //_rpm.rear.left = rpmRearLeft;
+            //_rpm.rear.right = rpmRearRight;
             _motorController = motorController;
         }
 
@@ -45,7 +45,7 @@ class SpeedService : public IService {
 
             if ((_rpm.front.left->getStatus() > 0) || (_rpm.front.right->getStatus() > 0)) {
                 // One of the front Sensors has a problem
-                if ((_rpm.front.left->getStatus() > 0) || (_rpm.front.right->getStatus() > 0)) {
+                //if ((_rpm.front.left->getStatus() > 0) || (_rpm.front.right->getStatus() > 0)) {
                     // One of the rear Sensors has a problem too
                     if (_motorController->getStatus() > 0) {
                         _speed = 0;
@@ -54,9 +54,9 @@ class SpeedService : public IService {
                     } else {
                         useSensor = MOTOR;
                     }
-                } else {
-                    useSensor = REAR;
-                }
+                //} else {
+                //    useSensor = REAR;
+                //}
             } else {
                 useSensor = FRONT;
             }
@@ -74,6 +74,7 @@ class SpeedService : public IService {
                 }
             }
 
+            /*
             if (useSensor == REAR) {
                 if (_checkPlausibility(_rpm.rear.left, _rpm.rear.right)) {
                     _speed = (_getSpeed(_rpm.rear.left) + _getSpeed(_rpm.rear.right)) / 2;
@@ -81,6 +82,7 @@ class SpeedService : public IService {
                     useSensor = MOTOR;
                 }
             }
+            */
 
             if (useSensor == MOTOR) {
                 _speed = 0;
@@ -104,10 +106,12 @@ class SpeedService : public IService {
                 IRpmSensor* right;
             } front;
 
+            /*
             struct rear {
                 IRpmSensor* left;
                 IRpmSensor* right;
             } rear;
+            */
         } _rpm;
 
         speed_value_t _getSpeed(IRpmSensor* sensor) {
