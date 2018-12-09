@@ -73,9 +73,9 @@ RpmSensorMessageHandler rpmSensorMessageHandler;
 
 //   Hardware
 HardwareLed brakeLight(MASTER_PIN_BRAKE_LIGHT, LED_BRAKE);
-HardwareMotorController motorController(CAN2_CONF, MASTER_PIN_RFE_ENABLE, MASTER_PIN_RUN_ENABLE, MOTOR_MAIN);
-HardwareRpmSensor rpmRearLeft(MASTER_PIN_RPM_SENSOR_HL, RPM_REAR_LEFT);
-HardwareRpmSensor rpmRearRight(MASTER_PIN_RPM_SENSOR_HR, RPM_REAR_RIGHT);
+HardwareMotorController motorController(MASTER_PIN_MOTOR_CONTROLLER_CAN_RD, MASTER_PIN_MOTOR_CONTROLLER_CAN_TD, MASTER_PIN_RFE_ENABLE, MASTER_PIN_RUN_ENABLE, MOTOR_MAIN);
+//HardwareRpmSensor rpmRearLeft(MASTER_PIN_RPM_SENSOR_HL, RPM_REAR_LEFT); // [il]
+//HardwareRpmSensor rpmRearRight(MASTER_PIN_RPM_SENSOR_HR, RPM_REAR_RIGHT); // [il]
 HardwareFan coolingFan(MASTER_PIN_FAN, COOLING_FAN);
 HardwarePump coolingPump(MASTER_PIN_PUMP_PWM, COOLING_PUMP);
 HardwareBuzzer buzzer(MASTER_PIN_BUZZER, BUZZER_ALARM);
@@ -95,7 +95,7 @@ MotorControllerService motorControllerService(carService,
 BrakeLightService brakeLightService(carService, (IPedal*)&brakePedal, (ILed*)&brakeLight);
 
 SpeedService speedService(carService,
-                          (IRpmSensor*)&rpmFrontLeft, (IRpmSensor*)&rpmFrontRight, (IRpmSensor*)&rpmRearLeft, (IRpmSensor*)&rpmRearRight,
+                          (IRpmSensor*)&rpmFrontLeft, (IRpmSensor*)&rpmFrontRight, /* (IRpmSensor*)&rpmRearLeft, (IRpmSensor*)&rpmRearRight, */
                           (IMotorController*)&motorController);
 
 CoolingService coolingService(carService,
