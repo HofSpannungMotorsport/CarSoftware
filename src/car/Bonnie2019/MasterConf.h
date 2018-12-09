@@ -102,7 +102,8 @@ SpeedService speedService(carService,
 CoolingService coolingService(carService,
                               speedService,
                               (IFan*)&coolingFan, (IPump*)&coolingPump,
-                              MASTER_PIN_HV_ENABLED);
+                              (IMotorController*)&motorController,
+                              hvEnabled);
 
 class Master {
     public:
