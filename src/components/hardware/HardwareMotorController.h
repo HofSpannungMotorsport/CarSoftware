@@ -4,33 +4,36 @@
 #include "bamocar-can.h"
 #include "../interface/IMotorController.h"
 
-#define STD_SPEED_REFRESH_TIME 40
-#define STD_CURRENT_REFRESH_TIME 10
-#define STD_CURRENT_DEVICE_REFRESH_TIME 10
-#define STD_MOTOR_TEMP_REFRESH_TIME 100
-#define STD_CONTROLLER_TEMP_REFRESH_TIME 100
-#define STD_AIR_TEMP_REFRESH_TIME 300
+#define STD_SPEED_REFRESH_TIME 240 // Hz
+#define STD_CURRENT_REFRESH_TIME 240 // Hz
+#define STD_CURRENT_DEVICE_REFRESH_TIME 240 // Hz
+#define STD_MOTOR_TEMP_REFRESH_TIME 12 // Hz
+#define STD_CONTROLLER_TEMP_REFRESH_TIME 12 // Hz
+#define STD_AIR_TEMP_REFRESH_TIME 6 // Hz
 
 class HardwareMotorController : public IMotorController {
     public:
-        HardwareMotorController(PinName canRD, PinName canTD)
-            : _bamocar(canRD, canTD) {
+        HardwareMotorController(PinName canRD, PinName canTD, PinName RFE, PinName RUN)
+            : _bamocar(canRD, canTD), _rfe(RFE), _run(RUN) {
             _telegramTypeId = MOTOR;
             _objectType = HARDWARE_OBJECT;
+
+            _rfe = 0;
+            _run = 0;
         }
 
-        HardwareMotorController(PinName canRD, PinName canTD, can_component_t componentId)
-            : HardwareMotorController(canRD, canTD) {
+        HardwareMotorController(PinName canRD, PinName canTD, PinName RFE, PinName RUN, can_component_t componentId)
+            : HardwareMotorController(canRD, canTD, RFE, RUN) {
             _componentId = componentId;
         }
 
         void beginCommunication() {
-            _bamocar.requestSpeed(STD_SPEED_REFRESH_TIME);
-            _bamocar.requestCurrent(STD_CURRENT_REFRESH_TIME);
-            _bamocar.requestCurrentDevice(STD_CURRENT_DEVICE_REFRESH_TIME);
-            _bamocar.requestMotorTemp(STD_MOTOR_TEMP_REFRESH_TIME);
-            _bamocar.requestControllerTemp(STD_CONTROLLER_TEMP_REFRESH_TIME);
-            _bamocar.requestAirTemp(STD_AIR_TEMP_REFRESH_TIME);
+            _bamocar.requestSpeed(1000 / STD_SPEED_REFRESH_TIME);
+            _bamocar.requestCurrent(1000 / STD_CURRENT_REFRESH_TIME);
+            _bamocar.requestCurrentDevice(1000 / STD_CURRENT_DEVICE_REFRESH_TIME);
+            _bamocar.requestMotorTemp(1000 / STD_MOTOR_TEMP_REFRESH_TIME);
+            _bamocar.requestControllerTemp(1000 / STD_CONTROLLER_TEMP_REFRESH_TIME);
+            _bamocar.requestAirTemp(1000 / STD_AIR_TEMP_REFRESH_TIME);
         }
 
         virtual motor_controller_status_t getStatus() {
@@ -122,12 +125,30 @@ class HardwareMotorController : public IMotorController {
             return _bamocar.getAirTemp();
         }
 
+        virtual void setRFE(motor_controller_rfe_enable_t state) {
+            if (state == MOTOR_CONTROLLER_RFE_ENABLE) {
+                _rfe = 1;
+            } else {
+                _rfe = 0;
+            }
+        }
+
+        virtual void setRUN(motor_controller_run_enable_t state) {
+            if (state == MOTOR_CONTROLLER_RUN_ENABLE) {
+                _run = 1;
+            } else {
+                _run = 0;
+            }
+        }
+
         virtual bool getHardEnabled() {
             return _bamocar.getHardEnable();
         }
 
     protected:
         Bamocar _bamocar;
+        DigitalOut _rfe;
+        DigitalOut _run;
 
         motor_controller_status_t _status = 0;
 };

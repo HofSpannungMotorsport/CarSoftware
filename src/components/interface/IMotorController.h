@@ -12,6 +12,16 @@ enum motor_controller_error_type_t : motor_controller_status_t {
 
 typedef uint8_t motor_controller_state_t;
 
+enum motor_controller_rfe_enable_t : bool {
+    MOTOR_CONTROLLER_RFE_DISABLE = false,
+    MOTOR_CONTROLLER_RFE_ENABLE = true
+};
+
+enum motor_controller_run_enable_t : bool {
+    MOTOR_CONTROLLER_RUN_DISABLE = false,
+    MOTOR_CONTROLLER_RUN_ENABLE = true
+};
+
 class IMotorController : public IID {
     public:
         // Status
@@ -38,7 +48,11 @@ class IMotorController : public IID {
         virtual uint8_t getControllerTemp() = 0;
         virtual uint8_t getAirTemp() = 0;
 
-        // Enable
+        // Enable setter
+        virtual void setRFE(motor_controller_rfe_enable_t state) = 0;
+        virtual void setRUN(motor_controller_run_enable_t state) = 0;
+
+        // Enable getter
         virtual bool getHardEnabled() = 0;
 };
 
