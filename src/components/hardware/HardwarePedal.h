@@ -8,6 +8,9 @@
 #define STD_MAX_DEVIANCE 0.10 // 10%
 #define STD_MAX_DEVIANCE_TIME 100 // 100ms
 
+#define STD_MAPPED_BOUNDARY_PERCENTAGE 0.10 // 10%
+#define STD_MAX_OUT_OF_BOUNDARY_TIME 100 // 100ms
+
 #define STD_CALIBRATION_REFRESH_TIME 0.030 // 30ms
 #define STD_CALIBRATION_MIN_DEVIANCE 500 // Raw analog
 #define STD_CALIBRATION_MAX_DEVIANCE 10000 // Raw analog
@@ -15,7 +18,7 @@
 #define STD_ANALOG_LOWER_BOUNDARY   655 // uint16_t min ->     0
 #define STD_ANALOG_UPPER_BOUNDARY 64880 // uint16_t max -> 65535
 
-#define STD_PEDAL_THRESHHOLD 0.05 // 5%
+#define STD_PEDAL_THRESHHOLD 0.10 // 10%
 
 class HardwarePedal : public IPedal {
     public:
@@ -195,14 +198,14 @@ class HardwarePedal : public IPedal {
 
             _pin1.setRawBoundary(_analogLowerBoundary, _analogUpperBoundary);
             _pin1.setRawBoundaryOutTime(STD_MAX_DEVIANCE_TIME);
-            _pin1.setBoundary(STD_MAX_DEVIANCE);
-            _pin1.setBoundaryOutTime(STD_MAX_DEVIANCE_TIME);
+            _pin1.setBoundary(STD_MAPPED_BOUNDARY_PERCENTAGE);
+            _pin1.setBoundaryOutTime(STD_MAX_OUT_OF_BOUNDARY_TIME);
 
             if (_secondSensor) {
                 _pin2.setRawBoundary(_analogLowerBoundary, _analogUpperBoundary);
                 _pin2.setRawBoundaryOutTime(STD_MAX_DEVIANCE_TIME);
-                _pin2.setBoundary(STD_MAX_DEVIANCE);
-                _pin2.setBoundaryOutTime(STD_MAX_DEVIANCE_TIME);
+                _pin2.setBoundary(STD_MAPPED_BOUNDARY_PERCENTAGE);
+                _pin2.setBoundaryOutTime(STD_MAX_OUT_OF_BOUNDARY_TIME);
             }
         }
 

@@ -104,12 +104,12 @@ class HardwareAnalogSensor : public IAnalogSensor {
             analog_sensor_t mappedValue = _getMapped(_pin.read_u16());
             analog_sensor_t returnValue = mappedValue;
 
-            analog_sensor_t maxDeviance = _boundary.percentage * (_map.to.max - _map.to.min);
             bool outOfBoundary = false;
 
             // Much code, less functionality. Check if out of boundary.
             // At first, look if directly proportional or improportional
             if (_map.to.min < _map.to.max) {
+                analog_sensor_t maxDeviance = _boundary.percentage * (_map.to.max - _map.to.min);
                 // Then, check if mappedValue is bigger then the given map
                 if (mappedValue < _map.to.min) {
                     // Set Value to min/max...
@@ -128,6 +128,7 @@ class HardwareAnalogSensor : public IAnalogSensor {
                         outOfBoundary = true;
                 }
             } else if (_map.to.min > _map.to.max) {
+                analog_sensor_t maxDeviance = _boundary.percentage * (_map.to.min - _map.to.max);
                 if (mappedValue < _map.to.max) {
                     returnValue = _map.to.max;
                     if (mappedValue < (_map.to.max - maxDeviance))
