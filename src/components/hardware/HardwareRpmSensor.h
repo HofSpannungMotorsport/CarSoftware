@@ -3,11 +3,11 @@
 
 #include "../interface/IRpmSensor.h"
 
-#define STD_MEASUREMENT_TIMEOUT 0.5 // s -> 100ms
-#define STD_MEASUREMENT_POINTS_PER_REVOLUTION 6
+#define STD_MEASUREMENT_TIMEOUT 0.5 // s -> 500ms
+#define STD_MEASUREMENT_POINTS_PER_REVOLUTION 12
 //#define USE_FALL // STD it uses the rising edge. Decomment to use falling edge as measurement point
 
-#define STD_AVERAGE_OVER_MEASUREMENT_POINTS 6 // Over how many measurement points should the real speed be calculated? HAS TO BE AT LEAST 1
+#define STD_AVERAGE_OVER_MEASUREMENT_POINTS 2 // Over how many measurement points should the real speed be calculated? HAS TO BE AT LEAST 1
 
 class HardwareRpmSensor : public IRpmSensor {
     public:

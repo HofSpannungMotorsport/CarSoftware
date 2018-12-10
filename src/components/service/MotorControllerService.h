@@ -311,7 +311,7 @@ class MotorControllerService : public IService {
             */
 
             if (_power.max < _power.setOnController) {
-                returnValue = (_power.max / _power.setOnController) * returnValue;
+                returnValue = returnValue * _power.max / _power.setOnController;
             }
 
             return returnValue;

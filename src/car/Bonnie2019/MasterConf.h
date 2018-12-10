@@ -96,7 +96,7 @@ MotorControllerService motorControllerService(carService,
 BrakeLightService brakeLightService(carService, (IPedal*)&brakePedal, (ILed*)&brakeLight);
 
 SpeedService speedService(carService,
-                          (IRpmSensor*)&rpmFrontLeft, (IRpmSensor*)&rpmFrontRight, /* (IRpmSensor*)&rpmRearLeft, (IRpmSensor*)&rpmRearRight, */
+                          (IRpmSensor*)&rpmFrontLeft, (IRpmSensor*)&rpmFrontRight, /* (IRpmSensor*)&rpmRearLeft, (IRpmSensor*)&rpmRearRight, */ // [il]
                           (IMotorController*)&motorController);
 
 CoolingService coolingService(carService,

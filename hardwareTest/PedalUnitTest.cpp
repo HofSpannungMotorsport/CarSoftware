@@ -7,7 +7,7 @@
 #include "../src/components/interface/IID.h"
 
 #define PEDAL_PIN1 A3
-#define PEDAL_PIN2 A4
+#define PEDAL_PIN2 A5
 
 #define REFRESH_TIME 333 // ms
 
@@ -64,7 +64,7 @@ void PedalUnitTest() {
     }
 
     if (softwarePedal.getStatus() > 0) {
-        pcSerial.printf("Error after Pedal Calibration: %u", softwarePedal.getStatus());
+        pcSerial.printf("Error after Pedal Calibration: 0x%x", softwarePedal.getStatus());
     } else {
         Timer refreshTimer = Timer();
         refreshTimer.start();
@@ -80,9 +80,9 @@ void PedalUnitTest() {
             while(refreshTimer.read_ms() < REFRESH_TIME);
         }
 
-        pcSerial.printf("Pedal Error: %u", softwarePedal.getStatus());
+        pcSerial.printf("Pedal Error: 0x%x\n", softwarePedal.getStatus());
     }
 
-    pcSerial.printf("End of Program");
+    pcSerial.printf("\n\n-----\nEnd of Program");
     while(1);
 }
