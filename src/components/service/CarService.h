@@ -10,12 +10,11 @@
 #include "../interface/IMotorController.h"
 #include "../../can/can_ids.h"
 
-#define ERROR_REGISTER_SIZE 64 // errors
+#define ERROR_REGISTER_SIZE 64 // errors, max: 255
 #define BOOT_ROUTINE_TEST_TIME 2 // s
 #define BRAKE_START_THRESHHOLD 0.75 // %
-#define WAIT_AFTER_RFE_ENABLE 0.51 // s
 
-#define BEEP_AFTER_READY_TO_DRIVE_TIME 2.2 // s
+#define HV_ENABLED_BEEP_TIME 2.2 // s (has to be at least 0.5)
 
 enum car_state_t : uint8_t {
     CAR_OFF = 0x0,
@@ -69,7 +68,6 @@ class CarService : public IService {
         }
 
         virtual void run() {
-            _checkBuzzer();
             _checkHvEnabled();
 
             if (_button.reset->getStatus() > 0) {
@@ -199,7 +197,7 @@ class CarService : public IService {
             }
 
 
-            // If all OK, go into Ready to drive
+            // If all OK, go into Almost Ready to drive
             if (_state == BOOT) {
                 _state = ALMOST_READY_TO_DRIVE;
             } else {
@@ -242,6 +240,10 @@ class CarService : public IService {
             // Set RFE enable
             _motorController->setRFE(MOTOR_CONTROLLER_RFE_ENABLE);
 
+            //Start beeping to signalize car is started
+            _buzzer->setBeep(BUZZER_MONO_TONE);
+            _buzzer->setState(BUZZER_ON);
+
             // Wait the set Time until enabling RUN
             waitTimer.reset();
             waitTimer.start();
@@ -260,12 +262,16 @@ class CarService : public IService {
                     _sendLedsOverCan();
                     while(1);
                 }
-            } while (waitTimer.read() < (float)WAIT_AFTER_RFE_ENABLE);
+            } while (waitTimer.read() < (float)HV_ENABLED_BEEP_TIME);
 
             // Set RUN enable if no Error
             canService.processInbound();
             _checkHvEnabled();
             processErrors();
+
+            // Stop beeping!
+            _buzzer->setState(BUZZER_OFF);
+
             if (_state == ALMOST_READY_TO_DRIVE) {
                 _motorController->setRUN(MOTOR_CONTROLLER_RUN_ENABLE);
             } else {
@@ -285,17 +291,13 @@ class CarService : public IService {
             _readyToDriveFor.reset();
             _readyToDriveFor.start();
 
-            // Start BEEEEEEP!!! to signalize the car is primed now (really loud :D )
-            _buzzer->setBeep(BUZZER_MONO_TONE);
-            _buzzer->setState(BUZZER_ON);
-
             // Stop blinking greed to show car is primed
             _led.green->setBlinking(BLINKING_OFF);
             _sendLedsOverCan();
         }
 
     private:
-        CircularBuffer<Error, 64, uint8_t> _errorRegister;
+        CircularBuffer<Error, ERROR_REGISTER_SIZE, uint8_t> _errorRegister;
 
         car_state_t _state = CAR_OFF;
         Timer _readyToDriveFor;
@@ -371,19 +373,6 @@ class CarService : public IService {
 
         void _stopTestOutputs() {
             _turnOffLed();
-        }
-
-        void _checkBuzzer() {
-            if (_readyToDriveFor.read() <= BEEP_AFTER_READY_TO_DRIVE_TIME) {
-                if (_buzzer->getState() != BUZZER_ON || _buzzer->getBeep() != BUZZER_MONO_TONE) {
-                    _buzzer->setBeep(BUZZER_MONO_TONE);
-                    _buzzer->setState(BUZZER_ON);
-                }
-            } else {
-                if (_buzzer->getState() != BUZZER_OFF) {
-                    _buzzer->setState(BUZZER_OFF);
-                }
-            }
         }
 
         void _checkHvEnabled() {
