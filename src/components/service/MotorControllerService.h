@@ -77,6 +77,7 @@ class MotorControllerService : public IService {
         CarService &_carService;
         IMotorController* _motorController;
         bool _ready = false;
+        bool _communicationStarted = false;
 
         struct _power {
             float max = STD_MAX_POWER,
@@ -184,6 +185,11 @@ class MotorControllerService : public IService {
                 _update(_frontRightWheel);
                 _update(_rearLeftWheel);
                 _update(_rearRightWheel);
+            }
+
+            if (!_communicationStarted) {
+                _motorController->beginCommunication();
+                _communicationStarted = true;
             }
         }
 

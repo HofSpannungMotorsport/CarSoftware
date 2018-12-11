@@ -30,7 +30,6 @@ class HardwareMotorController : public IMotorController {
         void beginCommunication() {
             _bamocar.requestSpeed(1000 / STD_SPEED_REFRESH_TIME);
             _bamocar.requestCurrent(1000 / STD_CURRENT_REFRESH_TIME);
-            _bamocar.requestCurrentDevice(1000 / STD_CURRENT_DEVICE_REFRESH_TIME);
             _bamocar.requestMotorTemp(1000 / STD_MOTOR_TEMP_REFRESH_TIME);
             _bamocar.requestControllerTemp(1000 / STD_CONTROLLER_TEMP_REFRESH_TIME);
             _bamocar.requestAirTemp(1000 / STD_AIR_TEMP_REFRESH_TIME);
@@ -48,6 +47,7 @@ class HardwareMotorController : public IMotorController {
             // The Status of the Motor Controller
             // (not naming it Status because otherwise it conflicts with the Status naming of the other components,
             // so to have a consistant naming and to save errors in "Status", we use the naming State here)
+            // [il]
             return _bamocar.getStatus();
         }
 
@@ -89,28 +89,15 @@ class HardwareMotorController : public IMotorController {
                 }
             }
 
-            // Set the torque to a 16-bit integer
-            int16_t torqueValue = (int16_t)((float)setTorqueTo * (float)0x5555);
-
-            // To prevent the torqueValue to get somehow out of boundary and prevent it to drive
-            // the Motor in reverse, just to be sure...
-            if (torqueValue < 0) {
-                torqueValue = 0;
-            }
-
-            _bamocar.setTorque(torqueValue);
+            _bamocar.setTorque(setTorqueTo);
         }
 
-        virtual int16_t getSpeed() {
+        virtual float getSpeed() {
             return _bamocar.getSpeed();
         }
 
-        virtual uint8_t getCurrent() {
+        virtual float getCurrent() {
             return _bamocar.getCurrent();
-        }
-
-        virtual uint8_t getCurrentDevice() {
-            return _bamocar.getCurrentDevice();
         }
 
         virtual uint8_t getMotorTemp() {
