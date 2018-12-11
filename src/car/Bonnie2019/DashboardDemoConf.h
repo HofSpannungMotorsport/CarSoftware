@@ -5,19 +5,23 @@
 
 #define REFRESH_RATE 1
 
+#define RED_MAX 0.8
+#define YELLOW_MAX 0.8
+#define GREEN_MAX 0.05
+
 #ifndef MESSAGE_REPORT
     #define MESSAGE_REPORT
     Serial pcSerial(USBTX, USBRX); // Connection to PC over Serial
 #endif
 
-#include "hardware/Pins_Dashboard_PCB.h"
+#include "hardware/Pins_Dashboard.h"
 #include "../../components/hardware/HardwareInterruptButton.h"
-#include "../../components/hardware/HardwareLed.h"
+#include "../../components/hardware/HardwareLedPwm.h"
 
 //LED's
-HardwareLed ledRed(DASHBOARD_PIN_LED_RED, LED_ERROR);
-HardwareLed ledYellow(DASHBOARD_PIN_LED_YELLOW, LED_ISSUE);
-HardwareLed ledGreen(DASHBOARD_PIN_LED_GREEN, LED_READY_TO_DRIVE);
+HardwareLedPwm ledRed(DASHBOARD_PIN_LED_RED, LED_ERROR);
+HardwareLedPwm ledYellow(DASHBOARD_PIN_LED_YELLOW, LED_ISSUE);
+HardwareLedPwm ledGreen(DASHBOARD_PIN_LED_GREEN, LED_READY_TO_DRIVE);
 
 
 // Buttons
@@ -42,13 +46,13 @@ class Dashboard {
                 if (!_buttonPressedBefore) {
                     _buttonPressedBefore = true;
 
-                    ledRed.setBrightness(1);
+                    ledRed.setBrightness(RED_MAX);
                     ledRed.setBlinking(BLINKING_FAST);
 
-                    ledYellow.setBrightness(1);
+                    ledYellow.setBrightness(YELLOW_MAX);
                     ledYellow.setBlinking(BLINKING_FAST);
 
-                    ledGreen.setBrightness(1);
+                    ledGreen.setBrightness(GREEN_MAX);
                     ledGreen.setBlinking(BLINKING_FAST);
                 }
             } else {
@@ -59,9 +63,9 @@ class Dashboard {
                     ledYellow.setBlinking(BLINKING_OFF);
                     ledGreen.setBlinking(BLINKING_OFF);
 
-                    ledRed.setBrightness((float)_last.red / 255);
-                    ledYellow.setBrightness((float)_last.yellow / 255);
-                    ledGreen.setBrightness((float)_last.green / 255);
+                    ledRed.setBrightness((float)_last.red / 255 * RED_MAX);
+                    ledYellow.setBrightness((float)_last.yellow / 255 * YELLOW_MAX);
+                    ledGreen.setBrightness((float)_last.green / 255 * GREEN_MAX);
                 }
 
                 if (_last.upRed) {
@@ -100,12 +104,14 @@ class Dashboard {
                     }
                 }
 
-                ledRed.setBrightness((float)_last.red / 255);
-                ledYellow.setBrightness((float)_last.yellow / 255);
-                ledGreen.setBrightness((float)_last.green / 255);
+                ledRed.setBrightness((float)_last.red / 255.0 * RED_MAX);
+                ledYellow.setBrightness((float)_last.yellow / 255.0 * YELLOW_MAX);
+                ledGreen.setBrightness((float)_last.green / 255.0 * GREEN_MAX);
+
+                //pcSerial.printf("%i\t%i\t%i\n", _last.red, _last.yellow, _last.green);
             }
 
-            wait(1 / REFRESH_RATE / 255);
+            wait((1.0 / (float)REFRESH_RATE / 255.0));
         }
     
     private:
