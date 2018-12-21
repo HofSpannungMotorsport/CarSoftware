@@ -91,13 +91,14 @@ enum can_component_t : uint8_t {
     BUZZER_ALARM = 0x0,
     
     // System messages
-    SYSTEM_MASTER =           0x0,
-    SYSTEM_DASHBOARD =        0x1,
-    SYSTEM_PEDAL =            0x2,
-    SYSTEM_MOTOR_CONTROLLER = 0x3,
-    SYSTEM_SPEED =            0x4,
-    SYSTEM_COOLING =          0x5,
-    SYSTEM_HV_ENABLED =       0x6
+    SYSTEM_BMS =              0x0, // !!! DON'T CHANGE !!! HAS TO BE SET ON BMS TOO !!!
+    SYSTEM_MASTER =           0x1,
+    SYSTEM_DASHBOARD =        0x2,
+    SYSTEM_PEDAL =            0x3,
+    SYSTEM_MOTOR_CONTROLLER = 0x4,
+    SYSTEM_SPEED =            0x5,
+    SYSTEM_COOLING =          0x6,
+    SYSTEM_HV_ENABLED =       0x7
     /*
     SYSTEM_INIT_REQUEST = 0x0,
     SYSTEM_INIT_RESPONSE = 0x1,
