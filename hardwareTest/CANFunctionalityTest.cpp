@@ -1,10 +1,15 @@
 // Copyed from https://os.mbed.com/handbook/CAN and modifyed
 
 #include "mbed.h"
-#include "../src/can/can_config.h"
+#include "../src/car/Bonnie2019/hardware/Pins_Master.h"
+#include "../src/car/Bonnie2019/hardware/Pins_Pedal.h"
 
-#ifndef STM32F446xx
-    #error "CANFunctionalitaTest written for NUCLEO-F446RE"
+#ifdef STM32F446xx
+    #define CAN1_CONF PB_8,PB_9
+    const uint16_t id = 1337;
+#else
+    #define CAN1_CONF PD_0, PD_1
+    const uint16_t id = 1338;
 #endif
 
 Ticker ticker;
@@ -14,7 +19,7 @@ char counter = 0;
 
 void send() {
     printf("send()\n");
-    if(can1.write(CANMessage(1337, &counter, 1))) {
+    if(can1.write(CANMessage(id, &counter, 1))) {
         printf("wloop()\n");
         counter++;
         printf("Message sent: %d\n\n", counter);

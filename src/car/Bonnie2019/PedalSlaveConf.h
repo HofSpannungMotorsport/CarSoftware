@@ -12,7 +12,7 @@
 #include "../../can/CANService.h"
 CANService canService(CAN1_CONF);
 
-#include "hardware/Pins_Pedal_PCB.h"
+#include "hardware/Pins_Pedal.h"
 #include "../../components/hardware/HardwarePedal.h"
 #include "../../can/PedalMessageHandler.h"
 #include "../../components/hardware/HardwareRpmSensor.h"
@@ -53,7 +53,7 @@ class Pedal {
         
             canService.run();
 
-            while(refreshTimer.read() < (1 / PEDAL_SEND_RATE));
+            while(refreshTimer.read() < (1 / (float)PEDAL_SEND_RATE));
         }
 };
 

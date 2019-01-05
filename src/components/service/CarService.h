@@ -131,6 +131,7 @@ class CarService : public IService {
         }
 
         void startUp() {
+            wait(2);
             _startTestOutputs();
             Timer waitTimer;
             waitTimer.reset();
@@ -331,15 +332,15 @@ class CarService : public IService {
 
         void _sendLedsOverCan() {
             // LED's
-            canService.sendMessage((void*)&_led.red);
-            canService.sendMessage((void*)&_led.yellow);
-            canService.sendMessage((void*)&_led.green);
+            canService.sendMessage((void*)_led.red);
+            canService.sendMessage((void*)_led.yellow);
+            canService.sendMessage((void*)_led.green);
         }
 
         void _sendPedalsOverCan() {
             // Pedals
-            canService.sendMessage((void*)&_pedal.gas);
-            canService.sendMessage((void*)&_pedal.brake);
+            canService.sendMessage((void*)_pedal.gas);
+            canService.sendMessage((void*)_pedal.brake);
         }
 
         void _sendComponentsOverCan() {
@@ -356,7 +357,7 @@ class CarService : public IService {
             _led.yellow->setState(LED_ON);
             _led.green->setState(LED_ON);
 
-            _sendComponentsOverCan();
+            _sendLedsOverCan();
         }
 
         void _turnOffLed() {

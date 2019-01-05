@@ -8,14 +8,14 @@
     Serial pcSerial(USBTX, USBRX); // Connection to PC over Serial
 #endif
 
-#include "../../can/can_config.h"
-#include "../../can/CANService.h"
-CANService canService(CAN1_CONF);
+#define HIGH_DEMAND_SERVICE_REFRESH_RATE 120 // Hz
+#define LOW_DEMAND_SERVICE_REFRESH_RATE 3 // Hz
 
 #include "hardware/Pins_Master.h"
 
-#define HIGH_DEMAND_SERVICE_REFRESH_RATE 120 // Hz
-#define LOW_DEMAND_SERVICE_REFRESH_RATE 3 // Hz
+#include "../../can/can_config.h"
+#include "../../can/CANService.h"
+CANService canService(MASTER_PIN_CAR_INTERN_CAN_RD, MASTER_PIN_CAR_INTERN_CAN_TD);
 
 // Include for Dashboard Components
 #include "../../components/software/SoftwareLed.h"

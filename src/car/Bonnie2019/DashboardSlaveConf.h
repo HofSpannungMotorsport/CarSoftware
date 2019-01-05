@@ -12,7 +12,7 @@
 #include "../../can/CANService.h"
 CANService canService(CAN1_CONF);
 
-#include "hardware/Pins_Dashboard_PCB.h"
+#include "hardware/Pins_Dashboard.h"
 #include "../../components/hardware/HardwareInterruptButton.h"
 #include "../../can/ButtonMessageHandler.h"
 #include "../../components/hardware/HardwareLed.h"
@@ -34,8 +34,8 @@ class Dashboard {
     public:
         // Called once at bootup
         void setup() {
-            canService.addComponent((void*)&ledGreen, (IMessageHandler<CANMessage>*)&ledMessageHandler, NORMAL);
-            canService.addComponent((void*)&ledGreen, (IMessageHandler<CANMessage>*)&ledMessageHandler, NORMAL);
+            canService.addComponent((void*)&ledRed, (IMessageHandler<CANMessage>*)&ledMessageHandler, NORMAL);
+            canService.addComponent((void*)&ledYellow, (IMessageHandler<CANMessage>*)&ledMessageHandler, NORMAL);
             canService.addComponent((void*)&ledGreen, (IMessageHandler<CANMessage>*)&ledMessageHandler, NORMAL);
             canService.addComponent((void*)&buttonReset, (IMessageHandler<CANMessage>*)&buttonMessageHandler, NORMAL);
             canService.addComponent((void*)&buttonStart, (IMessageHandler<CANMessage>*)&buttonMessageHandler, NORMAL);
