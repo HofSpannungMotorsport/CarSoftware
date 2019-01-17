@@ -46,7 +46,8 @@ class CoolingService : public IService {
         }
 
         virtual void run() {
-            if (_hvEnabled) {
+            // [QF]
+            if (/*_hvEnabled*/ true) {
                 speed_value_t currentSpeed = _speedService.getSpeed();
 
                 // Activate Fan according to driving speed

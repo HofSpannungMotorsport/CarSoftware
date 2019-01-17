@@ -12,7 +12,7 @@
 #include "../../can/CANService.h"
 CANService canService(CAN1_CONF);
 
-#include "hardware/Pins_Dashboard.h"
+#include "hardware/Pins_Dashboard_PCB.h"
 #include "../../components/hardware/HardwareInterruptButton.h"
 #include "../../can/ButtonMessageHandler.h"
 #include "../../components/hardware/HardwareLed.h"

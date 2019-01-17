@@ -17,6 +17,8 @@
 #define STD_CAN_FREQUENCY 250000
 #define TELEGRAM_IN_BUFFER_SIZE 64
 
+#define CAN_TIMEOUT 0.100 // s
+
 struct component_details_t {
     IMessageHandler<CANMessage>* handler;
     void* component;
@@ -59,7 +61,14 @@ class CANService : public IService {
 
                 if (msgBuildResult == MSG_BUILD_ERROR) return false;
 
-                int msgSendResult = _can.write(m);
+                int msgSendResult = 0;
+                Timer timeout;
+                timeout.start();
+                while((msgSendResult != 1) && (timeout < CAN_TIMEOUT)) {
+                    msgSendResult = _can.write(m);
+                    wait(0.00000124);
+                }
+
                 #ifdef CAN_DEBUG
                     pcSerial.printf("[CANService]@sendMessage: Message for Component 0x%x with m.id 0x%x write result: %i (1 == Succes, 0 == Failed)\n", id, m.id, msgSendResult);
                 #endif

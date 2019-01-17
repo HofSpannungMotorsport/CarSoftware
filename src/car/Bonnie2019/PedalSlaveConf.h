@@ -12,7 +12,7 @@
 #include "../../can/CANService.h"
 CANService canService(CAN1_CONF);
 
-#include "hardware/Pins_Pedal.h"
+#include "hardware/Pins_Pedal_PCB.h"
 #include "../../components/hardware/HardwarePedal.h"
 #include "../../can/PedalMessageHandler.h"
 #include "../../components/hardware/HardwareRpmSensor.h"

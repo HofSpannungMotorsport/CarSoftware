@@ -13,14 +13,14 @@
 #include "../src/can/can_ids.h"
 #include "../src/components/interface/IID.h"
 
-#define PEDAL_PIN1 A3
-#define PEDAL_PIN2 A5
+#define PEDAL_PIN1 PC_0
+#define PEDAL_PIN2 PC_1
 
 #define REFRESH_TIME 20 // ms
 
 HardwareInterruptButton calibrationButton(USER_BUTTON);
 
-HardwarePedal hardwarePedal(PEDAL_PIN1, PEDAL_PIN2, PEDAL_GAS);
+HardwarePedal hardwarePedal(PEDAL_PIN1, /*PEDAL_PIN2,*/ PEDAL_BRAKE);
 SoftwarePedal softwarePedal(PEDAL_GAS);
 
 PedalMessageHandler pedalMessageHandler;

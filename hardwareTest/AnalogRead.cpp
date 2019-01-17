@@ -7,12 +7,14 @@
 
 #include "mbed.h"
 
-#define PIN A5
-#define PIN2 A3
+#define PIN PB_0
+#define PIN2 PC_1
+#define PIN3 PC_0
 #define REFRESH_TIME 0.02 // s
 
 AnalogIn analogPin(PIN);
 AnalogIn analogPin2(PIN2);
+AnalogIn analogPin3(PIN3);
 PwmOut led(LED2);
 
 #ifndef MESSAGE_REPORT
@@ -20,11 +22,12 @@ PwmOut led(LED2);
 #endif
 
 Ticker analogRead;
-uint16_t currentAnalogValue;
-uint16_t currentAnalogValue2;
+uint16_t currentAnalogValue,
+         currentAnalogValue2,
+         currentAnalogValue3;
 
 void analogReadToSerial() {
-    pcSerial.printf("%i\t%i\n", currentAnalogValue, currentAnalogValue2);
+    pcSerial.printf("%i\t%i\t%i\n", currentAnalogValue, currentAnalogValue2, currentAnalogValue3);
 }
 
 void AnalogRead() {
@@ -34,6 +37,7 @@ void AnalogRead() {
     while(true) {
         currentAnalogValue = analogPin.read_u16();
         currentAnalogValue2 = analogPin2.read_u16();
+        currentAnalogValue3 = analogPin3.read_u16();
         led.write((float)currentAnalogValue/65535);
     }
 }
