@@ -1,7 +1,7 @@
 #ifndef HARDWAREMOTORCONTROLLER_H
 #define HARDWAREMOTORCONTROLLER_H
 
-#include "bamocar-can.h"
+#include "BamocarD3.h"
 #include "../interface/IMotorController.h"
 
 #define STD_SPEED_REFRESH_TIME 240 // Hz
@@ -28,12 +28,9 @@ class HardwareMotorController : public IMotorController {
         }
 
         void beginCommunication() {
-            _bamocar.requestSpeed(1000 / STD_SPEED_REFRESH_TIME);
-            _bamocar.requestCurrent(1000 / STD_CURRENT_REFRESH_TIME);
-            _bamocar.requestCurrentDevice(1000 / STD_CURRENT_DEVICE_REFRESH_TIME);
-            _bamocar.requestMotorTemp(1000 / STD_MOTOR_TEMP_REFRESH_TIME);
-            _bamocar.requestControllerTemp(1000 / STD_CONTROLLER_TEMP_REFRESH_TIME);
-            _bamocar.requestAirTemp(1000 / STD_AIR_TEMP_REFRESH_TIME);
+            _bamocar.requestSpeed(1000 / (float)STD_SPEED_REFRESH_TIME);
+            _bamocar.requestCurrent(1000 / (float)STD_CURRENT_REFRESH_TIME);
+            _bamocar.requestTemp(1000 / (float)STD_MOTOR_TEMP_REFRESH_TIME);
         }
 
         virtual motor_controller_status_t getStatus() {
@@ -48,20 +45,12 @@ class HardwareMotorController : public IMotorController {
             // The Status of the Motor Controller
             // (not naming it Status because otherwise it conflicts with the Status naming of the other components,
             // so to have a consistant naming and to save errors in "Status", we use the naming State here)
-            return _bamocar.getStatus();
+            // [il]
+            return 0;
         }
 
         virtual void setState() {
             // No implementation needed
-        }
-
-        // To be able to check the Status of the Motor Controller befor starting the whole communication, add a dedicated request method
-        void requestState() {
-            _bamocar.requestStatus();
-        }
-
-        virtual float getTorque() {
-            return _bamocar.getTorque();
         }
 
         virtual void setTorque(float torque) {
@@ -89,39 +78,26 @@ class HardwareMotorController : public IMotorController {
                 }
             }
 
-            // Set the torque to a 16-bit integer
-            int16_t torqueValue = (int16_t)((float)setTorqueTo * (float)0x7FFF);
-
-            // To prevent the torqueValue to get somehow out of boundary and prevent it to drive
-            // the Motor in reverse, just to be sure...
-            if (torqueValue < 0) {
-                torqueValue = 0;
-            }
-
-            _bamocar.setTorque(torqueValue);
+            _bamocar.setTorque(setTorqueTo);
         }
 
-        virtual int16_t getSpeed() {
+        virtual float getSpeed() {
             return _bamocar.getSpeed();
         }
 
-        virtual uint8_t getCurrent() {
+        virtual float getCurrent() {
             return _bamocar.getCurrent();
         }
 
-        virtual uint8_t getCurrentDevice() {
-            return _bamocar.getCurrentDevice();
-        }
-
-        virtual uint8_t getMotorTemp() {
+        virtual int16_t getMotorTemp() {
             return _bamocar.getMotorTemp();
         }
 
-        virtual uint8_t getControllerTemp() {
-            return _bamocar.getControllerTemp();
+        virtual int16_t getServoTemp() {
+            return _bamocar.getServoTemp();
         }
 
-        virtual uint8_t getAirTemp() {
+        virtual int16_t getAirTemp() {
             return _bamocar.getAirTemp();
         }
 
@@ -141,12 +117,8 @@ class HardwareMotorController : public IMotorController {
             }
         }
 
-        virtual bool getHardEnabled() {
-            return _bamocar.getHardEnable();
-        }
-
     protected:
-        Bamocar _bamocar;
+        BamocarD3 _bamocar;
         DigitalOut _rfe;
         DigitalOut _run;
 

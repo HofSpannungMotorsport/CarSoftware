@@ -53,7 +53,7 @@ class Pedal {
         
             canService.run();
 
-            while(refreshTimer.read() < (1 / PEDAL_SEND_RATE));
+            while(refreshTimer.read() < (1 / (float)PEDAL_SEND_RATE));
         }
 };
 

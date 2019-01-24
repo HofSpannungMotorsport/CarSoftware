@@ -1,30 +1,33 @@
 #include "../src/components/hardware/HardwareInterruptButton.h"
 #include "../src/components/hardware/HardwarePedal.h"
 #include "../src/components/software/SoftwarePedal.h"
+
+#ifndef MESSAGE_REPORT
+    #define MESSAGE_REPORT
+    Serial pcSerial(USBTX, USBRX); // Connection to PC over Serial
+#endif
+
+//#define PEDAL_MESSAGE_HANDLER_DEBUG
 #include "../src/can/PedalMessageHandler.h"
 
 #include "../src/can/can_ids.h"
 #include "../src/components/interface/IID.h"
 
-#define PEDAL_PIN1 A3
-#define PEDAL_PIN2 A4
+#define PEDAL_PIN1 PC_0
+#define PEDAL_PIN2 PC_1
 
-#define REFRESH_TIME 333 // ms
+#define REFRESH_TIME 20 // ms
 
 HardwareInterruptButton calibrationButton(USER_BUTTON);
 
-HardwarePedal hardwarePedal(PEDAL_PIN1, PEDAL_PIN2, PEDAL_GAS);
+HardwarePedal hardwarePedal(PEDAL_PIN1, /*PEDAL_PIN2,*/ PEDAL_BRAKE);
 SoftwarePedal softwarePedal(PEDAL_GAS);
 
 PedalMessageHandler pedalMessageHandler;
 
-#ifndef MESSAGE_REPORT
-    Serial pcSerial(USBTX, USBRX); // Connection to PC over Serial
-#endif
-
-component_id_t calculateComponentId(void* component) {
+message_id_t calculateComponentId(void* component) {
     IID *componentId = (IID*)component;
-    component_id_t id = ID::getComponentId(componentId->getTelegramTypeId(), componentId->getComponentId());
+    component_id_t id = ID::getMessageId(NORMAL, ID::getComponentId(componentId->getTelegramTypeId(), componentId->getComponentId()), componentId->getObjectType());
     return id;
 }
 
@@ -64,25 +67,26 @@ void PedalUnitTest() {
     }
 
     if (softwarePedal.getStatus() > 0) {
-        pcSerial.printf("Error after Pedal Calibration: %u", softwarePedal.getStatus());
+        pcSerial.printf("Error after Pedal Calibration: 0x%x", softwarePedal.getStatus());
     } else {
         Timer refreshTimer = Timer();
         refreshTimer.start();
         while(softwarePedal.getStatus() == 0) {
             refreshTimer.reset();
+            float currentHardwarePedalValue = hardwarePedal.getValue();
             {
                 CANMessage m = CANMessage();
                 m.id = calculateComponentId((void*)&hardwarePedal);
                 pedalMessageHandler.buildMessage((void*)&hardwarePedal, m);
                 pedalMessageHandler.parseMessage((void*)&softwarePedal, m);
             }
-            pcSerial.printf("Pedal Value: %.3f\n", softwarePedal.getValue());
+            pcSerial.printf("%.4f\t%.4f\n", softwarePedal.getValue(), currentHardwarePedalValue);
             while(refreshTimer.read_ms() < REFRESH_TIME);
         }
 
-        pcSerial.printf("Pedal Error: %u", softwarePedal.getStatus());
+        pcSerial.printf("Pedal Error: 0x%x\n", softwarePedal.getStatus());
     }
 
-    pcSerial.printf("End of Program");
+    pcSerial.printf("\n\n-----\nEnd of Program");
     while(1);
 }

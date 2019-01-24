@@ -40,10 +40,13 @@
 #define MASTER_PIN_RPM_SENSOR_HR            PG_10
 
 // Dout LED HV Enabled
-#define MASTER_PIN_LED_HV_ENABLED           LED1 // PB_7
+#define MASTER_PIN_LED_HV_ENABLED           LED2 // PB_7 -> BLUE
 
 // Dout LED Error
-#define MASTER_PIN_LED_ERROR                LED2 // PB_0
+#define MASTER_PIN_LED_ERROR                LED3 // PB_0 -> RED
+
+// DOUT LED Extra
+#define MASTER_PIN_LED_EXTRA                LED1 // PB_14 -> GREEN
 
 // Din User Button (Normally closed)
 #define MASTER_PIN_USER_BUTTON              USER_BUTTON // PC_13

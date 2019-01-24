@@ -10,12 +10,11 @@
 #include "../interface/IMotorController.h"
 #include "../../can/can_ids.h"
 
-#define ERROR_REGISTER_SIZE 64 // errors
+#define ERROR_REGISTER_SIZE 64 // errors, max: 255
 #define BOOT_ROUTINE_TEST_TIME 2 // s
 #define BRAKE_START_THRESHHOLD 0.75 // %
-#define WAIT_AFTER_RFE_ENABLE 0.51 // s
 
-#define BEEP_AFTER_READY_TO_DRIVE_TIME 2.2 // s
+#define HV_ENABLED_BEEP_TIME 2.2 // s (has to be at least 0.5)
 
 enum car_state_t : uint8_t {
     CAR_OFF = 0x0,
@@ -69,7 +68,6 @@ class CarService : public IService {
         }
 
         virtual void run() {
-            _checkBuzzer();
             _checkHvEnabled();
 
             if (_button.reset->getStatus() > 0) {
@@ -93,7 +91,9 @@ class CarService : public IService {
             while(!_errorRegister.empty()) {
                 Error error;
                 _errorRegister.pop(error);
+                pcSerial.printf("[CarService]@processErrors: Got Error at 0x%x with error code 0x%x and error type 0x%x !\n", error.componentId, error.code, error.type);
                 if (error.type >= ERROR_UNDEFINED) {
+                    _resetLeds();
                     if (error.type >= ERROR_SYSTEM) {
                         if (error.type >= ERROR_CRITICAL) {
                             // Critical Error
@@ -133,6 +133,7 @@ class CarService : public IService {
         }
 
         void startUp() {
+            wait(2);
             _startTestOutputs();
             Timer waitTimer;
             waitTimer.reset();
@@ -144,20 +145,28 @@ class CarService : public IService {
             _stopTestOutputs();
 
             // Turn on red LED while HV-Circuite is off
+            _resetLeds();
             _led.red->setState(LED_ON);
             _sendLedsOverCan();
 
+            // [QF]
+            /*
             while(!_hvEnabled) {
                 canService.processInbound();
             }
+            */
 
+           	_resetLeds();
             _led.red->setState(LED_OFF);
             _sendLedsOverCan();
+
+            wait(0.1);
 
             // Start bootup/calibration
             // Yellow -> On
             // Green  -> Normal Blinking
             _state = BOOT;
+            _resetLeds();
             _led.yellow->setState(LED_ON);
             _led.green->setState(LED_ON);
 
@@ -172,7 +181,7 @@ class CarService : public IService {
 
 
             // Calibrate pedal until pressed Start once for long time
-            while(_button.start->getStateChanged() || (_button.start->getState() != LONG_CLICKED)) {
+            while(_button.start->getState() != LONG_CLICKED) {
                 canService.processInbound();
             }
 
@@ -185,11 +194,13 @@ class CarService : public IService {
 
             // Wait till the Button got released again
             // Yellow -> Off
-            while(_button.start->getStateChanged() || (_button.start->getState() != NOT_PRESSED)) {
+            while(_button.start->getState() != NOT_PRESSED) {
                 canService.processInbound();
             }
             _led.yellow->setState(LED_OFF);
             _sendLedsOverCan();
+
+            wait(0.1);
 
 
             // Check for Errors at Calibration
@@ -199,25 +210,31 @@ class CarService : public IService {
             }
 
 
-            // If all OK, go into Ready to drive
+            // If all OK, go into Almost Ready to drive
             if (_state == BOOT) {
                 _state = ALMOST_READY_TO_DRIVE;
             } else {
                 // If an Error occured, stop continuing and glow Red
-                // Red   -> Blinkinf Slow
+                // Red   -> Blinking Slow
                 // Green -> Off
+                _resetLeds();
                 _led.red->setState(LED_ON);
                 _led.red->setBlinking(BLINKING_SLOW);
-                _led.green->setState(LED_OFF);
                 _sendLedsOverCan();
-                while(1);
+                while(1) {
+                    wait(100);
+                }
             }
 
 
             // If no Error, start blinking fast to show ready, but need to start car
             // Green -> Fast Blinking
+            _resetLeds();
+            _led.green->setState(LED_ON);
             _led.green->setBlinking(BLINKING_FAST);
             _sendLedsOverCan();
+
+            wait(0.1);
 
 
             // Wait till Car got started (Brake Pedal + Start Button long press) and check for Errors/HV disabled
@@ -227,20 +244,27 @@ class CarService : public IService {
                 processErrors();
                 if (_state != ALMOST_READY_TO_DRIVE) {
                     // If an Error occured, stop continuing and glow Red
-                    // Red   -> Blinkinf Fast
+                    // Red   -> Blinking Fast
                     // Green -> Off
                     _led.red->setState(LED_ON);
                     _led.red->setBlinking(BLINKING_FAST);
                     _led.green->setState(LED_OFF);
                     _sendLedsOverCan();
-                    while(1);
+                    while(1) {
+                        wait(100);
+                    }
                 }
-            } while (_button.start->getStateChanged() || (_button.start->getState() != LONG_CLICKED) || (_pedal.brake->getValue() < BRAKE_START_THRESHHOLD));
+            } while ((_button.start->getState() != LONG_CLICKED) || (_pedal.brake->getValue() < BRAKE_START_THRESHHOLD));
 
             // Optimize later!!
             // [il]
             // Set RFE enable
             _motorController->setRFE(MOTOR_CONTROLLER_RFE_ENABLE);
+
+            // [QF]
+            //Start beeping to signalize car is started
+            _buzzer->setBeep(BUZZER_MONO_TONE);
+            _buzzer->setState(BUZZER_ON);
 
             // Wait the set Time until enabling RUN
             waitTimer.reset();
@@ -252,30 +276,36 @@ class CarService : public IService {
                 if (_state != ALMOST_READY_TO_DRIVE) {
                     _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
                     // If an Error occured, stop continuing and glow Red
-                    // Red   -> Blinkinf Normal
+                    // Red   -> Blinking Normal
                     // Green -> Off
+                    _resetLeds();
                     _led.red->setState(LED_ON);
                     _led.red->setBlinking(BLINKING_NORMAL);
-                    _led.green->setState(LED_OFF);
                     _sendLedsOverCan();
-                    while(1);
+                    while(1) {
+                        wait(100);
+                    }
                 }
-            } while (waitTimer.read() < (float)WAIT_AFTER_RFE_ENABLE);
+            } while (waitTimer.read() < (float)HV_ENABLED_BEEP_TIME);
 
             // Set RUN enable if no Error
             canService.processInbound();
             _checkHvEnabled();
             processErrors();
+
+            // Stop beeping!
+            _buzzer->setState(BUZZER_OFF);
+
             if (_state == ALMOST_READY_TO_DRIVE) {
                 _motorController->setRUN(MOTOR_CONTROLLER_RUN_ENABLE);
             } else {
                 _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
                 // If an Error occured, stop continuing and glow Red
-                // Red   -> Blinkinf Normal
+                // Red   -> Blinking Normal
                 // Green -> Off
+                _resetLeds();
                 _led.red->setState(LED_ON);
                 _led.red->setBlinking(BLINKING_NORMAL);
-                _led.green->setState(LED_OFF);
                 _sendLedsOverCan();
                 while(1);
             }
@@ -285,17 +315,15 @@ class CarService : public IService {
             _readyToDriveFor.reset();
             _readyToDriveFor.start();
 
-            // Start BEEEEEEP!!! to signalize the car is primed now (really loud :D )
-            _buzzer->setBeep(BUZZER_MONO_TONE);
-            _buzzer->setState(BUZZER_ON);
-
             // Stop blinking greed to show car is primed
-            _led.green->setBlinking(BLINKING_OFF);
+            _resetLeds();
+            _led.green->setState(LED_ON);
             _sendLedsOverCan();
+            wait(0.1);
         }
 
     private:
-        CircularBuffer<Error, 64, uint8_t> _errorRegister;
+        CircularBuffer<Error, ERROR_REGISTER_SIZE, uint8_t> _errorRegister;
 
         car_state_t _state = CAR_OFF;
         Timer _readyToDriveFor;
@@ -329,15 +357,15 @@ class CarService : public IService {
 
         void _sendLedsOverCan() {
             // LED's
-            canService.sendMessage((void*)&_led.red);
-            canService.sendMessage((void*)&_led.yellow);
-            canService.sendMessage((void*)&_led.green);
+            canService.sendMessage((void*)_led.red);
+            canService.sendMessage((void*)_led.yellow);
+            canService.sendMessage((void*)_led.green);
         }
 
         void _sendPedalsOverCan() {
             // Pedals
-            canService.sendMessage((void*)&_pedal.gas);
-            canService.sendMessage((void*)&_pedal.brake);
+            canService.sendMessage((void*)_pedal.gas);
+            canService.sendMessage((void*)_pedal.brake);
         }
 
         void _sendComponentsOverCan() {
@@ -354,7 +382,7 @@ class CarService : public IService {
             _led.yellow->setState(LED_ON);
             _led.green->setState(LED_ON);
 
-            _sendComponentsOverCan();
+            _sendLedsOverCan();
         }
 
         void _turnOffLed() {
@@ -362,7 +390,21 @@ class CarService : public IService {
             _led.yellow->setState(LED_OFF);
             _led.green->setState(LED_OFF);
 
-            _sendComponentsOverCan();
+            _sendLedsOverCan();
+        }
+
+        void _resetLeds() {
+            _led.red->setBrightness(1);
+            _led.yellow->setBrightness(1);
+            _led.green->setBrightness(1);
+
+            _led.red->setState(LED_OFF);
+            _led.yellow->setState(LED_OFF);
+            _led.green->setState(LED_OFF);
+
+            _led.red->setBlinking(BLINKING_OFF);
+            _led.yellow->setBlinking(BLINKING_OFF);
+            _led.green->setBlinking(BLINKING_OFF);
         }
 
         void _startTestOutputs() {
@@ -373,23 +415,13 @@ class CarService : public IService {
             _turnOffLed();
         }
 
-        void _checkBuzzer() {
-            if (_readyToDriveFor.read() <= BEEP_AFTER_READY_TO_DRIVE_TIME) {
-                if (_buzzer->getState() != BUZZER_ON || _buzzer->getBeep() != BUZZER_MONO_TONE) {
-                    _buzzer->setBeep(BUZZER_MONO_TONE);
-                    _buzzer->setState(BUZZER_ON);
-                }
-            } else {
-                if (_buzzer->getState() != BUZZER_OFF) {
-                    _buzzer->setState(BUZZER_OFF);
-                }
-            }
-        }
-
         void _checkHvEnabled() {
+            // [QF]
+            /*
             if (!_hvEnabled) {
                 addError(Error(ID::getComponentId(SYSTEM, SYSTEM_HV_ENABLED), 0x1, ERROR_CRITICAL));
             }
+            */
         }
 };
 

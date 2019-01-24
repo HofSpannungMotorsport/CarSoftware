@@ -15,13 +15,14 @@
 #define STD_MAX_POWER 80 // kW
 #define STD_POWER_SET_ON_MOTOR_CONTROLLER 80 // kW
 
-#define STD_AGE_LIMIT 0.1 // s
-#define STD_BRAKE_POWER_LOCK_THRESHHOLD 0.02 // 2% -> if brake is put down only this amount, the Gas Pedal will be blocked
+#define STD_AGE_LIMIT 0.3 // s
+#define STD_BRAKE_POWER_LOCK_THRESHHOLD 0.40 // 40% -> if brake is put down only this amount, the Gas Pedal will be blocked
 
 // FSG Rules relevant
 // EV2.3 -> APPS / Brake Pedal Plausibility Check
 #define STD_GAS_PEDAL_PRIME_MIN 0.05 // 5% -> Gas Pedal has to be lower than that to be primed (if unprimed)
 #define STD_HARD_BRAKE_THRESHHOLD 0.75 // 75% (it has to be 30 bar pressure in the brake circuit, but we don't have a Sensor connected to our Microcontrollers)
+#define STD_HARD_BRAKE_PRESSURE 30 // bar [il]
 #define STD_HARD_BRAKE_CUTOFF_TIME 0.5 // 500 ms -> unprime gas pedal if braked hard for longer than this
 #define STD_HARD_BRAKE_CUTOFF_APPS_POSITION 0.25 // 25% -> If equal or higher than that while hard brake, gas pedal will be unprimed
 #define STD_HARD_BRAKE_CUTOFF_POWER 25 // kW -> If Power at Output highter than that while hard brake, gas pedal will be unprimed
@@ -57,7 +58,7 @@ class MotorControllerService : public IService {
             // Only if ready, set calculated Power
             if (_ready) {
                 // Get pedal status (if brake is pushed -> gas pedal will be locked -> returns 0)
-                float returnValue = (float)_getPedalPower();
+                returnValue = (float)_getPedalPower();
 
                 if (_asrActive) {
                     returnValue = _ASR(returnValue);
@@ -70,12 +71,14 @@ class MotorControllerService : public IService {
             // Send new Power to Motor -> Brum Brum (but without the Brum Brum)
             // ...maybe a drivers scream ;)
             _motorController->setTorque(returnValue);
+            pcSerial.printf("%f\n", returnValue);
         }
 
     protected:
         CarService &_carService;
         IMotorController* _motorController;
         bool _ready = false;
+        bool _communicationStarted = false;
 
         struct _power {
             float max = STD_MAX_POWER,
@@ -183,6 +186,11 @@ class MotorControllerService : public IService {
                 _update(_frontRightWheel);
                 _update(_rearLeftWheel);
                 _update(_rearRightWheel);
+            }
+
+            if (!_communicationStarted) {
+                _motorController->beginCommunication();
+                _communicationStarted = true;
             }
         }
 
@@ -311,7 +319,7 @@ class MotorControllerService : public IService {
             */
 
             if (_power.max < _power.setOnController) {
-                returnValue = (_power.max / _power.setOnController) * returnValue;
+                returnValue = returnValue * _power.max / _power.setOnController;
             }
 
             return returnValue;

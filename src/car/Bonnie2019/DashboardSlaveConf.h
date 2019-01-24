@@ -34,8 +34,8 @@ class Dashboard {
     public:
         // Called once at bootup
         void setup() {
-            canService.addComponent((void*)&ledGreen, (IMessageHandler<CANMessage>*)&ledMessageHandler, NORMAL);
-            canService.addComponent((void*)&ledGreen, (IMessageHandler<CANMessage>*)&ledMessageHandler, NORMAL);
+            canService.addComponent((void*)&ledRed, (IMessageHandler<CANMessage>*)&ledMessageHandler, NORMAL);
+            canService.addComponent((void*)&ledYellow, (IMessageHandler<CANMessage>*)&ledMessageHandler, NORMAL);
             canService.addComponent((void*)&ledGreen, (IMessageHandler<CANMessage>*)&ledMessageHandler, NORMAL);
             canService.addComponent((void*)&buttonReset, (IMessageHandler<CANMessage>*)&buttonMessageHandler, NORMAL);
             canService.addComponent((void*)&buttonStart, (IMessageHandler<CANMessage>*)&buttonMessageHandler, NORMAL);

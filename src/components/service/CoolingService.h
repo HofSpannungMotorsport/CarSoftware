@@ -46,7 +46,8 @@ class CoolingService : public IService {
         }
 
         virtual void run() {
-            if (_hvEnabled) {
+            // [QF]
+            if (/*_hvEnabled*/ true) {
                 speed_value_t currentSpeed = _speedService.getSpeed();
 
                 // Activate Fan according to driving speed
@@ -58,8 +59,8 @@ class CoolingService : public IService {
                     _fan->setState(FAN_OFF);
                 }
 
-                uint8_t motorTemp = _motorController->getMotorTemp();
-                uint8_t controllerTemp = _motorController->getControllerTemp();
+                int16_t motorTemp = 60;//_motorController->getMotorTemp();
+                int16_t controllerTemp = 40;//_motorController->getServoTemp();
 
                 // Set Pump speed according to the temperature of the devices
                 float pumpMotor = ((float)motorTemp - (float)STD_MOTOR_TEMP_START_PUMP) * 1.0 / ((float)STD_MOTOR_TEMP_FULL_PUMP - (float)STD_MOTOR_TEMP_START_PUMP);

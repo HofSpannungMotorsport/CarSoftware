@@ -33,27 +33,25 @@ class IMotorController : public IID {
         virtual void setState() = 0;
 
         // Torque
-        virtual float getTorque() = 0;
         virtual void setTorque(float torque) = 0; // from 0 to 1.0
 
         // Speed
-        virtual int16_t getSpeed() = 0;
+        virtual float getSpeed() = 0;
 
         // Current
-        virtual uint8_t getCurrent() = 0;
-        virtual uint8_t getCurrentDevice() = 0;
+        virtual float getCurrent() = 0;
 
         // Temperature
-        virtual uint8_t getMotorTemp() = 0;
-        virtual uint8_t getControllerTemp() = 0;
-        virtual uint8_t getAirTemp() = 0;
+        virtual int16_t getMotorTemp() = 0;
+        virtual int16_t getServoTemp() = 0;
+        virtual int16_t getAirTemp() = 0;
 
         // Enable setter
         virtual void setRFE(motor_controller_rfe_enable_t state) = 0;
         virtual void setRUN(motor_controller_run_enable_t state) = 0;
 
-        // Enable getter
-        virtual bool getHardEnabled() = 0;
+        // Method to send interval times
+        virtual void beginCommunication() = 0;
 };
 
 #endif // IMOTORCONTROLLER_H

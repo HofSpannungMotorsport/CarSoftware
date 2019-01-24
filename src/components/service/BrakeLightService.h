@@ -6,8 +6,8 @@
 #include "../interface/IPedal.h"
 #include "../interface/ILed.h"
 
-#define STD_BRAKE_LIGHT_THRESHHOLD 0.01 // 1%
-#define STD_HARD_BRAKE_LIGHT_FLASH_THRESHHOLD 0.75 // 75%
+#define STD_BRAKE_LIGHT_LOWER_THRESHHOLD 0.20 // 30%
+#define STD_BRAKE_LIGHT_UPPER_THRESHHOLD 0.35
 
 class BrakeLightService : public IService {
     public:
@@ -21,10 +21,11 @@ class BrakeLightService : public IService {
             // If Brakeing -> light on
             // If not Brakeing -> light off
             // If Error or something else -> light on
+            pedal_value_t brakePedalValue = _brakePedal->getValue();
             if (_carService.getState() == READY_TO_DRIVE) {
-                if (_brakePedal->getValue() >= STD_BRAKE_LIGHT_THRESHHOLD) {
+                if (brakePedalValue >= STD_BRAKE_LIGHT_UPPER_THRESHHOLD) {
                     _brakeLight->setState(LED_ON);
-                } else {
+                } else if (brakePedalValue < STD_BRAKE_LIGHT_LOWER_THRESHHOLD) {
                     _brakeLight->setState(LED_OFF);
                 }
             } else {
