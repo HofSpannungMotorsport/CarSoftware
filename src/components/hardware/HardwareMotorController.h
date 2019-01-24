@@ -1,7 +1,7 @@
 #ifndef HARDWAREMOTORCONTROLLER_H
 #define HARDWAREMOTORCONTROLLER_H
 
-#include "bamocar-can.h"
+#include "BamocarD3.h"
 #include "../interface/IMotorController.h"
 
 #define STD_SPEED_REFRESH_TIME 240 // Hz
@@ -93,8 +93,8 @@ class HardwareMotorController : public IMotorController {
             return _bamocar.getMotorTemp();
         }
 
-        virtual int16_t getControllerTemp() {
-            return _bamocar.getControllerTemp();
+        virtual int16_t getServoTemp() {
+            return _bamocar.getServoTemp();
         }
 
         virtual int16_t getAirTemp() {
@@ -118,7 +118,7 @@ class HardwareMotorController : public IMotorController {
         }
 
     protected:
-        Bamocar _bamocar;
+        BamocarD3 _bamocar;
         DigitalOut _rfe;
         DigitalOut _run;
 

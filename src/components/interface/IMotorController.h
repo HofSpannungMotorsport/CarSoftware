@@ -42,9 +42,9 @@ class IMotorController : public IID {
         virtual float getCurrent() = 0;
 
         // Temperature
-        virtual uint8_t getMotorTemp() = 0;
-        virtual uint8_t getControllerTemp() = 0;
-        virtual uint8_t getAirTemp() = 0;
+        virtual int16_t getMotorTemp() = 0;
+        virtual int16_t getServoTemp() = 0;
+        virtual int16_t getAirTemp() = 0;
 
         // Enable setter
         virtual void setRFE(motor_controller_rfe_enable_t state) = 0;
