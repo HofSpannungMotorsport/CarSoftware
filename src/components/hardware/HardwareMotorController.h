@@ -28,11 +28,9 @@ class HardwareMotorController : public IMotorController {
         }
 
         void beginCommunication() {
-            _bamocar.requestSpeed(1000 / STD_SPEED_REFRESH_TIME);
-            _bamocar.requestCurrent(1000 / STD_CURRENT_REFRESH_TIME);
-            _bamocar.requestMotorTemp(1000 / STD_MOTOR_TEMP_REFRESH_TIME);
-            _bamocar.requestControllerTemp(1000 / STD_CONTROLLER_TEMP_REFRESH_TIME);
-            _bamocar.requestAirTemp(1000 / STD_AIR_TEMP_REFRESH_TIME);
+            _bamocar.requestSpeed(1000 / (float)STD_SPEED_REFRESH_TIME);
+            _bamocar.requestCurrent(1000 / (float)STD_CURRENT_REFRESH_TIME);
+            _bamocar.requestTemp(1000 / (float)STD_MOTOR_TEMP_REFRESH_TIME);
         }
 
         virtual motor_controller_status_t getStatus() {
@@ -48,20 +46,11 @@ class HardwareMotorController : public IMotorController {
             // (not naming it Status because otherwise it conflicts with the Status naming of the other components,
             // so to have a consistant naming and to save errors in "Status", we use the naming State here)
             // [il]
-            return _bamocar.getStatus();
+            return 0;
         }
 
         virtual void setState() {
             // No implementation needed
-        }
-
-        // To be able to check the Status of the Motor Controller befor starting the whole communication, add a dedicated request method
-        void requestState() {
-            _bamocar.requestStatus();
-        }
-
-        virtual float getTorque() {
-            return _bamocar.getTorque();
         }
 
         virtual void setTorque(float torque) {
@@ -100,15 +89,15 @@ class HardwareMotorController : public IMotorController {
             return _bamocar.getCurrent();
         }
 
-        virtual uint8_t getMotorTemp() {
+        virtual int16_t getMotorTemp() {
             return _bamocar.getMotorTemp();
         }
 
-        virtual uint8_t getControllerTemp() {
+        virtual int16_t getControllerTemp() {
             return _bamocar.getControllerTemp();
         }
 
-        virtual uint8_t getAirTemp() {
+        virtual int16_t getAirTemp() {
             return _bamocar.getAirTemp();
         }
 
@@ -126,10 +115,6 @@ class HardwareMotorController : public IMotorController {
             } else {
                 _run = 0;
             }
-        }
-
-        virtual bool getHardEnabled() {
-            return _bamocar.getHardEnable();
         }
 
     protected:

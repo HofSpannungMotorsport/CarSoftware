@@ -33,7 +33,6 @@ class IMotorController : public IID {
         virtual void setState() = 0;
 
         // Torque
-        virtual float getTorque() = 0;
         virtual void setTorque(float torque) = 0; // from 0 to 1.0
 
         // Speed
@@ -50,9 +49,6 @@ class IMotorController : public IID {
         // Enable setter
         virtual void setRFE(motor_controller_rfe_enable_t state) = 0;
         virtual void setRUN(motor_controller_run_enable_t state) = 0;
-
-        // Enable getter
-        virtual bool getHardEnabled() = 0;
 
         // Method to send interval times
         virtual void beginCommunication() = 0;

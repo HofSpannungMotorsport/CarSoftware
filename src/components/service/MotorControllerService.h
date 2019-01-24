@@ -16,7 +16,7 @@
 #define STD_POWER_SET_ON_MOTOR_CONTROLLER 80 // kW
 
 #define STD_AGE_LIMIT 0.1 // s
-#define STD_BRAKE_POWER_LOCK_THRESHHOLD 0.02 // 2% -> if brake is put down only this amount, the Gas Pedal will be blocked
+#define STD_BRAKE_POWER_LOCK_THRESHHOLD 0.40 // 40% -> if brake is put down only this amount, the Gas Pedal will be blocked
 
 // FSG Rules relevant
 // EV2.3 -> APPS / Brake Pedal Plausibility Check
@@ -58,7 +58,7 @@ class MotorControllerService : public IService {
             // Only if ready, set calculated Power
             if (_ready) {
                 // Get pedal status (if brake is pushed -> gas pedal will be locked -> returns 0)
-                float returnValue = (float)_getPedalPower();
+                returnValue = (float)_getPedalPower();
 
                 if (_asrActive) {
                     returnValue = _ASR(returnValue);
