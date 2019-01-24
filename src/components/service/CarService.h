@@ -148,6 +148,7 @@ class CarService : public IService {
             _led.red->setState(LED_ON);
             _sendLedsOverCan();
 
+            // [QF]
             /*
             while(!_hvEnabled) {
                 canService.processInbound();
@@ -259,6 +260,7 @@ class CarService : public IService {
             // Set RFE enable
             _motorController->setRFE(MOTOR_CONTROLLER_RFE_ENABLE);
 
+            // [QF]
             //Start beeping to signalize car is started
             _buzzer->setBeep(BUZZER_MONO_TONE);
             _buzzer->setState(BUZZER_ON);
@@ -413,6 +415,7 @@ class CarService : public IService {
         }
 
         void _checkHvEnabled() {
+            // [QF]
             /*
             if (!_hvEnabled) {
                 addError(Error(ID::getComponentId(SYSTEM, SYSTEM_HV_ENABLED), 0x1, ERROR_CRITICAL));

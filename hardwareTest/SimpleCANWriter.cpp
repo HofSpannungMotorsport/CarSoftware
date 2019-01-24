@@ -1,5 +1,3 @@
-// Copyed from https://os.mbed.com/handbook/CAN and modifyed
-
 #include "mbed.h"
 
 #ifndef MESSAGE_REPORT
@@ -27,14 +25,30 @@ void receivedMessage() {
     }
 }
 
-void CANSniffer() {
-    printf("CANSniffer listening\n\n");
-    can1.attach(receivedMessage);
-    while(1) {
-        if(can1.rderror() || can1.tderror()) {
-            printf("\nCAN Errors:\n\tRD: %i\n\tTD: %i\n\n", can1.rderror(), can1.tderror());
-            can1.reset();
-        }
-        wait(1);
+void checkErrors() {
+    if(can1.rderror() || can1.tderror()) {
+        printf("\nCAN Errors:\n\tRD: %i\n\tTD: %i\n\n", can1.rderror(), can1.tderror());
+        can1.reset();
     }
+}
+
+void SimpleCANWriter() {
+    printf("SimpleCANWriter\n\n");
+    can1.attach(receivedMessage);
+    Ticker errorChecker;
+    errorChecker.attach(&checkErrors, 2);
+
+    wait(0.01);
+    CANMessage msg;
+    msg.format = CANStandard;
+
+    msg.id = 0x201;
+    msg.len = 3;
+    msg.data[0] = 0x3D;
+    msg.data[1] = 0x30;
+    msg.data[2] = 0x00;
+
+    can1.write(msg);
+
+    while(1) {}
 }
