@@ -18,7 +18,7 @@
 #define STD_ANALOG_LOWER_BOUNDARY   655 // uint16_t min ->     0
 #define STD_ANALOG_UPPER_BOUNDARY 64880 // uint16_t max -> 65535
 
-#define STD_PEDAL_THRESHHOLD 0.10 // 10%
+#define STD_PEDAL_THRESHHOLD 0.15 // 15%
 
 class HardwarePedal : public IPedal {
     public:

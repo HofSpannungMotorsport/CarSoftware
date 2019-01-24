@@ -15,7 +15,7 @@
 #define STD_MAX_POWER 80 // kW
 #define STD_POWER_SET_ON_MOTOR_CONTROLLER 80 // kW
 
-#define STD_AGE_LIMIT 0.1 // s
+#define STD_AGE_LIMIT 0.3 // s
 #define STD_BRAKE_POWER_LOCK_THRESHHOLD 0.40 // 40% -> if brake is put down only this amount, the Gas Pedal will be blocked
 
 // FSG Rules relevant
@@ -71,6 +71,7 @@ class MotorControllerService : public IService {
             // Send new Power to Motor -> Brum Brum (but without the Brum Brum)
             // ...maybe a drivers scream ;)
             _motorController->setTorque(returnValue);
+            pcSerial.printf("%f\n", returnValue);
         }
 
     protected:

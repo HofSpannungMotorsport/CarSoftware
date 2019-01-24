@@ -91,6 +91,7 @@ class CarService : public IService {
             while(!_errorRegister.empty()) {
                 Error error;
                 _errorRegister.pop(error);
+                pcSerial.printf("[CarService]@processErrors: Got Error at 0x%x with error code 0x%x and error type 0x%x !\n", error.componentId, error.code, error.type);
                 if (error.type >= ERROR_UNDEFINED) {
                     _resetLeds();
                     if (error.type >= ERROR_SYSTEM) {
