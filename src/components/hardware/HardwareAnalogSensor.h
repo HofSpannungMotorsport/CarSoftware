@@ -4,7 +4,8 @@
 #include "../interface/IAnalogSensor.h"
 #include "mbed.h"
 
-#define STD_OUT_OF_BOUNDARY_TIME_LIMIT 100
+#define STD_OUT_OF_BOUNDARY_TIME_LIMIT 99
+#define STD_OUT_OF_BOUNDARY_TIME_LIMIT_RAW 89
 
 
 class HardwareAnalogSensor : public IAnalogSensor {
@@ -101,7 +102,7 @@ class HardwareAnalogSensor : public IAnalogSensor {
         virtual analog_sensor_t getValue() {
             if (!_map.set) return 0;
 
-            analog_sensor_t mappedValue = _getMapped(_pin.read_u16());
+            analog_sensor_t mappedValue = _getMapped(getRawValue());
             analog_sensor_t returnValue = mappedValue;
 
             bool outOfBoundary = false;
@@ -207,10 +208,10 @@ class HardwareAnalogSensor : public IAnalogSensor {
             uint16_t outTimerLimit = STD_OUT_OF_BOUNDARY_TIME_LIMIT;
 
             struct raw {
-                analog_sensor_raw_t lowerEnd = 0, upperEnd = 65535;
+                analog_sensor_raw_t lowerEnd = 66, upperEnd = 65469;
                 Timer outTimer = Timer();
                 bool outTimerStarted = false;
-                uint16_t outTimerLimit = STD_OUT_OF_BOUNDARY_TIME_LIMIT;
+                uint16_t outTimerLimit = STD_OUT_OF_BOUNDARY_TIME_LIMIT_RAW;
             } raw;
         } _boundary;
 

@@ -146,6 +146,7 @@ class Master {
         // Called repeately after bootup
         void loop() {
             services.run();
+            wait(0.001);
         }
     
     protected:

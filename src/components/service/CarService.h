@@ -191,23 +191,33 @@ class CarService : public IService {
             _pedal.brake->setCalibrationStatus(CURRENTLY_NOT_CALIBRATING);
             _sendPedalsOverCan();
 
+            wait(0.1);
+            canService.processInbound();
+            _led.yellow->setState(LED_OFF);
+            _sendLedsOverCan();
+
+
 
             // Wait till the Button got released again
             // Yellow -> Off
             while(_button.start->getState() != NOT_PRESSED) {
                 canService.processInbound();
             }
-            _led.yellow->setState(LED_OFF);
-            _sendLedsOverCan();
 
             wait(0.1);
 
 
             // Check for Errors at Calibration
             canService.processInbound();
-            if ((_pedal.gas->getStatus() > 0) || (_pedal.brake->getStatus() > 0)) {
-                _state = CAR_ERROR;
+            if (_pedal.gas->getStatus() > 0) {
+                _pedalError(_pedal.gas);
             }
+
+            if (_pedal.brake->getStatus() > 0) {
+                _pedalError(_pedal.brake);
+            }
+
+            processErrors();
 
 
             // If all OK, go into Almost Ready to drive
@@ -413,6 +423,10 @@ class CarService : public IService {
 
         void _stopTestOutputs() {
             _turnOffLed();
+        }
+
+        void _pedalError(IPedal* sensorId) {
+            addError(Error(ID::getComponentId(sensorId->getTelegramTypeId(), sensorId->getComponentId()), sensorId->getStatus(), ERROR_CRITICAL));
         }
 
         void _checkHvEnabled() {

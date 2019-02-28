@@ -36,7 +36,6 @@ enum can_telegram_type_t : uint8_t {
     COOLING =           0x4,
     BUTTON =            0x5,
     LED =               0x6,
-    RPM =               0x7,
     SUSPENSION_TRAVEL = 0x8,
     ACCELERATION =      0x9,
     GYROSCOPE =         0xA,
@@ -75,17 +74,11 @@ enum can_component_t : uint8_t {
     LED_DASHBOARD =      0x5, // green LED on the board PCB (dashboard)
     LED_PEDAL =          0x6, // green LED on the board PCB (pedal)
 
-    // RPM sensors
-    RPM_TIRE_FR = 0x0,
-    RPM_TIRE_FL = 0x1,
-    RPM_TIRE_RR = 0x2,
-    RPM_TIRE_RL = 0x3,
-
     // Suspension travel sensors
-    STS_FR = 0x0,
-    STS_FL = 0x1,
-    STS_RR = 0x2,
-    STS_RL = 0x3,
+    SUSPENSION_TRAVEL_FR = 0x0,
+    SUSPENSION_TRAVEL_FL = 0x1,
+    SUSPENSION_TRAVEL_RR = 0x2,
+    SUSPENSION_TRAVEL_RL = 0x3,
 
     // Buzzer
     BUZZER_ALARM = 0x0,

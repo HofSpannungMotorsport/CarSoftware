@@ -55,17 +55,8 @@ class HardwarePedal : public IPedal {
         }
 
         virtual pedal_status_t getStatus() {
-            pedal_error_type_t analogSensorError = ANALOG_SENSOR_ERROR;
-
-            if (_pin1.getStatus() > 0) {
-                _status |= analogSensorError;
-            }
-            
-            if (_secondSensor) {
-                if (_pin2.getStatus() > 0) {
-                    _status |= analogSensorError;
-                }
-            }
+            _status |= (_pin1.getStatus() << 4);
+            _status |= (_pin2.getStatus() << 4);
 
             return _status;
         }

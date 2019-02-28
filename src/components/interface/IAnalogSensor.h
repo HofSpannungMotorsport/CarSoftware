@@ -10,11 +10,10 @@ typedef float analog_sensor_boundary_t;
 
 typedef uint8_t analog_sensor_status_t;
 enum analog_sensor_error_type_t : uint8_t {
-    UNDEFINED_ANALOG_SENSOR_ERROR = 0x1,
-    DISCONNECTED =                  0x2,
-    SHORT_CIRCUIT =                 0x4,
-    OUT_OF_BOUNDARY =               0x8,
-    BOUNDARY_CHECK_FAIL =          0x10
+    DISCONNECTED =                  0x1,
+    SHORT_CIRCUIT =                 0x2,
+    OUT_OF_BOUNDARY =               0x4,
+    BOUNDARY_CHECK_FAIL =           0x8
 };
 
 class IAnalogSensor {

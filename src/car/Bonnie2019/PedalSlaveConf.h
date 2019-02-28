@@ -43,6 +43,8 @@ class Pedal {
             canService.addComponent((void*)&rpmFrontRight, (IMessageHandler<CANMessage>*)&rpmSensorMessageHandler, NORMAL);
             canService.addComponentToSendLoop((void*)&rpmFrontLeft);
             canService.addComponentToSendLoop((void*)&rpmFrontRight);
+
+            wait(0.1);
         }
     
         // Called repeately after bootup
