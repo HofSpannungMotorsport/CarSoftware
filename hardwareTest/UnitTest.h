@@ -2,7 +2,8 @@
 // runtime.setup() gets called at the beginning,
 // runtime.loop() gets called then over and over again...
 
-#include "SimpleCANWriter.cpp"
+// Include the test program here
+#include ".cpp"
 
 class UnitTest {
     public:
@@ -11,7 +12,8 @@ class UnitTest {
         }
 
         void loop() {
-            SimpleCANWriter();
+            // Main Function here, it will be called constantly
+            
         }
 };
 
