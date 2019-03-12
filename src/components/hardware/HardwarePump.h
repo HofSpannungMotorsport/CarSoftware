@@ -5,14 +5,15 @@
 
 class HardwarePump : public IPump {
     public:
-        HardwarePump(PinName port) : _port(port) {
-            _port.write(0);
+        HardwarePump(PinName pwmPort, PinName enablePort) : _pwmPort(pwmPort), _enablePort(enablePort) {
+            _enablePort.write(0);
+            _pwmPort.write(0);
 
             _telegramTypeId = COOLING;
             _objectType = HARDWARE_OBJECT;
         }
 
-        HardwarePump(PinName port, can_component_t componentId) : HardwarePump(port) {
+        HardwarePump(PinName pwmPort, PinName enablePort, can_component_t componentId) : HardwarePump(pwmPort, enablePort) {
             _componentId = componentId;
         }
 
@@ -20,15 +21,24 @@ class HardwarePump : public IPump {
             if (speed > 1) speed = 1;
             if (speed < 0) speed = 0;
 
-            _port.write(speed);
+            _pwmPort.write(speed);
         }
 
         virtual pump_speed_t getSpeed() {
-            return _port.read();
+            return _pwmPort.read();
+        }
+
+        virtual void setEnable(pump_enable_t enable) {
+            _enablePort.write(enable);
+        }
+
+        virtual pump_enable_t getEnable() {
+            return _enablePort.read();
         }
 
     protected:
-        PwmOut _port;
+        PwmOut _pwmPort;
+        DigitalOut _enablePort;
 };
 
 #endif // HARDWAREPUMP_H

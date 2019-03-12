@@ -8,7 +8,7 @@ typedef uint8_t pedal_status_t;
 enum pedal_error_type_t : uint8_t {
     SENSOR_DEVIANCE_TOO_HIGH =             0x1,
     CALIBRATION_FAILED_TOO_LOW_DEVIANCE =  0x2,
-    CALIBRATION_FAILED_TOO_HIGH_DEVIANCE = 0x4,
+    CALIBRATION_FAILED_TOO_HIGH_DEVIANCE = 0x4, 
     CALIBRATION_FAILED_WRONG_CONFIG =      0x8
 };
 

@@ -81,7 +81,9 @@ class CoolingService : public IService {
                     newPumpPower = 0;
 
                 // Apply pump power
-                _pump->setSpeed(newPumpPower);
+                //_pump->setSpeed(newPumpPower);
+                // [QF]
+                _pump->setSpeed(0); // Disable Pump until water is filled in the Tank, otherwise the Pump would be killed
 
                 // At least after setting the pump, check if the temperature of any device is too high
                 if (motorTemp > STD_MAX_MOTOR_TEMP) {

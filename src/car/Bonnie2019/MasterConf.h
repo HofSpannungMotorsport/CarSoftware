@@ -77,7 +77,7 @@ HardwareMotorController motorController(MASTER_PIN_MOTOR_CONTROLLER_CAN_RD, MAST
 //HardwareRpmSensor rpmRearLeft(MASTER_PIN_RPM_SENSOR_HL, RPM_REAR_LEFT); // [il]
 //HardwareRpmSensor rpmRearRight(MASTER_PIN_RPM_SENSOR_HR, RPM_REAR_RIGHT); // [il]
 HardwareFan coolingFan(MASTER_PIN_FAN, COOLING_FAN);
-HardwarePump coolingPump(MASTER_PIN_PUMP_PWM, COOLING_PUMP);
+HardwarePump coolingPump(MASTER_PIN_PUMP_PWM, MASTER_PIN_PUMP_ENABLE, COOLING_PUMP);
 HardwareBuzzer buzzer(MASTER_PIN_BUZZER, BUZZER_ALARM);
 DigitalIn hvEnabled(MASTER_PIN_HV_ENABLED);
 
