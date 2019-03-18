@@ -2,6 +2,7 @@
 // runtime.setup() gets called at the beginning,
 // runtime.loop() gets called then over and over again...
 
+#include "mbed.h"
 #ifndef MESSAGE_REPORT
     #define MESSAGE_REPORT
     Serial pcSerial(USBTX, USBRX); // Connection to PC over Serial
