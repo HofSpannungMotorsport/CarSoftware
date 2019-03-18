@@ -2,10 +2,6 @@
 #include "../src/components/hardware/HardwarePedal.h"
 #include "../src/components/software/SoftwarePedal.h"
 
-#ifndef MESSAGE_REPORT
-    #define MESSAGE_REPORT
-    Serial pcSerial(USBTX, USBRX); // Connection to PC over Serial
-#endif
 
 //#define PEDAL_MESSAGE_HANDLER_DEBUG
 #include "../src/can/PedalMessageHandler.h"

@@ -13,11 +13,6 @@ HardwareInterruptButton calibrationButton(USER_BUTTON);
 
 HardwarePedal pedal(PEDAL_PIN1, PEDAL_PIN2, PEDAL_GAS);
 
-#ifndef MESSAGE_REPORT
-    #define MESSAGE_REPORT
-    Serial pcSerial(USBTX, USBRX); // Connection to PC over Serial
-#endif
-
 void HardwarePedalUnitTest() {
     // Pedal Unit Test
     // Calibrate and test a Pedal

@@ -76,58 +76,20 @@ void releaseAll() {
     ledExtra = 0;
 }
 
-void MasterOutputTest() {
-    /*
-       Hi :)
-       Today we want to test the outputs of the master
-       Will the relais work?
-       Has Anton made the right desicions by soldering while drinking?
-       Will we see great sparks?
-      
-       Let's Start our Test!!! :DDDDD
-    */
-
+void RFEandRUNtest() {
     // At first, release all
     releaseAll();
 
-    pcSerial.printf("\nHi! I'm Bert. I am your pin test bot. Let's Start! Just press the Blue Button on the Master Board\n\n");
-    waitForClick();
-
-    pcSerial.printf("Current input Values:\n\tSpringTravelSensor HL: %i\n\tSpringTravelSensor HR: %i\n\tHV Enable: %i\n\tRPM HL: %i\n\tRPM HR: %i\n\n",
-        springTravelSensorHL.read_u16(), springTravelSensorHR.read_u16(), enabledHV.read(), rpmHL.read(), rpmHR.read());
-
-
-    testPin("Buzzer", buzzer);
-
-    string message = "Click button to turn On:  RFE and than RUN\n";
-    pcSerial.printf("%s", message.c_str());
+    pcSerial.printf("Click button to turn On:  RFE\n");
     waitForClick();
     enableRFE = 1;
-    wait(0.5);
+
+    pcSerial.printf("Click button to turn On:  RUN\n");
+    waitForClick();
     enableRUN = 1;
 
-    message = "Click button to turn Off: RFE and RUN\n";
-    pcSerial.printf("%s", message.c_str());
+    pcSerial.printf("Click button to turn Off: RFE and RUN\n\n");
     waitForClick();
     enableRFE = 0;
     enableRUN = 0;
-
-
-    testPin("Brake Light", brakeLight);
-    testPin("Pump Enable", pumpEnable);
-
-    pcSerial.printf("Click button to turn On:  Pump PWM\n");
-    waitForClick();
-    pumpPWM = 0.5;
-
-    pcSerial.printf("Click button to turn Off: Pump PWM\n");
-    waitForClick();
-    pumpPWM = 0;
-
-    testPin("Cooling Fans", coolingFans);
-    testPin("LED HV Enabled", ledHVEnabled);
-    testPin("LED Error", ledError);
-    testPin("LED Extra", ledExtra);
-
-    pcSerial.printf("Finish! Hope everything was right. If not, look in the Pins_Master.h\n\nStarting all over again :D\n\n");
 }

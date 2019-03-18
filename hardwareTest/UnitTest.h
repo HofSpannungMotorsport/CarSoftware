@@ -5,6 +5,11 @@
 // Include the test program here
 #include ".cpp"
 
+#ifndef MESSAGE_REPORT
+    #define MESSAGE_REPORT
+    Serial pcSerial(USBTX, USBRX); // Connection to PC over Serial
+#endif
+
 class UnitTest {
     public:
         void setup() {

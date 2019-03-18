@@ -7,10 +7,6 @@ SoftwareButton testSoftwareButton = SoftwareButton();
 
 ButtonMessageHandler buttonHandler;
 
-#ifndef MESSAGE_REPORT
-    Serial pcSerial(USBTX, USBRX); // Connection to PC over Serial
-#endif
-
 void ButtonUnitTest() {
     // Button Unit Test
     // Printout the different Stats for the Button

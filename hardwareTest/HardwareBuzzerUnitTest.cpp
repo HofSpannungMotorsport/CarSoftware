@@ -5,10 +5,6 @@
 
 HardwareBuzzer buzzer(BUZZER_PIN, BUZZER_ALARM);
 
-#ifndef MESSAGE_REPORT
-    Serial pcSerial(USBTX, USBRX); // Connection to PC over Serial
-#endif
-
 void HardwareBuzzerUnitTest() {
     pcSerial.printf("BUZZER_MOMO_TONE\n");
     buzzer.setBeep(BUZZER_MONO_TONE);

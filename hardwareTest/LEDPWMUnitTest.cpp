@@ -13,9 +13,6 @@ HardwareLedPwm hardwareLed = HardwareLedPwm(LED_PIN, LED_DASHBOARD);
 SoftwareLed led = SoftwareLed(LED_DASHBOARD);
 LEDMessageHandler ledMessageHandler;
 
-#ifndef MESSAGE_REPORT
-    Serial pcSerial(USBTX, USBRX); // Connection to PC over Serial
-#endif
 
 void syncLed() {
     CANMessage msg;

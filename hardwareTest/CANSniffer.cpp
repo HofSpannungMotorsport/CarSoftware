@@ -2,11 +2,6 @@
 
 #include "mbed.h"
 
-#ifndef MESSAGE_REPORT
-    #define MESSAGE_REPORT
-    Serial pcSerial(USBTX, USBRX, 9600); // Connection to PC over Serial
-#endif
-
 #ifdef STM32F446xx
     #define CAN1_CONF PB_8,PB_9 // Car intern
 #else

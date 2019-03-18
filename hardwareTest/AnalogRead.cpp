@@ -17,9 +17,6 @@ AnalogIn analogPin2(PIN2);
 AnalogIn analogPin3(PIN3);
 PwmOut led(LED2);
 
-#ifndef MESSAGE_REPORT
-    Serial pcSerial(USBTX, USBRX); // Connection to PC over Serial
-#endif
 
 Ticker analogRead;
 uint16_t currentAnalogValue,

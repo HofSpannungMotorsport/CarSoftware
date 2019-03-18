@@ -9,10 +9,6 @@ HardwareRpmSensor rpmSensor(RPM_PIN, RPM_FRONT_LEFT);
 SoftwareRpmSensor softwareRpmSensor(RPM_FRONT_LEFT);
 RpmSensorMessageHandler rpmSensorMessageHandler;
 
-#ifndef MESSAGE_REPORT
-    Serial pcSerial(USBTX, USBRX); // Connection to PC over Serial
-#endif
-
 void RPMSensorUnitTest() {
     pcSerial.printf("RPM Sensor Unit Test\n\n");
 

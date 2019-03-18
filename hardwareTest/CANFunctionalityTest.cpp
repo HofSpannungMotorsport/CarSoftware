@@ -18,32 +18,32 @@ CAN can1(CAN1_CONF, 250000);
 char counter = 0;
 
 void send() {
-    printf("send()\n");
+    pcSerial.printf("send()\n");
     if(can1.write(CANMessage(id, &counter, 1))) {
-        printf("wloop()\n");
+        pcSerial.printf("wloop()\n");
         counter++;
-        printf("Message sent: %d\n\n", counter);
+        pcSerial.printf("Message sent: %d\n\n", counter);
         led1 = !led1;
     } else {
-        printf("wloop() error\n\n");
+        pcSerial.printf("wloop() error\n\n");
     }
 }
 
 void CANFunctionalityTest() {
-    printf("main()\n\n");
+    pcSerial.printf("main()\n\n");
     ticker.attach(&send, 2);
     CANMessage msg;
     while(1) {
-        printf("loop()\n");
+        pcSerial.printf("loop()\n");
         if(can1.read(msg)) {
-            printf("Message received: %d\n", msg.data[0]);
+            pcSerial.printf("Message received: %d\n", msg.data[0]);
         }
 
         if(can1.rderror() || can1.tderror()) {
-            printf("CAN Errors:\n\tRD: %i\n\tTD: %i\n\n", can1.rderror(), can1.tderror());
+            pcSerial.printf("CAN Errors:\n\tRD: %i\n\tTD: %i\n\n", can1.rderror(), can1.tderror());
             can1.reset();
         } else {
-            printf("\n");
+            pcSerial.printf("\n");
         }
         wait(0.5);
     }

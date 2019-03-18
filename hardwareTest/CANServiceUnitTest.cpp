@@ -9,11 +9,6 @@
 
 #include "mbed.h"
 
-#ifndef MESSAGE_REPORT
-    #define MESSAGE_REPORT
-    Serial pcSerial(USBTX, USBRX, 9600); // Connection to PC over Serial
-#endif
-
 //#define CAN_DEBUG
 
 #include "../src/can/can_config.h"

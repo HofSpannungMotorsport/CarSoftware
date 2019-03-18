@@ -14,10 +14,6 @@ SoftwareLed led = SoftwareLed(LED_DASHBOARD);
 LEDMessageHandler ledMessageHandler;
 
 
-#ifndef MESSAGE_REPORT
-    Serial pcSerial(USBTX, USBRX); // Connection to PC over Serial
-#endif
-
 void setLed(led_blinking_t mode) {
     CANMessage msg;
     led.setBlinking(mode);
