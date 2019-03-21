@@ -15,7 +15,7 @@ DigitalOut pumpEnable(MASTER_PIN_PUMP_ENABLE);
 PwmOut pumpPWM(MASTER_PIN_PUMP_PWM);
 
 // Cooling Fans
-DigitalOut coolingFans(MASTER_PIN_FAN);
+DigitalOut coolingFan(MASTER_PIN_FAN);
 
 
 void waitForClick() {
@@ -25,8 +25,8 @@ void waitForClick() {
 
 void releaseAll() {
     pumpEnable = 0;
-    pumpPWM = 0;
-    coolingFans = 0;
+    pumpPWM = 1;
+    coolingFan = 0;
 }
 
 void PumpRefill() {
@@ -38,10 +38,10 @@ void PumpRefill() {
     pcSerial.printf("Setting Pump Enable now\n");
     pumpEnable = 1;
 
-    pcSerial.prinf("Pump now primed. Starting pump in 2 Seconds... ");
+    pcSerial.printf("Pump now primed. Starting pump in 2 Seconds... ");
     wait(2.0);
 
-    pcSerial.printf("Starting now\n\n");
+    pcSerial.printf("Starting now\n");
 
     {
         Timer timer;
@@ -49,14 +49,26 @@ void PumpRefill() {
         timer.start();
 
         float currentTime = 0.0;
-        while(currentTime < PUMP_TIME_UNTIL_MAX_POWER) {
-            pumpPWM = (currentTime / PUMP_TIME_UNTIL_MAX_POWER);
-            currentTime = timer.read();
+        
+
+        for (uint8_t i = 1; i <= 10; i++) {
+            while(currentTime < PUMP_TIME_UNTIL_MAX_POWER/10*i) {
+                pumpPWM = 1 - (currentTime / PUMP_TIME_UNTIL_MAX_POWER);
+                currentTime = timer.read();
+            }
+
+            pcSerial.printf("%i0%%\n", i);
         }
     }
 
-    pumpPWM = 1;
+    pumpPWM = 0;
 
+    pcSerial.printf("Pump now now fully throtteled\nClick Button to start Fan\n");
+    waitForClick();
 
-    while(true); // Wait forever
+    coolingFan = 1;
+
+    pcSerial.printf("Fan on\n\n");
+
+    waitForClick();
 }

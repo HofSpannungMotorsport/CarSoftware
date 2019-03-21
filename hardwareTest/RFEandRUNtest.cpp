@@ -7,44 +7,9 @@
 
 HardwareInterruptButton buttonNext(MASTER_PIN_USER_BUTTON, BUTTON_START);
 
-// AnalogIn Spring Travel Sensor
-AnalogIn springTravelSensorHL(MASTER_PIN_SPRING_TRAVEL_SENSOR_HL);
-AnalogIn springTravelSensorHR(MASTER_PIN_SPRING_TRAVEL_SENSOR_HR);
-
-// Dout Buzzer
-DigitalOut buzzer(MASTER_PIN_BUZZER);
-
 // Dout Enable Pins for Motor Controller
 DigitalOut enableRFE(MASTER_PIN_RFE_ENABLE);
 DigitalOut enableRUN(MASTER_PIN_RUN_ENABLE);
-
-// Dout Brake Light
-DigitalOut brakeLight(MASTER_PIN_BRAKE_LIGHT);
-
-// Dout Pump enable
-DigitalOut pumpEnable(MASTER_PIN_PUMP_ENABLE);
-
-// PWMOut Pump
-PwmOut pumpPWM(MASTER_PIN_PUMP_PWM);
-
-// Cooling Fans
-DigitalOut coolingFans(MASTER_PIN_FAN);
-
-// HV Enable
-DigitalIn enabledHV(MASTER_PIN_HV_ENABLED);
-
-// Din RPM Sensors
-DigitalIn rpmHL(MASTER_PIN_RPM_SENSOR_HL);
-DigitalIn rpmHR(MASTER_PIN_RPM_SENSOR_HR);
-
-// Dout LED HV Enabled
-DigitalOut ledHVEnabled(MASTER_PIN_LED_HV_ENABLED);
-
-// Dout LED Error
-DigitalOut ledError(MASTER_PIN_LED_ERROR);
-
-// DOUT LED Extra
-DigitalOut ledExtra(MASTER_PIN_LED_EXTRA);
 
 void waitForClick() {
     while(buttonNext.getState() != NOT_PRESSED);
@@ -63,22 +28,10 @@ void testPin(string deviceName, DigitalOut &device) {
     device = 0;
 }
 
-void releaseAll() {
-    buzzer = 0;
-    enableRFE = 0;
-    enableRUN = 0;
-    brakeLight = 0;
-    pumpEnable = 0;
-    pumpPWM = 0;
-    coolingFans = 0;
-    ledHVEnabled = 0;
-    ledError = 0;
-    ledExtra = 0;
-}
-
 void RFEandRUNtest() {
     // At first, release all
-    releaseAll();
+    enableRFE = 0;
+    enableRUN = 0;
 
     pcSerial.printf("Click button to turn On:  RFE\n");
     waitForClick();
