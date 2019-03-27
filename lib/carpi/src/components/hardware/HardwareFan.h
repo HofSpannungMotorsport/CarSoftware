@@ -8,12 +8,12 @@ class HardwareFan : public IFan {
         HardwareFan(PinName port) : _port(port) {
             _port = 0;
 
-            _telegramTypeId = COOLING;
-            _objectType = HARDWARE_OBJECT;
+            setComponentType(COMPONENT_COOLING);
+            setObjectType(OBJECT_HARDWARE)
         }
 
-        HardwareFan(PinName port, can_component_t componentId) : HardwareFan(port) {
-            _componentId = componentId;
+        HardwareFan(PinName port, id_sub_component_t componentSubId) : HardwareFan(port) {
+            setComponentSubId(componentSubId);
         }
 
         virtual void setState(fan_state_t state) {

@@ -6,13 +6,13 @@
 class SoftwarePedal : public IPedal {
     public:
         SoftwarePedal() {
-            _telegramTypeId = PEDAL;
-            _objectType = SOFTWARE_OBJECT;
+            setComponentType(COMPONENT_PEDAL);
+            setObjectType(OBJECT_SOFTWARE);
         }
 
-        SoftwarePedal(can_component_t componentId)
+        SoftwarePedal(id_sub_component_t componentSubId)
             : SoftwarePedal() {
-            _componentId = componentId;
+            setComponentSubId(componentSubId);
         }
 
         virtual void setProportionality(pedal_sensor_type_t proportionality, uint16_t sensorNumber = 0) {

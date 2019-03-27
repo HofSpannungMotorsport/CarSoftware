@@ -10,13 +10,14 @@ class SoftwareButton : public IButton {
         SoftwareButton() {
             _status = 0;
             _lastState = NOT_PRESSED;
-            _telegramTypeId = BUTTON;
-            _objectType = SOFTWARE_OBJECT;
+            
+            setComponentType(COMPONENT_BUTTON);
+            setObjectType(OBJECT_SOFTWARE);
         }
 
-        SoftwareButton(can_component_t componentId)
+        SoftwareButton(id_sub_component_t componentSubId)
             : SoftwareButton() {
-            _componentId = componentId;
+            setComponentSubId(componentSubId);
         }
 
         virtual void setLongClickTime(button_time_t time) {

@@ -19,13 +19,13 @@ class HardwareRpmSensor : public IRpmSensor {
                 _pin.rise(callback(this, &HardwareRpmSensor::_measurementEvent));
             #endif
 
-            _telegramTypeId = RPM_SENSOR;
-            _objectType = HARDWARE_OBJECT;
+            setComponentType(COMPONENT_RPM_SENSOR);
+            setObjectType(OBJECT_HARDWARE);
         }
 
-        HardwareRpmSensor(PinName pin, can_component_t componentId, uint8_t measurementPointsPerRevolution = STD_MEASUREMENT_POINTS_PER_REVOLUTION)
+        HardwareRpmSensor(PinName pin, id_sub_component_t componentSubId, uint8_t measurementPointsPerRevolution = STD_MEASUREMENT_POINTS_PER_REVOLUTION)
             : HardwareRpmSensor(pin) {
-            _componentId = componentId;
+            setComponentSubId(componentSubId);
             _measurement.pointsPerRevolution = measurementPointsPerRevolution;
         }
 

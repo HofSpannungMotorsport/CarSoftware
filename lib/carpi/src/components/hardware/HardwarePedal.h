@@ -28,9 +28,9 @@ class HardwarePedal : public IPedal {
             _init();
         }
 
-        HardwarePedal(PinName inputPin, can_component_t componentId)
+        HardwarePedal(PinName inputPin, id_sub_component_t componentSubId)
             : HardwarePedal(inputPin) {
-            _componentId = componentId;
+            setComponentSubId(componentSubId);
         }
 
         HardwarePedal(PinName inputPin1, PinName inputPin2)
@@ -39,9 +39,9 @@ class HardwarePedal : public IPedal {
             _init();
         }
 
-        HardwarePedal(PinName inputPin1, PinName inputPin2, can_component_t componentId)
+        HardwarePedal(PinName inputPin1, PinName inputPin2, id_sub_component_t componentSubId)
             : HardwarePedal(inputPin1, inputPin2) {
-            _componentId = componentId;
+            setComponentSubId(componentSubId);
         }
 
         virtual void setProportionality(pedal_sensor_type_t proportionality, uint16_t sensorNumber = 0) {
@@ -184,8 +184,8 @@ class HardwarePedal : public IPedal {
         } _deviance;
 
         void _init() {
-            _telegramTypeId = PEDAL;
-            _objectType = HARDWARE_OBJECT;
+            setComponentType(COMPONENT_PEDAL);
+            setObjectType(OBJECT_HARDWARE);
 
             _pin1.setRawBoundary(_analogLowerBoundary, _analogUpperBoundary);
             _pin1.setRawBoundaryOutTime(STD_MAX_DEVIANCE_TIME);

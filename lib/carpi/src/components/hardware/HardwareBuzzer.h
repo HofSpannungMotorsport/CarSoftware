@@ -10,13 +10,13 @@ class HardwareBuzzer : public IBuzzer {
     public:
         HardwareBuzzer(PinName port)
             : _port(port) {
-            _telegramTypeId = BUZZER;
-            _objectType = HARDWARE_OBJECT;
+            setComponentType(COMPONENT_BUZZER);
+            setObjectType(OBJECT_HARDWARE);
         }
         
-        HardwareBuzzer(PinName port, can_component_t componentId)
+        HardwareBuzzer(PinName port, id_sub_component_t componentSubId)
             : HardwareBuzzer(port) {
-            _componentId = componentId;
+            setComponentSubId(componentSubId);
         }
 
         virtual void setStatus(buzzer_status_t status) {

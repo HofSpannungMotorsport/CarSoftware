@@ -16,13 +16,13 @@ class HardwarePwmBuzzer : public IBuzzer {
     public:
         HardwarePwmBuzzer(PinName port) 
             : _port(port) {
-            _telegramTypeId = BUZZER;
-            _objectType = HARDWARE_OBJECT;
+            setComponentType(COMPONENT_BUZZER);
+            setObjectType(OBJECT_HARDWARE);
         }
         
-        HardwarePwmBuzzer(PinName port, can_component_t componentId)
+        HardwarePwmBuzzer(PinName port, id_sub_component_t componentSubId)
             : HardwarePwmBuzzer(port) {
-            _componentId = componentId;
+            setComponentSubId(componentSubId);
         }
 
         virtual void setStatus(buzzer_status_t status) {

@@ -11,13 +11,13 @@ class HardwareLedPwm : public ILed {
     public:
         HardwareLedPwm(PinName port)
             : _port(port) {
-            _telegramTypeId = LED;
-            _objectType = HARDWARE_OBJECT;
+            setComponentType(COMPONENT_LED);
+            setObjectType(OBJECT_HARDWARE);
         }
 
-        HardwareLedPwm(PinName port, can_component_t componentId)
+        HardwareLedPwm(PinName port, id_sub_component_t componentSubId)
             : HardwareLedPwm(port) {
-            _componentId = componentId;
+            setComponentSubId(componentSubId);
         }
 
         // setters

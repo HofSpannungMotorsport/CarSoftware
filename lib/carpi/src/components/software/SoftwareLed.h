@@ -6,13 +6,13 @@
 class SoftwareLed : ILed {
     public:
         SoftwareLed() {
-            _telegramTypeId = LED;
-            _objectType = SOFTWARE_OBJECT;
+            setComponentType(COMPONENT_LED);
+            setObjectType(OBJECT_SOFTWARE);
         }
 
-        SoftwareLed(can_component_t componentId)
+        SoftwareLed(id_sub_component_t componentSubId)
             : SoftwareLed() {
-            _componentId = componentId;
+            setComponentSubId(componentSubId);
         }
 
 

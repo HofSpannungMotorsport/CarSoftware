@@ -11,13 +11,13 @@ class HardwareLed : public ILed {
     public:
         HardwareLed(PinName port)
             : _port(port) {
-            _telegramTypeId = LED;
-            _objectType = HARDWARE_OBJECT;
+            setComponentType(COMPONENT_LED);
+            setObjectType(OBJECT_HARDWARE);
         }
 
-        HardwareLed(PinName port, can_component_t componentId)
+        HardwareLed(PinName port, id_sub_component_t componentSubId)
             : HardwareLed(port) {
-            _componentId = componentId;
+            setComponentSubId(componentSubId);
         }
 
         // setters
