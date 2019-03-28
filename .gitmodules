@@ -1,3 +1,3 @@
 [submodule "lib/cArPI/lib/BamocarD3"]
-	path = lib/cArPI/lib/BamocarD3
+	path = lib/carpi/lib/BamocarD3
 	url = https://github.com/HofSpannungMotorsport/BamocarD3.git
