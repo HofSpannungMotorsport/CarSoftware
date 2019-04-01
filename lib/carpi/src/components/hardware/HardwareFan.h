@@ -9,7 +9,7 @@ class HardwareFan : public IFan {
             _port = 0;
 
             setComponentType(COMPONENT_COOLING);
-            setObjectType(OBJECT_HARDWARE)
+            setObjectType(OBJECT_HARDWARE);
         }
 
         HardwareFan(PinName port, id_sub_component_t componentSubId) : HardwareFan(port) {

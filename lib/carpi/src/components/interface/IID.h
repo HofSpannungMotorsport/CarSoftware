@@ -13,8 +13,8 @@ enum component_object_type_t : component_object_type_datatype_t {
 class IID {
     public:
         IID() {}
-        IID(can_component_t componentId)
-            : _componentId(componentId) {}
+        IID(id_sub_component_t componentSubId)
+            : _componentSubId(componentSubId) {}
 
         virtual void setComponentSubId(id_sub_component_t componentSubId) {
             _componentSubId = componentSubId;

@@ -16,18 +16,15 @@
     #endif
 
     // Communication
-    #include "communication/can_config.h"
     #include "communication/CANService.h"
+    #include "communication/CarMessage.h"
+    #include "communication/componentIds.h"
+    #include "communication/deviceIds.h"
 
     // Components
-    //   Message Handler
-    #include "components/handler/IMessageHandler.h"
-    #include "components/handler/ButtonMessageHandler.h"
-    #include "components/handler/LEDMessageHandler.h"
-    #include "components/handler/PedalMessageHandler.h"
-    #include "components/handler/RpmSensorMessageHandler.h"
     //   Interface
     #include "components/interface/IID.h"
+    #include "components/interface/ICommunication.h"
     #include "components/interface/IAnalogSensor.h"
     #include "components/interface/IButton.h"
     #include "components/interface/IBuzzer.h"

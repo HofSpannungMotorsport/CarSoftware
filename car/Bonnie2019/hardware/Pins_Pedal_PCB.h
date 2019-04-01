@@ -10,4 +10,6 @@
 #define PEDAL_PIN_RPM_SENSOR_FL           PA_13
 #define PEDAL_PIN_RPM_SENSOR_FR           PA_14
 
+#define PEDAL_CAN PB_8,PB_9
+
 #endif // PINS_PEDAL_H

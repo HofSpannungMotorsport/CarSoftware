@@ -73,6 +73,21 @@ class SoftwareButton : public IButton {
                 return true;
         }
 
+        virtual message_build_result_t buildMessage(CarMessage &carMessage) {
+            // No implementation needed yet
+        }
+
+        virtual message_parse_result_t parseMessage(CarMessage &carMessage) {
+            message_parse_result_t result = MESSAGE_PARSE_OK;
+            for(car_sub_message_t &subMessage : carMessage.subMessages) {
+                if (subMessage.length != 2) result = MESSAGE_PARSE_ERROR; 
+                this->setState((button_state_t)subMessage.data[0]);
+                this->setStatus((button_status_t)subMessage.data[1]);
+            }
+
+            return result;
+        }
+
     private:
         button_status_t _status;
         button_state_t _lastState;

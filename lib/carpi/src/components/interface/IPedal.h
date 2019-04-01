@@ -1,7 +1,7 @@
 #ifndef IPEDAL_H
 #define IPEDAL_H
 
-#include "IID.h"
+#include "ICommunication.h"
 
 typedef uint8_t pedal_status_t;
 enum pedal_error_type_t : uint8_t {
@@ -23,7 +23,7 @@ enum pedal_calibration_t : bool {
     CURRENTLY_NOT_CALIBRATING = false
 };
 
-class IPedal : public IID {
+class IPedal : public ICommunication {
     public:
         virtual void setProportionality(pedal_sensor_type_t proportionality, uint16_t sensorNumber = 0) = 0;
 

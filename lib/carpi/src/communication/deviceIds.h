@@ -10,11 +10,12 @@
 */
 
 enum id_device_t : uint8_t {
-    DEVICE_PEDAL =     0x0,
-    DEVICE_BMS =       0x1,
-    DEVICE_DASHBOARD = 0x2,
-    DEVICE_MASTER =    0x3,
-    DEVICE_DISPLAY =   0x4
+    DEVICE_ALL =       0x0,
+    DEVICE_PEDAL =     0x1,
+    DEVICE_BMS =       0x2,
+    DEVICE_DASHBOARD = 0x3,
+    DEVICE_MASTER =    0x4,
+    DEVICE_DISPLAY =   0x5
 };
 
 typedef uint16_t id_message_header_t;

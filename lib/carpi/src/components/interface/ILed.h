@@ -1,7 +1,7 @@
 #ifndef ILED_H
 #define ILED_H
 
-#include "IID.h"
+#include "ICommunication.h"
 
 enum led_state_t : uint8_t {
     LED_ON = 0x1,
@@ -18,7 +18,7 @@ enum led_blinking_t : uint8_t {
 typedef float led_brightness_t;
 
 
-class ILed : public IID {
+class ILed : public ICommunication {
     public:
         // setters
         virtual void setState(led_state_t state) = 0;

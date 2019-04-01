@@ -2,7 +2,7 @@
 #define PCOOLING_H
 
 #include "IProgram.h"
-#include "communication/can_ids.h"
+#include "communication/componentIds.h"
 #include "services/SCar.h"
 #include "services/SSpeed.h"
 #include "components/interface/IFan.h"
@@ -88,12 +88,12 @@ class PCooling : public IProgram {
                 // At least after setting the pump, check if the temperature of any device is too high
                 if (motorTemp > STD_MAX_MOTOR_TEMP) {
                     cooling_service_error_type_t motorOverheatError = COOLING_SERVICE_MOTOR_OVERHEAT;
-                    _carService.addError(Error(ID::getComponentId(SYSTEM, SYSTEM_COOLING), motorOverheatError, ERROR_CRITICAL));
+                    _carService.addError(Error(componentId::getComponentId(COMPONENT_SYSTEM, COMPONENT_SYSTEM_COOLING), motorOverheatError, ERROR_CRITICAL));
                 }
 
                 if (controllerTemp > STD_MAX_CONTROLLER_TEMP) {
                     cooling_service_error_type_t controllerOverheatError = COOLING_SERVICE_CONTROLLER_OVERHEAT;
-                    _carService.addError(Error(ID::getComponentId(SYSTEM, SYSTEM_COOLING), controllerOverheatError, ERROR_CRITICAL));
+                    _carService.addError(Error(componentId::getComponentId(COMPONENT_SYSTEM, COMPONENT_SYSTEM_COOLING), controllerOverheatError, ERROR_CRITICAL));
                 }
             } else {
                 _pump->setSpeed(0);

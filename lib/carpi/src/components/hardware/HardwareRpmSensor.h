@@ -63,6 +63,29 @@ class HardwareRpmSensor : public IRpmSensor {
             return returnValue;
         }
 
+        virtual message_build_result_t buildMessage(CarMessage &carMessage) {
+            car_sub_message_t subMessage;
+            subMessage.length = 4;
+
+            subMessage.data[0] = this->getStatus();
+
+            rpm_sensor_frequency_t frequency = this->getFrequency();
+            uint32_t frequencyBinary = *((uint32_t*)&frequency);
+
+            // Slice data in 4 Byte -> 32bit float
+            for (uint8_t i = 1; i < 5; i++) {
+                subMessage.data[i] = (uint8_t)((frequencyBinary >> ((i - 1) * 8)) & 0xFF);
+            }
+
+            carMessage.addSubMessage(subMessage);
+
+            return MESSAGE_BUILD_OK;
+        }
+
+        virtual message_parse_result_t parseMessage(CarMessage &carMessage) {
+            // No implementation needed
+        }
+
     protected:
         InterruptIn _pin;
         rpm_sensor_status_t _status = 0;

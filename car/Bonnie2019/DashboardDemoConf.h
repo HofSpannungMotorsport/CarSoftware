@@ -12,14 +12,14 @@
 #include "hardware/Pins_Dashboard.h"
 
 //LED's
-HardwareLedPwm ledRed(DASHBOARD_PIN_LED_RED, LED_ERROR);
-HardwareLedPwm ledYellow(DASHBOARD_PIN_LED_YELLOW, LED_ISSUE);
-HardwareLedPwm ledGreen(DASHBOARD_PIN_LED_GREEN, LED_READY_TO_DRIVE);
+HardwareLedPwm ledRed(DASHBOARD_PIN_LED_RED, COMPONENT_LED_ERROR);
+HardwareLedPwm ledYellow(DASHBOARD_PIN_LED_YELLOW, COMPONENT_LED_ISSUE);
+HardwareLedPwm ledGreen(DASHBOARD_PIN_LED_GREEN, COMPONENT_LED_READY_TO_DRIVE);
 
 
 // Buttons
-HardwareInterruptButton buttonReset(DASHBOARD_PIN_BUTTON_RESET, BUTTON_RESET);
-HardwareInterruptButton buttonStart(DASHBOARD_PIN_BUTTON_START, BUTTON_START);
+HardwareInterruptButton buttonReset(DASHBOARD_PIN_BUTTON_RESET, COMPONENT_BUTTON_RESET);
+HardwareInterruptButton buttonStart(DASHBOARD_PIN_BUTTON_START, COMPONENT_BUTTON_START);
 
 class Dashboard {
     public:

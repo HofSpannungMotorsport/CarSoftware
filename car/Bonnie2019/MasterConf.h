@@ -14,36 +14,32 @@ CANService canService(MASTER_PIN_CAR_INTERN_CAN_RD, MASTER_PIN_CAR_INTERN_CAN_TD
 //   Software
 //     Dashboard
 //       LED's
-SoftwareLed ledRed(LED_ERROR);
-SoftwareLed ledYellow(LED_ISSUE);
-SoftwareLed ledGreen(LED_READY_TO_DRIVE);
-LEDMessageHandler ledMessageHandler;
+SoftwareLed ledRed(COMPONENT_LED_ERROR);
+SoftwareLed ledYellow(COMPONENT_LED_ISSUE);
+SoftwareLed ledGreen(COMPONENT_LED_READY_TO_DRIVE);
 
 //       Buttons
-SoftwareButton buttonReset(BUTTON_RESET);
-SoftwareButton buttonStart(BUTTON_START);
-ButtonMessageHandler buttonMessageHandler;
+SoftwareButton buttonReset(COMPONENT_BUTTON_RESET);
+SoftwareButton buttonStart(COMPONENT_BUTTON_START);
 
 //     Pedal
 //       Pedals
-SoftwarePedal gasPedal(PEDAL_GAS);
-SoftwarePedal brakePedal(PEDAL_BRAKE);
-PedalMessageHandler pedalMessageHandler;
+SoftwarePedal gasPedal(COMPONENT_PEDAL_GAS);
+SoftwarePedal brakePedal(COMPONENT_PEDAL_BRAKE);
 
 //       RPM Sensors (at Pedal Box)
-SoftwareRpmSensor rpmFrontLeft(RPM_FRONT_LEFT);
-SoftwareRpmSensor rpmFrontRight(RPM_FRONT_RIGHT);
-RpmSensorMessageHandler rpmSensorMessageHandler;
+SoftwareRpmSensor rpmFrontLeft(COMPONENT_RPM_FRONT_LEFT);
+SoftwareRpmSensor rpmFrontRight(COMPONENT_RPM_FRONT_RIGHT);
 
 //   Hardware
-HardwareLed brakeLight(MASTER_PIN_BRAKE_LIGHT, LED_BRAKE);
-HardwareMotorController motorController(MASTER_PIN_MOTOR_CONTROLLER_CAN_RD, MASTER_PIN_MOTOR_CONTROLLER_CAN_TD, MASTER_PIN_RFE_ENABLE, MASTER_PIN_RUN_ENABLE, MOTOR_MAIN);
+HardwareLed brakeLight(MASTER_PIN_BRAKE_LIGHT, COMPONENT_LED_BRAKE);
+HardwareMotorController motorController(MASTER_PIN_MOTOR_CONTROLLER_CAN_RD, MASTER_PIN_MOTOR_CONTROLLER_CAN_TD, MASTER_PIN_RFE_ENABLE, MASTER_PIN_RUN_ENABLE, COMPONENT_MOTOR_MAIN);
 //HardwareRpmSensor rpmRearLeft(MASTER_PIN_RPM_SENSOR_HL, RPM_REAR_LEFT); // [il]
 //HardwareRpmSensor rpmRearRight(MASTER_PIN_RPM_SENSOR_HR, RPM_REAR_RIGHT); // [il]
-HardwareFan coolingFan(MASTER_PIN_FAN, COOLING_FAN);
-HardwarePump coolingPump(MASTER_PIN_PUMP_PWM, MASTER_PIN_PUMP_ENABLE, COOLING_PUMP);
-HardwareBuzzer buzzer(MASTER_PIN_BUZZER, BUZZER_ALARM);
-DigitalIn hvEnabled(MASTER_PIN_HV_ENABLED);
+HardwareFan coolingFan(MASTER_PIN_FAN, COMPONENT_COOLING_FAN);
+HardwarePump coolingPump(MASTER_PIN_PUMP_PWM, MASTER_PIN_PUMP_ENABLE, COMPONENT_COOLING_PUMP);
+HardwareBuzzer buzzer(MASTER_PIN_BUZZER, COMPONENT_BUZZER_STARTUP);
+DigitalIn hvEnabled(MASTER_PIN_HV_ENABLED); // [QF]
 
 // Services
 SCar carService(canService,
@@ -55,38 +51,40 @@ SCar carService(canService,
                 hvEnabled);
 
 PMotorController motorControllerService(carService,
-                                              (IMotorController*)&motorController,
-                                              (IPedal*)&gasPedal, (IPedal*)&brakePedal);
+                                        (IMotorController*)&motorController,
+                                        (IPedal*)&gasPedal, (IPedal*)&brakePedal);
 
 PBrakeLight brakeLightService(carService, (IPedal*)&brakePedal, (ILed*)&brakeLight);
 
 SSpeed speedService(carService,
-                          (IRpmSensor*)&rpmFrontLeft, (IRpmSensor*)&rpmFrontRight, /* (IRpmSensor*)&rpmRearLeft, (IRpmSensor*)&rpmRearRight, */ // [il]
-                          (IMotorController*)&motorController);
+                    (IRpmSensor*)&rpmFrontLeft, (IRpmSensor*)&rpmFrontRight, /* (IRpmSensor*)&rpmRearLeft, (IRpmSensor*)&rpmRearRight, */ // [il]
+                    (IMotorController*)&motorController);
 
 PCooling coolingService(carService,
-                              speedService,
-                              (IFan*)&coolingFan, (IPump*)&coolingPump,
-                              (IMotorController*)&motorController,
-                              hvEnabled);
+                        speedService,
+                        (IFan*)&coolingFan, (IPump*)&coolingPump,
+                        (IMotorController*)&motorController,
+                        hvEnabled);
 
 class Master {
     public:
         // Called once at bootup
         void setup() {
+            canService.setSenderId(DEVICE_MASTER);
+
             // Add all Software Components to the CAN Service
             // Dashboard
-            canService.addComponent((void*)&ledRed, (IMessageHandler<CANMessage>*)&ledMessageHandler, NORMAL);
-            canService.addComponent((void*)&ledYellow, (IMessageHandler<CANMessage>*)&ledMessageHandler, NORMAL);
-            canService.addComponent((void*)&ledGreen, (IMessageHandler<CANMessage>*)&ledMessageHandler, NORMAL);
-            canService.addComponent((void*)&buttonReset, (IMessageHandler<CANMessage>*)&buttonMessageHandler, NORMAL);
-            canService.addComponent((void*)&buttonStart, (IMessageHandler<CANMessage>*)&buttonMessageHandler, NORMAL);
+            canService.addComponent((ICommunication*)&ledRed);
+            canService.addComponent((ICommunication*)&ledYellow);
+            canService.addComponent((ICommunication*)&ledGreen);
+            canService.addComponent((ICommunication*)&buttonReset);
+            canService.addComponent((ICommunication*)&buttonStart);
 
             // Pedal
-            canService.addComponent((void*)&gasPedal, (IMessageHandler<CANMessage>*)&pedalMessageHandler, NORMAL);
-            canService.addComponent((void*)&brakePedal, (IMessageHandler<CANMessage>*)&pedalMessageHandler, NORMAL);
-            canService.addComponent((void*)&rpmFrontLeft, (IMessageHandler<CANMessage>*)&rpmSensorMessageHandler, NORMAL);
-            canService.addComponent((void*)&rpmFrontRight, (IMessageHandler<CANMessage>*)&rpmSensorMessageHandler, NORMAL);
+            canService.addComponent((ICommunication*)&gasPedal);
+            canService.addComponent((ICommunication*)&brakePedal);
+            canService.addComponent((ICommunication*)&rpmFrontLeft);
+            canService.addComponent((ICommunication*)&rpmFrontRight);
 
 
 

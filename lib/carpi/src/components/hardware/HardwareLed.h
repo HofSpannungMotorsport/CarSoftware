@@ -54,6 +54,24 @@ class HardwareLed : public ILed {
             return false;
         }
 
+        virtual message_build_result_t buildMessage(CarMessage &carMessage) {
+            // No implementation needed yet
+        }
+
+        virtual message_parse_result_t parseMessage(CarMessage &carMessage) {
+            message_parse_result_t result = MESSAGE_PARSE_OK;
+            for(car_sub_message_t &subMessage : carMessage.subMessages) {
+                if(subMessage.length != 1) // not a valid message for leds
+                    result = MESSAGE_PARSE_ERROR;
+        
+                this->setState((led_state_t)((subMessage.data[0] >> 7) & 0x1));
+                this->setBrightness((float)((subMessage.data[0] >> 2) & 0x1F) / 0x1F);
+                this->setBlinking((led_blinking_t)((subMessage.data[0]) & 0x3));
+            }
+
+            return result;
+        }
+
     protected:
         DigitalOut _port;
 

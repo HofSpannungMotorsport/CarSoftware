@@ -144,6 +144,58 @@ class HardwarePedal : public IPedal {
             // No impemantation needed
         }
 
+        virtual message_build_result_t buildMessage(CarMessage &carMessage) {
+            car_sub_message_t subMessage;
+
+            subMessage.length = 3;
+
+            subMessage.data[0] = this->getStatus();
+
+            // change line below when type of pedal_value_t changes
+            float pedalValueFloat = this->getValue();
+            uint16_t pedalValue = ((float)pedalValueFloat * 65535);
+
+            #ifdef PEDAL_MESSAGE_HANDLER_DEBUG
+                pcSerial.printf("[HardwarePedal]@buildMessage: HardwareObject (float)pedalValue: %.3f\t(uint16_t)pedalValue: %i\t", pedalValueFloat, pedalValue);
+            #endif
+
+            subMessage.data[1] = pedalValue & 0xFF;
+            subMessage.data[2] = (pedalValue >> 8) & 0xFF;
+
+            #ifdef PEDAL_MESSAGE_HANDLER_DEBUG
+                pcSerial.printf("msg.data[1]: 0x%x\tmsg.data[2]: 0x%x\n", subMessage.data[1], subMessage.data[2]);
+            #endif
+
+            carMessage.addSubMessage(subMessage);
+
+            return MESSAGE_BUILD_OK;
+        }
+
+        virtual message_parse_result_t parseMessage(CarMessage &carMessage) {
+            message_parse_result_t result = MESSAGE_PARSE_OK;
+            for (car_sub_message_t &subMessage : carMessage.subMessages) {
+                if(subMessage.length != 1) // not a valid message
+                    result = MESSAGE_PARSE_ERROR;
+
+                uint8_t gotValue = subMessage.data[0];
+                pedal_calibration_t calibrationStatus = CURRENTLY_NOT_CALIBRATING;
+
+                if (gotValue == 1) {
+                    calibrationStatus = CURRENTLY_NOT_CALIBRATING;
+                } else if (gotValue == 2) {
+                    calibrationStatus = CURRENTLY_CALIBRATING;
+                }
+
+                this->setCalibrationStatus(calibrationStatus);
+
+                #ifdef PEDAL_MESSAGE_HANDLER_DEBUG
+                    pcSerial.printf("[HardwarePedal]@parseMessage: SoftwareObject calibrationStatus: 0x%x\tmsg.data[0]: 0x%x\tgotValue: %i\n", calibrationStatus, subMessage.data[0], gotValue);
+                #endif
+            }
+            
+            return result;
+        }
+
     protected:
         HardwareAnalogSensor _pin1;
         HardwareAnalogSensor _pin2;

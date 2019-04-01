@@ -3,6 +3,7 @@
 
 #include "platform/CircularBuffer.h"
 #include "IService.h"
+#include "communication/componentIds.h"
 #include "communication/CANService.h"
 #include "components/interface/IButton.h"
 #include "components/interface/ILed.h"
@@ -35,10 +36,10 @@ enum error_type_t : uint8_t {
 class Error {
     public:
         Error(){}
-        Error(component_id_t ComponentId, uint8_t Code, error_type_t Type)
+        Error(id_component_t ComponentId, uint8_t Code, error_type_t Type)
             : componentId(ComponentId), code(Code), type(Type) {}
 
-        component_id_t componentId;
+        id_component_t componentId;
         uint8_t code = 0;
         error_type_t type;
 };
@@ -363,22 +364,22 @@ class SCar : public IService {
 
         DigitalIn &_hvEnabled;
 
-        component_id_t _calculateComponentId(IID* component) {
-            component_id_t id = ID::getComponentId(component->getTelegramTypeId(), component->getComponentId());
+        id_component_t _calculateComponentId(IID* component) {
+            id_component_t id = component->getComponentId();
             return id;
         }
 
         void _sendLedsOverCan() {
             // LED's
-            _canService.sendMessage((void*)_led.red);
-            _canService.sendMessage((void*)_led.yellow);
-            _canService.sendMessage((void*)_led.green);
+            _canService.sendMessage((ICommunication*)_led.red, DEVICE_DASHBOARD);
+            _canService.sendMessage((ICommunication*)_led.yellow, DEVICE_DASHBOARD);
+            _canService.sendMessage((ICommunication*)_led.green, DEVICE_DASHBOARD);
         }
 
         void _sendPedalsOverCan() {
             // Pedals
-            _canService.sendMessage((void*)_pedal.gas);
-            _canService.sendMessage((void*)_pedal.brake);
+            _canService.sendMessage((ICommunication*)_pedal.gas, DEVICE_PEDAL);
+            _canService.sendMessage((ICommunication*)_pedal.brake, DEVICE_PEDAL);
         }
 
         void _sendComponentsOverCan() {
@@ -429,7 +430,7 @@ class SCar : public IService {
         }
 
         void _pedalError(IPedal* sensorId) {
-            addError(Error(ID::getComponentId(sensorId->getTelegramTypeId(), sensorId->getComponentId()), sensorId->getStatus(), ERROR_CRITICAL));
+            addError(Error(sensorId->getComponentId(), sensorId->getStatus(), ERROR_CRITICAL));
         }
 
         void _checkHvEnabled() {

@@ -50,7 +50,7 @@ class SSpeed : public IService {
                     // One of the rear Sensors has a problem too
                     if (_motorController->getStatus() > 0) {
                         _speed = 0;
-                        _carService.addError(Error(ID::getComponentId(SYSTEM, SYSTEM_SPEED), SPEED_SERVICE_NO_SENSOR_WORKING, ERROR_ISSUE));
+                        _carService.addError(Error(componentId::getComponentId(COMPONENT_SYSTEM, COMPONENT_SYSTEM_SPEED), SPEED_SERVICE_NO_SENSOR_WORKING, ERROR_ISSUE));
                         return;
                     } else {
                         useSensor = MOTOR;

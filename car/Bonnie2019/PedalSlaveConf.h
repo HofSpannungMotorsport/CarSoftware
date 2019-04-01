@@ -3,35 +3,35 @@
 
 #include "carpi.h"
 
-CANService canService(CAN1_CONF);
-
 #include "hardware/Pins_Pedal_PCB.h"
+
+CANService canService(PEDAL_CAN);
 
 #define PEDAL_SEND_RATE 120 // Hz
 
 // Pedals
-HardwarePedal gasPedal(PEDAL_PIN_ROTATION_ANGLE_GAS_1, PEDAL_PIN_ROTATION_ANGLE_GAS_2, PEDAL_GAS);
-HardwarePedal brakePedal(PEDAL_PIN_ROTATION_ANGLE_BRAKE, PEDAL_BRAKE);
-PedalMessageHandler pedalMessageHandler;
+HardwarePedal gasPedal(PEDAL_PIN_ROTATION_ANGLE_GAS_1, PEDAL_PIN_ROTATION_ANGLE_GAS_2, COMPONENT_PEDAL_GAS);
+HardwarePedal brakePedal(PEDAL_PIN_ROTATION_ANGLE_BRAKE, COMPONENT_PEDAL_BRAKE);
 
 // RPM Sensor
-HardwareRpmSensor rpmFrontLeft(PEDAL_PIN_RPM_SENSOR_FL, RPM_FRONT_LEFT);
-HardwareRpmSensor rpmFrontRight(PEDAL_PIN_RPM_SENSOR_FR, RPM_FRONT_RIGHT);
-RpmSensorMessageHandler rpmSensorMessageHandler;
+HardwareRpmSensor rpmFrontLeft(PEDAL_PIN_RPM_SENSOR_FL, COMPONENT_RPM_FRONT_LEFT);
+HardwareRpmSensor rpmFrontRight(PEDAL_PIN_RPM_SENSOR_FR, COMPONENT_RPM_FRONT_RIGHT);
 
 class Pedal {
     public:
         // Called once at bootup
         void setup() {
-            canService.addComponent((void*)&gasPedal, (IMessageHandler<CANMessage>*)&pedalMessageHandler, NORMAL);
-            canService.addComponent((void*)&brakePedal, (IMessageHandler<CANMessage>*)&pedalMessageHandler, NORMAL);
-            canService.addComponentToSendLoop((void*)&gasPedal);
-            canService.addComponentToSendLoop((void*)&brakePedal);
+            canService.setSenderId(DEVICE_PEDAL);
 
-            canService.addComponent((void*)&rpmFrontLeft, (IMessageHandler<CANMessage>*)&rpmSensorMessageHandler, NORMAL);
-            canService.addComponent((void*)&rpmFrontRight, (IMessageHandler<CANMessage>*)&rpmSensorMessageHandler, NORMAL);
-            canService.addComponentToSendLoop((void*)&rpmFrontLeft);
-            canService.addComponentToSendLoop((void*)&rpmFrontRight);
+            canService.addComponent((ICommunication*)&gasPedal);
+            canService.addComponent((ICommunication*)&brakePedal);
+            canService.addComponentToSendLoop((ICommunication*)&gasPedal);
+            canService.addComponentToSendLoop((ICommunication*)&brakePedal);
+
+            canService.addComponent((ICommunication*)&rpmFrontLeft);
+            canService.addComponent((ICommunication*)&rpmFrontRight);
+            canService.addComponentToSendLoop((ICommunication*)&rpmFrontLeft);
+            canService.addComponentToSendLoop((ICommunication*)&rpmFrontRight);
 
             wait(0.1);
         }

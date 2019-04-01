@@ -9,7 +9,7 @@ class HardwarePump : public IPump {
             _enablePort = 0;
             _pwmPort = 0;
 
-            setComponentType(COMPONENT_COOLING_PUMP);
+            setComponentType(COMPONENT_COOLING);
             setObjectType(OBJECT_HARDWARE);
         }
 

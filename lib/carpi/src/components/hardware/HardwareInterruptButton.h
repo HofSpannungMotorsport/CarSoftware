@@ -26,7 +26,7 @@ class HardwareInterruptButton : public IButton {
             _lastState = NOT_PRESSED;
 
             setComponentType(COMPONENT_BUTTON);
-            setObjectType(OBJECT_HARDWARE)
+            setObjectType(OBJECT_HARDWARE);
 
             // Assign the Function/Method to a state (Rising/Falling) after initializing all variables
             if (buttonType == NORMALLY_CLOSED) {
@@ -82,6 +82,22 @@ class HardwareInterruptButton : public IButton {
                 return false;
             else
                 return true;
+        }
+
+        virtual message_build_result_t buildMessage(CarMessage &carMessage) {
+            while(getStateChanged()) {
+                car_sub_message_t subMessage;
+                subMessage.length = 2;
+                subMessage.data[0] = getState();
+                subMessage.data[1] = getStatus();
+                carMessage.addSubMessage(subMessage);
+            }
+
+            return MESSAGE_BUILD_OK;
+        }
+
+        virtual message_parse_result_t parseMessage(CarMessage &carMessage) {
+            // No implementation needed yet
         }
 
     protected:

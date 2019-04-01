@@ -4,6 +4,8 @@
 #define COMPONENT_TYPE_LENGTH 4
 #define COMPONENT_SUB_ID_LENGTH 4
 
+#include <stdint.h>
+
 /*
     Component IDs
 
@@ -49,8 +51,8 @@ enum id_sub_component_t : uint8_t {
     COMPONENT_COOLING_FAN  = 0x1,
 
     // Buttons
-    COMPONENT_COMPONENT_BUTTON_RESET = 0x0,
-    BUTTON_START = 0x1,
+    COMPONENT_BUTTON_RESET = 0x0,
+    COMPONENT_BUTTON_START = 0x1,
 
     // LEDs
     COMPONENT_LED_BRAKE =          0x0, // The braking light on the back of the car
@@ -94,7 +96,7 @@ namespace componentId {
         id_component_t componentId;
 
         componentId = ((componentType & 0xF) << COMPONENT_SUB_ID_LENGTH);
-        componentId |= (somponentSubId & 0xF);
+        componentId |= (componentSubId & 0xF);
 
         return componentId;
     }
