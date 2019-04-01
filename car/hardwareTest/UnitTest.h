@@ -10,7 +10,7 @@
 
 
 // Include the test program here
-#include "RFEandRUNtest.h"
+#include ".h"
 
 class UnitTest {
     public:
@@ -20,7 +20,7 @@ class UnitTest {
 
         void loop() {
             // Main Function here, it will be called constantly
-            RFEandRUNtest();
+            
         }
 };
 
