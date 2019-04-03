@@ -56,7 +56,7 @@ class CANService : public IService {
                     }
                 #endif
 
-                if (msgBuildResult == MESSAGE_BUILD_OK) return false;
+                if (msgBuildResult == MESSAGE_BUILD_ERROR) return false;
 
 
                 // Convert CarMessage to CANMessage and send all sub-messages

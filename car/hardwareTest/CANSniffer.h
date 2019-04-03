@@ -9,7 +9,7 @@
     #define CAN1_CONF PB_12,PB_6 // Motor Controller
 #endif
 
-CAN can1(CAN1_CONF, 500000);
+CAN can1(CAN1_CONF, 250000);
 
 void receivedMessage() {
     CANMessage msg;

@@ -12,7 +12,7 @@
 
 
 #define ERROR_REGISTER_SIZE 64 // errors, max: 255
-#define BOOT_ROUTINE_TEST_TIME 2 // s
+#define BOOT_ROUTINE_TEST_TIME 0.5 // s
 #define BRAKE_START_THRESHHOLD 0.75 // %
 
 #define HV_ENABLED_BEEP_TIME 2.2 // s (has to be at least 0.5)
@@ -393,18 +393,30 @@ class SCar : public IService {
             _led.green->setBrightness(1);
 
             _led.red->setState(LED_ON);
-            _led.yellow->setState(LED_ON);
-            _led.green->setState(LED_ON);
-
             _sendLedsOverCan();
+            wait(0.3);
+
+            _led.yellow->setState(LED_ON);
+            _sendLedsOverCan();
+            wait(0.3);
+
+            _led.green->setState(LED_ON);
+            _sendLedsOverCan();
+            wait(0.3);
         }
 
         void _turnOffLed() {
             _led.red->setState(LED_OFF);
-            _led.yellow->setState(LED_OFF);
-            _led.green->setState(LED_OFF);
-
             _sendLedsOverCan();
+            wait(0.3);
+
+            _led.yellow->setState(LED_OFF);
+            _sendLedsOverCan();
+            wait(0.3);
+
+            _led.green->setState(LED_OFF);
+            _sendLedsOverCan();
+            wait(0.3);
         }
 
         void _resetLeds() {
@@ -437,7 +449,7 @@ class SCar : public IService {
             // [QF]
             /*
             if (!_hvEnabled) {
-                addError(Error(ID::getComponentId(SYSTEM, SYSTEM_HV_ENABLED), 0x1, ERROR_CRITICAL));
+                addError(Error(componentId::getComponentId(COMPONENT_SYSTEM, COMPONENT_SYSTEM_HV_ENABLED), 0x1, ERROR_CRITICAL));
             }
             */
         }

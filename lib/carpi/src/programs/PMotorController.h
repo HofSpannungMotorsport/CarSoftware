@@ -68,7 +68,10 @@ class PMotorController : public IProgram {
             // Send new Power to Motor -> Brum Brum (but without the Brum Brum)
             // ...maybe a drivers scream ;)
             _motorController->setTorque(returnValue);
-            //pcSerial.printf("%f\n", returnValue);
+
+            #ifdef MOTORCONTROLLER_OUTPUT
+                pcSerial.printf("%f\n", returnValue);
+            #endif
         }
 
     protected:
