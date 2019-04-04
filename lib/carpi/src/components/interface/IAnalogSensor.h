@@ -1,7 +1,7 @@
 #ifndef IANALOG_SENSOR_H
 #define IANALOG_SENSOR_H
 
-#include "IID.h"
+#include "IComponent.h"
 
 typedef float analog_sensor_t;
 typedef uint16_t analog_sensor_raw_t;
@@ -15,7 +15,7 @@ enum analog_sensor_error_type_t : uint8_t {
     BOUNDARY_CHECK_FAIL =           0x8
 };
 
-class IAnalogSensor {
+class IAnalogSensor : private NonCopyable<IAnalogSensor> {
     public:
         virtual bool setMapping(analog_sensor_raw_t minIn, analog_sensor_raw_t maxIn, analog_sensor_t minOut, analog_sensor_t maxOut);
         

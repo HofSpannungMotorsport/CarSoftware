@@ -1,7 +1,7 @@
 #ifndef IRPMSENSOR_H
 #define IRPMSENSOR_H
 
-#include "IID.h"
+#include "ICommunication.h"
 
 typedef uint8_t rpm_sensor_status_t;
 struct rpm_sensor_error_type_t {
@@ -10,7 +10,7 @@ struct rpm_sensor_error_type_t {
 
 typedef float rpm_sensor_frequency_t; // rpm
 
-class IRpmSensor : public IID {
+class IRpmSensor : public ICommunication {
     public:
         virtual void setStatus(rpm_sensor_status_t status) = 0;
         virtual rpm_sensor_status_t getStatus() = 0;

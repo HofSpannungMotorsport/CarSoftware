@@ -2,7 +2,7 @@
 #include "../Bonnie2019/hardware/Pins_Master.h"
 #include <string>
 
-HardwareInterruptButton buttonNext(MASTER_PIN_USER_BUTTON, BUTTON_START);
+HardwareInterruptButton buttonNext(MASTER_PIN_USER_BUTTON, COMPONENT_BUTTON_START);
 
 // Dout Enable Pins for Motor Controller
 DigitalOut enableRFE(MASTER_PIN_RFE_ENABLE);

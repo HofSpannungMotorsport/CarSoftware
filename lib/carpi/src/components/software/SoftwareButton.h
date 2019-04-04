@@ -10,13 +10,14 @@ class SoftwareButton : public IButton {
         SoftwareButton() {
             _status = 0;
             _lastState = NOT_PRESSED;
-            _telegramTypeId = BUTTON;
-            _objectType = SOFTWARE_OBJECT;
+            
+            setComponentType(COMPONENT_BUTTON);
+            setObjectType(OBJECT_SOFTWARE);
         }
 
-        SoftwareButton(can_component_t componentId)
+        SoftwareButton(id_sub_component_t componentSubId)
             : SoftwareButton() {
-            _componentId = componentId;
+            setComponentSubId(componentSubId);
         }
 
         virtual void setLongClickTime(button_time_t time) {
@@ -70,6 +71,22 @@ class SoftwareButton : public IButton {
                 return false;
             else
                 return true;
+        }
+
+        virtual message_build_result_t buildMessage(CarMessage &carMessage) {
+            // No implementation needed yet
+            return MESSAGE_BUILD_ERROR;
+        }
+
+        virtual message_parse_result_t parseMessage(CarMessage &carMessage) {
+            message_parse_result_t result = MESSAGE_PARSE_OK;
+            for(car_sub_message_t &subMessage : carMessage.subMessages) {
+                if (subMessage.length != 2) result = MESSAGE_PARSE_ERROR; 
+                this->setState((button_state_t)subMessage.data[0]);
+                this->setStatus((button_status_t)subMessage.data[1]);
+            }
+
+            return result;
         }
 
     private:

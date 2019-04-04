@@ -19,13 +19,13 @@ class HardwareRpmSensor : public IRpmSensor {
                 _pin.rise(callback(this, &HardwareRpmSensor::_measurementEvent));
             #endif
 
-            _telegramTypeId = RPM_SENSOR;
-            _objectType = HARDWARE_OBJECT;
+            setComponentType(COMPONENT_RPM_SENSOR);
+            setObjectType(OBJECT_HARDWARE);
         }
 
-        HardwareRpmSensor(PinName pin, can_component_t componentId, uint8_t measurementPointsPerRevolution = STD_MEASUREMENT_POINTS_PER_REVOLUTION)
+        HardwareRpmSensor(PinName pin, id_sub_component_t componentSubId, uint8_t measurementPointsPerRevolution = STD_MEASUREMENT_POINTS_PER_REVOLUTION)
             : HardwareRpmSensor(pin) {
-            _componentId = componentId;
+            setComponentSubId(componentSubId);
             _measurement.pointsPerRevolution = measurementPointsPerRevolution;
         }
 
@@ -61,6 +61,30 @@ class HardwareRpmSensor : public IRpmSensor {
             }
 
             return returnValue;
+        }
+
+        virtual message_build_result_t buildMessage(CarMessage &carMessage) {
+            car_sub_message_t subMessage;
+            subMessage.length = 4;
+
+            subMessage.data[0] = this->getStatus();
+
+            rpm_sensor_frequency_t frequency = this->getFrequency();
+            uint32_t frequencyBinary = *((uint32_t*)&frequency);
+
+            // Slice data in 4 Byte -> 32bit float
+            for (uint8_t i = 1; i < 5; i++) {
+                subMessage.data[i] = (uint8_t)((frequencyBinary >> ((i - 1) * 8)) & 0xFF);
+            }
+
+            carMessage.addSubMessage(subMessage);
+
+            return MESSAGE_BUILD_OK;
+        }
+
+        virtual message_parse_result_t parseMessage(CarMessage &carMessage) {
+            // No implementation needed
+            return MESSAGE_PARSE_ERROR;
         }
 
     protected:

@@ -25,8 +25,8 @@ class HardwareInterruptButton : public IButton {
             _status = 0;
             _lastState = NOT_PRESSED;
 
-            _telegramTypeId = BUTTON;
-            _objectType = HARDWARE_OBJECT;
+            setComponentType(COMPONENT_BUTTON);
+            setObjectType(OBJECT_HARDWARE);
 
             // Assign the Function/Method to a state (Rising/Falling) after initializing all variables
             if (buttonType == NORMALLY_CLOSED) {
@@ -42,9 +42,9 @@ class HardwareInterruptButton : public IButton {
             }
         }
 
-        HardwareInterruptButton(PinName pin, can_component_t componentId, button_type_t buttonType = NORMALLY_OPEN)
+        HardwareInterruptButton(PinName pin, id_sub_component_t componentSubId, button_type_t buttonType = NORMALLY_OPEN)
             : HardwareInterruptButton(pin, buttonType) {
-            _componentId = componentId;
+            setComponentSubId(componentSubId);
         }
 
         virtual void setLongClickTime(button_time_t time) {
@@ -82,6 +82,23 @@ class HardwareInterruptButton : public IButton {
                 return false;
             else
                 return true;
+        }
+
+        virtual message_build_result_t buildMessage(CarMessage &carMessage) {
+            while(getStateChanged()) {
+                car_sub_message_t subMessage;
+                subMessage.length = 2;
+                subMessage.data[0] = getState();
+                subMessage.data[1] = getStatus();
+                carMessage.addSubMessage(subMessage);
+            }
+
+            return MESSAGE_BUILD_OK;
+        }
+
+        virtual message_parse_result_t parseMessage(CarMessage &carMessage) {
+            // No implementation needed yet
+            return MESSAGE_PARSE_ERROR;
         }
 
     protected:

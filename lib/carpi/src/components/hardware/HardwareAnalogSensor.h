@@ -202,13 +202,13 @@ class HardwareAnalogSensor : public IAnalogSensor {
         struct _boundary {
             analog_sensor_boundary_t percentage = 0.001;
 
-            Timer outTimer = Timer();
+            Timer outTimer;
             bool outTimerStarted = false;
             uint16_t outTimerLimit = STD_OUT_OF_BOUNDARY_TIME_LIMIT;
 
             struct raw {
                 analog_sensor_raw_t lowerEnd = 66, upperEnd = 65469;
-                Timer outTimer = Timer();
+                Timer outTimer;
                 bool outTimerStarted = false;
                 uint16_t outTimerLimit = STD_OUT_OF_BOUNDARY_TIME_LIMIT_RAW;
             } raw;

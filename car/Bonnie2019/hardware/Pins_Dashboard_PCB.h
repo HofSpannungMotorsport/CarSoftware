@@ -7,4 +7,6 @@
 #define DASHBOARD_PIN_LED_YELLOW   PA_0  // PWM -> Marked as LED Yellow on PCB!
 #define DASHBOARD_PIN_LED_GREEN    PA_1  // PWM -> Marked as LED Red on PCB!
 
+#define DASHBOARD_CAN PB_8,PB_9
+
 #endif // PINS_DASHBOARD_H

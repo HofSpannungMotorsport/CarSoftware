@@ -1,7 +1,7 @@
 #ifndef IMOTORCONTROLLER_H
 #define IMOTORCONTROLLER_H
 
-#include "IID.h"
+#include "IComponent.h"
 
 typedef uint8_t motor_controller_status_t;
 enum motor_controller_error_type_t : motor_controller_status_t {
@@ -22,7 +22,7 @@ enum motor_controller_run_enable_t : bool {
     MOTOR_CONTROLLER_RUN_ENABLE = true
 };
 
-class IMotorController : public IID {
+class IMotorController : public IComponent {
     public:
         // Status
         virtual motor_controller_status_t getStatus() = 0;

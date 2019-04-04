@@ -11,7 +11,7 @@ void ButtonUnitTest() {
     // Testing HardwareInterruptButton and SoftwareButton
     pcSerial.printf("Button Unit Test\n");
     while(1) {
-        Timer test = Timer();
+        Timer test;
         test.start();
         if (testButton.getStateChanged()) {
             CANMessage message = CANMessage();

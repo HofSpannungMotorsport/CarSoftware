@@ -15,16 +15,16 @@ class HardwareMotorController : public IMotorController {
     public:
         HardwareMotorController(PinName canRD, PinName canTD, PinName RFE, PinName RUN)
             : _bamocar(canRD, canTD), _rfe(RFE), _run(RUN) {
-            _telegramTypeId = MOTOR;
-            _objectType = HARDWARE_OBJECT;
-
             _rfe = 0;
             _run = 0;
+
+            setComponentType(COMPONENT_MOTOR);
+            setObjectType(OBJECT_HARDWARE);
         }
 
-        HardwareMotorController(PinName canRD, PinName canTD, PinName RFE, PinName RUN, can_component_t componentId)
+        HardwareMotorController(PinName canRD, PinName canTD, PinName RFE, PinName RUN, id_sub_component_t componentSubId)
             : HardwareMotorController(canRD, canTD, RFE, RUN) {
-            _componentId = componentId;
+            setComponentSubId(componentSubId);
         }
 
         void beginCommunication() {

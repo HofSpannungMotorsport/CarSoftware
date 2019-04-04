@@ -2,7 +2,7 @@
 #define PMOTORCONTROLLER_H
 
 #include "IProgram.h"
-#include "communication/can_ids.h"
+
 #include "services/SCar.h"
 #include "components/interface/IMotorController.h"
 #include "components/interface/IPedal.h"
@@ -68,7 +68,10 @@ class PMotorController : public IProgram {
             // Send new Power to Motor -> Brum Brum (but without the Brum Brum)
             // ...maybe a drivers scream ;)
             _motorController->setTorque(returnValue);
-            //pcSerial.printf("%f\n", returnValue);
+
+            #ifdef MOTORCONTROLLER_OUTPUT
+                pcSerial.printf("%f\n", returnValue);
+            #endif
         }
 
     protected:
@@ -93,7 +96,7 @@ class PMotorController : public IProgram {
                        _brakePedal;
 
         bool _gasPedalPrimed = false;
-        Timer _hardBrakeingSince = Timer();
+        Timer _hardBrakeingSince;
         bool _hardBrakeingStarted = false;
 
         struct _rpmSensorStruct_t {
@@ -112,12 +115,12 @@ class PMotorController : public IProgram {
 
         struct _asrSave {
             float lastTorque, lastA;
-            Timer lastRun = Timer();
+            Timer lastRun;
         } _asrSave;
 
         void _checkErrors() {
             if (_motorController->getStatus() > 0) {
-                _carService.addError(Error(ID::getComponentId(_motorController->getTelegramTypeId(), _motorController->getComponentId()), _motorController->getStatus(), ERROR_CRITICAL));
+                _carService.addError(Error(_motorController->getComponentId(), _motorController->getStatus(), ERROR_CRITICAL));
             }
 
             if (_asrActive) {
@@ -150,12 +153,12 @@ class PMotorController : public IProgram {
         }
 
         void _pedalError(IPedal* sensorId) {
-            _carService.addError(Error(ID::getComponentId(sensorId->getTelegramTypeId(), sensorId->getComponentId()), sensorId->getStatus(), ERROR_CRITICAL));
+            _carService.addError(Error(sensorId->getComponentId(), sensorId->getStatus(), ERROR_CRITICAL));
         }
 
         void _asrError() {
             _asrActive = false;
-            _carService.addError(Error(ID::getComponentId(SYSTEM, SYSTEM_MASTER), 0x0, ERROR_ISSUE));
+            _carService.addError(Error(componentId::getComponentId(COMPONENT_SYSTEM, COMPONENT_SYSTEM_MASTER), 0x0, ERROR_ISSUE));
         }
 
         float _getAge(_rpmSensorStruct_t &sensor) {

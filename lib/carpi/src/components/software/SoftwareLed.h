@@ -6,13 +6,13 @@
 class SoftwareLed : ILed {
     public:
         SoftwareLed() {
-            _telegramTypeId = LED;
-            _objectType = SOFTWARE_OBJECT;
+            setComponentType(COMPONENT_LED);
+            setObjectType(OBJECT_SOFTWARE);
         }
 
-        SoftwareLed(can_component_t componentId)
+        SoftwareLed(id_sub_component_t componentSubId)
             : SoftwareLed() {
-            _componentId = componentId;
+            setComponentSubId(componentSubId);
         }
 
 
@@ -60,6 +60,23 @@ class SoftwareLed : ILed {
             }
 
             return false;
+        }
+
+        virtual message_build_result_t buildMessage(CarMessage &carMessage) {
+            car_sub_message_t subMessage;
+
+            subMessage.data[0] = (this->getState() & 0x1) << 7;
+            subMessage.data[0] |= ((uint8_t)(this->getBrightness() * 0x1F) & 0x1F) << 2;
+            subMessage.data[0] |= ((this->getBlinking() & 0x3));
+            subMessage.length = 1;
+            carMessage.addSubMessage(subMessage);
+
+            return MESSAGE_BUILD_OK;
+        }
+
+        virtual message_parse_result_t parseMessage(CarMessage &carMessage) {
+            // No implementation needed yet
+            return MESSAGE_PARSE_ERROR;
         }
 
     private:

@@ -6,15 +6,15 @@
 class HardwarePump : public IPump {
     public:
         HardwarePump(PinName pwmPort, PinName enablePort) : _pwmPort(pwmPort), _enablePort(enablePort) {
-            _enablePort.write(0);
-            _pwmPort.write(0);
+            _enablePort = 0;
+            _pwmPort = 0;
 
-            _telegramTypeId = COOLING;
-            _objectType = HARDWARE_OBJECT;
+            setComponentType(COMPONENT_COOLING);
+            setObjectType(OBJECT_HARDWARE);
         }
 
-        HardwarePump(PinName pwmPort, PinName enablePort, can_component_t componentId) : HardwarePump(pwmPort, enablePort) {
-            _componentId = componentId;
+        HardwarePump(PinName pwmPort, PinName enablePort, id_sub_component_t componentSubId) : HardwarePump(pwmPort, enablePort) {
+            setComponentSubId(componentSubId);
         }
 
         virtual void setSpeed(pump_speed_t speed) {

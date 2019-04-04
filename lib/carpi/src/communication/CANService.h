@@ -8,10 +8,9 @@
 #include "platform/CircularBuffer.h"
 #include <map>
 #include <vector>
-#include "can_ids.h"
 #include "services/IService.h"
-#include "components/interface/IID.h"
-#include "components/handler/IMessageHandler.h"
+#include "components/interface/ICommunication.h"
+#include "CarMessage.h"
 
 
 #define STD_CAN_FREQUENCY 250000
@@ -20,10 +19,7 @@
 #define CAN_TIMEOUT 0.100 // s
 
 struct component_details_t {
-    IMessageHandler<CANMessage>* handler;
-    void* component;
-    uint8_t objectType;
-    can_priority_t priority;
+    ICommunication *component;
 };
 
 struct component_exist_t {
@@ -37,40 +33,57 @@ class CANService : public IService {
             _can.attach(callback(this, &CANService::_messageReceived), CAN::RxIrq);
         }
 
-        bool sendMessage(component_id_t id, can_object_type_t objectType) {
+        bool sendMessage(id_component_t id, id_device_t senderId, id_device_t receiverId) {
             component_exist_t componentExist = _registeredAddresses[id];
 
             #ifdef CAN_DEBUG
-                pcSerial.printf("[CANService]@sendMessage: Try to send Message for ComponentID: 0x%x\tObjectType: 0x%x\n", id, objectType);
+                pcSerial.printf("[CANService]@sendMessage: Try to send Message for ComponentID: 0x%x\n", id);
             #endif
 
             if (componentExist.exists) {
-                CANMessage m = CANMessage();
+                CarMessage m;
                 component_details_t component = _components[id];
 
-                m.id = ID::getMessageId(component.priority, id, objectType);
-                msg_build_result_t msgBuildResult = component.handler->buildMessage(component.component, m);
+                m.setSenderId(senderId);
+                m.setReceiverId(receiverId);
+                message_build_result_t msgBuildResult = component.component->buildMessage(m);
 
                 #ifdef CAN_DEBUG
-                    if (msgBuildResult == MSG_BUILD_OK) {
+                    if (msgBuildResult == MESSAGE_BUILD_OK) {
                         pcSerial.printf("[CANService]@sendMessage: Component 0x%x Message Build success\n", id);
                     } else {
                         pcSerial.printf("[CANService]@sendMessage: Component 0x%x Message Build error\n", id);
                     }
                 #endif
 
-                if (msgBuildResult == MSG_BUILD_ERROR) return false;
+                if (msgBuildResult == MESSAGE_BUILD_ERROR) return false;
 
+
+                // Convert CarMessage to CANMessage and send all sub-messages
                 int msgSendResult = 0;
-                Timer timeout;
-                timeout.start();
-                while((msgSendResult != 1) && (timeout < CAN_TIMEOUT)) {
-                    msgSendResult = _can.write(m);
-                    wait(0.00000124);
+                for (car_sub_message_t &subMessage : m.subMessages) {
+                    msgSendResult = 0;
+
+                    CANMessage canMessage = CANMessage();
+                    canMessage.format = CANStandard;
+                    canMessage.id = deviceId::getMessageHeader(m.getSenderId(), m.getReceiverId());
+                    canMessage.len = subMessage.length + 1;
+                    canMessage.data[0] = id;
+                    
+                    for (int i = 0; i < subMessage.length; i++) {
+                        canMessage.data[i+1] = subMessage.data[i];
+                    }
+
+                    Timer timeout;
+                    timeout.start();
+                    while((msgSendResult != 1) && (timeout < CAN_TIMEOUT)) {
+                        msgSendResult = _can.write(canMessage);
+                        wait(0.00000124);
+                    }
                 }
 
                 #ifdef CAN_DEBUG
-                    pcSerial.printf("[CANService]@sendMessage: Message for Component 0x%x with m.id 0x%x write result: %i (1 == Succes, 0 == Failed)\n", id, m.id, msgSendResult);
+                    pcSerial.printf("[CANService]@sendMessage: Message for Component 0x%x write result: %i (1 == Succes, 0 == Failed)\n", id, msgSendResult);
                 #endif
 
                 if (msgSendResult > 0) return true;
@@ -84,14 +97,16 @@ class CANService : public IService {
             return false;
         }
 
-        bool sendMessage(component_id_t id) {
-            component_details_t component = _components[id];
-            can_object_type_t objectType = _getComponentObjectType(component.component);
-            return sendMessage(id, objectType);
+        bool sendMessage(ICommunication* component, id_device_t receiverId) {
+            return sendMessage(component->getComponentId(), _deviceId, receiverId);
         }
 
-        bool sendMessage(void* component) {
-            return sendMessage(_calculateComponentId(component));
+        bool broadcastMessage(id_component_t id) {
+            return sendMessage(id, _deviceId, DEVICE_ALL);
+        }
+
+        bool broadcastMessage(ICommunication* component) {
+            return broadcastMessage(component->getComponentId());
         }
 
         bool processInbound() {
@@ -103,11 +118,10 @@ class CANService : public IService {
             // Process received Telegrams saved in the _telegramsIn Buffer
             CANMessage m;
             while(_telegramsIn.pop(m)) {
-                // search in _components for right component
-                // call bridge with component pointer
-                // check before if the component was registered before
-                uint16_t id16 = (uint16_t)((m.id & 0x3FC) >> 2); // Filter out ComponentID and "convert" it to 8-Bit ID
-                uint8_t id = id16;
+                // Search in _components for right component
+                // Check before if the component was registered before
+                // So read the first byte of the message which represents the component id
+                id_component_t id = m.data[0];
 
                 #ifdef CAN_DEBUG
                     pcSerial.printf("[CANService]@processInbound: Processing Message with ID: 0x%x\n", id);
@@ -115,10 +129,22 @@ class CANService : public IService {
 
                 component_exist_t componentExist = _registeredAddresses[id];
                 if (componentExist.exists) {
-                    component_details_t component = _components[id];
-                    msg_parse_result_t msgParseResult = component.handler->parseMessage(component.component, m);
+                    // Convert CANMessage to CarMessage
+                    CarMessage carMessage;
 
-                    if (msgParseResult == MSG_PARSE_OK) {
+                    car_sub_message_t subMessage;
+                    subMessage.length = m.len - 1;
+                    
+                    for(int i = 0; i < subMessage.length; i++) {
+                        subMessage.data[i] = m.data[i+1];
+                    }
+
+                    carMessage.addSubMessage(subMessage);
+
+                    component_details_t component = _components[id];
+                    message_parse_result_t msgParseResult = component.component->parseMessage(carMessage);
+
+                    if (msgParseResult == MESSAGE_PARSE_OK) {
                         #ifdef CAN_DEBUG
                             pcSerial.printf("[CANService]@processInbound: Message with ID 0x%x parsed successfully\n", id);
                         #endif
@@ -139,7 +165,8 @@ class CANService : public IService {
             return success;
         }
 
-        void addComponent(component_id_t id, void* component, IMessageHandler<CANMessage>* handler, can_priority_t priority = NORMAL) {
+        void addComponent(ICommunication* component) {
+            id_component_t id = component->getComponentId();
             component_exist_t componentExist = _registeredAddresses[id];
             if (componentExist.exists) {
                 #ifdef MESSAGE_REPORT
@@ -149,9 +176,7 @@ class CANService : public IService {
 
             // Create new component to process Messages for it
             component_details_t newComponent;
-            newComponent.handler = handler;
             newComponent.component = component;
-            newComponent.priority = priority;
 
             // To be able to check later if the component has been registered before, save it in a different map to check
             component_exist_t newComponentExist;
@@ -167,16 +192,13 @@ class CANService : public IService {
             #endif
         }
 
-        void addComponent(void* component, IMessageHandler<CANMessage>* handler, can_priority_t priority = NORMAL) {
-            addComponent(_calculateComponentId(component), component, handler, priority);
-        }
-
-        bool addComponentToSendLoop(component_id_t id) {
+        bool addComponentToSendLoop(ICommunication *component) {
+            id_component_t id = component->getComponentId();
             component_exist_t componentExist = _registeredAddresses[id];
             if (componentExist.exists) {
                 if (!componentExist.sendLoop) {
                     _registeredAddresses[id].sendLoop = true;
-                    _sendLoopComponents.emplace_back(id);
+                    _sendLoopComponents.push_back(id);
                     #ifdef CAN_DEBUG
                         pcSerial.printf("[CANService]@addComponentToSendLoop: Component add to sendLoop. ComponentID: 0x%x\n", id);
                     #endif
@@ -195,10 +217,6 @@ class CANService : public IService {
             return false;
         }
 
-        bool addComponentToSendLoop(void* component) {
-            return addComponentToSendLoop(_calculateComponentId(component));
-        }
-
         bool processSendLoop() {
             bool success = true;
 
@@ -209,7 +227,7 @@ class CANService : public IService {
             for (auto componentId : _sendLoopComponents) {
                 component_exist_t componentExist = _registeredAddresses[componentId];
                 if (componentExist.sendLoop) {
-                    if (sendMessage(componentId)) {
+                    if (broadcastMessage(componentId)) {
                         #ifdef CAN_DEBUG
                             pcSerial.printf("[CANService]@processSendLoop: Component in sendLoop processed successfully. ComponentID: 0x%x\n", componentId);
                         #endif
@@ -228,6 +246,10 @@ class CANService : public IService {
             }
 
             return success;
+        }
+
+        void setSenderId(id_device_t senderId) {
+            _deviceId = senderId;
         }
 
         virtual void run() {
@@ -253,7 +275,7 @@ class CANService : public IService {
         CircularBuffer<CANMessage, TELEGRAM_IN_BUFFER_SIZE, uint8_t> _telegramsIn;
 
         // Saves all registered Components with its Message Handler
-        std::map<component_id_t, component_details_t> _components;
+        std::map<id_component_t, component_details_t> _components;
         /*
             Because of the struct defined at the beginning of the file, you
             can store if a component has been registered in the following map.
@@ -261,10 +283,13 @@ class CANService : public IService {
             If it wasn't registered, the map will return the datatype as it has
             just been constructed -> component.exists == false (as in the struct)...
         */
-        std::map<component_id_t, component_exist_t> _registeredAddresses;
+        std::map<id_component_t, component_exist_t> _registeredAddresses;
 
         // Saves all (already registered) components to be send repeatedly
-        vector<component_id_t> _sendLoopComponents;
+        vector<id_component_t> _sendLoopComponents;
+
+        // The address for this device
+        id_device_t _deviceId = DEVICE_ALL;
 
         void _messageReceived() {
             // Put received Message in a Buffer to process later
@@ -272,18 +297,6 @@ class CANService : public IService {
             while(_can.read(m)) {
                 _telegramsIn.push(m);
             }
-        }
-
-        component_id_t _calculateComponentId(void* component) {
-            IID *componentId = (IID*)component;
-            component_id_t id = ID::getComponentId(componentId->getTelegramTypeId(), componentId->getComponentId());
-            return id;
-        }
-
-        can_object_type_t _getComponentObjectType(void* component) {
-            IID *componentObjectType = (IID*)component;
-            can_object_type_t objectType = componentObjectType->getObjectType();
-            return objectType;
         }
 };
 

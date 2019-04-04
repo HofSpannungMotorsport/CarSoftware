@@ -4,19 +4,24 @@
 #include "../interface/IBuzzer.h"
 
 #define STD_BUZZER_ON_OFF_TIME  0.5 // s
+
+#ifdef STD_BUZZER_FAST_HIGH_LOW_TIME
+    #undef STD_BUZZER_FAST_HIGH_LOW_TIME
+#endif
+
 #define STD_BUZZER_FAST_HIGH_LOW_TIME 0.075 // s
 
 class HardwareBuzzer : public IBuzzer {
     public:
         HardwareBuzzer(PinName port)
             : _port(port) {
-            _telegramTypeId = BUZZER;
-            _objectType = HARDWARE_OBJECT;
+            setComponentType(COMPONENT_BUZZER);
+            setObjectType(OBJECT_HARDWARE);
         }
         
-        HardwareBuzzer(PinName port, can_component_t componentId)
+        HardwareBuzzer(PinName port, id_sub_component_t componentSubId)
             : HardwareBuzzer(port) {
-            _componentId = componentId;
+            setComponentSubId(componentSubId);
         }
 
         virtual void setStatus(buzzer_status_t status) {

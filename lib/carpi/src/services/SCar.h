@@ -3,6 +3,7 @@
 
 #include "platform/CircularBuffer.h"
 #include "IService.h"
+#include "communication/componentIds.h"
 #include "communication/CANService.h"
 #include "components/interface/IButton.h"
 #include "components/interface/ILed.h"
@@ -11,7 +12,7 @@
 
 
 #define ERROR_REGISTER_SIZE 64 // errors, max: 255
-#define BOOT_ROUTINE_TEST_TIME 2 // s
+#define BOOT_ROUTINE_TEST_TIME 0.5 // s
 #define BRAKE_START_THRESHHOLD 0.75 // %
 
 #define HV_ENABLED_BEEP_TIME 2.2 // s (has to be at least 0.5)
@@ -35,12 +36,12 @@ enum error_type_t : uint8_t {
 class Error {
     public:
         Error(){}
-        Error(component_id_t ComponentId, uint8_t Code, error_type_t Type)
+        Error(id_component_t ComponentId, uint8_t Code, error_type_t Type)
             : componentId(ComponentId), code(Code), type(Type) {}
 
-        component_id_t componentId;
+        id_component_t componentId = 0;
         uint8_t code = 0;
-        error_type_t type;
+        error_type_t type = ERROR_NO;
 };
 
 class SCar : public IService {
@@ -72,11 +73,11 @@ class SCar : public IService {
             _checkHvEnabled();
 
             if (_button.reset->getStatus() > 0) {
-                addError(Error(_calculateComponentId((IID*)_button.reset), _button.reset->getStatus(), ERROR_SYSTEM));
+                addError(Error(_calculateComponentId((IComponent*)_button.reset), _button.reset->getStatus(), ERROR_SYSTEM));
             }
 
             if (_button.start->getStatus() > 0) {
-                addError(Error(_calculateComponentId((IID*)_button.start), _button.start->getStatus(), ERROR_SYSTEM));
+                addError(Error(_calculateComponentId((IComponent*)_button.start), _button.start->getStatus(), ERROR_SYSTEM));
             }
 
             if (!(_errorRegister.empty())) {
@@ -151,11 +152,11 @@ class SCar : public IService {
             _sendLedsOverCan();
 
             // [QF]
-            /*
+            ///*
             while(!_hvEnabled) {
                 _canService.processInbound();
             }
-            */
+            //*/
 
            	_resetLeds();
             _led.red->setState(LED_OFF);
@@ -363,22 +364,22 @@ class SCar : public IService {
 
         DigitalIn &_hvEnabled;
 
-        component_id_t _calculateComponentId(IID* component) {
-            component_id_t id = ID::getComponentId(component->getTelegramTypeId(), component->getComponentId());
+        id_component_t _calculateComponentId(IComponent* component) {
+            id_component_t id = component->getComponentId();
             return id;
         }
 
         void _sendLedsOverCan() {
             // LED's
-            _canService.sendMessage((void*)_led.red);
-            _canService.sendMessage((void*)_led.yellow);
-            _canService.sendMessage((void*)_led.green);
+            _canService.sendMessage((ICommunication*)_led.red, DEVICE_DASHBOARD);
+            _canService.sendMessage((ICommunication*)_led.yellow, DEVICE_DASHBOARD);
+            _canService.sendMessage((ICommunication*)_led.green, DEVICE_DASHBOARD);
         }
 
         void _sendPedalsOverCan() {
             // Pedals
-            _canService.sendMessage((void*)_pedal.gas);
-            _canService.sendMessage((void*)_pedal.brake);
+            _canService.sendMessage((ICommunication*)_pedal.gas, DEVICE_PEDAL);
+            _canService.sendMessage((ICommunication*)_pedal.brake, DEVICE_PEDAL);
         }
 
         void _sendComponentsOverCan() {
@@ -392,18 +393,30 @@ class SCar : public IService {
             _led.green->setBrightness(1);
 
             _led.red->setState(LED_ON);
-            _led.yellow->setState(LED_ON);
-            _led.green->setState(LED_ON);
-
             _sendLedsOverCan();
+            wait(0.3);
+
+            _led.yellow->setState(LED_ON);
+            _sendLedsOverCan();
+            wait(0.3);
+
+            _led.green->setState(LED_ON);
+            _sendLedsOverCan();
+            wait(0.3);
         }
 
         void _turnOffLed() {
             _led.red->setState(LED_OFF);
-            _led.yellow->setState(LED_OFF);
-            _led.green->setState(LED_OFF);
-
             _sendLedsOverCan();
+            wait(0.3);
+
+            _led.yellow->setState(LED_OFF);
+            _sendLedsOverCan();
+            wait(0.3);
+
+            _led.green->setState(LED_OFF);
+            _sendLedsOverCan();
+            wait(0.3);
         }
 
         void _resetLeds() {
@@ -429,16 +442,16 @@ class SCar : public IService {
         }
 
         void _pedalError(IPedal* sensorId) {
-            addError(Error(ID::getComponentId(sensorId->getTelegramTypeId(), sensorId->getComponentId()), sensorId->getStatus(), ERROR_CRITICAL));
+            addError(Error(sensorId->getComponentId(), sensorId->getStatus(), ERROR_CRITICAL));
         }
 
         void _checkHvEnabled() {
             // [QF]
-            /*
+            ///*
             if (!_hvEnabled) {
-                addError(Error(ID::getComponentId(SYSTEM, SYSTEM_HV_ENABLED), 0x1, ERROR_CRITICAL));
+                addError(Error(componentId::getComponentId(COMPONENT_SYSTEM, COMPONENT_SYSTEM_HV_ENABLED), 0x1, ERROR_CRITICAL));
             }
-            */
+            //*/
         }
 };
 

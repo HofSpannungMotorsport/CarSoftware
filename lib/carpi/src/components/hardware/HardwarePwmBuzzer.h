@@ -7,6 +7,11 @@
 
 #define STD_BUZZER_ON_OFF_TIME  0.5 // s
 #define STD_BUZZER_HIGH_LOW_TIME 0.6 // s
+
+#ifdef STD_BUZZER_FAST_HIGH_LOW_TIME
+    #undef STD_BUZZER_FAST_HIGH_LOW_TIME
+#endif
+
 #define STD_BUZZER_FAST_HIGH_LOW_TIME 0.15 // s
 #define STD_BUZZER_BEEP_HIGH_TO_LOW_RATIO 0.6 // -> Low = 60% of High
 
@@ -16,13 +21,13 @@ class HardwarePwmBuzzer : public IBuzzer {
     public:
         HardwarePwmBuzzer(PinName port) 
             : _port(port) {
-            _telegramTypeId = BUZZER;
-            _objectType = HARDWARE_OBJECT;
+            setComponentType(COMPONENT_BUZZER);
+            setObjectType(OBJECT_HARDWARE);
         }
         
-        HardwarePwmBuzzer(PinName port, can_component_t componentId)
+        HardwarePwmBuzzer(PinName port, id_sub_component_t componentSubId)
             : HardwarePwmBuzzer(port) {
-            _componentId = componentId;
+            setComponentSubId(componentSubId);
         }
 
         virtual void setStatus(buzzer_status_t status) {
