@@ -14,7 +14,7 @@ SoftwarePedal softwarePedal(PEDAL_GAS);
 PedalMessageHandler pedalMessageHandler;
 
 message_id_t calculateComponentId(void* component) {
-    IID *componentId = (IID*)component;
+    IComponent *componentId = (IComponent*)component;
     component_id_t id = ID::getMessageId(NORMAL, ID::getComponentId(componentId->getTelegramTypeId(), componentId->getComponentId()), componentId->getObjectType());
     return id;
 }
@@ -57,7 +57,7 @@ void PedalUnitTest() {
     if (softwarePedal.getStatus() > 0) {
         pcSerial.printf("Error after Pedal Calibration: 0x%x", softwarePedal.getStatus());
     } else {
-        Timer refreshTimer = Timer();
+        Timer refreshTimer;
         refreshTimer.start();
         while(softwarePedal.getStatus() == 0) {
             refreshTimer.reset();

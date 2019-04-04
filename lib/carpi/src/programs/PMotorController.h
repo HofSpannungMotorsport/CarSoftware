@@ -96,7 +96,7 @@ class PMotorController : public IProgram {
                        _brakePedal;
 
         bool _gasPedalPrimed = false;
-        Timer _hardBrakeingSince = Timer();
+        Timer _hardBrakeingSince;
         bool _hardBrakeingStarted = false;
 
         struct _rpmSensorStruct_t {
@@ -115,7 +115,7 @@ class PMotorController : public IProgram {
 
         struct _asrSave {
             float lastTorque, lastA;
-            Timer lastRun = Timer();
+            Timer lastRun;
         } _asrSave;
 
         void _checkErrors() {

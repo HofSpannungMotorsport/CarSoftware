@@ -13,7 +13,7 @@ class ServiceList : public IService {
         }
 
         void addService(IService* service) {
-            _services.emplace_back(service);
+            _services.push_back(service);
         }
 
     protected:

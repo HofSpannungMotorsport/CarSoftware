@@ -63,6 +63,7 @@ class HardwareLedPwm : public ILed {
 
         virtual message_build_result_t buildMessage(CarMessage &carMessage) {
             // No implementation needed yet
+            return MESSAGE_BUILD_ERROR;
         }
 
         virtual message_parse_result_t parseMessage(CarMessage &carMessage) {

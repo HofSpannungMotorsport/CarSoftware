@@ -39,9 +39,9 @@ class Error {
         Error(id_component_t ComponentId, uint8_t Code, error_type_t Type)
             : componentId(ComponentId), code(Code), type(Type) {}
 
-        id_component_t componentId;
+        id_component_t componentId = 0;
         uint8_t code = 0;
-        error_type_t type;
+        error_type_t type = ERROR_NO;
 };
 
 class SCar : public IService {
@@ -73,11 +73,11 @@ class SCar : public IService {
             _checkHvEnabled();
 
             if (_button.reset->getStatus() > 0) {
-                addError(Error(_calculateComponentId((IID*)_button.reset), _button.reset->getStatus(), ERROR_SYSTEM));
+                addError(Error(_calculateComponentId((IComponent*)_button.reset), _button.reset->getStatus(), ERROR_SYSTEM));
             }
 
             if (_button.start->getStatus() > 0) {
-                addError(Error(_calculateComponentId((IID*)_button.start), _button.start->getStatus(), ERROR_SYSTEM));
+                addError(Error(_calculateComponentId((IComponent*)_button.start), _button.start->getStatus(), ERROR_SYSTEM));
             }
 
             if (!(_errorRegister.empty())) {
@@ -152,11 +152,11 @@ class SCar : public IService {
             _sendLedsOverCan();
 
             // [QF]
-            /*
+            ///*
             while(!_hvEnabled) {
                 _canService.processInbound();
             }
-            */
+            //*/
 
            	_resetLeds();
             _led.red->setState(LED_OFF);
@@ -364,7 +364,7 @@ class SCar : public IService {
 
         DigitalIn &_hvEnabled;
 
-        id_component_t _calculateComponentId(IID* component) {
+        id_component_t _calculateComponentId(IComponent* component) {
             id_component_t id = component->getComponentId();
             return id;
         }
@@ -447,11 +447,11 @@ class SCar : public IService {
 
         void _checkHvEnabled() {
             // [QF]
-            /*
+            ///*
             if (!_hvEnabled) {
                 addError(Error(componentId::getComponentId(COMPONENT_SYSTEM, COMPONENT_SYSTEM_HV_ENABLED), 0x1, ERROR_CRITICAL));
             }
-            */
+            //*/
         }
 };
 

@@ -11,7 +11,7 @@ struct car_sub_message_t {
     uint8_t data[7];
 };
 
-class CarMessage {
+class CarMessage : private NonCopyable<CarMessage> {
     public:
         CarMessage() {}
 
@@ -59,10 +59,10 @@ class CarMessage {
             Add a new subMessage to the whole Message.
             Returns true if the message was successfully added.
         */
-        bool addSubMessage(car_sub_message_t subMessage) {
+        bool addSubMessage(car_sub_message_t &subMessage) {
             if (subMessages.size() == subMessages.max_size()) return false;
 
-            subMessages.emplace_back(subMessage);
+            subMessages.push_back(subMessage);
 
             return true;
         }

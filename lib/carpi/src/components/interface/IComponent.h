@@ -1,5 +1,5 @@
-#ifndef IID_H
-#define IID_H
+#ifndef ICOMPONENT_H
+#define ICOMPONENT_H
 
 #include "communication/componentIds.h"
 
@@ -10,10 +10,10 @@ enum component_object_type_t : component_object_type_datatype_t {
     OBJECT_SOFTWARE = 0x2
 };
 
-class IID {
+class IComponent : private NonCopyable<IComponent> {
     public:
-        IID() {}
-        IID(id_sub_component_t componentSubId)
+        IComponent() {}
+        IComponent(id_sub_component_t componentSubId)
             : _componentSubId(componentSubId) {}
 
         virtual void setComponentSubId(id_sub_component_t componentSubId) {
@@ -51,4 +51,4 @@ class IID {
         component_object_type_t _objectType = OBJECT_UNDEFINED;
 };
 
-#endif // IID_H
+#endif // IComponent_H

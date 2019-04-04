@@ -44,6 +44,7 @@ class SoftwareRpmSensor : public IRpmSensor {
 
         virtual message_build_result_t buildMessage(CarMessage &carMessage) {
             // No implementation needed
+            return MESSAGE_BUILD_ERROR;
         }
 
         virtual message_parse_result_t parseMessage(CarMessage &carMessage) {

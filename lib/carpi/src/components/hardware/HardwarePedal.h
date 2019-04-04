@@ -231,7 +231,7 @@ class HardwarePedal : public IPedal {
         struct _deviance {
             float max = STD_MAX_DEVIANCE;
             uint16_t maxTime = STD_MAX_DEVIANCE_TIME;
-            Timer timer = Timer();
+            Timer timer;
             bool timerStarted = false;
         } _deviance;
 

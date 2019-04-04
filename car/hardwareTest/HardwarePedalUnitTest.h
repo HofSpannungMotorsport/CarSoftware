@@ -28,7 +28,7 @@ void HardwarePedalUnitTest() {
     if (pedal.getStatus() > 0) {
         pcSerial.printf("Error after Pedal Calibration: 0x%x\n", pedal.getStatus());
     } else {
-        Timer refreshTimer = Timer();
+        Timer refreshTimer;
         refreshTimer.start();
         while(pedal.getStatus() == 0) {
             refreshTimer.reset();

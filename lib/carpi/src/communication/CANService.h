@@ -41,7 +41,7 @@ class CANService : public IService {
             #endif
 
             if (componentExist.exists) {
-                CarMessage m = CarMessage();
+                CarMessage m;
                 component_details_t component = _components[id];
 
                 m.setSenderId(senderId);
@@ -130,7 +130,7 @@ class CANService : public IService {
                 component_exist_t componentExist = _registeredAddresses[id];
                 if (componentExist.exists) {
                     // Convert CANMessage to CarMessage
-                    CarMessage carMessage = CarMessage();
+                    CarMessage carMessage;
 
                     car_sub_message_t subMessage;
                     subMessage.length = m.len - 1;
@@ -198,7 +198,7 @@ class CANService : public IService {
             if (componentExist.exists) {
                 if (!componentExist.sendLoop) {
                     _registeredAddresses[id].sendLoop = true;
-                    _sendLoopComponents.emplace_back(id);
+                    _sendLoopComponents.push_back(id);
                     #ifdef CAN_DEBUG
                         pcSerial.printf("[CANService]@addComponentToSendLoop: Component add to sendLoop. ComponentID: 0x%x\n", id);
                     #endif

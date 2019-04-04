@@ -84,6 +84,7 @@ class HardwareRpmSensor : public IRpmSensor {
 
         virtual message_parse_result_t parseMessage(CarMessage &carMessage) {
             // No implementation needed
+            return MESSAGE_PARSE_ERROR;
         }
 
     protected:

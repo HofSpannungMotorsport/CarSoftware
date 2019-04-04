@@ -98,6 +98,7 @@ class HardwareInterruptButton : public IButton {
 
         virtual message_parse_result_t parseMessage(CarMessage &carMessage) {
             // No implementation needed yet
+            return MESSAGE_PARSE_ERROR;
         }
 
     protected:

@@ -1,7 +1,7 @@
 #ifndef IBUZZER_H
 #define IBUZZER_H
 
-#include "IID.h"
+#include "IComponent.h"
 
 enum buzzer_state_t : bool {
     BUZZER_OFF = false,
@@ -25,7 +25,7 @@ enum buzzer_error_type_t : buzzer_status_t {
     BUZZER_WRONG_BEEP = 0x4
 };
 
-class IBuzzer : public IID {
+class IBuzzer : public IComponent {
     public:
         virtual void setStatus(buzzer_status_t status) = 0;
         virtual buzzer_status_t getStatus() = 0;

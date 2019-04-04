@@ -1,6 +1,8 @@
 #ifndef MASTERCONF_H
 #define MASTERCONF_H
 
+//#define CAN_DEBUG
+//#define MOTORCONTROLLER_OUTPUT
 #include "carpi.h"
 
 #define HIGH_DEMAND_SERVICE_REFRESH_RATE 120 // Hz
@@ -70,6 +72,8 @@ class Master {
     public:
         // Called once at bootup
         void setup() {
+            wait(2);
+
             canService.setSenderId(DEVICE_MASTER);
 
             // Add all Software Components to the CAN Service

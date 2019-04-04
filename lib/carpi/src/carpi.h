@@ -23,7 +23,7 @@
 
     // Components
     //   Interface
-    #include "components/interface/IID.h"
+    #include "components/interface/IComponent.h"
     #include "components/interface/ICommunication.h"
     #include "components/interface/IAnalogSensor.h"
     #include "components/interface/IButton.h"
