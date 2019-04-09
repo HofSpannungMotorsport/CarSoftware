@@ -57,14 +57,9 @@ class CarMessage : private NonCopyable<CarMessage> {
 
         /*
             Add a new subMessage to the whole Message.
-            Returns true if the message was successfully added.
         */
-        bool addSubMessage(car_sub_message_t &subMessage) {
-            if (subMessages.size() == subMessages.max_size()) return false;
-
+        void addSubMessage(car_sub_message_t &subMessage) {
             subMessages.push_back(subMessage);
-
-            return true;
         }
 
         /*
@@ -122,10 +117,6 @@ class CarMessage : private NonCopyable<CarMessage> {
         */
         float getTimeSinceSent() {
             return _sentTimer.read();
-        }
-
-        std::size_t getSize() {
-            return subMessages.size();
         }
     
     protected:

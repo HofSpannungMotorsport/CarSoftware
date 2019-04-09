@@ -93,18 +93,18 @@ class Master {
 
 
             // Add all high demand Services to our Service list
-            highDemandServices.addService((IService*)&canService);
-            highDemandServices.addService((IService*)&carService);
-            highDemandServices.addService((IService*)&motorControllerService);
-            highDemandServices.addService((IService*)&brakeLightService);
+            highDemandServices.addRunable((IRunable*)&canService);
+            highDemandServices.addRunable((IRunable*)&carService);
+            highDemandServices.addRunable((IRunable*)&motorControllerService);
+            highDemandServices.addRunable((IRunable*)&brakeLightService);
 
             // Add all low demand Services to our Service list
-            lowDemandServices.addService((IService*)&speedService);
-            lowDemandServices.addService((IService*)&coolingService);
+            lowDemandServices.addRunable((IRunable*)&speedService);
+            lowDemandServices.addRunable((IRunable*)&coolingService);
 
             // Add all Services and ServiceLists to our ServiceScheduler
-            services.addService((IService*)&highDemandServices, HIGH_DEMAND_SERVICE_REFRESH_RATE);
-            services.addService((IService*)&lowDemandServices, LOW_DEMAND_SERVICE_REFRESH_RATE);
+            services.addRunable((IRunable*)&highDemandServices, HIGH_DEMAND_SERVICE_REFRESH_RATE);
+            services.addRunable((IRunable*)&lowDemandServices, LOW_DEMAND_SERVICE_REFRESH_RATE);
 
             // Start the Car
             carService.startUp();
@@ -117,9 +117,9 @@ class Master {
         }
     
     protected:
-        ServiceList highDemandServices;
-        ServiceList lowDemandServices;
-        ServiceScheduler services;
+        RunableList highDemandServices;
+        RunableList lowDemandServices;
+        RunableScheduler services;
 };
 
 Master runtime;

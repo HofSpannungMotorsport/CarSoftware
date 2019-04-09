@@ -1,13 +1,15 @@
-#ifndef SERVICESCHEDULER_H
-#define SERVICESCHEDULER_H
+#ifndef RUNABLESCHEDULER_H
+#define RUNABLESCHEDULER_H
 
 #include <memory>
 #include <vector>
-#include "IService.h"
+#include "IRunable.h"
+
+using namespace std;
 
 #define STD_SCHEDULER_REFRESH_RATE 5 // Hz
 
-class ServiceScheduler : public IService {
+class RunableScheduler : public IRunable {
     public:
         virtual void run() {
             for (auto &service : _services) {
@@ -25,36 +27,30 @@ class ServiceScheduler : public IService {
             }
         }
 
-        void addService(IService* service, float refreshRate = STD_SCHEDULER_REFRESH_RATE) {
-            _services.emplace_back();
-            ServiceSchedule &serviceReference = _services.back();
-
-            serviceReference.service = service;
-            serviceReference.refreshRate = refreshRate;
+        /*
+            Add a Runable to the List.
+        */
+        void addRunable(IRunable* service, float refreshRate = STD_SCHEDULER_REFRESH_RATE) {
+            _services.emplace_back(service, refreshRate);
         }
 
-
-    protected:
-        class ServiceSchedule {
+    private:
+        class RunableSchedule {
             public:
-                ServiceSchedule() {
-                    lastRun = std::shared_ptr<Timer>(new Timer());
-                }
-
-                ServiceSchedule(IService* servicePointer, float serviceRefreshRate)
-                : ServiceSchedule() {
+                RunableSchedule(IRunable* servicePointer, float serviceRefreshRate) {
                     service = servicePointer;
                     refreshRate = serviceRefreshRate;
+                    lastRun = lastRun = std::shared_ptr<Timer>(new Timer());
                 }
 
-                IService *service;
+                IRunable *service;
                 float refreshRate = STD_SCHEDULER_REFRESH_RATE;
                 bool running = false;
 
                 std::shared_ptr<Timer> lastRun;
         };
 
-        vector<ServiceSchedule> _services;
+        vector<RunableSchedule> _services;
 };
 
-#endif // SERVICESCHEDULER_H
+#endif // RUNABLESCHEDULER_H
