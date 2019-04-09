@@ -2,6 +2,7 @@
 #define HARDWAREPEDAL_H
 
 #include "mbed.h"
+#include "platform/CircularBuffer.h"
 #include "../interface/IPedal.h"
 #include "../hardware/HardwareAnalogSensor.h"
 
@@ -11,9 +12,10 @@
 #define STD_MAPPED_BOUNDARY_PERCENTAGE 0.10 // 10%
 #define STD_MAX_OUT_OF_BOUNDARY_TIME 100 // 100ms
 
-#define STD_CALIBRATION_REFRESH_TIME 0.030 // 30ms
-#define STD_CALIBRATION_MIN_DEVIANCE 500 // Raw analog
-#define STD_CALIBRATION_MAX_DEVIANCE 30000 // Raw analog
+#define STD_CALIBRATION_REFRESH_TIME        0.030 // 30ms
+#define STD_CALIBRATION_MIN_DEVIANCE        500 // Raw analog
+#define STD_CALIBRATION_MAX_DEVIANCE        30000 // Raw analog
+#define STD_CALIBRATION_SAMPLE_BUFFER_SIZE  20 // How many values should be combined during calibration to get the fu***** deviance away
 
 #define STD_ANALOG_LOWER_BOUNDARY   655 // uint16_t min ->     0
 #define STD_ANALOG_UPPER_BOUNDARY 64880 // uint16_t max -> 65535
@@ -221,10 +223,14 @@ class HardwarePedal : public IPedal {
         struct _calibration {
             struct sensor1 {
                 analog_sensor_raw_t min = 0, max = 0;
+                bool initPointSet = false;
+                CircularBuffer<analog_sensor_raw_t, STD_CALIBRATION_SAMPLE_BUFFER_SIZE> buffer;
             } sensor1;
 
             struct sensor2 {
                 analog_sensor_raw_t min = 0, max = 0;
+                bool initPointSet = false;
+                CircularBuffer<analog_sensor_raw_t, STD_CALIBRATION_SAMPLE_BUFFER_SIZE> buffer;
             } sensor2;
         } _calibration;
 
@@ -252,31 +258,64 @@ class HardwarePedal : public IPedal {
             }
         }
 
+        analog_sensor_raw_t _getAverageValue(CircularBuffer<analog_sensor_raw_t, STD_CALIBRATION_SAMPLE_BUFFER_SIZE> &buffer) {
+            uint32_t value = 0,
+                     valueCount = 0;
+
+            while(!buffer.empty()) {
+                analog_sensor_raw_t currentValue = 0; // Initializing with 0, don't want to get an compiler warning over and over again
+                buffer.pop(currentValue);
+                value += currentValue;
+                valueCount++;
+            }
+
+            value /= valueCount;
+            return value;
+        }
+
         void _calibrationLoop() {
-            analog_sensor_raw_t currentValue = _pin1.getRawValue();
-            if (currentValue < _calibration.sensor1.min)
-                _calibration.sensor1.min = currentValue;
-            if (currentValue > _calibration.sensor1.max)
-                _calibration.sensor1.max = currentValue;
+            _calibration.sensor1.buffer.push(_pin1.getRawValue());
+            if (_calibration.sensor1.buffer.full()) {
+                analog_sensor_raw_t currentValue = _getAverageValue(_calibration.sensor1.buffer);
+
+                if (_calibration.sensor1.initPointSet) {
+                    if (currentValue < _calibration.sensor1.min)
+                        _calibration.sensor1.min = currentValue;
+                    if (currentValue > _calibration.sensor1.max)
+                        _calibration.sensor1.max = currentValue;
+                } else {
+                    _calibration.sensor1.min = currentValue;
+                    _calibration.sensor1.max = currentValue;
+                    _calibration.sensor1.initPointSet = true;
+                }
+            }
 
             if (_secondSensor) {
-                currentValue = _pin2.getRawValue();
-                if (currentValue < _calibration.sensor2.min)
-                    _calibration.sensor2.min = currentValue;
-                if (currentValue > _calibration.sensor2.max)
-                    _calibration.sensor2.max = currentValue;
+                _calibration.sensor2.buffer.push(_pin2.getRawValue());
+                if (_calibration.sensor2.buffer.full()) {
+                    analog_sensor_raw_t currentValue = _getAverageValue(_calibration.sensor2.buffer);
+
+                    if (_calibration.sensor2.initPointSet) {
+                        if (currentValue < _calibration.sensor2.min)
+                            _calibration.sensor2.min = currentValue;
+                        if (currentValue > _calibration.sensor2.max)
+                            _calibration.sensor2.max = currentValue;
+                    } else {
+                        _calibration.sensor2.min = currentValue;
+                        _calibration.sensor2.max = currentValue;
+                        _calibration.sensor2.initPointSet = true;
+                    }
+                }
             }
         }
 
         virtual void _beginCalibration() {
-            analog_sensor_raw_t sensorValue = _pin1.getRawValue();
-            _calibration.sensor1.min = sensorValue;
-            _calibration.sensor1.max = sensorValue;
+            _calibration.sensor1.initPointSet = false;
+            _calibration.sensor1.buffer.reset();
 
             if (_secondSensor) {
-                sensorValue = _pin2.getRawValue();
-                _calibration.sensor2.min = sensorValue;
-                _calibration.sensor2.max = sensorValue;
+                _calibration.sensor2.initPointSet = false;
+                _calibration.sensor2.buffer.reset();
             }
 
             _calibrationTicker.attach(callback(this, &HardwarePedal::_calibrationLoop), _calibrationRefreshTime);
@@ -286,6 +325,22 @@ class HardwarePedal : public IPedal {
             _calibrationTicker.detach();
             bool devianceTooLow = false;
             bool devianceTooHigh = false;
+
+            if (!_calibration.sensor1.initPointSet) {
+                devianceTooLow = true;
+
+                _calibration.sensor1.min = 0;
+                _calibration.sensor1.max = 0;
+            }
+
+            if (_secondSensor) {
+                if (!_calibration.sensor2.initPointSet) {
+                    devianceTooLow = true;
+
+                    _calibration.sensor2.min = 0;
+                    _calibration.sensor2.max = 0;
+                }
+            }
 
             if ((_calibration.sensor1.max - _calibration.sensor1.min) >= _calibrationMinDeviance) {
                 if ((_calibration.sensor1.max - _calibration.sensor1.min) <= _calibrationMaxDeviance) {
