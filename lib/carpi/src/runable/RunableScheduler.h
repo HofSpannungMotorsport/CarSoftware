@@ -1,6 +1,7 @@
 #ifndef RUNABLESCHEDULER_H
 #define RUNABLESCHEDULER_H
 
+#include <memory>
 #include <vector>
 #include "IRunable.h"
 
@@ -28,7 +29,6 @@ class RunableScheduler : public IRunable {
 
         /*
             Add a Runable to the List.
-            Don't use in realtime, its slow caused by 'new', only at configuration/startup
         */
         void addRunable(IRunable* service, float refreshRate = STD_SCHEDULER_REFRESH_RATE) {
             _services.emplace_back(service, refreshRate);
@@ -40,25 +40,14 @@ class RunableScheduler : public IRunable {
                 RunableSchedule(IRunable* servicePointer, float serviceRefreshRate) {
                     service = servicePointer;
                     refreshRate = serviceRefreshRate;
-                    lastRun = new Timer;
-                }
-
-                ~RunableSchedule() {
-                    delete lastRun;
-                }
-
-                RunableSchedule(const RunableSchedule& r) {
-                    service = r.service;
-                    refreshRate = r.refreshRate;
-                    running = false;
-                    lastRun = new Timer;
+                    lastRun = lastRun = std::shared_ptr<Timer>(new Timer());
                 }
 
                 IRunable *service;
                 float refreshRate = STD_SCHEDULER_REFRESH_RATE;
                 bool running = false;
 
-                Timer *lastRun;
+                std::shared_ptr<Timer> lastRun;
         };
 
         vector<RunableSchedule> _services;
