@@ -21,11 +21,11 @@ class HardwarePump : public IPump {
             if (speed > 1) speed = 1;
             if (speed < 0) speed = 0;
 
-            _pwmPort.write(speed);
+            _pwmPort.write(1 - speed);
         }
 
         virtual pump_speed_t getSpeed() {
-            return _pwmPort.read();
+            return 1 - _pwmPort.read();
         }
 
         virtual void setEnable(pump_enable_t enable) {
