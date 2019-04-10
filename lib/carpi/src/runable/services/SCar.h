@@ -1,5 +1,5 @@
-#ifndef CARSERVICE_H
-#define CARSERVICE_H
+#ifndef SCAR_H
+#define SCAR_H
 
 #include "platform/CircularBuffer.h"
 #include "IService.h"
@@ -71,6 +71,8 @@ class SCar : public IService {
 
         virtual void run() {
             _checkHvEnabled();
+
+            _checkInput();
 
             if (_button.reset->getStatus() > 0) {
                 addError(Error(_calculateComponentId((IComponent*)_button.reset), _button.reset->getStatus(), ERROR_SYSTEM));
@@ -282,9 +284,9 @@ class SCar : public IService {
             waitTimer.reset();
             waitTimer.start();
             do {
+                _canService.processInbound();
                 _checkHvEnabled();
                 processErrors();
-                _canService.processInbound();
                 if (_state != ALMOST_READY_TO_DRIVE) {
                     _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
                     // If an Error occured, stop continuing and glow Red
@@ -294,6 +296,10 @@ class SCar : public IService {
                     _led.red->setState(LED_ON);
                     _led.red->setBlinking(BLINKING_NORMAL);
                     _sendLedsOverCan();
+
+                    // Stop beeping!
+                    _buzzer->setState(BUZZER_OFF);
+
                     while(1) {
                         wait(100);
                     }
@@ -453,6 +459,100 @@ class SCar : public IService {
             }
             //*/
         }
+
+        void _checkInput() {
+            if (_button.reset->getStateChanged()) {
+                if (_button.reset->getState() == PRESSED) {
+                    if (_state == READY_TO_DRIVE) {
+                        // Disable RFE and RUN
+                        _motorController->setRUN(MOTOR_CONTROLLER_RUN_DISABLE);
+                        _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
+
+                        _state = ALMOST_READY_TO_DRIVE;
+
+                        _readyToDriveFor.stop();
+                        _readyToDriveFor.reset();
+
+                        _led.green->setBlinking(BLINKING_FAST);
+                        _sendLedsOverCan();
+                    }
+                }
+            }
+
+            if (_state == ALMOST_READY_TO_DRIVE) {
+                if ((_button.start->getState() == LONG_CLICKED) && (_pedal.brake->getValue() >= BRAKE_START_THRESHHOLD)) {
+                    // Optimize later!!
+                    // [il]
+                    // Set RFE enable
+                    _motorController->setRFE(MOTOR_CONTROLLER_RFE_ENABLE);
+
+                    // [QF]
+                    //Start beeping to signalize car is started
+                    _buzzer->setBeep(BUZZER_MONO_TONE);
+                    _buzzer->setState(BUZZER_ON);
+
+                    // Wait the set Time until enabling RUN
+                    Timer waitTimer;
+                    waitTimer.reset();
+                    waitTimer.start();
+                    do {
+                        _canService.processInbound();
+                        _checkHvEnabled();
+                        processErrors();
+                        if (_state != ALMOST_READY_TO_DRIVE) {
+                            _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
+                            // If an Error occured, stop continuing and glow Red
+                            // Red   -> Blinking Normal
+                            // Green -> Off
+                            _resetLeds();
+                            _led.red->setState(LED_ON);
+                            _led.red->setBlinking(BLINKING_NORMAL);
+                            _sendLedsOverCan();
+
+                            // Stop beeping!
+                            _buzzer->setState(BUZZER_OFF);
+
+                            while(1) {
+                                wait(100);
+                            }
+                        }
+                    } while (waitTimer.read() < (float)HV_ENABLED_BEEP_TIME);
+
+                    // Set RUN enable if no Error
+                    _canService.processInbound();
+                    _checkHvEnabled();
+                    processErrors();
+
+                    // Stop beeping!
+                    _buzzer->setState(BUZZER_OFF);
+
+                    if (_state == ALMOST_READY_TO_DRIVE) {
+                        _motorController->setRUN(MOTOR_CONTROLLER_RUN_ENABLE);
+                    } else {
+                        _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
+                        // If an Error occured, stop continuing and glow Red
+                        // Red   -> Blinking Normal
+                        // Green -> Off
+                        _resetLeds();
+                        _led.red->setState(LED_ON);
+                        _led.red->setBlinking(BLINKING_NORMAL);
+                        _sendLedsOverCan();
+                        while(1);
+                    }
+
+                    // Set car ready to drive (-> pressing the gas-pedal will move the car -> fun)
+                    _state = READY_TO_DRIVE;
+                    _readyToDriveFor.reset();
+                    _readyToDriveFor.start();
+
+                    // Stop blinking greed to show car is primed
+                    _resetLeds();
+                    _led.green->setState(LED_ON);
+                    _sendLedsOverCan();
+                    wait(0.1);
+                }
+            }
+        }
 };
 
-#endif // CARSERVICE_H
+#endif // SCAR_H

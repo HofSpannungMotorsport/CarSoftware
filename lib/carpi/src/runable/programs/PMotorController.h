@@ -63,6 +63,8 @@ class PMotorController : public IProgram {
 
                 // Map the Value to match the power limit/set power
                 returnValue = _mapToPowerLimit(returnValue);
+            } else {
+                unprimeGas();
             }
 
             // Send new Power to Motor -> Brum Brum (but without the Brum Brum)
@@ -72,6 +74,10 @@ class PMotorController : public IProgram {
             #ifdef MOTORCONTROLLER_OUTPUT
                 pcSerial.printf("%f\n", returnValue);
             #endif
+        }
+
+        void unprimeGas() {
+            _gasPedalPrimed = false;
         }
 
     protected:

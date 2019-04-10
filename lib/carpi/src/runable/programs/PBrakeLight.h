@@ -22,7 +22,7 @@ class PBrakeLight : public IService {
             // If not Brakeing -> light off
             // If Error or something else -> light on
             pedal_value_t brakePedalValue = _brakePedal->getValue();
-            if (_carService.getState() == READY_TO_DRIVE) {
+            if (_carService.getState() == READY_TO_DRIVE || _carService.getState() == ALMOST_READY_TO_DRIVE) {
                 if (brakePedalValue >= STD_BRAKE_LIGHT_UPPER_THRESHHOLD) {
                     _brakeLight->setState(LED_ON);
                 } else if (brakePedalValue < STD_BRAKE_LIGHT_LOWER_THRESHHOLD) {

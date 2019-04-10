@@ -42,6 +42,7 @@ class PCooling : public IProgram {
             _motorController = motorController;
 
             _pump->setSpeed(0);
+            _pump->setEnable(1);
             _fan->setState(FAN_OFF);
         }
 
@@ -83,7 +84,7 @@ class PCooling : public IProgram {
                 // Apply pump power
                 //_pump->setSpeed(newPumpPower);
                 // [QF]
-                _pump->setSpeed(0); // Disable Pump until water is filled in the Tank, otherwise the Pump would be killed
+                _pump->setSpeed(1);
 
                 // At least after setting the pump, check if the temperature of any device is too high
                 if (motorTemp > STD_MAX_MOTOR_TEMP) {

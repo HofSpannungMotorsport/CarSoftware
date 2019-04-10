@@ -275,7 +275,7 @@ class CANService : public IService {
         CircularBuffer<CANMessage, TELEGRAM_IN_BUFFER_SIZE, uint8_t> _telegramsIn;
 
         // Saves all registered Components with its Message Handler
-        std::map<id_component_t, component_details_t> _components;
+        map<id_component_t, component_details_t> _components;
         /*
             Because of the struct defined at the beginning of the file, you
             can store if a component has been registered in the following map.
@@ -283,7 +283,7 @@ class CANService : public IService {
             If it wasn't registered, the map will return the datatype as it has
             just been constructed -> component.exists == false (as in the struct)...
         */
-        std::map<id_component_t, component_exist_t> _registeredAddresses;
+        map<id_component_t, component_exist_t> _registeredAddresses;
 
         // Saves all (already registered) components to be send repeatedly
         vector<id_component_t> _sendLoopComponents;
