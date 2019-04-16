@@ -22,7 +22,7 @@
     // Include Framework
     #include "Arduino.h"
     #include "crossplatform/arduinoToMbed/arduinoToMbed.h"
-    HardwareSerial pcSerial = Serial;
+    HardwareSerial &pcSerial = Serial;
 #endif
 
 // ---------------------------------------------------------------------
