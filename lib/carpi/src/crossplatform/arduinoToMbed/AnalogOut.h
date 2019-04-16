@@ -1,8 +1,6 @@
 #ifndef ANALOG_OUT_H
 #define ANALOG_OUT_H
 
-#include "NonCopyable.h"
-
 class AnalogOut {
     public:
         AnalogOut(uint8_t pin)

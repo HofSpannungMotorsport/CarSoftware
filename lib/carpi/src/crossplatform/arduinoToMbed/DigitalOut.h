@@ -1,8 +1,6 @@
 #ifndef DIGITAL_OUT_H
 #define DIGITAL_OUT_H
 
-#include "NonCopyable.h"
-
 class DigitalOut {
     public:
         DigitalOut(uint8_t pin)
