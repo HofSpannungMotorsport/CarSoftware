@@ -1,7 +1,7 @@
 #ifndef DISPLAYSLAVECONF_H
 #define DISPLAYSLAVECONF_H
 
-#include <Arduino.h>
+#include "carpi.h"
 
 class Display {
     public:

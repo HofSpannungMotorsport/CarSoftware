@@ -4,12 +4,11 @@
     With this, all components, services and programs are included in the actual CarSoftware.
 */
 
-// At first, add all components
+// Prior include Platform-specific Components
 
 #ifdef USE_MBED
-    // Framework
+    // Include Framework
     #include "mbed.h"
-
     #ifndef MESSAGE_REPORT
         #define MESSAGE_REPORT
         Serial pcSerial(USBTX, USBRX); // Connection to PC over Serial
@@ -17,34 +16,60 @@
 
     // Communication
     #include "communication/CANService.h"
-    #include "communication/CarMessage.h"
-    #include "communication/componentIds.h"
-    #include "communication/deviceIds.h"
+#endif
 
+#ifdef USE_ARDUINO
+    // Include Framework
+    #include "Arduino.h"
+    #include "crossplatform/arduinoToMbed/arduinoToMbed.h"
+    HardwareSerial pcSerial = Serial;
+#endif
+
+// ---------------------------------------------------------------------
+
+// All Platform Components
+
+// Communication
+#include "communication/CarMessage.h"
+#include "communication/componentIds.h"
+#include "communication/deviceIds.h"
+
+// Components
+//   Interface
+#include "components/interface/IComponent.h"
+#include "components/interface/ICommunication.h"
+#include "components/interface/IAnalogSensor.h"
+#include "components/interface/IPump.h"
+//   Hardware
+#include "components/hardware/HardwareAnalogSensor.h"
+#include "components/hardware/HardwarePump.h"
+//   Software
+
+
+// ---------------------------------------------------------------------
+
+
+// After include Platform specific Components
+
+#ifdef USE_MBED
     // Components
     //   Interface
-    #include "components/interface/IComponent.h"
-    #include "components/interface/ICommunication.h"
-    #include "components/interface/IAnalogSensor.h"
     #include "components/interface/IButton.h"
     #include "components/interface/IBuzzer.h"
     #include "components/interface/IFan.h"
     #include "components/interface/ILed.h"
-    #include "components/interface/IMotorController.h"
     #include "components/interface/IPedal.h"
-    #include "components/interface/IPump.h"
+    #include "components/interface/IMotorController.h"
     #include "components/interface/IRpmSensor.h"
     //   Hardware
-    #include "components/hardware/HardwareAnalogSensor.h"
     #include "components/hardware/HardwareBuzzer.h"
+    #include "components/hardware/HardwarePwmBuzzer.h"
     #include "components/hardware/HardwareFan.h"
     #include "components/hardware/HardwareInterruptButton.h"
     #include "components/hardware/HardwareLed.h"
     #include "components/hardware/HardwareLedPwm.h"
-    #include "components/hardware/HardwareMotorController.h"
     #include "components/hardware/HardwarePedal.h"
-    #include "components/hardware/HardwarePump.h"
-    #include "components/hardware/HardwarePwmBuzzer.h"
+    #include "components/hardware/HardwareMotorController.h"
     #include "components/hardware/HardwareRpmSensor.h"
     //   Software
     #include "components/software/SoftwareButton.h"
@@ -64,7 +89,6 @@
     #include "runable/programs/PBrakeLight.h"
     #include "runable/programs/PCooling.h"
     #include "runable/programs/PMotorController.h"
-    
 #endif
 
 #ifdef USE_ARDUINO
