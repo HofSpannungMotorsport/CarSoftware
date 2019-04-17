@@ -40,9 +40,11 @@
 #include "components/interface/ICommunication.h"
 #include "components/interface/IAnalogSensor.h"
 #include "components/interface/IPump.h"
+#include "components/interface/IHvEnabled.h"
 //   Hardware
 #include "components/hardware/HardwareAnalogSensor.h"
 #include "components/hardware/HardwarePump.h"
+#include "components/hardware/HardwareHvEnabled.h"
 //   Software
 
 

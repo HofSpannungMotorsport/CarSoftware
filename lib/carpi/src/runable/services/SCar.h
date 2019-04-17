@@ -9,6 +9,7 @@
 #include "components/interface/ILed.h"
 #include "components/interface/IBuzzer.h"
 #include "components/interface/IMotorController.h"
+#include "components/interface/IHvEnabled.h"
 
 
 #define ERROR_REGISTER_SIZE 64 // errors, max: 255
@@ -52,8 +53,8 @@ class SCar : public IService {
              IPedal* gasPedal, IPedal* brakePedal,
              IBuzzer* buzzer,
              IMotorController* motorController,
-             DigitalIn &hvEnabled)
-            : _canService(canService), _hvEnabled(hvEnabled) {
+             IHvEnabled* hvEnabled)
+            : _canService(canService) {
             _button.reset = buttonReset;
             _button.start = buttonStart;
 
@@ -67,6 +68,8 @@ class SCar : public IService {
             _buzzer = buzzer;
 
             _motorController = motorController;
+
+            _hvEnabled = hvEnabled;
         }
 
         virtual void run() {
@@ -154,11 +157,9 @@ class SCar : public IService {
             _sendLedsOverCan();
 
             // [QF]
-            ///*
-            while(!_hvEnabled) {
+            while(!(_hvEnabled->read())) {
                 _canService.processInbound();
             }
-            //*/
 
            	_resetLeds();
             _led.red->setState(LED_OFF);
@@ -365,7 +366,7 @@ class SCar : public IService {
 
         IMotorController* _motorController;
 
-        DigitalIn &_hvEnabled;
+        IHvEnabled* _hvEnabled;
 
         id_component_t _calculateComponentId(IComponent* component) {
             id_component_t id = component->getComponentId();
@@ -450,11 +451,9 @@ class SCar : public IService {
 
         void _checkHvEnabled() {
             // [QF]
-            ///*
-            if (!_hvEnabled) {
+            if (!(_hvEnabled->read())) {
                 addError(Error(componentId::getComponentId(COMPONENT_SYSTEM, COMPONENT_SYSTEM_HV_ENABLED), 0x1, ERROR_CRITICAL));
             }
-            //*/
         }
 
         void _checkInput() {
