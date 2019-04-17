@@ -330,8 +330,6 @@ class SCar : public IService {
 
             // Set car ready to drive (-> pressing the gas-pedal will move the car -> fun)
             _state = READY_TO_DRIVE;
-            _readyToDriveFor.reset();
-            _readyToDriveFor.start();
 
             // Stop blinking greed to show car is primed
             _resetLeds();
@@ -346,7 +344,6 @@ class SCar : public IService {
         CircularBuffer<Error, ERROR_REGISTER_SIZE, uint8_t> _errorRegister;
 
         car_state_t _state = CAR_OFF;
-        Timer _readyToDriveFor;
 
         struct _button {
             IButton* reset;
@@ -470,9 +467,6 @@ class SCar : public IService {
 
                         _state = ALMOST_READY_TO_DRIVE;
 
-                        _readyToDriveFor.stop();
-                        _readyToDriveFor.reset();
-
                         _led.green->setBlinking(BLINKING_FAST);
                         _sendLedsOverCan();
                     }
@@ -542,8 +536,6 @@ class SCar : public IService {
 
                     // Set car ready to drive (-> pressing the gas-pedal will move the car -> fun)
                     _state = READY_TO_DRIVE;
-                    _readyToDriveFor.reset();
-                    _readyToDriveFor.start();
 
                     // Stop blinking greed to show car is primed
                     _resetLeds();
