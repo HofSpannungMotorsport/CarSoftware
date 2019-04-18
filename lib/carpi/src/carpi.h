@@ -129,5 +129,5 @@ class Carpi {
 
     private:
         string _version = CARPI_VERSION;
-        string _environment;
+        string _environment = ENVIRONMENT;
 };
