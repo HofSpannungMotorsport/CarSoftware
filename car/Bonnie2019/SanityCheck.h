@@ -1,7 +1,3 @@
-// #ifndef SANITYCHECK_H
-// #define SANITYCHECK_H
-// SanityCheck can be used multiple times -> no sanitycheck define needed
-
 // Check if the right board is selected before compiling (to avoid compiling errors and compiling for the wrong board)
 #ifdef BOARD_DASHBOARD
     #ifndef STM32F446xx
@@ -40,4 +36,9 @@
     #endif
 #endif
 
-// #endif // SANITYCHECK_H
+// Check if Framework mBed and Arduino is active at the same time
+#ifdef USE_MBED
+    #ifdef USE_ARDUINO
+        #error "More than one Framework is currently active. Check platformio.ini"
+    #endif
+#endif

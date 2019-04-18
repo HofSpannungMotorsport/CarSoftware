@@ -69,7 +69,7 @@ PCooling coolingService(carService,
                         (IMotorController*)&motorController,
                         (IHvEnabled*)&hvEnabled);
 
-class Master {
+class Master : public Carpi {
     public:
         // Called once at bootup
         void setup() {

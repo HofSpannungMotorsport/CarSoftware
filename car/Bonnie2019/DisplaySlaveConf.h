@@ -3,7 +3,7 @@
 
 #include "carpi.h"
 
-class Display {
+class Display : public Carpi{
     public:
         void setup() {
             

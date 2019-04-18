@@ -4,6 +4,8 @@
     With this, all components, services and programs are included in the actual CarSoftware.
 */
 
+#define CARPI_VERSION "V0.1.1-P1"
+
 // Prior include Platform-specific Components
 
 #ifdef USE_MBED
@@ -96,3 +98,36 @@
 #ifdef USE_ARDUINO
 
 #endif
+
+// Include some Information about carpi (cross-platform)
+#include <string>
+class Carpi {
+    public:
+        Carpi() {
+            // Print out the current Verison of Carpi
+            printInfo();
+        }
+
+        void printInfo() {
+            #ifdef USE_ARDUINO
+                pcSerial.print("Carpi Version: "); pcSerial.println(_version.c_str());
+                pcSerial.print("Environment: "); pcSerial.println(_environment.c_str());
+            #endif
+
+            #ifdef USE_MBED
+                pcSerial.printf("Carpi Version: %s\nEnvironment: %s\n", _version.c_str(), _environment.c_str());
+            #endif
+        }
+
+        string getVersion() {
+            return _version;
+        }
+
+        string getEnvironment() {
+            return _environment;
+        }
+
+    private:
+        string _version = CARPI_VERSION;
+        string _environment;
+};
