@@ -1,7 +1,6 @@
 #ifndef HARDWAREPEDAL_H
 #define HARDWAREPEDAL_H
 
-#include "mbed.h"
 #include "platform/CircularBuffer.h"
 #include "../interface/IPedal.h"
 #include "../hardware/HardwareAnalogSensor.h"
@@ -117,14 +116,12 @@ class HardwarePedal : public IPedal {
         }
 
         virtual void setCalibrationStatus(pedal_calibration_t calibrationStatus) {
-            if (calibrationStatus != _calibrationStatus) {
-                if (calibrationStatus == CURRENTLY_CALIBRATING) {
-                    _beginCalibration();
-                } else if (calibrationStatus == CURRENTLY_NOT_CALIBRATING) {
-                    _endCalibration();
-                }
-                _calibrationStatus = calibrationStatus;
+            if (calibrationStatus == CURRENTLY_CALIBRATING) {
+                _beginCalibration();
+            } else if (calibrationStatus == CURRENTLY_NOT_CALIBRATING) {
+                _endCalibration();
             }
+            _calibrationStatus = calibrationStatus;
         }
 
         virtual pedal_calibration_t getCalibrationStatus() {

@@ -162,7 +162,6 @@ class SCar : public IService {
             }
 
            	_resetLeds();
-            _led.red->setState(LED_OFF);
             _sendLedsOverCan();
 
             wait(0.1);
@@ -470,8 +469,99 @@ class SCar : public IService {
                         _sendLedsOverCan();
                     }
                 }
+
+                // [QF]
+                if (_button.reset->getState() == LONG_CLICKED) {
+                    if (_state != READY_TO_DRIVE) {
+                        // ReCalibrate the Pedals
+                        // Start bootup/calibration
+                        // Yellow -> On
+                        // Green  -> Normal Blinking
+                        _state = BOOT;
+                        _resetLeds();
+                        _led.yellow->setState(LED_ON);
+                        _led.green->setState(LED_ON);
+
+                        _led.yellow->setBlinking(BLINKING_OFF);
+                        _led.yellow->setBrightness(0.76);
+                        _led.green->setBlinking(BLINKING_NORMAL);
+
+                        _pedal.gas->setCalibrationStatus(CURRENTLY_CALIBRATING);
+                        _pedal.brake->setCalibrationStatus(CURRENTLY_CALIBRATING);
+
+                        _sendComponentsOverCan();
+
+
+                        // Calibrate pedal until pressed Start once for long time
+                        while(_button.start->getState() != LONG_CLICKED) {
+                            _canService.processInbound();
+                        }
+
+
+                        // Stop calibration
+                        _pedal.gas->setCalibrationStatus(CURRENTLY_NOT_CALIBRATING);
+                        _pedal.brake->setCalibrationStatus(CURRENTLY_NOT_CALIBRATING);
+                        _sendPedalsOverCan();
+
+                        wait(0.1);
+                        _canService.processInbound();
+                        _led.yellow->setState(LED_OFF);
+                        _sendLedsOverCan();
+
+
+
+                        // Wait till the Button got released again
+                        // Yellow -> Off
+                        while(_button.start->getState() != NOT_PRESSED) {
+                            _canService.processInbound();
+                        }
+
+                        wait(0.1);
+
+
+                        // Check for Errors at Calibration
+                        _canService.processInbound();
+                        if (_pedal.gas->getStatus() > 0) {
+                            _pedalError(_pedal.gas);
+                        }
+
+                        if (_pedal.brake->getStatus() > 0) {
+                            _pedalError(_pedal.brake);
+                        }
+
+                        processErrors();
+
+
+                        // If all OK, go into Almost Ready to drive
+                        if (_state == BOOT) {
+                            _state = ALMOST_READY_TO_DRIVE;
+                        } else {
+                            // If an Error occured, stop continuing and glow Red
+                            // Red   -> Blinking Slow
+                            // Green -> Off
+                            _resetLeds();
+                            _led.red->setState(LED_ON);
+                            _led.red->setBlinking(BLINKING_SLOW);
+                            _sendLedsOverCan();
+                            while(1) {
+                                wait(100);
+                            }
+                        }
+
+
+                        // If no Error, start blinking fast to show ready, but need to start car
+                        // Green -> Fast Blinking
+                        _resetLeds();
+                        _led.green->setState(LED_ON);
+                        _led.green->setBlinking(BLINKING_FAST);
+                        _sendLedsOverCan();
+
+                        wait(0.1);
+                    }
+                }
             }
 
+            // [QF]
             if (_state == ALMOST_READY_TO_DRIVE) {
                 if ((_button.start->getState() == LONG_CLICKED) && (_pedal.brake->getValue() >= BRAKE_START_THRESHHOLD)) {
                     // Optimize later!!
