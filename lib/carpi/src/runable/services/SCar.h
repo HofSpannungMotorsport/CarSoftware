@@ -269,9 +269,6 @@ class SCar : public IService {
                         wait(100);
                     }
                 }
-
-                pcSerial.printf("%f\n", _pedal.brake->getValue());
-                wait(500);
             } while ((_button.start->getState() != LONG_CLICKED) || (_pedal.brake->getValue() < BRAKE_START_THRESHHOLD));
 
             // Optimize later!!
