@@ -1,6 +1,7 @@
 #ifndef PEDALSLAVECONF_H
 #define PEDALSLAVECONF_H
 
+//#define CAN_DEBUG
 #include "carpi.h"
 
 #include "hardware/Pins_Pedal_PCB.h"
@@ -38,13 +39,9 @@ class Pedal : public Carpi {
     
         // Called repeately after bootup
         void loop() {
-            Timer refreshTimer;
-            refreshTimer.reset();
-            refreshTimer.start();
-        
             canService.run();
 
-            while(refreshTimer.read() < (1 / (float)PEDAL_SEND_RATE));
+            wait(1.0/(float)PEDAL_SEND_RATE);
         }
 };
 

@@ -14,7 +14,7 @@
 
 #define ERROR_REGISTER_SIZE 64 // errors, max: 255
 #define BOOT_ROUTINE_TEST_TIME 0.5 // s
-#define BRAKE_START_THRESHHOLD 0.75 // %
+#define BRAKE_START_THRESHHOLD 0.60 // %
 
 #define HV_ENABLED_BEEP_TIME 2.2 // s (has to be at least 0.5)
 
@@ -269,6 +269,9 @@ class SCar : public IService {
                         wait(100);
                     }
                 }
+
+                pcSerial.printf("%f\n", _pedal.brake->getValue());
+                wait(500);
             } while ((_button.start->getState() != LONG_CLICKED) || (_pedal.brake->getValue() < BRAKE_START_THRESHHOLD));
 
             // Optimize later!!
