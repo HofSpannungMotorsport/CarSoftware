@@ -12,8 +12,11 @@
 #include "components/interface/IHvEnabled.h"
 
 
+#define STARTUP_WAIT 1 // s wait before system gets started
 #define ERROR_REGISTER_SIZE 64 // errors, max: 255
-#define BOOT_ROUTINE_TEST_TIME 0.5 // s
+#define STARTUP_ANIMATION_SPEED 0.075 // s between led-changes
+#define STARTUP_ANIMATION_PLAYBACKS 5 // times the animation should be played
+#define STARTUP_ANIMATION_WAIT_AFTER 0.3 // s wait after animation
 #define BRAKE_START_THRESHHOLD 0.60 // %
 
 #define HV_ENABLED_BEEP_TIME 2.2 // s (has to be at least 0.5)
@@ -140,16 +143,13 @@ class SCar : public IService {
         }
 
         void startUp() {
-            wait(2);
-            _startTestOutputs();
-            Timer waitTimer;
-            waitTimer.reset();
-            waitTimer.start();
-            // Wait some time to test the outputs for a given time
-            while(waitTimer.read() < (float)BOOT_ROUTINE_TEST_TIME) {
-                _canService.processInbound();
+            wait(STARTUP_WAIT);
+
+            for (uint8_t i = 0; i < STARTUP_ANIMATION_PLAYBACKS; i++) {
+                _startupAnimation();
             }
-            _stopTestOutputs();
+
+            wait(STARTUP_ANIMATION_WAIT_AFTER);
 
             // Turn on red LED while HV-Circuite is off
             _resetLeds();
@@ -237,36 +237,33 @@ class SCar : public IService {
             _sendPedalsOverCan();
         }
 
-        void _turnOnLed() {
-            _led.red->setBrightness(1);
-            _led.yellow->setBrightness(1);
-            _led.green->setBrightness(1);
-
+        void _startupAnimation() {
+            _resetLeds();
             _led.red->setState(LED_ON);
             _sendLedsOverCan();
-            wait(0.3);
+
+            wait(STARTUP_ANIMATION_SPEED);
 
             _led.yellow->setState(LED_ON);
             _sendLedsOverCan();
-            wait(0.3);
+
+            wait(STARTUP_ANIMATION_SPEED);
 
             _led.green->setState(LED_ON);
-            _sendLedsOverCan();
-            wait(0.3);
-        }
-
-        void _turnOffLed() {
             _led.red->setState(LED_OFF);
             _sendLedsOverCan();
-            wait(0.3);
+
+            wait(STARTUP_ANIMATION_SPEED);
 
             _led.yellow->setState(LED_OFF);
             _sendLedsOverCan();
-            wait(0.3);
+
+            wait(STARTUP_ANIMATION_SPEED);
 
             _led.green->setState(LED_OFF);
             _sendLedsOverCan();
-            wait(0.3);
+
+            wait(STARTUP_ANIMATION_SPEED);
         }
 
         void _resetLeds() {
@@ -281,14 +278,6 @@ class SCar : public IService {
             _led.red->setBlinking(BLINKING_OFF);
             _led.yellow->setBlinking(BLINKING_OFF);
             _led.green->setBlinking(BLINKING_OFF);
-        }
-
-        void _startTestOutputs() {
-            _turnOnLed();
-        }
-
-        void _stopTestOutputs() {
-            _turnOffLed();
         }
 
         void _pedalError(IPedal* sensorId) {
