@@ -166,176 +166,23 @@ class SCar : public IService {
 
             wait(0.1);
 
-            // Start bootup/calibration
-            // Yellow -> On
-            // Green  -> Normal Blinking
-            _state = BOOT;
-            _resetLeds();
-            _led.yellow->setState(LED_ON);
-            _led.green->setState(LED_ON);
+            _calibratePedals();
 
-            _led.yellow->setBlinking(BLINKING_OFF);
-            _led.yellow->setBrightness(0.76);
-            _led.green->setBlinking(BLINKING_NORMAL);
-
-            _pedal.gas->setCalibrationStatus(CURRENTLY_CALIBRATING);
-            _pedal.brake->setCalibrationStatus(CURRENTLY_CALIBRATING);
-
-            _sendComponentsOverCan();
-
-
-            // Calibrate pedal until pressed Start once for long time
-            while(_button.start->getState() != LONG_CLICKED) {
-                _canService.processInbound();
-            }
-
-
-            // Stop calibration
-            _pedal.gas->setCalibrationStatus(CURRENTLY_NOT_CALIBRATING);
-            _pedal.brake->setCalibrationStatus(CURRENTLY_NOT_CALIBRATING);
-            _sendPedalsOverCan();
-
-            wait(0.1);
             _canService.processInbound();
-            _led.yellow->setState(LED_OFF);
-            _sendLedsOverCan();
-
-
-
-            // Wait till the Button got released again
-            // Yellow -> Off
-            while(_button.start->getState() != NOT_PRESSED) {
-                _canService.processInbound();
-            }
-
-            wait(0.1);
-
-
-            // Check for Errors at Calibration
-            _canService.processInbound();
-            if (_pedal.gas->getStatus() > 0) {
-                _pedalError(_pedal.gas);
-            }
-
-            if (_pedal.brake->getStatus() > 0) {
-                _pedalError(_pedal.brake);
-            }
-
+            _checkHvEnabled();
             processErrors();
-
-
-            // If all OK, go into Almost Ready to drive
-            if (_state == BOOT) {
-                _state = ALMOST_READY_TO_DRIVE;
-            } else {
+            if (_state != ALMOST_READY_TO_DRIVE) {
                 // If an Error occured, stop continuing and glow Red
-                // Red   -> Blinking Slow
+                // Red   -> Blinking Fast
                 // Green -> Off
-                _resetLeds();
                 _led.red->setState(LED_ON);
-                _led.red->setBlinking(BLINKING_SLOW);
+                _led.red->setBlinking(BLINKING_FAST);
+                _led.green->setState(LED_OFF);
                 _sendLedsOverCan();
                 while(1) {
                     wait(100);
                 }
             }
-
-
-            // If no Error, start blinking fast to show ready, but need to start car
-            // Green -> Fast Blinking
-            _resetLeds();
-            _led.green->setState(LED_ON);
-            _led.green->setBlinking(BLINKING_FAST);
-            _sendLedsOverCan();
-
-            wait(0.1);
-
-
-            // Wait till Car got started (Brake Pedal + Start Button long press) and check for Errors/HV disabled
-            do {
-                _canService.processInbound();
-                _checkHvEnabled();
-                processErrors();
-                if (_state != ALMOST_READY_TO_DRIVE) {
-                    // If an Error occured, stop continuing and glow Red
-                    // Red   -> Blinking Fast
-                    // Green -> Off
-                    _led.red->setState(LED_ON);
-                    _led.red->setBlinking(BLINKING_FAST);
-                    _led.green->setState(LED_OFF);
-                    _sendLedsOverCan();
-                    while(1) {
-                        wait(100);
-                    }
-                }
-            } while ((_button.start->getState() != LONG_CLICKED) || (_pedal.brake->getValue() < BRAKE_START_THRESHHOLD));
-
-            // Optimize later!!
-            // [il]
-            // Set RFE enable
-            _motorController->setRFE(MOTOR_CONTROLLER_RFE_ENABLE);
-
-            // [QF]
-            //Start beeping to signalize car is started
-            _buzzer->setBeep(BUZZER_MONO_TONE);
-            _buzzer->setState(BUZZER_ON);
-
-            // Wait the set Time until enabling RUN
-            waitTimer.reset();
-            waitTimer.start();
-            do {
-                _canService.processInbound();
-                _checkHvEnabled();
-                processErrors();
-                if (_state != ALMOST_READY_TO_DRIVE) {
-                    _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
-                    // If an Error occured, stop continuing and glow Red
-                    // Red   -> Blinking Normal
-                    // Green -> Off
-                    _resetLeds();
-                    _led.red->setState(LED_ON);
-                    _led.red->setBlinking(BLINKING_NORMAL);
-                    _sendLedsOverCan();
-
-                    // Stop beeping!
-                    _buzzer->setState(BUZZER_OFF);
-
-                    while(1) {
-                        wait(100);
-                    }
-                }
-            } while (waitTimer.read() < (float)HV_ENABLED_BEEP_TIME);
-
-            // Set RUN enable if no Error
-            _canService.processInbound();
-            _checkHvEnabled();
-            processErrors();
-
-            // Stop beeping!
-            _buzzer->setState(BUZZER_OFF);
-
-            if (_state == ALMOST_READY_TO_DRIVE) {
-                _motorController->setRUN(MOTOR_CONTROLLER_RUN_ENABLE);
-            } else {
-                _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
-                // If an Error occured, stop continuing and glow Red
-                // Red   -> Blinking Normal
-                // Green -> Off
-                _resetLeds();
-                _led.red->setState(LED_ON);
-                _led.red->setBlinking(BLINKING_NORMAL);
-                _sendLedsOverCan();
-                while(1);
-            }
-
-            // Set car ready to drive (-> pressing the gas-pedal will move the car -> fun)
-            _state = READY_TO_DRIVE;
-
-            // Stop blinking greed to show car is primed
-            _resetLeds();
-            _led.green->setState(LED_ON);
-            _sendLedsOverCan();
-            wait(0.1);
         }
 
     private:
@@ -455,6 +302,92 @@ class SCar : public IService {
             }
         }
 
+        void _calibratePedals() {
+            // Start bootup/calibration
+            // Yellow -> On
+            // Green  -> Normal Blinking
+            _state = BOOT;
+            _resetLeds();
+            _led.yellow->setState(LED_ON);
+            _led.green->setState(LED_ON);
+
+            _led.yellow->setBlinking(BLINKING_OFF);
+            _led.yellow->setBrightness(0.76);
+            _led.green->setBlinking(BLINKING_NORMAL);
+
+            _pedal.gas->setCalibrationStatus(CURRENTLY_CALIBRATING);
+            _pedal.brake->setCalibrationStatus(CURRENTLY_CALIBRATING);
+
+            _sendComponentsOverCan();
+
+
+            // Calibrate pedal until pressed Start once for long time
+            while(_button.start->getState() != LONG_CLICKED) {
+                _canService.processInbound();
+            }
+
+
+            // Stop calibration
+            _pedal.gas->setCalibrationStatus(CURRENTLY_NOT_CALIBRATING);
+            _pedal.brake->setCalibrationStatus(CURRENTLY_NOT_CALIBRATING);
+            _sendPedalsOverCan();
+
+            wait(0.1);
+            _canService.processInbound();
+            _led.yellow->setState(LED_OFF);
+            _sendLedsOverCan();
+
+
+
+            // Wait till the Button got released again
+            // Yellow -> Off
+            while(_button.start->getState() != NOT_PRESSED) {
+                _canService.processInbound();
+            }
+
+            wait(0.1);
+
+
+            // Check for Errors at Calibration
+            _canService.processInbound();
+            if (_pedal.gas->getStatus() > 0) {
+                _pedalError(_pedal.gas);
+            }
+
+            if (_pedal.brake->getStatus() > 0) {
+                _pedalError(_pedal.brake);
+            }
+
+            processErrors();
+
+
+            // If all OK, go into Almost Ready to drive
+            if (_state == BOOT) {
+                _state = ALMOST_READY_TO_DRIVE;
+            } else {
+                // If an Error occured, stop continuing and glow Red
+                // Red   -> Blinking Slow
+                // Green -> Off
+                _resetLeds();
+                _led.red->setState(LED_ON);
+                _led.red->setBlinking(BLINKING_SLOW);
+                _sendLedsOverCan();
+                while(1) {
+                    wait(100);
+                }
+            }
+
+
+            // If no Error, start blinking fast to show ready, but need to start car
+            // Green -> Fast Blinking
+            _resetLeds();
+            _led.green->setState(LED_ON);
+            _led.green->setBlinking(BLINKING_FAST);
+            _sendLedsOverCan();
+
+            wait(0.1);
+        }
+
         void _checkInput() {
             if (_button.reset->getStateChanged()) {
                 if (_button.reset->getState() == PRESSED) {
@@ -468,95 +401,10 @@ class SCar : public IService {
                         _led.green->setBlinking(BLINKING_FAST);
                         _sendLedsOverCan();
                     }
-                }
-
-                // [QF]
-                if (_button.reset->getState() == LONG_CLICKED) {
+                } else if (_button.reset->getState() == LONG_CLICKED) {
                     if (_state != READY_TO_DRIVE) {
                         // ReCalibrate the Pedals
-                        // Start bootup/calibration
-                        // Yellow -> On
-                        // Green  -> Normal Blinking
-                        _state = BOOT;
-                        _resetLeds();
-                        _led.yellow->setState(LED_ON);
-                        _led.green->setState(LED_ON);
-
-                        _led.yellow->setBlinking(BLINKING_OFF);
-                        _led.yellow->setBrightness(0.76);
-                        _led.green->setBlinking(BLINKING_NORMAL);
-
-                        _pedal.gas->setCalibrationStatus(CURRENTLY_CALIBRATING);
-                        _pedal.brake->setCalibrationStatus(CURRENTLY_CALIBRATING);
-
-                        _sendComponentsOverCan();
-
-
-                        // Calibrate pedal until pressed Start once for long time
-                        while(_button.start->getState() != LONG_CLICKED) {
-                            _canService.processInbound();
-                        }
-
-
-                        // Stop calibration
-                        _pedal.gas->setCalibrationStatus(CURRENTLY_NOT_CALIBRATING);
-                        _pedal.brake->setCalibrationStatus(CURRENTLY_NOT_CALIBRATING);
-                        _sendPedalsOverCan();
-
-                        wait(0.1);
-                        _canService.processInbound();
-                        _led.yellow->setState(LED_OFF);
-                        _sendLedsOverCan();
-
-
-
-                        // Wait till the Button got released again
-                        // Yellow -> Off
-                        while(_button.start->getState() != NOT_PRESSED) {
-                            _canService.processInbound();
-                        }
-
-                        wait(0.1);
-
-
-                        // Check for Errors at Calibration
-                        _canService.processInbound();
-                        if (_pedal.gas->getStatus() > 0) {
-                            _pedalError(_pedal.gas);
-                        }
-
-                        if (_pedal.brake->getStatus() > 0) {
-                            _pedalError(_pedal.brake);
-                        }
-
-                        processErrors();
-
-
-                        // If all OK, go into Almost Ready to drive
-                        if (_state == BOOT) {
-                            _state = ALMOST_READY_TO_DRIVE;
-                        } else {
-                            // If an Error occured, stop continuing and glow Red
-                            // Red   -> Blinking Slow
-                            // Green -> Off
-                            _resetLeds();
-                            _led.red->setState(LED_ON);
-                            _led.red->setBlinking(BLINKING_SLOW);
-                            _sendLedsOverCan();
-                            while(1) {
-                                wait(100);
-                            }
-                        }
-
-
-                        // If no Error, start blinking fast to show ready, but need to start car
-                        // Green -> Fast Blinking
-                        _resetLeds();
-                        _led.green->setState(LED_ON);
-                        _led.green->setBlinking(BLINKING_FAST);
-                        _sendLedsOverCan();
-
-                        wait(0.1);
+                        _calibratePedals();
                     }
                 }
             }
