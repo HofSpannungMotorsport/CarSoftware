@@ -1,8 +1,9 @@
 #ifndef MASTERCONF_H
 #define MASTERCONF_H
 
-//#define CAN_DEBUG
-//#define MOTORCONTROLLER_OUTPUT
+//#define CAN_DEBUG // Enables CAN Service Debug Output (Log almost every step done by the CANService over Serial)
+//#define MOTORCONTROLLER_OUTPUT // Output the Value sent to the MotorController over Serial
+//#define FORCE_DISABLE_HV_CHECK // Disables HV-Checks (HardwareHvEnabled always returns true) !!! ONLY USE FOR DEBUGGING WITHOUT HV-ACCU INSTALLED !!!
 #include "carpi.h"
 
 #define HIGH_DEMAND_SERVICE_REFRESH_RATE 120 // Hz
@@ -41,7 +42,7 @@ HardwareMotorController motorController(MASTER_PIN_MOTOR_CONTROLLER_CAN_RD, MAST
 HardwareFan coolingFan(MASTER_PIN_FAN, COMPONENT_COOLING_FAN);
 HardwarePump coolingPump(MASTER_PIN_PUMP_PWM, MASTER_PIN_PUMP_ENABLE, COMPONENT_COOLING_PUMP);
 HardwareBuzzer buzzer(MASTER_PIN_BUZZER, COMPONENT_BUZZER_STARTUP);
-DigitalIn hvEnabled(MASTER_PIN_HV_ENABLED); // [QF]
+HardwareHvEnabled hvEnabled(MASTER_PIN_HV_ENABLED, COMPONENT_SYSTEM_HV_ENABLED);
 
 // Services
 SCar carService(canService,
@@ -50,7 +51,7 @@ SCar carService(canService,
                 (IPedal*)&gasPedal, (IPedal*)&brakePedal,
                 (IBuzzer*)&buzzer,
                 (IMotorController*)&motorController,
-                hvEnabled);
+                (IHvEnabled*)&hvEnabled);
 
 PMotorController motorControllerService(carService,
                                         (IMotorController*)&motorController,
@@ -66,9 +67,9 @@ PCooling coolingService(carService,
                         speedService,
                         (IFan*)&coolingFan, (IPump*)&coolingPump,
                         (IMotorController*)&motorController,
-                        hvEnabled);
+                        (IHvEnabled*)&hvEnabled);
 
-class Master {
+class Master : public Carpi {
     public:
         // Called once at bootup
         void setup() {

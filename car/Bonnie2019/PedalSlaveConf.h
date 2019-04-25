@@ -1,6 +1,7 @@
 #ifndef PEDALSLAVECONF_H
 #define PEDALSLAVECONF_H
 
+//#define CAN_DEBUG
 #include "carpi.h"
 
 #include "hardware/Pins_Pedal_PCB.h"
@@ -17,7 +18,7 @@ HardwarePedal brakePedal(PEDAL_PIN_ROTATION_ANGLE_BRAKE, COMPONENT_PEDAL_BRAKE);
 HardwareRpmSensor rpmFrontLeft(PEDAL_PIN_RPM_SENSOR_FL, COMPONENT_RPM_FRONT_LEFT);
 HardwareRpmSensor rpmFrontRight(PEDAL_PIN_RPM_SENSOR_FR, COMPONENT_RPM_FRONT_RIGHT);
 
-class Pedal {
+class Pedal : public Carpi {
     public:
         // Called once at bootup
         void setup() {
@@ -38,13 +39,9 @@ class Pedal {
     
         // Called repeately after bootup
         void loop() {
-            Timer refreshTimer;
-            refreshTimer.reset();
-            refreshTimer.start();
-        
             canService.run();
 
-            while(refreshTimer.read() < (1 / (float)PEDAL_SEND_RATE));
+            wait(1.0/(float)PEDAL_SEND_RATE);
         }
 };
 

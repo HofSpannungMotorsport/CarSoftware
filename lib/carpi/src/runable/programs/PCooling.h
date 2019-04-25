@@ -35,11 +35,12 @@ class PCooling : public IProgram {
                        SSpeed &speedService,
                        IFan* fan, IPump* pump,
                        IMotorController* motorController,
-                       DigitalIn &hvEnabled)
-            : _carService(carService), _speedService(speedService), _hvEnabled(hvEnabled) {
+                       IHvEnabled* hvEnabled)
+            : _carService(carService), _speedService(speedService) {
             _fan = fan;
             _pump = pump;
             _motorController = motorController;
+            _hvEnabled = hvEnabled;
 
             _pump->setSpeed(0);
             _pump->setEnable(1);
@@ -48,7 +49,7 @@ class PCooling : public IProgram {
 
         virtual void run() {
             // [QF]
-            if (/*_hvEnabled*/ true) {
+            if (_hvEnabled->read()) {
                 speed_value_t currentSpeed = _speedService.getSpeed();
 
                 // Activate Fan according to driving speed
@@ -108,8 +109,7 @@ class PCooling : public IProgram {
         IFan* _fan;
         IPump* _pump;
         IMotorController* _motorController;
-
-        DigitalIn &_hvEnabled;
+        IHvEnabled* _hvEnabled;
 };
 
 #endif // PCOOLING_H

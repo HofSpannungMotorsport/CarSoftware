@@ -6,6 +6,8 @@
 #include "deviceIds.h"
 #include "componentIds.h"
 
+using namespace std;
+
 struct car_sub_message_t {
     uint8_t length;
     uint8_t data[7];
