@@ -15,8 +15,8 @@
 #define STARTUP_WAIT 1 // s wait before system gets started
 #define ERROR_REGISTER_SIZE 64 // errors, max: 255
 #define STARTUP_ANIMATION_SPEED 0.075 // s between led-changes
-#define STARTUP_ANIMATION_PLAYBACKS 5 // times the animation should be played
-#define STARTUP_ANIMATION_WAIT_AFTER 0.3 // s wait after animation
+#define STARTUP_ANIMATION_PLAYBACKS 3 // times the animation should be played
+#define STARTUP_ANIMATION_WAIT_AFTER 0.25 // s wait after animation
 #define BRAKE_START_THRESHHOLD 0.60 // %
 
 #define HV_ENABLED_BEEP_TIME 2.2 // s (has to be at least 0.5)
@@ -146,7 +146,8 @@ class SCar : public IService {
             wait(STARTUP_WAIT);
 
             for (uint8_t i = 0; i < STARTUP_ANIMATION_PLAYBACKS; i++) {
-                _startupAnimation();
+                _startupAnimationUp();
+                _startupAnimationDown();
             }
 
             wait(STARTUP_ANIMATION_WAIT_AFTER);
@@ -237,7 +238,7 @@ class SCar : public IService {
             _sendPedalsOverCan();
         }
 
-        void _startupAnimation() {
+        void _startupAnimationUp() {
             _resetLeds();
             _led.red->setState(LED_ON);
             _sendLedsOverCan();
@@ -261,6 +262,35 @@ class SCar : public IService {
             wait(STARTUP_ANIMATION_SPEED);
 
             _led.green->setState(LED_OFF);
+            _sendLedsOverCan();
+
+            wait(STARTUP_ANIMATION_SPEED);
+        }
+
+        void _startupAnimationDown() {
+            _resetLeds();
+            _led.green->setState(LED_ON);
+            _sendLedsOverCan();
+
+            wait(STARTUP_ANIMATION_SPEED);
+
+            _led.yellow->setState(LED_ON);
+            _sendLedsOverCan();
+
+            wait(STARTUP_ANIMATION_SPEED);
+
+            _led.red->setState(LED_ON);
+            _led.green->setState(LED_OFF);
+            _sendLedsOverCan();
+
+            wait(STARTUP_ANIMATION_SPEED);
+
+            _led.yellow->setState(LED_OFF);
+            _sendLedsOverCan();
+
+            wait(STARTUP_ANIMATION_SPEED);
+
+            _led.red->setState(LED_OFF);
             _sendLedsOverCan();
 
             wait(STARTUP_ANIMATION_SPEED);
