@@ -23,12 +23,13 @@ enum id_component_type_t : uint8_t {
     COMPONENT_RPM_SENSOR =        0x3,
     COMPONENT_TEMPERATURE =       0x4,
     COMPONENT_COOLING =           0x5,
-    COMPONENT_BUTTON =            0x6,
-    COMPONENT_LED =               0x7,
-    COMPONENT_SUSPENSION_TRAVEL = 0x8,
-    COMPONENT_ACCELERATION =      0x9,
-    COMPONENT_GYROSCOPE =         0xA,
-    COMPONENT_BUZZER =            0xB,
+    COMPONENT_ALIVE =             0x6,
+    COMPONENT_BUTTON =            0x7,
+    COMPONENT_LED =               0x8,
+    COMPONENT_SUSPENSION_TRAVEL = 0x9,
+    COMPONENT_ACCELERATION =      0xA,
+    COMPONENT_GYROSCOPE =         0xB,
+    COMPONENT_BUZZER =            0xC,
     COMPONENT_SYSTEM =            0xF
 };
 
@@ -49,6 +50,11 @@ enum id_sub_component_t : uint8_t {
     // Cooling
     COMPONENT_COOLING_PUMP = 0x0,
     COMPONENT_COOLING_FAN  = 0x1,
+
+    // Alive
+    COMPONENT_ALIVE_PEDAL =     0x0,
+    COMPONENT_ALIVE_DASHBOARD = 0x1,
+    COMPONENT_ALIVE_MASTER =    0x2,
 
     // Buttons
     COMPONENT_BUTTON_RESET = 0x0,

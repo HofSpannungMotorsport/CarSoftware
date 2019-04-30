@@ -40,14 +40,17 @@
 //   Interface
 #include "components/interface/IComponent.h"
 #include "components/interface/ICommunication.h"
+#include "components/interface/IAlive.h"
 #include "components/interface/IAnalogSensor.h"
 #include "components/interface/IPump.h"
 #include "components/interface/IHvEnabled.h"
 //   Hardware
+#include "components/hardware/HardwareAlive.h"
 #include "components/hardware/HardwareAnalogSensor.h"
 #include "components/hardware/HardwarePump.h"
 #include "components/hardware/HardwareHvEnabled.h"
 //   Software
+#include "components/software/SoftwareAlive.h"
 
 
 // ---------------------------------------------------------------------
