@@ -12,7 +12,7 @@ class SoftwareAlive : public IAlive {
         }
 
         void setAlive(bool alive) {
-            _alive = alive;
+            // No implementation needed
         }
 
         bool getAlive() {
@@ -20,7 +20,7 @@ class SoftwareAlive : public IAlive {
         }
 
         alive_status_t getStatus() {
-            if (_alive) {
+            if (getAlive()) {
                 return 0;
             } else {
                 alive_error_type_t error = ALIVE_ERROR_DEAD;

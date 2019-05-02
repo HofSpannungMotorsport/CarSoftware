@@ -11,7 +11,9 @@
 
 #include "hardware/Pins_Master.h"
 
-CANService canService(MASTER_PIN_CAR_INTERN_CAN_RD, MASTER_PIN_CAR_INTERN_CAN_TD);
+// Communication
+Sync syncer(DEVICE_MASTER);
+CCan canIntern(syncer, MASTER_PIN_CAR_INTERN_CAN_RD, MASTER_PIN_CAR_INTERN_CAN_TD);
 
 // Components
 //   Software
@@ -31,8 +33,8 @@ SoftwarePedal gasPedal(COMPONENT_PEDAL_GAS);
 SoftwarePedal brakePedal(COMPONENT_PEDAL_BRAKE);
 
 //       RPM Sensors (at Pedal Box)
-SoftwareRpmSensor rpmFrontLeft(COMPONENT_RPM_FRONT_LEFT);
-SoftwareRpmSensor rpmFrontRight(COMPONENT_RPM_FRONT_RIGHT);
+//SoftwareRpmSensor rpmFrontLeft(COMPONENT_RPM_FRONT_LEFT);
+//SoftwareRpmSensor rpmFrontRight(COMPONENT_RPM_FRONT_RIGHT);
 
 //   Hardware
 HardwareLed brakeLight(MASTER_PIN_BRAKE_LIGHT, COMPONENT_LED_BRAKE);
@@ -45,8 +47,7 @@ HardwareBuzzer buzzer(MASTER_PIN_BUZZER, COMPONENT_BUZZER_STARTUP);
 HardwareHvEnabled hvEnabled(MASTER_PIN_HV_ENABLED, COMPONENT_SYSTEM_HV_ENABLED);
 
 // Services
-SCar carService(canService,
-                (IButton*)&buttonReset, (IButton*)&buttonStart,
+SCar carService((IButton*)&buttonReset, (IButton*)&buttonStart,
                 (ILed*)&ledRed, (ILed*)&ledYellow, (ILed*)&ledGreen,
                 (IPedal*)&gasPedal, (IPedal*)&brakePedal,
                 (IBuzzer*)&buzzer,
@@ -60,7 +61,7 @@ PMotorController motorControllerService(carService,
 PBrakeLight brakeLightService(carService, (IPedal*)&brakePedal, (ILed*)&brakeLight);
 
 SSpeed speedService(carService,
-                    (IRpmSensor*)&rpmFrontLeft, (IRpmSensor*)&rpmFrontRight, /* (IRpmSensor*)&rpmRearLeft, (IRpmSensor*)&rpmRearRight, */ // [il]
+                    /*(IRpmSensor*)&rpmFrontLeft, (IRpmSensor*)&rpmFrontRight, (IRpmSensor*)&rpmRearLeft, (IRpmSensor*)&rpmRearRight, */ // [il]
                     (IMotorController*)&motorController);
 
 PCooling coolingService(carService,
@@ -73,28 +74,23 @@ class Master : public Carpi {
     public:
         // Called once at bootup
         void setup() {
-            wait(2);
-
-            canService.setSenderId(DEVICE_MASTER);
-
             // Add all Software Components to the CAN Service
             // Dashboard
-            canService.addComponent((ICommunication*)&ledRed);
-            canService.addComponent((ICommunication*)&ledYellow);
-            canService.addComponent((ICommunication*)&ledGreen);
-            canService.addComponent((ICommunication*)&buttonReset);
-            canService.addComponent((ICommunication*)&buttonStart);
+            syncer.addComponent((ICommunication&)ledRed, canIntern, DEVICE_DASHBOARD);
+            syncer.addComponent((ICommunication&)ledYellow, canIntern, DEVICE_DASHBOARD);
+            syncer.addComponent((ICommunication&)ledGreen, canIntern, DEVICE_DASHBOARD);
+            syncer.addComponent((ICommunication&)buttonReset, canIntern, DEVICE_DASHBOARD);
+            syncer.addComponent((ICommunication&)buttonStart, canIntern, DEVICE_DASHBOARD);
 
             // Pedal
-            canService.addComponent((ICommunication*)&gasPedal);
-            canService.addComponent((ICommunication*)&brakePedal);
-            canService.addComponent((ICommunication*)&rpmFrontLeft);
-            canService.addComponent((ICommunication*)&rpmFrontRight);
+            syncer.addComponent((ICommunication&)gasPedal, canIntern, DEVICE_PEDAL);
+            syncer.addComponent((ICommunication&)brakePedal, canIntern, DEVICE_PEDAL);
+            //syncer.addComponent((ICommunication&)rpmFrontLeft, canIntern, DEVICE_PEDAL);
+            //syncer.addComponent((ICommunication&)rpmFrontRight, canIntern, DEVICE_PEDAL);
 
 
 
             // Add all high demand Services to our Service list
-            highDemandServices.addRunable((IRunable*)&canService);
             highDemandServices.addRunable((IRunable*)&carService);
             highDemandServices.addRunable((IRunable*)&motorControllerService);
             highDemandServices.addRunable((IRunable*)&brakeLightService);

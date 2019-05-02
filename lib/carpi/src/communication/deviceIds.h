@@ -9,13 +9,19 @@
     the System.
 */
 
+enum id_device_type_t : uint8_t {
+    DEVICE_TYPE_SENDER = 0x0,
+    DEVICE_TYPE_RECEIVER = 0x1
+};
+
 enum id_device_t : uint8_t {
-    DEVICE_ALL =       0x0,
-    DEVICE_PEDAL =     0x1,
-    DEVICE_BMS =       0x2,
-    DEVICE_DASHBOARD = 0x3,
-    DEVICE_MASTER =    0x4,
-    DEVICE_DISPLAY =   0x5
+    DEVICE_NOT_SET =   0x0,
+    DEVICE_ALL =       0x1,
+    DEVICE_PEDAL =     0x2,
+    DEVICE_BMS =       0x3,
+    DEVICE_DASHBOARD = 0x4,
+    DEVICE_MASTER =    0x5,
+    DEVICE_DISPLAY =   0x6
 };
 
 typedef uint16_t id_message_header_t;
@@ -28,6 +34,16 @@ namespace deviceId {
         messageHeader |= receiverDeviceId;
 
         return messageHeader;
+    }
+
+    id_device_t getDeviceIdFromMessageHeader(id_message_header_t messageHeader, id_device_type_t deviceType) {
+        if (deviceType == DEVICE_TYPE_RECEIVER) {
+            messageHeader &= 0x1F;
+            return (id_device_t)messageHeader;
+        } else if (deviceType == DEVICE_TYPE_SENDER) {
+            messageHeader = (messageHeader >> 5) & 0x1F;
+            return (id_device_t)messageHeader;
+        } else return DEVICE_NOT_SET;
     }
 }; // deviceId
 

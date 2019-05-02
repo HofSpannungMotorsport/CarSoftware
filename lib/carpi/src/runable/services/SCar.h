@@ -4,7 +4,6 @@
 #include "platform/CircularBuffer.h"
 #include "IService.h"
 #include "communication/componentIds.h"
-#include "communication/CANService.h"
 #include "components/interface/IButton.h"
 #include "components/interface/ILed.h"
 #include "components/interface/IBuzzer.h"
@@ -50,14 +49,12 @@ class Error {
 
 class SCar : public IService {
     public:
-        SCar(CANService &canService,
-             IButton* buttonReset, IButton* buttonStart,
+        SCar(IButton* buttonReset, IButton* buttonStart,
              ILed* ledRed, ILed* ledYellow, ILed* ledGreen,
              IPedal* gasPedal, IPedal* brakePedal,
              IBuzzer* buzzer,
              IMotorController* motorController,
-             IHvEnabled* hvEnabled)
-            : _canService(canService) {
+             IHvEnabled* hvEnabled) {
             _button.reset = buttonReset;
             _button.start = buttonStart;
 
@@ -132,8 +129,6 @@ class SCar : public IService {
                         _led.yellow->setBrightness(0.51);
                         _led.yellow->setBlinking(BLINKING_OFF);
                     }
-
-                    _sendLedsOverCan();
                 }
             }
         }
@@ -155,21 +150,18 @@ class SCar : public IService {
             // Turn on red LED while HV-Circuite is off
             _resetLeds();
             _led.red->setState(LED_ON);
-            _sendLedsOverCan();
 
             // [QF]
             while(!(_hvEnabled->read())) {
-                _canService.processInbound();
+                wait(0.1);
             }
 
            	_resetLeds();
-            _sendLedsOverCan();
 
             wait(0.1);
 
             _calibratePedals();
 
-            _canService.processInbound();
             _checkHvEnabled();
             processErrors();
             if (_state != ALMOST_READY_TO_DRIVE) {
@@ -179,7 +171,6 @@ class SCar : public IService {
                 _led.red->setState(LED_ON);
                 _led.red->setBlinking(BLINKING_FAST);
                 _led.green->setState(LED_OFF);
-                _sendLedsOverCan();
                 while(1) {
                     wait(100);
                 }
@@ -187,8 +178,6 @@ class SCar : public IService {
         }
 
     private:
-        CANService &_canService;
-
         CircularBuffer<Error, ERROR_REGISTER_SIZE, uint8_t> _errorRegister;
 
         car_state_t _state = CAR_OFF;
@@ -220,49 +209,26 @@ class SCar : public IService {
             return id;
         }
 
-        void _sendLedsOverCan() {
-            // LED's
-            _canService.sendMessage((ICommunication*)_led.red, DEVICE_DASHBOARD);
-            _canService.sendMessage((ICommunication*)_led.yellow, DEVICE_DASHBOARD);
-            _canService.sendMessage((ICommunication*)_led.green, DEVICE_DASHBOARD);
-        }
-
-        void _sendPedalsOverCan() {
-            // Pedals
-            _canService.sendMessage((ICommunication*)_pedal.gas, DEVICE_PEDAL);
-            _canService.sendMessage((ICommunication*)_pedal.brake, DEVICE_PEDAL);
-        }
-
-        void _sendComponentsOverCan() {
-            _sendLedsOverCan();
-            _sendPedalsOverCan();
-        }
-
         void _startupAnimationUp() {
             _resetLeds();
             _led.red->setState(LED_ON);
-            _sendLedsOverCan();
 
             wait(STARTUP_ANIMATION_SPEED);
 
             _led.yellow->setState(LED_ON);
-            _sendLedsOverCan();
 
             wait(STARTUP_ANIMATION_SPEED);
 
             _led.green->setState(LED_ON);
             _led.red->setState(LED_OFF);
-            _sendLedsOverCan();
 
             wait(STARTUP_ANIMATION_SPEED);
 
             _led.yellow->setState(LED_OFF);
-            _sendLedsOverCan();
 
             wait(STARTUP_ANIMATION_SPEED);
 
             _led.green->setState(LED_OFF);
-            _sendLedsOverCan();
 
             wait(STARTUP_ANIMATION_SPEED);
         }
@@ -270,28 +236,23 @@ class SCar : public IService {
         void _startupAnimationDown() {
             _resetLeds();
             _led.green->setState(LED_ON);
-            _sendLedsOverCan();
 
             wait(STARTUP_ANIMATION_SPEED);
 
             _led.yellow->setState(LED_ON);
-            _sendLedsOverCan();
 
             wait(STARTUP_ANIMATION_SPEED);
 
             _led.red->setState(LED_ON);
             _led.green->setState(LED_OFF);
-            _sendLedsOverCan();
 
             wait(STARTUP_ANIMATION_SPEED);
 
             _led.yellow->setState(LED_OFF);
-            _sendLedsOverCan();
 
             wait(STARTUP_ANIMATION_SPEED);
 
             _led.red->setState(LED_OFF);
-            _sendLedsOverCan();
 
             wait(STARTUP_ANIMATION_SPEED);
         }
@@ -331,44 +292,38 @@ class SCar : public IService {
             _led.green->setState(LED_ON);
 
             _led.yellow->setBlinking(BLINKING_OFF);
-            _led.yellow->setBrightness(0.76);
+            _led.yellow->setBrightness(0.75);
             _led.green->setBlinking(BLINKING_NORMAL);
 
             _pedal.gas->setCalibrationStatus(CURRENTLY_CALIBRATING);
             _pedal.brake->setCalibrationStatus(CURRENTLY_CALIBRATING);
 
-            _sendComponentsOverCan();
-
 
             // Calibrate pedal until pressed Start once for long time
             while(_button.start->getState() != LONG_CLICKED) {
-                _canService.processInbound();
+                wait(0.1);
             }
 
 
             // Stop calibration
             _pedal.gas->setCalibrationStatus(CURRENTLY_NOT_CALIBRATING);
             _pedal.brake->setCalibrationStatus(CURRENTLY_NOT_CALIBRATING);
-            _sendPedalsOverCan();
 
             wait(0.1);
-            _canService.processInbound();
             _led.yellow->setState(LED_OFF);
-            _sendLedsOverCan();
 
 
 
             // Wait till the Button got released again
             // Yellow -> Off
             while(_button.start->getState() != NOT_PRESSED) {
-                _canService.processInbound();
+                wait(0.1);
             }
 
             wait(0.1);
 
 
             // Check for Errors at Calibration
-            _canService.processInbound();
             if (_pedal.gas->getStatus() > 0) {
                 _pedalError(_pedal.gas);
             }
@@ -390,7 +345,6 @@ class SCar : public IService {
                 _resetLeds();
                 _led.red->setState(LED_ON);
                 _led.red->setBlinking(BLINKING_SLOW);
-                _sendLedsOverCan();
                 while(1) {
                     wait(100);
                 }
@@ -402,7 +356,6 @@ class SCar : public IService {
             _resetLeds();
             _led.green->setState(LED_ON);
             _led.green->setBlinking(BLINKING_FAST);
-            _sendLedsOverCan();
 
             wait(0.1);
         }
@@ -418,7 +371,6 @@ class SCar : public IService {
                         _state = ALMOST_READY_TO_DRIVE;
 
                         _led.green->setBlinking(BLINKING_FAST);
-                        _sendLedsOverCan();
                     }
                 } else if (_button.reset->getState() == LONG_CLICKED) {
                     if (_state != READY_TO_DRIVE) {
@@ -446,7 +398,6 @@ class SCar : public IService {
                     waitTimer.reset();
                     waitTimer.start();
                     do {
-                        _canService.processInbound();
                         _checkHvEnabled();
                         processErrors();
                         if (_state != ALMOST_READY_TO_DRIVE) {
@@ -457,7 +408,6 @@ class SCar : public IService {
                             _resetLeds();
                             _led.red->setState(LED_ON);
                             _led.red->setBlinking(BLINKING_NORMAL);
-                            _sendLedsOverCan();
 
                             // Stop beeping!
                             _buzzer->setState(BUZZER_OFF);
@@ -469,7 +419,6 @@ class SCar : public IService {
                     } while (waitTimer.read() < (float)HV_ENABLED_BEEP_TIME);
 
                     // Set RUN enable if no Error
-                    _canService.processInbound();
                     _checkHvEnabled();
                     processErrors();
 
@@ -486,7 +435,6 @@ class SCar : public IService {
                         _resetLeds();
                         _led.red->setState(LED_ON);
                         _led.red->setBlinking(BLINKING_NORMAL);
-                        _sendLedsOverCan();
                         while(1);
                     }
 
@@ -496,7 +444,6 @@ class SCar : public IService {
                     // Stop blinking greed to show car is primed
                     _resetLeds();
                     _led.green->setState(LED_ON);
-                    _sendLedsOverCan();
                     wait(0.1);
                 }
             }

@@ -4,7 +4,7 @@
     With this, all components, services and programs are included in the actual CarSoftware.
 */
 
-#define CARPI_VERSION "V0.1.2-P1"
+#define CARPI_VERSION "V0.2.0-P1"
 
 // Prior include Platform-specific Components
 
@@ -15,9 +15,6 @@
         #define MESSAGE_REPORT
         Serial pcSerial(USBTX, USBRX); // Connection to PC over Serial
     #endif
-
-    // Communication
-    #include "communication/CANService.h"
 #endif
 
 #ifdef USE_ARDUINO
@@ -32,14 +29,17 @@
 // All Platform Components
 
 // Communication
+#include "communication/Sync.h"
 #include "communication/CarMessage.h"
 #include "communication/componentIds.h"
 #include "communication/deviceIds.h"
+#include "communication/IChannel.h"
+#include "communication/SelfSyncable.h"
+#include "communication/SendPriority.h"
 
 // Components
 //   Interface
 #include "components/interface/IComponent.h"
-#include "components/interface/ICommunication.h"
 #include "components/interface/IAlive.h"
 #include "components/interface/IAnalogSensor.h"
 #include "components/interface/IPump.h"
@@ -59,6 +59,9 @@
 // After include Platform specific Components
 
 #ifdef USE_MBED
+    // Communication
+    #include "communication/CCan.h"
+
     // Components
     //   Interface
     #include "components/interface/IButton.h"

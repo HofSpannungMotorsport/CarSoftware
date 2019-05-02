@@ -27,11 +27,11 @@ typedef float speed_value_t;
 class SSpeed : public IService {
     public:
         SSpeed(SCar &carService,
-                     IRpmSensor* rpmFrontLeft, IRpmSensor* rpmFrontRight, /* IRpmSensor* rpmRearLeft, IRpmSensor* rpmRearRight, */
+                     /*IRpmSensor* rpmFrontLeft, IRpmSensor* rpmFrontRight,  IRpmSensor* rpmRearLeft, IRpmSensor* rpmRearRight, */
                      IMotorController* motorController)
             : _carService(carService) {
-            _rpm.front.left = rpmFrontLeft;
-            _rpm.front.right = rpmFrontRight;
+            //_rpm.front.left = rpmFrontLeft;
+            //_rpm.front.right = rpmFrontRight;
             //_rpm.rear.left = rpmRearLeft;
             //_rpm.rear.right = rpmRearRight;
             _motorController = motorController;
@@ -44,7 +44,7 @@ class SSpeed : public IService {
                 MOTOR
             } useSensor;
 
-            if ((_rpm.front.left->getStatus() > 0) || (_rpm.front.right->getStatus() > 0)) {
+            //if ((_rpm.front.left->getStatus() > 0) || (_rpm.front.right->getStatus() > 0)) {
                 // One of the front Sensors has a problem
                 //if ((_rpm.front.left->getStatus() > 0) || (_rpm.front.right->getStatus() > 0)) {
                     // One of the rear Sensors has a problem too
@@ -58,10 +58,11 @@ class SSpeed : public IService {
                 //} else {
                 //    useSensor = REAR;
                 //}
-            } else {
-                useSensor = FRONT;
-            }
+            //} else {
+                //useSensor = FRONT;
+            //}
 
+            /*
             if (useSensor == FRONT) {
                 if (_checkPlausibility(_rpm.front.left, _rpm.front.right)) {
                     // Calculate mid. of both sensors, then rpm -> m/min -> km/h
@@ -74,6 +75,7 @@ class SSpeed : public IService {
                     }
                 }
             }
+            */
 
             /*
             if (useSensor == REAR) {

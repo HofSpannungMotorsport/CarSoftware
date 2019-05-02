@@ -5,7 +5,9 @@
 
 #include "hardware/Pins_Dashboard_PCB.h"
 
-CANService canService(DASHBOARD_CAN);
+// Communication
+Sync syncer(DEVICE_DASHBOARD);
+CCan canIntern(syncer, DASHBOARD_CAN);
 
 //LED's
 HardwareLed ledRed(DASHBOARD_PIN_LED_RED, COMPONENT_LED_ERROR);
@@ -21,26 +23,16 @@ class Dashboard : public Carpi {
     public:
         // Called once at bootup
         void setup() {
-            canService.setSenderId(DEVICE_DASHBOARD);
-
-            canService.addComponent((ICommunication*)&ledRed);
-            canService.addComponent((ICommunication*)&ledYellow);
-            canService.addComponent((ICommunication*)&ledGreen);
-            canService.addComponent((ICommunication*)&buttonReset);
-            canService.addComponent((ICommunication*)&buttonStart);
+            syncer.addComponent((ICommunication&)ledRed, canIntern, DEVICE_MASTER);
+            syncer.addComponent((ICommunication&)ledYellow, canIntern, DEVICE_MASTER);
+            syncer.addComponent((ICommunication&)ledGreen, canIntern, DEVICE_MASTER);
+            syncer.addComponent((ICommunication&)buttonReset, canIntern, DEVICE_MASTER);
+            syncer.addComponent((ICommunication&)buttonStart, canIntern, DEVICE_MASTER);
         }
 
         // Called repeately after bootup
         void loop() {
-            canService.run();
-
-            if (buttonReset.getStateChanged()) {
-                canService.sendMessage((ICommunication*)&buttonReset, DEVICE_MASTER);
-            }
-
-            if (buttonStart.getStateChanged()) {
-                canService.sendMessage((ICommunication*)&buttonStart, DEVICE_MASTER);
-            }
+            wait(0.0001);
         }
 };
 

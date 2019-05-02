@@ -24,6 +24,12 @@ class HardwareAlive : public IAlive {
             if (_portSet) {
                 _setOutput(alive);
             }
+
+            if (_syncerAttached) {
+                if (_alive) {
+                    _sendCommand(ALIVE_MESSAGE_SEND_ALIVE, 0x1, SEND_PRIORITY_ALIVE, STD_ALIVE_MESSAGE_TIMEOUT);
+                }
+            }
         }
 
         bool getAlive() {

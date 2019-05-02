@@ -84,21 +84,8 @@ class HardwareInterruptButton : public IButton {
                 return true;
         }
 
-        virtual message_build_result_t buildMessage(CarMessage &carMessage) {
-            while(getStateChanged()) {
-                car_sub_message_t subMessage;
-                subMessage.length = 2;
-                subMessage.data[0] = getState();
-                subMessage.data[1] = getStatus();
-                carMessage.addSubMessage(subMessage);
-            }
-
-            return MESSAGE_BUILD_OK;
-        }
-
-        virtual message_parse_result_t parseMessage(CarMessage &carMessage) {
+        virtual void receive(CarMessage &carMessage) {
             // No implementation needed yet
-            return MESSAGE_PARSE_ERROR;
         }
 
     protected:
@@ -156,10 +143,14 @@ class HardwareInterruptButton : public IButton {
         }
 
         void _addState(button_state_t state) {
-            if (_stateBuffer.full())
-                _stateBufferFull();
+            if (_syncerAttached) {
+                _sendCommand(BUTTON_MESSAGE_COMMAND_ADD_STATE, state, SEND_PRIORITY_BUTTON, BUTTON_MESSAGE_TIMEOUT);
+            } else {
+                if (_stateBuffer.full())
+                    _stateBufferFull();
 
-            _stateBuffer.push(state);
+                _stateBuffer.push(state);
+            }
         }
 
         button_state_t _readState() {

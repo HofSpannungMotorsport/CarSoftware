@@ -1,7 +1,13 @@
 #ifndef IINTERRUPTBUTTON_H
 #define IINTERRUPTBUTTON_H
 
-#include "ICommunication.h"
+#include "communication/SelfSyncable.h"
+
+#define BUTTON_MESSAGE_TIMEOUT 0.1 // s
+
+enum button_message_command_t : uint8_t {
+    BUTTON_MESSAGE_COMMAND_ADD_STATE = 0x0
+};
 
 typedef uint8_t button_status_t;
 enum button_error_type_t : uint8_t {
@@ -35,7 +41,7 @@ typedef float button_debounce_time_t;
 #define STD_LONG_CLICK_TIME 800 // ms
 #define STATE_BUFFER_SIZE 100
 
-class IButton : public ICommunication {
+class IButton : public SelfSyncable {
     public:
         // Set the time for each Event. If not set, the standard Values will be used.
         virtual void setLongClickTime(button_time_t time) = 0;

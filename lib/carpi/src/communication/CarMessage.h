@@ -1,6 +1,7 @@
 #ifndef CARMESSAGE_H
 #define CARMESSAGE_H
 
+#include <memory>
 #include <vector>
 #include <stdint.h>
 #include "deviceIds.h"
@@ -13,7 +14,14 @@ struct car_sub_message_t {
     uint8_t data[7];
 };
 
-class CarMessage : private NonCopyable<CarMessage> {
+typedef uint8_t car_message_priority_t;
+
+#include "SendPriority.h"
+
+#define CAR_MESSAGE_PRIORITY_HIGHEST 255
+#define CAR_MESSAGE_PRIORITY_LOWEST 0
+
+class CarMessage {
     public:
         CarMessage() {}
 
@@ -51,6 +59,14 @@ class CarMessage : private NonCopyable<CarMessage> {
         }
 
         /*
+            Seth the Sender and Receiver Id from a message header
+        */
+        void setIdsFromMessageHeader(id_message_header_t messageHeader) {
+            setSenderId(deviceId::getDeviceIdFromMessageHeader(messageHeader, DEVICE_TYPE_SENDER));
+            setReceiverId(deviceId::getDeviceIdFromMessageHeader(messageHeader, DEVICE_TYPE_RECEIVER));
+        }
+
+        /*
             Get the whole Message Header including Sender ID and Reveiver ID
         */
         id_message_header_t getMessageHeader() {
@@ -62,6 +78,13 @@ class CarMessage : private NonCopyable<CarMessage> {
         */
         void addSubMessage(car_sub_message_t &subMessage) {
             subMessages.push_back(subMessage);
+        }
+
+        /*
+            Remove first subMessage
+        */
+        void removeFirstSubMessage() {
+            subMessages.erase(subMessages.begin());
         }
 
         /*
@@ -81,14 +104,14 @@ class CarMessage : private NonCopyable<CarMessage> {
         /*
             Set the send Priority. Should be a Value between 1 and 255
         */
-        void setSendPriority(uint8_t sendPriority) {
+        void setSendPriority(car_message_priority_t sendPriority) {
             _sendPriority = sendPriority;
         }
 
         /*
             Get the send Priority. Should be a Value between 0 and 255
         */
-        uint8_t getSendPriority() {
+        car_message_priority_t getSendPriority() {
             return _sendPriority;
         }
 
@@ -110,15 +133,28 @@ class CarMessage : private NonCopyable<CarMessage> {
             Start the Timer from when on the message was sent. Should be called shortly before putting the message into the queue.
         */
         void startSentTimer() {
-            _sentTimer.reset();
-            _sentTimer.start();
+            _sentTimer = std::shared_ptr<Timer>(new Timer());
+            _sentTimerSet = true;
+            _sentTimer->reset();
+            _sentTimer->start();
         }
 
         /*
             Get the time passed since the message has been sent
         */
         float getTimeSinceSent() {
-            return _sentTimer.read();
+            if (!_sentTimerSet) return 0;
+
+            return _sentTimer->read();
+        }
+
+        /*
+            Get the information (true/false) if the message got timed out
+        */
+        bool timeout() {
+            if (!_sentTimerSet) return false;
+
+            return (*_sentTimer >= _timeout);
         }
     
     protected:
@@ -127,10 +163,11 @@ class CarMessage : private NonCopyable<CarMessage> {
 
         id_component_t _componentId;
         
-        uint8_t _sendPriority;
+        car_message_priority_t _sendPriority;
         float _timeout;
         
-        Timer _sentTimer;
+        std::shared_ptr<Timer> _sentTimer;
+        bool _sentTimerSet = false;
 };
 
 #endif

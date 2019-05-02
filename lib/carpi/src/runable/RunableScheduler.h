@@ -40,7 +40,7 @@ class RunableScheduler : public IRunable {
                 RunableSchedule(IRunable* servicePointer, float serviceRefreshRate) {
                     service = servicePointer;
                     refreshRate = serviceRefreshRate;
-                    lastRun = lastRun = std::shared_ptr<Timer>(new Timer());
+                    lastRun = std::shared_ptr<Timer>(new Timer());
                 }
 
                 IRunable *service;

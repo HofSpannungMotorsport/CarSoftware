@@ -9,14 +9,10 @@
 
 class HardwareLedPwm : public ILed {
     public:
-        HardwareLedPwm(PinName port)
+        HardwareLedPwm(PinName port, id_sub_component_t componentSubId)
             : _port(port) {
             setComponentType(COMPONENT_LED);
             setObjectType(OBJECT_HARDWARE);
-        }
-
-        HardwareLedPwm(PinName port, id_sub_component_t componentSubId)
-            : HardwareLedPwm(port) {
             setComponentSubId(componentSubId);
         }
 
@@ -43,41 +39,22 @@ class HardwareLedPwm : public ILed {
             _refresh();
         }
 
-        // getters
-        virtual led_state_t getState() {
-            return _state;
-        }
-
-        virtual led_brightness_t getBrightness() {
-            return _brightness;
-        }
-
-        virtual led_blinking_t getBlinking() {
-            return _mode;
-        }
-
-        virtual bool getSentConfigurationChanged() {
-            // No implementation needed
-            return false;
-        }
-
-        virtual message_build_result_t buildMessage(CarMessage &carMessage) {
-            // No implementation needed yet
-            return MESSAGE_BUILD_ERROR;
-        }
-
-        virtual message_parse_result_t parseMessage(CarMessage &carMessage) {
-            message_parse_result_t result = MESSAGE_PARSE_OK;
-            for(car_sub_message_t &subMessage : carMessage.subMessages) {
-                if(subMessage.length != 1) // not a valid message for leds
-                    result = MESSAGE_PARSE_ERROR;
-        
-                this->setState((led_state_t)((subMessage.data[0] >> 7) & 0x1));
-                this->setBrightness((float)((subMessage.data[0] >> 2) & 0x1F) / 0x1F);
-                this->setBlinking((led_blinking_t)((subMessage.data[0]) & 0x3));
+        virtual void receive(CarMessage &carMessage) {
+            for (car_sub_message_t &subMessage : carMessage.subMessages) {
+                switch (subMessage.data[0]) {
+                    case LED_MESSAGE_COMMAND_SET_STATE:
+                        setState((led_state_t)subMessage.data[1]);
+                        break;
+                    
+                    case LED_MESSAGE_COMMAND_SET_BLINKING:
+                        setBlinking((led_blinking_t)subMessage.data[1]);
+                        break;
+                    
+                    case LED_MESSAGE_COMMAND_SET_BRIGHTNESS:
+                        setBrightness(subMessage.data[1] / 0xFF);
+                        break;
+                }
             }
-
-            return result;
         }
 
     protected:

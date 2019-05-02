@@ -1,7 +1,18 @@
 #ifndef IPEDAL_H
 #define IPEDAL_H
 
-#include "ICommunication.h"
+#include "communication/SelfSyncable.h"
+
+#define STD_PEDAL_VALUE_REFRESH_RATE 120 // Hz
+#define STD_PEDAL_MESSAGE_TIMEOUT 0.005 // s
+
+enum pedal_message_command_t : uint8_t {
+    PEDAL_MESSAGE_COMMAND_SET_PROPORTIONALITY_SENSOR_1 = 0x0,
+    PEDAL_MESSAGE_COMMAND_SET_PROPORTIONALITY_SENSOR_2,
+    PEDAL_MESSAGE_COMMAND_SET_STATUS,
+    PEDAL_MESSAGE_COMMAND_SET_VALUE,
+    PEDAL_MESSAGE_COMMAND_SET_CALIBRATION_STATUS
+};
 
 typedef uint8_t pedal_status_t;
 enum pedal_error_type_t : uint8_t {
@@ -23,7 +34,7 @@ enum pedal_calibration_t : bool {
     CURRENTLY_NOT_CALIBRATING = false
 };
 
-class IPedal : public ICommunication {
+class IPedal : public SelfSyncable {
     public:
         virtual void setProportionality(pedal_sensor_type_t proportionality, uint16_t sensorNumber = 0) = 0;
 
