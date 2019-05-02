@@ -60,10 +60,12 @@ class SelfSyncable : public ICommunication {
 
         virtual void _send(CarMessage &carMessage, uint8_t priority, float timeout) {
             carMessage.setSendPriority(priority);
-            carMessage.setTimeout(timeout);
             carMessage.setComponentId(getComponentId());
 
-            carMessage.startSentTimer();
+            #ifdef USE_MBED
+                carMessage.setTimeout(timeout);
+                carMessage.startSentTimer();
+            #endif // USE_MBED
 
             if (_syncerAttached)
                 _syncer->send(carMessage);

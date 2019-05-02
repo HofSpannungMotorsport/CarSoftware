@@ -115,6 +115,8 @@ class CarMessage {
             return _sendPriority;
         }
 
+        #ifdef USE_MBED
+
         /*
             Set the Timeout for a message, e.g. define the max. time a message can sit in the queue
         */
@@ -156,18 +158,23 @@ class CarMessage {
 
             return (*_sentTimer >= _timeout);
         }
+
+        #endif // USE_MBED
     
     protected:
         id_device_t _senderId; // only 5 bits are useable
         id_device_t _receiverId; // only 5 bits are usable
 
         id_component_t _componentId;
-        
+
         car_message_priority_t _sendPriority;
-        float _timeout;
-        
-        std::shared_ptr<Timer> _sentTimer;
-        bool _sentTimerSet = false;
+
+        #ifdef USE_MBED
+            float _timeout;
+
+            std::shared_ptr<Timer> _sentTimer;
+            bool _sentTimerSet = false;
+        #endif // USE_MBED
 };
 
 #endif

@@ -12,7 +12,7 @@ using namespace std;
 #include "IChannel.h"
 #include "components/interface/ICommunication.h"
 
-#define SYNC_DEBUG // for debugging
+//#define SYNC_DEBUG // for debugging
 
 class Sync {
     public:
@@ -30,8 +30,13 @@ class Sync {
                 return false;
             }
 
-            // Construct new element at the end
-            router.emplace_back(component, channel, receiverId);
+            #ifdef USE_MBED
+                // Construct new element at the end
+                router.emplace_back(component, channel, receiverId);
+            #else
+                Route route(component, channel, receiverId);
+                router.push_back(route);
+            #endif // USE_MBED
 
             #ifdef SYNC_DEBUG
                 pcSerial.printf("[Sync]@addComponent: Component with ID 0x%x successfully added\n", component.getComponentId());
@@ -50,7 +55,12 @@ class Sync {
                 return false;
             }
 
-            bridger.emplace_back(componentId, channelDevice1, channelDevice2, deviceId1, deviceId2);
+            #ifdef USE_MBED
+                bridger.emplace_back(componentId, channelDevice1, channelDevice2, deviceId1, deviceId2);
+            #else
+                Bridge bridge(componentId, channelDevice1, channelDevice2, deviceId1, deviceId2);
+                bridger.push_back(bridge);
+            #endif // USE_MBED
 
             #ifdef SYNC_DEBUG
                 pcSerial.printf("[Sync]@addBridge: Component with ID 0x%x successfully added to Bridge\n", componentId);
