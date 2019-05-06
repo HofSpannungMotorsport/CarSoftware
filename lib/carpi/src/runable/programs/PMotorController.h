@@ -69,6 +69,9 @@ class PMotorController : public IProgram {
 
             // Send new Power to Motor -> Brum Brum (but without the Brum Brum)
             // ...maybe a drivers scream ;)
+
+            returnValue = _applyGasCurve(returnValue);
+
             _motorController->setTorque(returnValue);
 
             #ifdef MOTORCONTROLLER_OUTPUT
@@ -335,6 +338,27 @@ class PMotorController : public IProgram {
             // Implementing later
             // [il]
             return returnValue;
+        }
+
+        float _applyGasCurve(float pedalPosition) {
+            float gasValue = pedalPosition;
+
+            gas_curve_t gasCurve = _carService.getGasCurve();
+
+            if (gasCurve == GAS_CURVE_LINEAR) {
+                gasValue = pedalPosition;
+            } else if (gasCurve == GAS_CURVE_X_POW_2) {
+                gasValue = pedalPosition * pedalPosition;
+            } else if (gasCurve == GAS_CURVE_X_POW_3) {
+                gasValue = pedalPosition * pedalPosition * pedalPosition;
+            } else if (gasCurve == GAS_CURVE_X_POW_4) {
+                gasValue = pedalPosition * pedalPosition * pedalPosition * pedalPosition;
+            }
+
+            if (gasValue > 1.0) gasValue = 1.0;
+            else if (gasValue < 0.0) gasValue = 0.0;
+
+            return gasValue;
         }
 };
 

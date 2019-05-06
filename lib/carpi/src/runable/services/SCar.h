@@ -15,11 +15,21 @@
 #define STARTUP_WAIT 1 // s wait before system gets started
 #define ERROR_REGISTER_SIZE 64 // errors, max: 255
 #define STARTUP_ANIMATION_SPEED 0.075 // s between led-changes
-#define STARTUP_ANIMATION_PLAYBACKS 5 // times the animation should be played
+#define STARTUP_ANIMATION_PLAYBACKS 3 // times the animation should be played
 #define STARTUP_ANIMATION_WAIT_AFTER 0.3 // s wait after animation
 #define BRAKE_START_THRESHHOLD 0.60 // %
 
 #define HV_ENABLED_BEEP_TIME 2.2 // s (has to be at least 0.5)
+
+#define BEEP_MULTI_BEEP_TIME 0.15 // s
+#define BEEP_MULTI_SILENT_TIME 0.1 // s
+
+enum gas_curve_t : uint8_t {
+    GAS_CURVE_LINEAR = 0x0,
+    GAS_CURVE_X_POW_2,
+    GAS_CURVE_X_POW_3,
+    GAS_CURVE_X_POW_4
+};
 
 enum car_state_t : uint8_t {
     CAR_OFF = 0x0,
@@ -185,12 +195,18 @@ class SCar : public IService {
             }
         }
 
+        gas_curve_t getGasCurve() {
+            return _gasCurve;
+        }
+
     private:
         CANService &_canService;
 
         CircularBuffer<Error, ERROR_REGISTER_SIZE, uint8_t> _errorRegister;
 
         car_state_t _state = CAR_OFF;
+
+        gas_curve_t _gasCurve = GAS_CURVE_LINEAR;
 
         struct _button {
             IButton* reset;
@@ -377,27 +393,13 @@ class SCar : public IService {
             wait(0.1);
         }
 
+        struct _resetButton {
+            bool pressed = false,
+                 longPressed = false,
+                 released = false;
+        } _resetButton;
+
         void _checkInput() {
-            if (_button.reset->getStateChanged()) {
-                if (_button.reset->getState() == PRESSED) {
-                    if (_state == READY_TO_DRIVE) {
-                        // Disable RFE and RUN
-                        _motorController->setRUN(MOTOR_CONTROLLER_RUN_DISABLE);
-                        _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
-
-                        _state = ALMOST_READY_TO_DRIVE;
-
-                        _led.green->setBlinking(BLINKING_FAST);
-                        _sendLedsOverCan();
-                    }
-                } else if (_button.reset->getState() == LONG_CLICKED) {
-                    if (_state != READY_TO_DRIVE) {
-                        // ReCalibrate the Pedals
-                        _calibratePedals();
-                    }
-                }
-            }
-
             // [QF]
             if (_state == ALMOST_READY_TO_DRIVE) {
                 if ((_button.start->getState() == LONG_CLICKED) && (_pedal.brake->getValue() >= BRAKE_START_THRESHHOLD)) {
@@ -469,7 +471,74 @@ class SCar : public IService {
                     _sendLedsOverCan();
                     wait(0.1);
                 }
+
+                if (_button.reset->getStateChanged()) {
+                    button_state_t buttonState = _button.reset->getState();
+
+                    if (buttonState == PRESSED) {
+                        _resetButton.pressed = true;
+                    } else if (buttonState == LONG_CLICKED) {
+                        _resetButton.longPressed = true;
+                    } else if (buttonState == NOT_PRESSED) {
+                        _resetButton.released = true;
+                    }
+
+                    if (_resetButton.released) {
+                        if (_resetButton.longPressed && _resetButton.pressed) {
+                            _calibratePedals();
+                        } else if (_resetButton.pressed) {
+                            _rotateGasCurve();
+                        }
+
+                        _resetButton.released = false;
+                        _resetButton.pressed = false;
+                        _resetButton.longPressed = false;
+                    }
+                }
+                
+
+                return;
             }
+
+            if (_state == READY_TO_DRIVE) {
+                if (_button.reset->getState() == PRESSED) {
+                    // Disable RFE and RUN
+                    _motorController->setRUN(MOTOR_CONTROLLER_RUN_DISABLE);
+                    _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
+
+                    _state = ALMOST_READY_TO_DRIVE;
+
+                    _led.green->setBlinking(BLINKING_FAST);
+                    _sendLedsOverCan();
+                }
+
+                return;
+            }
+        }
+
+        void _beepTimes(uint8_t times) {
+            for (uint8_t i = 0; i < times; i++) {
+                _buzzer->setState(BUZZER_ON);
+                wait(BEEP_MULTI_BEEP_TIME);
+                _buzzer->setState(BUZZER_OFF);
+                wait(BEEP_MULTI_SILENT_TIME);
+            }
+        }
+
+        void _rotateGasCurve() {
+            if (_gasCurve == GAS_CURVE_LINEAR) {
+                _gasCurve = GAS_CURVE_X_POW_2;
+                _beepTimes(2);
+            } else if (_gasCurve == GAS_CURVE_X_POW_2) {
+                _gasCurve = GAS_CURVE_X_POW_3;
+                _beepTimes(3);
+            } else if (_gasCurve == GAS_CURVE_X_POW_3) {
+                _gasCurve = GAS_CURVE_X_POW_4;
+                _beepTimes(4);
+            } else if (_gasCurve == GAS_CURVE_X_POW_4) {
+                _gasCurve = GAS_CURVE_LINEAR;
+                _beepTimes(1);
+            } else _gasCurve = GAS_CURVE_LINEAR;
         }
 };
 
