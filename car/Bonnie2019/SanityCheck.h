@@ -1,13 +1,29 @@
 // Check if the right board is selected before compiling (to avoid compiling errors and compiling for the wrong board)
 #ifdef BOARD_DASHBOARD
-    #ifndef STM32F446xx
-        #error "Wrong Board choosen! Select Nucleo F446RE as your desiered Board (Dashboard Controller). Check platformio.ini"
+    #ifdef STM32F446xx
+        // OK
+    #else
+        #ifdef NEW_SMALL
+            #ifndef STM32L432xx
+                #error "Wrong Board choosen! Select Nucleo L432KC as your desiered Board (Dashboard_new_small Controller). Check platformio.ini"
+            #endif
+        #else
+            #error "Wrong Board choosen! Select Nucleo F446RE as your desiered Board (Dashboard Controller). Check platformio.ini"
+        #endif
     #endif
 #endif
 
 #ifdef BOARD_PEDAL
-    #ifndef STM32F446xx
-        #error "Wrong Board choosen! Select Nucleo F446RE as your desiered Board (Pedal Controller). Check platformio.ini"
+    #ifdef STM32F446xx
+        // OK
+    #else
+        #ifdef NEW_SMALL
+            #ifndef STM32L432xx
+                #error "Wrong Board choosen! Select Nucleo L432KC as your desiered Board (Dashboard_new_small Controller). Check platformio.ini"
+            #endif
+        #else
+            #error "Wrong Board choosen! Select Nucleo F446RE as your desiered Board (Dashboard Controller). Check platformio.ini"
+        #endif
     #endif
 #endif
 
