@@ -15,52 +15,59 @@ class SelfSyncable : public ICommunication {
         Sync *_syncer;
         bool _syncerAttached = false;
 
-        virtual void _sendCommand(uint8_t command, uint8_t value, uint8_t priority, float timeout) {
-            CarMessage carMessage;
-
-            car_sub_message_t subMessage;
+        virtual void _getSubMessageCommand(car_sub_message_t &subMessage, uint8_t command, uint8_t value) {
             subMessage.length = 2;
             subMessage.data[0] = command;
             subMessage.data[1] = value;
-
-            carMessage.addSubMessage(subMessage);
-
-            _send(carMessage, priority, timeout);
         }
 
-        virtual void _sendCommand(uint8_t command, uint8_t value, uint8_t value2, uint8_t priority, float timeout) {
-            CarMessage carMessage;
-
-            car_sub_message_t subMessage;
+        virtual void _getSubMessageCommand(car_sub_message_t &subMessage, uint8_t command, uint8_t value, uint8_t value2) {
+            _getSubMessageCommand(subMessage, command, value);
             subMessage.length = 3;
-            subMessage.data[0] = command;
-            subMessage.data[1] = value;
             subMessage.data[2] = value2;
-
-            carMessage.addSubMessage(subMessage);
-
-            _send(carMessage, priority, timeout);
         }
 
-        virtual void _sendCommand(uint8_t command, uint8_t value, uint8_t value2, uint8_t value3, uint8_t value4, uint8_t priority, float timeout) {
-            CarMessage carMessage;
-
-            car_sub_message_t subMessage;
+        virtual void _getSubMessageCommand(car_sub_message_t &subMessage, uint8_t command, uint8_t value, uint8_t value2, uint8_t value3, uint8_t value4) {
+            _getSubMessageCommand(subMessage, command, value, value2);
             subMessage.length = 5;
-            subMessage.data[0] = command;
-            subMessage.data[1] = value;
-            subMessage.data[2] = value2;
             subMessage.data[3] = value3;
             subMessage.data[4] = value4;
-
-            carMessage.addSubMessage(subMessage);
-
-            _send(carMessage, priority, timeout);
         }
 
-        virtual void _send(CarMessage &carMessage, uint8_t priority, float timeout) {
+        virtual void _sendCommand(uint8_t command, uint8_t value, uint8_t priority, float timeout, bool dropable) {
+            CarMessage carMessage;
+
+            car_sub_message_t subMessage;
+            _getSubMessageCommand(subMessage, command, value);
+            carMessage.addSubMessage(subMessage);
+
+            _send(carMessage, priority, timeout, dropable);
+        }
+
+        virtual void _sendCommand(uint8_t command, uint8_t value, uint8_t value2, uint8_t priority, float timeout, bool dropable) {
+            CarMessage carMessage;
+
+            car_sub_message_t subMessage;
+            _getSubMessageCommand(subMessage, command, value, value2);
+            carMessage.addSubMessage(subMessage);
+
+            _send(carMessage, priority, timeout, dropable);
+        }
+
+        virtual void _sendCommand(uint8_t command, uint8_t value, uint8_t value2, uint8_t value3, uint8_t value4, uint8_t priority, float timeout, bool dropable) {
+            CarMessage carMessage;
+
+            car_sub_message_t subMessage;
+            _getSubMessageCommand(subMessage, command, value, value2, value3, value4);
+            carMessage.addSubMessage(subMessage);
+
+            _send(carMessage, priority, timeout, dropable);
+        }
+
+        virtual void _send(CarMessage &carMessage, uint8_t priority, float timeout, bool dropable) {
             carMessage.setSendPriority(priority);
             carMessage.setComponentId(getComponentId());
+            carMessage.setDropable(dropable);
 
             #ifdef USE_MBED
                 carMessage.setTimeout(timeout);

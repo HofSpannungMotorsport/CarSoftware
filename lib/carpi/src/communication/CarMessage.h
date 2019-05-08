@@ -48,7 +48,7 @@ class CarMessage {
             Set the receiverId for the device which should reveive the message
         */
         void setReceiverId(id_device_t receiverId) {
-            _receiverId = _receiverId;
+            _receiverId = receiverId;
         }
 
         /*
@@ -115,49 +115,57 @@ class CarMessage {
             return _sendPriority;
         }
 
+        void setDropable(bool dropable) {
+            _dropable = dropable;
+        }
+
+        bool getDropable() {
+            return _dropable;
+        }
+
         #ifdef USE_MBED
 
-        /*
-            Set the Timeout for a message, e.g. define the max. time a message can sit in the queue
-        */
-        void setTimeout(float timeout) {
-            _timeout = timeout;
-        }
+            /*
+                Set the Timeout for a message, e.g. define the max. time a message can sit in the queue
+            */
+            void setTimeout(float timeout) {
+                _timeout = timeout;
+            }
 
-        /*
-            Get the Timeout for a message, e.g. get the max. time a message can sit in the queue
-        */
-        float getTimeout() {
-            return _timeout;
-        }
+            /*
+                Get the Timeout for a message, e.g. get the max. time a message can sit in the queue
+            */
+            float getTimeout() {
+                return _timeout;
+            }
 
-        /*
-            Start the Timer from when on the message was sent. Should be called shortly before putting the message into the queue.
-        */
-        void startSentTimer() {
-            _sentTimer = std::shared_ptr<Timer>(new Timer());
-            _sentTimerSet = true;
-            _sentTimer->reset();
-            _sentTimer->start();
-        }
+            /*
+                Start the Timer from when on the message was sent. Should be called shortly before putting the message into the queue.
+            */
+            void startSentTimer() {
+                _sentTimer = std::shared_ptr<Timer>(new Timer());
+                _sentTimerSet = true;
+                _sentTimer->reset();
+                _sentTimer->start();
+            }
 
-        /*
-            Get the time passed since the message has been sent
-        */
-        float getTimeSinceSent() {
-            if (!_sentTimerSet) return 0;
+            /*
+                Get the time passed since the message has been sent
+            */
+            float getTimeSinceSent() {
+                if (!_sentTimerSet) return 0;
 
-            return _sentTimer->read();
-        }
+                return _sentTimer->read();
+            }
 
-        /*
-            Get the information (true/false) if the message got timed out
-        */
-        bool timeout() {
-            if (!_sentTimerSet) return false;
+            /*
+                Get the information (true/false) if the message got timed out
+            */
+            bool timeout() {
+                if (!_sentTimerSet) return false;
 
-            return (*_sentTimer >= _timeout);
-        }
+                return (*_sentTimer >= _timeout);
+            }
 
         #endif // USE_MBED
     
@@ -168,6 +176,16 @@ class CarMessage {
         id_component_t _componentId;
 
         car_message_priority_t _sendPriority;
+
+
+        /*
+            If a message is send often and repeadly, it could let overflow the outgoing bessage queue.
+            These messages are not so importent and can be dropped because a new message will come really soon,
+            being more uptodate and making the last message useless.
+
+            A Configuration-Message is sent mostly only once and should not be dropped at all!
+        */
+        bool _dropable = false;
 
         #ifdef USE_MBED
             float _timeout;

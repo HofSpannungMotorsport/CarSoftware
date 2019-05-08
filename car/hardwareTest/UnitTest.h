@@ -10,17 +10,17 @@
 
 
 // Include the test program here
-#include ".h"
+#include "CANSniffer.h"
 
 class UnitTest {
     public:
         void setup() {
-            wait(2);
+            wait(0.1);
         }
 
         void loop() {
             // Main Function here, it will be called constantly
-            
+            CANSniffer();
         }
 };
 

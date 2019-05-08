@@ -154,7 +154,8 @@ class HardwarePedal : public IPedal {
         }
 
     protected:
-        Ticker _refreshMessageTicker;
+        Ticker _pedalPositionTicker;
+        Ticker _statusTicker;
 
         HardwareAnalogSensor _pin1;
         HardwareAnalogSensor _pin2;
@@ -198,12 +199,17 @@ class HardwarePedal : public IPedal {
             bool timerStarted = false;
         } _deviance;
 
-        void _updateValues() {
+        void _updatePedalPosition() {
             if (_syncerAttached) {
                 uint16_t pedalValue = ((float)getValue() * 65535);
 
-                _sendCommand(PEDAL_MESSAGE_COMMAND_SET_VALUE, pedalValue & 0xFF, (pedalValue >> 8) & 0xFF, SEND_PRIORITY_PEDAL, STD_PEDAL_MESSAGE_TIMEOUT);
-                _sendCommand(PEDAL_MESSAGE_COMMAND_SET_STATUS, getStatus(), SEND_PRIORITY_PEDAL, STD_PEDAL_MESSAGE_TIMEOUT);
+                _sendCommand(true, PEDAL_MESSAGE_COMMAND_SET_VALUE, pedalValue & 0xFF, (pedalValue >> 8) & 0xFF, SEND_PRIORITY_PEDAL, STD_PEDAL_MESSAGE_TIMEOUT);
+            }
+        }
+
+        void _updateStatus() {
+            if (_syncerAttached) {
+                _sendCommand(false, PEDAL_MESSAGE_COMMAND_SET_STATUS, getStatus(), SEND_PRIORITY_PEDAL, STD_PEDAL_MESSAGE_TIMEOUT);
             }
         }
 
@@ -223,7 +229,8 @@ class HardwarePedal : public IPedal {
                 _pin2.setBoundaryOutTime(STD_MAX_OUT_OF_BOUNDARY_TIME);
             }
 
-            _refreshMessageTicker.attach(callback(this, &HardwarePedal::_updateValues), 1/(float)STD_PEDAL_VALUE_REFRESH_RATE);
+            _pedalPositionTicker.attach(callback(this, &HardwarePedal::_updatePedalPosition), 1.0/(float)STD_PEDAL_VALUE_REFRESH_RATE);
+            _statusTicker.attach(callback(this, &HardwarePedal::_updateStatus), STD_PEDAL_STATUS_REFRESH_TIME);
         }
 
         analog_sensor_raw_t _getAverageValue(CircularBuffer<analog_sensor_raw_t, STD_CALIBRATION_SAMPLE_BUFFER_SIZE> &buffer) {

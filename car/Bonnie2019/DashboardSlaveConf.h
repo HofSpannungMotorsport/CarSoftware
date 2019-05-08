@@ -23,11 +23,20 @@ class Dashboard : public Carpi {
     public:
         // Called once at bootup
         void setup() {
+            wait(0.2);
+
             syncer.addComponent((ICommunication&)ledRed, canIntern, DEVICE_MASTER);
             syncer.addComponent((ICommunication&)ledYellow, canIntern, DEVICE_MASTER);
             syncer.addComponent((ICommunication&)ledGreen, canIntern, DEVICE_MASTER);
             syncer.addComponent((ICommunication&)buttonReset, canIntern, DEVICE_MASTER);
             syncer.addComponent((ICommunication&)buttonStart, canIntern, DEVICE_MASTER);
+
+            // Attach the Syncer to all components
+            ledRed.attach(syncer);
+            ledYellow.attach(syncer);
+            ledGreen.attach(syncer);
+            buttonReset.attach(syncer);
+            buttonStart.attach(syncer);
         }
 
         // Called repeately after bootup

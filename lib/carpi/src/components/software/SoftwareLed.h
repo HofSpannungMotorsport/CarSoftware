@@ -14,7 +14,7 @@ class SoftwareLed : public ILed {
 
         virtual void setState(led_state_t state) {
             if (_syncerAttached)
-                _sendCommand(LED_MESSAGE_COMMAND_SET_STATE, state, SEND_PRIORITY_LED, STD_LED_MESSAGE_TIMEOUT);
+                _sendCommand(false, LED_MESSAGE_COMMAND_SET_STATE, state, SEND_PRIORITY_LED, STD_LED_MESSAGE_TIMEOUT);
         }
 
         virtual void setBrightness(led_brightness_t brightness) {
@@ -22,12 +22,12 @@ class SoftwareLed : public ILed {
             else if (brightness < 0.0) brightness = 0.0;
 
             if (_syncerAttached)
-                _sendCommand(LED_MESSAGE_COMMAND_SET_BRIGHTNESS, brightness * 0xFF, SEND_PRIORITY_LED, STD_LED_MESSAGE_TIMEOUT);
+                _sendCommand(false, LED_MESSAGE_COMMAND_SET_BRIGHTNESS, ((float)brightness * 255.0), SEND_PRIORITY_LED, STD_LED_MESSAGE_TIMEOUT);
         }
 
         virtual void setBlinking(led_blinking_t blinking) {
             if (_syncerAttached)
-                _sendCommand(LED_MESSAGE_COMMAND_SET_BLINKING, blinking, SEND_PRIORITY_LED, STD_LED_MESSAGE_TIMEOUT);
+                _sendCommand(false, LED_MESSAGE_COMMAND_SET_BLINKING, blinking, SEND_PRIORITY_LED, STD_LED_MESSAGE_TIMEOUT);
         }
 
         virtual void receive(CarMessage &carMessage) {

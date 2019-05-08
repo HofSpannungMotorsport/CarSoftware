@@ -1,9 +1,12 @@
 #ifndef MASTERCONF_H
 #define MASTERCONF_H
 
-//#define CAN_DEBUG // Enables CAN Service Debug Output (Log almost every step done by the CANService over Serial)
 //#define MOTORCONTROLLER_OUTPUT // Output the Value sent to the MotorController over Serial
-//#define FORCE_DISABLE_HV_CHECK // Disables HV-Checks (HardwareHvEnabled always returns true) !!! ONLY USE FOR DEBUGGING WITHOUT HV-ACCU INSTALLED !!!
+#define FORCE_DISABLE_HV_CHECK // Disables HV-Checks (HardwareHvEnabled always returns true) !!! ONLY USE FOR DEBUGGING WITHOUT HV-ACCU INSTALLED !!!
+//#define SYNC_DEBUG // Enables reporting for Sync
+//#define SYNC_SENDING_DEBUG // Enables reporting while sending a message over Sync
+//#define CCAN_DEBUG // Enables CAN Channel Debug Output
+#define CCAN_SENDING_DEBUG // Enables reporting at sending over Can
 #include "carpi.h"
 
 #define HIGH_DEMAND_SERVICE_REFRESH_RATE 120 // Hz
@@ -76,15 +79,15 @@ class Master : public Carpi {
         void setup() {
             // Add all Software Components to the CAN Service
             // Dashboard
-            syncer.addComponent((ICommunication&)ledRed, canIntern, DEVICE_DASHBOARD);
-            syncer.addComponent((ICommunication&)ledYellow, canIntern, DEVICE_DASHBOARD);
-            syncer.addComponent((ICommunication&)ledGreen, canIntern, DEVICE_DASHBOARD);
-            syncer.addComponent((ICommunication&)buttonReset, canIntern, DEVICE_DASHBOARD);
-            syncer.addComponent((ICommunication&)buttonStart, canIntern, DEVICE_DASHBOARD);
+            syncer.addComponent(ledRed, canIntern, DEVICE_DASHBOARD);
+            syncer.addComponent(ledYellow, canIntern, DEVICE_DASHBOARD);
+            syncer.addComponent(ledGreen, canIntern, DEVICE_DASHBOARD);
+            syncer.addComponent(buttonReset, canIntern, DEVICE_DASHBOARD);
+            syncer.addComponent(buttonStart, canIntern, DEVICE_DASHBOARD);
 
             // Pedal
-            syncer.addComponent((ICommunication&)gasPedal, canIntern, DEVICE_PEDAL);
-            syncer.addComponent((ICommunication&)brakePedal, canIntern, DEVICE_PEDAL);
+            syncer.addComponent(gasPedal, canIntern, DEVICE_PEDAL);
+            syncer.addComponent(brakePedal, canIntern, DEVICE_PEDAL);
             //syncer.addComponent((ICommunication&)rpmFrontLeft, canIntern, DEVICE_PEDAL);
             //syncer.addComponent((ICommunication&)rpmFrontRight, canIntern, DEVICE_PEDAL);
 
@@ -102,6 +105,21 @@ class Master : public Carpi {
             // Add all Services and ServiceLists to our ServiceScheduler
             services.addRunable((IRunable*)&highDemandServices, HIGH_DEMAND_SERVICE_REFRESH_RATE);
             services.addRunable((IRunable*)&lowDemandServices, LOW_DEMAND_SERVICE_REFRESH_RATE);
+
+            // Attach the Syncer to all components
+            // Dashboard
+            ledRed.attach(syncer);
+            ledYellow.attach(syncer);
+            ledGreen.attach(syncer);
+            buttonReset.attach(syncer);
+            buttonStart.attach(syncer);
+
+            // Pedal
+            gasPedal.attach(syncer);
+            brakePedal.attach(syncer);
+            //rpmFrontLeft.attach(syncer);
+            //rpmFrontRight.attach(syncer);
+
 
             // Start the Car
             carService.startUp();

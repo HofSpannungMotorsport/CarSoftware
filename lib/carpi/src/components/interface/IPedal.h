@@ -3,8 +3,10 @@
 
 #include "communication/SelfSyncable.h"
 
-#define STD_PEDAL_VALUE_REFRESH_RATE 120 // Hz
+#define STD_PEDAL_VALUE_REFRESH_RATE 60 // Hz
 #define STD_PEDAL_MESSAGE_TIMEOUT 0.005 // s
+
+#define STD_PEDAL_STATUS_REFRESH_TIME 0.05 // s -> 50ms
 
 enum pedal_message_command_t : uint8_t {
     PEDAL_MESSAGE_COMMAND_SET_PROPORTIONALITY_SENSOR_1 = 0x0,

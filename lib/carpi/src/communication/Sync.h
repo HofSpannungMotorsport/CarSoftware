@@ -128,7 +128,7 @@ class Sync {
         }
 
         void send(CarMessage &carMessage) {
-            #ifdef SYNC_DEBUG
+            #ifdef SYNC_SENDING_DEBUG
                 pcSerial.printf("[Sync]@send: Try to send Message for component 0x%x\n", carMessage.getComponentId());
             #endif
 
@@ -138,7 +138,7 @@ class Sync {
                     carMessage.setReceiverId(route.receiverId);
                     _send(carMessage, route.channel);
 
-                    #ifdef SYNC_DEBUG
+                    #ifdef SYNC_SENDING_DEBUG
                         pcSerial.printf("[Sync]@send: Sent Message for component 0x%x to channel\n", carMessage.getComponentId());
                     #endif
 
@@ -152,8 +152,8 @@ class Sync {
 
         class Route {
             public:
-                Route(ICommunication &component, IChannel &channel, id_device_t receiverId)
-                : component(&component), channel(&channel), receiverId(receiverId) {}
+                Route(ICommunication &_component, IChannel &_channel, id_device_t _receiverId)
+                : component(&_component), channel(&_channel), receiverId(_receiverId) {}
 
                 ICommunication *component;
                 IChannel *channel;
@@ -162,10 +162,10 @@ class Sync {
 
         class Bridge {
             public:
-                Bridge(id_component_t componentId, IChannel &channelDevice1, IChannel &channelDevice2,
-                                                  id_device_t deviceId1,    id_device_t deviceId2)
-                : componentId(componentId), channelDevice1(&channelDevice1), channelDevice2(&channelDevice2),
-                                         deviceId1(deviceId1),            deviceId2(deviceId2) {}
+                Bridge(id_component_t _componentId, IChannel &_channelDevice1, IChannel &_channelDevice2,
+                                                  id_device_t _deviceId1,    id_device_t _deviceId2)
+                : componentId(_componentId), channelDevice1(&_channelDevice1), channelDevice2(&_channelDevice2),
+                                         deviceId1(_deviceId1),            deviceId2(_deviceId2) {}
 
                 id_component_t componentId;
                 IChannel *channelDevice1;

@@ -30,8 +30,8 @@ namespace deviceId {
     id_message_header_t getMessageHeader(id_device_t senderDeviceId, id_device_t receiverDeviceId){
         id_message_header_t messageHeader;
 
-        messageHeader = (senderDeviceId << 5);
-        messageHeader |= receiverDeviceId;
+        messageHeader = (((id_message_header_t)senderDeviceId & 0x1F) << 5);
+        messageHeader |= (id_message_header_t)receiverDeviceId & 0x1F;
 
         return messageHeader;
     }
@@ -39,11 +39,11 @@ namespace deviceId {
     id_device_t getDeviceIdFromMessageHeader(id_message_header_t messageHeader, id_device_type_t deviceType) {
         if (deviceType == DEVICE_TYPE_RECEIVER) {
             messageHeader &= 0x1F;
-            return (id_device_t)messageHeader;
         } else if (deviceType == DEVICE_TYPE_SENDER) {
             messageHeader = (messageHeader >> 5) & 0x1F;
-            return (id_device_t)messageHeader;
         } else return DEVICE_NOT_SET;
+
+        return (id_device_t)messageHeader;
     }
 }; // deviceId
 

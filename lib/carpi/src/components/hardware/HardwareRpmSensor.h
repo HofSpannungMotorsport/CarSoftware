@@ -24,7 +24,7 @@ class HardwareRpmSensor : public IRpmSensor {
             setComponentSubId(componentSubId);
             _measurement.pointsPerRevolution = measurementPointsPerRevolution;
 
-            _updateValuesTicker.attach(callback(this, &HardwareRpmSensor::_updateValues), 1/RPM_SENSOR_MESSAGE_REFRESH_RATE);
+            _updateValuesTicker.attach(callback(this, &HardwareRpmSensor::_updateValues), 1.0/(float)RPM_SENSOR_MESSAGE_REFRESH_RATE);
         }
 
         virtual void setStatus(rpm_sensor_status_t status) {
@@ -123,15 +123,15 @@ class HardwareRpmSensor : public IRpmSensor {
         }
 
         virtual void _updateValues() {
-            _sendCommand(RPM_MESSAGE_COMMAND_SET_STATUS, getStatus(), SEND_PRIORITY_RPM, STD_RPM_MESSAGE_TIMEOUT);
+            _sendCommand(true, RPM_MESSAGE_COMMAND_SET_STATUS, getStatus(), SEND_PRIORITY_RPM, STD_RPM_MESSAGE_TIMEOUT);
 
             rpm_sensor_frequency_t frequency = this->getFrequency();
             uint32_t frequencyBinary = *((uint32_t*)&frequency);
 
-            _sendCommand(RPM_MESSAGE_COMMAND_SET_FREQUENCY, (uint8_t)(frequencyBinary & 0xFF),
-                                                            (uint8_t)((frequencyBinary >> 8) & 0xFF),
-                                                            (uint8_t)((frequencyBinary >> 16) & 0xFF),
-                                                            (uint8_t)((frequencyBinary >> 24) & 0xFF), SEND_PRIORITY_RPM, STD_RPM_MESSAGE_TIMEOUT);
+            _sendCommand(true, RPM_MESSAGE_COMMAND_SET_FREQUENCY, (uint8_t)(frequencyBinary & 0xFF),
+                                                                  (uint8_t)((frequencyBinary >> 8) & 0xFF),
+                                                                  (uint8_t)((frequencyBinary >> 16) & 0xFF),
+                                                                  (uint8_t)((frequencyBinary >> 24) & 0xFF), SEND_PRIORITY_RPM, STD_RPM_MESSAGE_TIMEOUT);
         }
 };
 

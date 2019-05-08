@@ -14,7 +14,7 @@
 #define STARTUP_WAIT 1 // s wait before system gets started
 #define ERROR_REGISTER_SIZE 64 // errors, max: 255
 #define STARTUP_ANIMATION_SPEED 0.075 // s between led-changes
-#define STARTUP_ANIMATION_PLAYBACKS 3 // times the animation should be played
+#define STARTUP_ANIMATION_PLAYBACKS 2 // times the animation should be played
 #define STARTUP_ANIMATION_WAIT_AFTER 0.25 // s wait after animation
 #define BRAKE_START_THRESHHOLD 0.60 // %
 
