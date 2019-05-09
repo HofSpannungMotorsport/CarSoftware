@@ -24,6 +24,13 @@
     HardwareSerial &pcSerial = Serial;
 #endif
 
+#ifdef USE_TEENSYDUINO
+    // Include Framework
+    #include "Arduino.h"
+    #include "crossplatform/arduinoToMbed/arduinoToMbed.h"
+    #define pcSerial Serial
+#endif
+
 // ---------------------------------------------------------------------
 
 // All Platform Components
@@ -105,6 +112,10 @@
 
 #endif
 
+#ifdef USE_TEENSYDUINO
+
+#endif
+
 // Include some Information about carpi (cross-platform)
 #include <string>
 class Carpi {
@@ -115,7 +126,7 @@ class Carpi {
         }
 
         void printInfo() {
-            #ifdef USE_ARDUINO
+            #if defined(USE_ARDUINO) || defined(USE_TEENSYDUINO)
                 pcSerial.print("Carpi Version: "); pcSerial.println(_version.c_str());
                 pcSerial.print("Environment: "); pcSerial.println(_environment.c_str());
             #endif
