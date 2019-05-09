@@ -47,7 +47,7 @@ class HardwareLed : public ILed {
                         break;
                     
                     case LED_MESSAGE_COMMAND_SET_BRIGHTNESS:
-                        setBrightness(subMessage.data[1] / 255.0);
+                        setBrightness((led_brightness_t)subMessage.data[1] / 255.0);
                         break;
                 }
             }

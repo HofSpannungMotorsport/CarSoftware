@@ -16,8 +16,8 @@ class SoftwarePedal : public IPedal {
         }
 
         virtual void setProportionality(pedal_sensor_type_t proportionality, uint16_t sensorNumber = 0) {
-            if (sensorNumber == 0) _sendCommand(false, PEDAL_MESSAGE_COMMAND_SET_PROPORTIONALITY_SENSOR_1, proportionality, SEND_PRIORITY_PEDAL, STD_PEDAL_MESSAGE_TIMEOUT);
-            else if (sensorNumber == 1) _sendCommand(false, PEDAL_MESSAGE_COMMAND_SET_PROPORTIONALITY_SENSOR_2, proportionality, SEND_PRIORITY_PEDAL, STD_PEDAL_MESSAGE_TIMEOUT);
+            if (sensorNumber == 0) _sendCommand(PEDAL_MESSAGE_COMMAND_SET_PROPORTIONALITY_SENSOR_1, proportionality, SEND_PRIORITY_PEDAL, STD_PEDAL_MESSAGE_TIMEOUT, IS_NOT_DROPABLE);
+            else if (sensorNumber == 1) _sendCommand(PEDAL_MESSAGE_COMMAND_SET_PROPORTIONALITY_SENSOR_2, proportionality, SEND_PRIORITY_PEDAL, STD_PEDAL_MESSAGE_TIMEOUT, IS_NOT_DROPABLE);
         }
 
         virtual pedal_status_t getStatus() {
@@ -29,7 +29,7 @@ class SoftwarePedal : public IPedal {
         }
 
         virtual void setCalibrationStatus(pedal_calibration_t calibrationStatus) {
-            _sendCommand(false, PEDAL_MESSAGE_COMMAND_SET_CALIBRATION_STATUS, calibrationStatus, SEND_PRIORITY_PEDAL, STD_PEDAL_MESSAGE_TIMEOUT);
+            _sendCommand(PEDAL_MESSAGE_COMMAND_SET_CALIBRATION_STATUS, calibrationStatus, SEND_PRIORITY_PEDAL, STD_PEDAL_MESSAGE_TIMEOUT, IS_NOT_DROPABLE);
             _calibrationStatus = calibrationStatus;
         }
 

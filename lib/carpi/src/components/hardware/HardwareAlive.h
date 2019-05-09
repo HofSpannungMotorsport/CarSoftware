@@ -27,9 +27,9 @@ class HardwareAlive : public IAlive {
 
             if (_syncerAttached) {
                 if (_alive) {
-                    _sendCommand(false, ALIVE_MESSAGE_SEND_ALIVE, 0x1, SEND_PRIORITY_ALIVE, STD_ALIVE_MESSAGE_TIMEOUT);
+                    _sendCommand(ALIVE_MESSAGE_SEND_ALIVE, 0x1, SEND_PRIORITY_ALIVE, STD_ALIVE_MESSAGE_TIMEOUT, IS_NOT_DROPABLE);
                 } else {
-                    _sendCommand(false, ALIVE_MESSAGE_SEND_ALIVE, 0x0, SEND_PRIORITY_ALIVE, STD_ALIVE_MESSAGE_TIMEOUT);
+                    _sendCommand(ALIVE_MESSAGE_SEND_ALIVE, 0x0, SEND_PRIORITY_ALIVE, STD_ALIVE_MESSAGE_TIMEOUT, IS_NOT_DROPABLE);
                 }
             }
         }

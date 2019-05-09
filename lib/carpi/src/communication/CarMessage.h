@@ -14,12 +14,17 @@ struct car_sub_message_t {
     uint8_t data[7];
 };
 
+enum car_message_dropable_t : bool {
+    IS_NOT_DROPABLE = false,
+    IS_DROPABLE = true
+};
+
 typedef uint8_t car_message_priority_t;
 
 #include "SendPriority.h"
 
-#define CAR_MESSAGE_PRIORITY_HIGHEST 255
-#define CAR_MESSAGE_PRIORITY_LOWEST 0
+#define CAR_MESSAGE_PRIORITY_LOWEST 255
+#define CAR_MESSAGE_PRIORITY_HIGHEST 0
 
 class CarMessage {
     public:
@@ -115,11 +120,11 @@ class CarMessage {
             return _sendPriority;
         }
 
-        void setDropable(bool dropable) {
+        void setDropable(car_message_dropable_t dropable) {
             _dropable = dropable;
         }
 
-        bool getDropable() {
+        car_message_dropable_t getDropable() {
             return _dropable;
         }
 
@@ -170,12 +175,12 @@ class CarMessage {
         #endif // USE_MBED
     
     protected:
-        id_device_t _senderId; // only 5 bits are useable
-        id_device_t _receiverId; // only 5 bits are usable
+        id_device_t _senderId = DEVICE_NOT_SET; // only 5 bits are useable
+        id_device_t _receiverId = DEVICE_NOT_SET; // only 5 bits are usable
 
-        id_component_t _componentId;
+        id_component_t _componentId = 0;
 
-        car_message_priority_t _sendPriority;
+        car_message_priority_t _sendPriority = CAR_MESSAGE_PRIORITY_LOWEST;
 
 
         /*
@@ -185,7 +190,7 @@ class CarMessage {
 
             A Configuration-Message is sent mostly only once and should not be dropped at all!
         */
-        bool _dropable = false;
+        car_message_dropable_t _dropable = IS_NOT_DROPABLE;
 
         #ifdef USE_MBED
             float _timeout;

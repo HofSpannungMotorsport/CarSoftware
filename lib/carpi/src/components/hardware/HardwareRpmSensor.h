@@ -123,15 +123,15 @@ class HardwareRpmSensor : public IRpmSensor {
         }
 
         virtual void _updateValues() {
-            _sendCommand(true, RPM_MESSAGE_COMMAND_SET_STATUS, getStatus(), SEND_PRIORITY_RPM, STD_RPM_MESSAGE_TIMEOUT);
+            _sendCommand(RPM_MESSAGE_COMMAND_SET_STATUS, getStatus(), SEND_PRIORITY_RPM, STD_RPM_MESSAGE_TIMEOUT, IS_DROPABLE);
 
             rpm_sensor_frequency_t frequency = this->getFrequency();
             uint32_t frequencyBinary = *((uint32_t*)&frequency);
 
-            _sendCommand(true, RPM_MESSAGE_COMMAND_SET_FREQUENCY, (uint8_t)(frequencyBinary & 0xFF),
-                                                                  (uint8_t)((frequencyBinary >> 8) & 0xFF),
-                                                                  (uint8_t)((frequencyBinary >> 16) & 0xFF),
-                                                                  (uint8_t)((frequencyBinary >> 24) & 0xFF), SEND_PRIORITY_RPM, STD_RPM_MESSAGE_TIMEOUT);
+            _sendCommand(RPM_MESSAGE_COMMAND_SET_FREQUENCY, (uint8_t)(frequencyBinary & 0xFF),
+                                                            (uint8_t)((frequencyBinary >> 8) & 0xFF),
+                                                            (uint8_t)((frequencyBinary >> 16) & 0xFF),
+                                                            (uint8_t)((frequencyBinary >> 24) & 0xFF), SEND_PRIORITY_RPM, STD_RPM_MESSAGE_TIMEOUT, IS_DROPABLE);
         }
 };
 

@@ -6,7 +6,7 @@
 //#define SYNC_DEBUG // Enables reporting for Sync
 //#define SYNC_SENDING_DEBUG // Enables reporting while sending a message over Sync
 //#define CCAN_DEBUG // Enables CAN Channel Debug Output
-#define CCAN_SENDING_DEBUG // Enables reporting at sending over Can
+//#define CCAN_SENDING_DEBUG // Enables reporting at sending over Can
 #include "carpi.h"
 
 #define HIGH_DEMAND_SERVICE_REFRESH_RATE 120 // Hz

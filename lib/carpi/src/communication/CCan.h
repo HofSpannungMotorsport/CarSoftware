@@ -74,8 +74,8 @@ class CCan : public IChannel {
             -> should be not important anymore because a newer more uptodate message is already present
         */
         void _dropOldestMessage(vector<CarMessage> &queue) {
-            for (auto carMessageIterator = (queue.end()-1); carMessageIterator != (queue.begin()-1); carMessageIterator--) {
-                if (carMessageIterator->getDropable()) {
+            for (auto carMessageIterator = queue.begin(); carMessageIterator != queue.end(); carMessageIterator++) {
+                if (carMessageIterator->getDropable() == IS_DROPABLE) {
                     queue.erase(carMessageIterator);
                     return;
                 }
@@ -117,7 +117,7 @@ class CCan : public IChannel {
         }
 
         car_message_priority_t _getHighestPriortiy(vector<CarMessage> &queue) {
-            car_message_priority_t highestPriorityFound = CAR_MESSAGE_PRIORITY_HIGHEST;
+            car_message_priority_t highestPriorityFound = CAR_MESSAGE_PRIORITY_LOWEST;
             for(CarMessage &carMessage : queue) {
                 if(carMessage.getSendPriority() < highestPriorityFound) {
                     highestPriorityFound = carMessage.getSendPriority();
@@ -172,7 +172,7 @@ class CCan : public IChannel {
                                     carMessageIterator = _outQueueTimeout.erase(carMessageIterator);
                                 } else {
                                     // If a message already got sent partly, make it not dropable
-                                    carMessageIterator->setDropable(false);
+                                    carMessageIterator->setDropable(IS_NOT_DROPABLE);
                                 }
 
                                 #ifdef CCAN_SENDING_DEBUG
@@ -215,7 +215,7 @@ class CCan : public IChannel {
                                     carMessageIterator = _outQueue.erase(carMessageIterator);
                                 } else {
                                     // If a message already got sent partly, make it not dropable
-                                    carMessageIterator->setDropable(false);
+                                    carMessageIterator->setDropable(IS_NOT_DROPABLE);
                                 }
 
                                 #ifdef CCAN_SENDING_DEBUG
