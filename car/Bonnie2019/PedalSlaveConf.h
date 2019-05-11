@@ -23,24 +23,29 @@ HardwarePedal brakePedal(PEDAL_PIN_ROTATION_ANGLE_BRAKE, COMPONENT_PEDAL_BRAKE);
 //HardwareRpmSensor rpmFrontLeft(PEDAL_PIN_RPM_SENSOR_FL, COMPONENT_RPM_FRONT_LEFT);
 //HardwareRpmSensor rpmFrontRight(PEDAL_PIN_RPM_SENSOR_FR, COMPONENT_RPM_FRONT_RIGHT);
 
+// Alive
+HardwareAlive alive(COMPONENT_ALIVE_PEDAL, LED2);
+
 class Pedal : public Carpi {
     public:
         // Called once at bootup
         void setup() {
-            wait(0.2);
-
             syncer.addComponent((ICommunication&)gasPedal, canIntern, DEVICE_MASTER);
             syncer.addComponent((ICommunication&)brakePedal, canIntern, DEVICE_MASTER);
             //syncer.addComponent((ICommunication&)rpmFrontLeft, canIntern, DEVICE_MASTER);
             //syncer.addComponent((ICommunication&)rpmFrontRight, canIntern, DEVICE_MASTER);
+            syncer.addComponent((ICommunication&)alive, canIntern, DEVICE_MASTER);
+
+            wait(0.1);
 
             // Attach the Syncer to all components
             gasPedal.attach(syncer);
             brakePedal.attach(syncer);
             //rpmFrontLeft.attach(syncer);
             //rpmFrontRight.attach(syncer);
+            alive.attach(syncer);
 
-            wait(0.1);
+            alive.setAlive(true);
         }
     
         // Called repeately after bootup

@@ -2,7 +2,7 @@
 #define MASTERCONF_H
 
 //#define MOTORCONTROLLER_OUTPUT // Output the Value sent to the MotorController over Serial
-#define FORCE_DISABLE_HV_CHECK // Disables HV-Checks (HardwareHvEnabled always returns true) !!! ONLY USE FOR DEBUGGING WITHOUT HV-ACCU INSTALLED !!!
+//#define FORCE_DISABLE_HV_CHECK // Disables HV-Checks (HardwareHvEnabled always returns true) !!! ONLY USE FOR DEBUGGING WITHOUT HV-ACCU INSTALLED !!!
 //#define SYNC_DEBUG // Enables reporting for Sync
 //#define SYNC_SENDING_DEBUG // Enables reporting while sending a message over Sync
 //#define CCAN_DEBUG // Enables CAN Channel Debug Output
@@ -30,6 +30,9 @@ SoftwareLed ledGreen(COMPONENT_LED_READY_TO_DRIVE);
 SoftwareButton buttonReset(COMPONENT_BUTTON_RESET);
 SoftwareButton buttonStart(COMPONENT_BUTTON_START);
 
+//       Alive
+SoftwareAlive dashboardAlive(COMPONENT_ALIVE_DASHBOARD);
+
 //     Pedal
 //       Pedals
 SoftwarePedal gasPedal(COMPONENT_PEDAL_GAS);
@@ -38,6 +41,9 @@ SoftwarePedal brakePedal(COMPONENT_PEDAL_BRAKE);
 //       RPM Sensors (at Pedal Box)
 //SoftwareRpmSensor rpmFrontLeft(COMPONENT_RPM_FRONT_LEFT);
 //SoftwareRpmSensor rpmFrontRight(COMPONENT_RPM_FRONT_RIGHT);
+
+//       Alive
+SoftwareAlive pedalAlive(COMPONENT_ALIVE_PEDAL);
 
 //   Hardware
 HardwareLed brakeLight(MASTER_PIN_BRAKE_LIGHT, COMPONENT_LED_BRAKE);
@@ -84,12 +90,14 @@ class Master : public Carpi {
             syncer.addComponent(ledGreen, canIntern, DEVICE_DASHBOARD);
             syncer.addComponent(buttonReset, canIntern, DEVICE_DASHBOARD);
             syncer.addComponent(buttonStart, canIntern, DEVICE_DASHBOARD);
+            syncer.addComponent(dashboardAlive, canIntern, DEVICE_DASHBOARD);
 
             // Pedal
             syncer.addComponent(gasPedal, canIntern, DEVICE_PEDAL);
             syncer.addComponent(brakePedal, canIntern, DEVICE_PEDAL);
             //syncer.addComponent((ICommunication&)rpmFrontLeft, canIntern, DEVICE_PEDAL);
             //syncer.addComponent((ICommunication&)rpmFrontRight, canIntern, DEVICE_PEDAL);
+            syncer.addComponent(pedalAlive, canIntern, DEVICE_PEDAL);
 
 
 
@@ -113,12 +121,14 @@ class Master : public Carpi {
             ledGreen.attach(syncer);
             buttonReset.attach(syncer);
             buttonStart.attach(syncer);
+            dashboardAlive.attach(syncer);
 
             // Pedal
             gasPedal.attach(syncer);
             brakePedal.attach(syncer);
             //rpmFrontLeft.attach(syncer);
             //rpmFrontRight.attach(syncer);
+            pedalAlive.attach(syncer);
 
 
             // Start the Car

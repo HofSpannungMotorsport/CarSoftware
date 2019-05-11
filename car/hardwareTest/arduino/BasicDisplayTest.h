@@ -15,13 +15,10 @@
 
 #include "SPI.h"
 #include "ILI9341_t3.h"
+#include "XPT2046_Touchscreen.h"
+#include "../../Bonnie2019/hardware/Pins_Display.h"
 
-// For the Adafruit shield, these are the default.
-#define TFT_DC  9
-#define TFT_CS 10
-
-// Use hardware SPI (on Uno, #13, #12, #11) and the above for CS/DC
-ILI9341_t3 tft = ILI9341_t3(TFT_CS, TFT_DC);
+ILI9341_t3 tft = ILI9341_t3(DISPLAY_TFT_CS, DISPLAY_TFT_DC, DISPLAY_TFT_RST, DISPLAY_TFT_MOSI, DISPLAY_TFT_SCLK, DISPLAY_TFT_MISO);
 
 unsigned long testFillScreen() {
   unsigned long start = micros();
