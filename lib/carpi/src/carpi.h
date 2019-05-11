@@ -47,17 +47,14 @@
 // Components
 //   Interface
 #include "components/interface/IComponent.h"
-#include "components/interface/IAlive.h"
 #include "components/interface/IAnalogSensor.h"
 #include "components/interface/IPump.h"
 #include "components/interface/IHvEnabled.h"
 //   Hardware
-#include "components/hardware/HardwareAlive.h"
 #include "components/hardware/HardwareAnalogSensor.h"
 #include "components/hardware/HardwarePump.h"
 #include "components/hardware/HardwareHvEnabled.h"
 //   Software
-#include "components/software/SoftwareAlive.h"
 
 
 // ---------------------------------------------------------------------
@@ -71,6 +68,7 @@
 
     // Components
     //   Interface
+    #include "components/interface/IAlive.h"
     #include "components/interface/IButton.h"
     #include "components/interface/IBuzzer.h"
     #include "components/interface/IFan.h"
@@ -79,6 +77,7 @@
     #include "components/interface/IMotorController.h"
     #include "components/interface/IRpmSensor.h"
     //   Hardware
+    #include "components/hardware/HardwareAlive.h"
     #include "components/hardware/HardwareBuzzer.h"
     #include "components/hardware/HardwarePwmBuzzer.h"
     #include "components/hardware/HardwareFan.h"
@@ -89,6 +88,7 @@
     #include "components/hardware/HardwareMotorController.h"
     #include "components/hardware/HardwareRpmSensor.h"
     //   Software
+    #include "components/software/SoftwareAlive.h"
     #include "components/software/SoftwareButton.h"
     #include "components/software/SoftwareLed.h"
     #include "components/software/SoftwarePedal.h"
