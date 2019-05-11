@@ -14,7 +14,7 @@
     }
 #endif // USE_MBED
 
-#ifdef USE_ARDUINO
+#if defined(USE_ARDUINO) || defined(USE_TEENSYDUINO)
     void setup() {
         runtime.setup();
     }
@@ -22,4 +22,4 @@
     void loop() {
         runtime.loop();
     }
-#endif // USE_ARDUINO
+#endif // USE_ARDUINO || USE_TEENSYDUINO

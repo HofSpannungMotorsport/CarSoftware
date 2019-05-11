@@ -17,19 +17,29 @@
     HardwareSerial &pcSerial = Serial;
 #endif // USE_ARDUINO
 
+#ifdef USE_TEENSYDUINO
+    // Include Framework
+    #include "Arduino.h"
+    #define pcSerial Serial
+#endif // USE_TEENSYDUINO
 
 // Include the test program here
-#include ".h"
+#include "arduino/BasicDisplayTest.h"
 
 class UnitTest {
     public:
         void setup() {
-            wait(0.1);
+            #ifdef USE_MBED
+                wait(0.1);
+            #endif
+
+            // Setup Function here, it will be called once at startup
+            BasicDisplayTestSetup();
         }
 
         void loop() {
-            // Main Function here, it will be called constantly
-            
+            // Loop Function here, it will be called constantly
+            BasicDisplayTestLoop();
         }
 };
 

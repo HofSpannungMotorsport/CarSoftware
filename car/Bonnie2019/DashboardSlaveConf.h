@@ -13,7 +13,7 @@
 Sync syncer(DEVICE_DASHBOARD);
 CCan canIntern(syncer, DASHBOARD_CAN);
 
-//LED's
+// LED's
 HardwareLed ledRed(DASHBOARD_PIN_LED_RED, COMPONENT_LED_ERROR);
 HardwareLed ledYellow(DASHBOARD_PIN_LED_YELLOW, COMPONENT_LED_ISSUE);
 HardwareLed ledGreen(DASHBOARD_PIN_LED_GREEN, COMPONENT_LED_READY_TO_DRIVE);
@@ -23,17 +23,21 @@ HardwareLed ledGreen(DASHBOARD_PIN_LED_GREEN, COMPONENT_LED_READY_TO_DRIVE);
 HardwareInterruptButton buttonReset(DASHBOARD_PIN_BUTTON_RESET, COMPONENT_BUTTON_RESET);
 HardwareInterruptButton buttonStart(DASHBOARD_PIN_BUTTON_START, COMPONENT_BUTTON_START);
 
+// Alive
+HardwareAlive alive(COMPONENT_ALIVE_DASHBOARD, LED2);
+
 class Dashboard : public Carpi {
     public:
         // Called once at bootup
         void setup() {
-            wait(0.2);
-
             syncer.addComponent((ICommunication&)ledRed, canIntern, DEVICE_MASTER);
             syncer.addComponent((ICommunication&)ledYellow, canIntern, DEVICE_MASTER);
             syncer.addComponent((ICommunication&)ledGreen, canIntern, DEVICE_MASTER);
             syncer.addComponent((ICommunication&)buttonReset, canIntern, DEVICE_MASTER);
             syncer.addComponent((ICommunication&)buttonStart, canIntern, DEVICE_MASTER);
+            syncer.addComponent((ICommunication&)alive, canIntern, DEVICE_MASTER);
+
+            wait(0.1);
 
             // Attach the Syncer to all components
             ledRed.attach(syncer);
@@ -41,6 +45,9 @@ class Dashboard : public Carpi {
             ledGreen.attach(syncer);
             buttonReset.attach(syncer);
             buttonStart.attach(syncer);
+            alive.attach(syncer);
+
+            alive.setAlive(true);
         }
 
         // Called repeately after bootup

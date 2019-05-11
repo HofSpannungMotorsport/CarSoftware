@@ -9,6 +9,8 @@ class HardwareAlive : public IAlive {
             setComponentType(COMPONENT_ALIVE);
             setComponentSubId(componentSubId);
             setObjectType(OBJECT_HARDWARE);
+            _portSet = false;
+            _alive = false;
         }
 
         HardwareAlive(id_sub_component_t componentSubId, PinName port)
@@ -26,11 +28,11 @@ class HardwareAlive : public IAlive {
             }
 
             if (_syncerAttached) {
-                if (_alive) {
-                    _sendCommand(ALIVE_MESSAGE_SEND_ALIVE, 0x1, SEND_PRIORITY_ALIVE, STD_ALIVE_MESSAGE_TIMEOUT, IS_NOT_DROPABLE);
-                } else {
-                    _sendCommand(ALIVE_MESSAGE_SEND_ALIVE, 0x0, SEND_PRIORITY_ALIVE, STD_ALIVE_MESSAGE_TIMEOUT, IS_NOT_DROPABLE);
-                }
+                _aliveTicker.detach();
+
+                _updateAlive();
+
+                _aliveTicker.attach(callback(this, &HardwareAlive::_updateAlive), STD_ALIVE_SIGNAL_SEND_RATE);
             }
         }
 
@@ -47,10 +49,16 @@ class HardwareAlive : public IAlive {
             }
         }
 
+        virtual void receive(CarMessage &carMessage) {
+            // No implementation needed
+        }
+
     private:
-        static PinName _port;
-        static bool _portSet;
-        static bool _alive;
+        PinName _port;
+        bool _portSet;
+        bool _alive;
+
+        Ticker _aliveTicker;
 
         void _setOutput(bool alive) {
             static DigitalOut port(_port);
@@ -59,6 +67,14 @@ class HardwareAlive : public IAlive {
                 port = 1;
             } else {
                 port = 0;
+            }
+        }
+
+        void _updateAlive() {
+            if (_alive) {
+                _sendCommand(ALIVE_MESSAGE_SEND_ALIVE, 0x1, SEND_PRIORITY_ALIVE, STD_ALIVE_MESSAGE_TIMEOUT, IS_NOT_DROPABLE);
+            } else {
+                _sendCommand(ALIVE_MESSAGE_SEND_ALIVE, 0x0, SEND_PRIORITY_ALIVE, STD_ALIVE_MESSAGE_TIMEOUT, IS_NOT_DROPABLE);
             }
         }
 };

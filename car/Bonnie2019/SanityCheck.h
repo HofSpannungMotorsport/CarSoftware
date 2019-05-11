@@ -57,4 +57,14 @@
     #ifdef USE_ARDUINO
         #error "More than one Framework is currently active. Check platformio.ini"
     #endif
+
+    #ifdef USE_TEENSYDUINO
+        #error "More than one Framework is currently active. Check platformio.ini"
+    #endif
+#endif
+
+#ifdef USE_ARDUINO
+    #ifdef USE_TEENSYDUINO
+        #error "More than one Framework is currently active. Check platformio.ini"
+    #endif
 #endif

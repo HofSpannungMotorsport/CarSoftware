@@ -11,7 +11,7 @@
 #include "components/interface/IHvEnabled.h"
 
 
-#define STARTUP_WAIT 1 // s wait before system gets started
+#define STARTUP_WAIT 0.3 // s wait before system gets started
 #define ERROR_REGISTER_SIZE 64 // errors, max: 255
 #define STARTUP_ANIMATION_SPEED 0.075 // s between led-changes
 #define STARTUP_ANIMATION_PLAYBACKS 2 // times the animation should be played

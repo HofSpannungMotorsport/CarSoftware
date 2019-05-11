@@ -24,6 +24,13 @@
     HardwareSerial &pcSerial = Serial;
 #endif
 
+#ifdef USE_TEENSYDUINO
+    // Include Framework
+    #include "Arduino.h"
+    #include "crossplatform/arduinoToMbed/arduinoToMbed.h"
+    #define pcSerial Serial
+#endif
+
 // ---------------------------------------------------------------------
 
 // All Platform Components
@@ -40,17 +47,14 @@
 // Components
 //   Interface
 #include "components/interface/IComponent.h"
-#include "components/interface/IAlive.h"
 #include "components/interface/IAnalogSensor.h"
 #include "components/interface/IPump.h"
 #include "components/interface/IHvEnabled.h"
 //   Hardware
-#include "components/hardware/HardwareAlive.h"
 #include "components/hardware/HardwareAnalogSensor.h"
 #include "components/hardware/HardwarePump.h"
 #include "components/hardware/HardwareHvEnabled.h"
 //   Software
-#include "components/software/SoftwareAlive.h"
 
 
 // ---------------------------------------------------------------------
@@ -64,6 +68,7 @@
 
     // Components
     //   Interface
+    #include "components/interface/IAlive.h"
     #include "components/interface/IButton.h"
     #include "components/interface/IBuzzer.h"
     #include "components/interface/IFan.h"
@@ -72,6 +77,7 @@
     #include "components/interface/IMotorController.h"
     #include "components/interface/IRpmSensor.h"
     //   Hardware
+    #include "components/hardware/HardwareAlive.h"
     #include "components/hardware/HardwareBuzzer.h"
     #include "components/hardware/HardwarePwmBuzzer.h"
     #include "components/hardware/HardwareFan.h"
@@ -82,6 +88,7 @@
     #include "components/hardware/HardwareMotorController.h"
     #include "components/hardware/HardwareRpmSensor.h"
     //   Software
+    #include "components/software/SoftwareAlive.h"
     #include "components/software/SoftwareButton.h"
     #include "components/software/SoftwareLed.h"
     #include "components/software/SoftwarePedal.h"
@@ -105,6 +112,10 @@
 
 #endif
 
+#ifdef USE_TEENSYDUINO
+
+#endif
+
 // Include some Information about carpi (cross-platform)
 #include <string>
 class Carpi {
@@ -115,7 +126,7 @@ class Carpi {
         }
 
         void printInfo() {
-            #ifdef USE_ARDUINO
+            #if defined(USE_ARDUINO) || defined(USE_TEENSYDUINO)
                 pcSerial.print("Carpi Version: "); pcSerial.println(_version.c_str());
                 pcSerial.print("Environment: "); pcSerial.println(_environment.c_str());
             #endif
