@@ -3,6 +3,8 @@
 
 #include "carpi.h"
 
+#include "hardware/Pins_Display.h"
+
 class Display : public Carpi{
     public:
         void setup() {
