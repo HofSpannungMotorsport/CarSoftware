@@ -1,14 +1,10 @@
 #ifndef SD_CARD_TEST_H
 #define SD_CARD_TEST_H
 
-#include "SD_Lib/SDFileSystem.h"
+#include "SDFileSystem.h"
+#include "../../Bonnie2019/hardware/Pins_Master.h"
 
-#define SPI_CS   D9
-#define SPI_SCK  D13
-#define SPI_MOSI D11
-#define SPI_MISO D12
-
-SDFileSystem sd(SPI_MOSI, SPI_MISO, SPI_SCK, SPI_CS, "sd");
+SDFileSystem sd(MASTER_PIN_SPI_SD_MOSI, MASTER_PIN_SPI_SD_MISO, MASTER_PIN_SPI_SD_SCK, MASTER_PIN_SPI_SD_CS, "sd");
 
 void SDCardTest() {
     printf("Hello World!\n");   
