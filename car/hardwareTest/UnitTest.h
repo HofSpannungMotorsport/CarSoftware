@@ -24,7 +24,7 @@
 #endif // USE_TEENSYDUINO
 
 // Include the test program here
-#include "arduino/BasicDisplayTest.h"
+#include ""
 
 class UnitTest {
     public:
@@ -34,12 +34,12 @@ class UnitTest {
             #endif
 
             // Setup Function here, it will be called once at startup
-            BasicDisplayTestSetup();
+            
         }
 
         void loop() {
             // Loop Function here, it will be called constantly
-            BasicDisplayTestLoop();
+            
         }
 };
 
