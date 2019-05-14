@@ -15,7 +15,6 @@
 
 #include "SPI.h"
 #include "ILI9341_t3.h"
-#include "XPT2046_Touchscreen.h"
 #include "../../Bonnie2019/hardware/Pins_Display.h"
 
 ILI9341_t3 tft = ILI9341_t3(DISPLAY_TFT_CS, DISPLAY_TFT_DC, DISPLAY_TFT_RST, DISPLAY_TFT_MOSI, DISPLAY_TFT_SCLK, DISPLAY_TFT_MISO);
