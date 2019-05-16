@@ -52,7 +52,7 @@ class Dashboard : public Carpi {
 
         // Called repeately after bootup
         void loop() {
-            wait(0.0001);
+            wait(LOOP_WAIT_TIME);
         }
 };
 

@@ -76,6 +76,7 @@
     #include "components/interface/IPedal.h"
     #include "components/interface/IMotorController.h"
     #include "components/interface/IRpmSensor.h"
+    #include "components/interface/ISDCard.h"
     //   Hardware
     #include "components/hardware/HardwareAlive.h"
     #include "components/hardware/HardwareBuzzer.h"
@@ -87,6 +88,7 @@
     #include "components/hardware/HardwarePedal.h"
     #include "components/hardware/HardwareMotorController.h"
     #include "components/hardware/HardwareRpmSensor.h"
+    #include "components/hardware/HardwareSDCard.h"
     //   Software
     #include "components/software/SoftwareAlive.h"
     #include "components/software/SoftwareButton.h"
@@ -106,6 +108,7 @@
     #include "runable/programs/PBrakeLight.h"
     #include "runable/programs/PCooling.h"
     #include "runable/programs/PMotorController.h"
+    #include "runable/programs/PLogger.h"
 #endif
 
 #ifdef USE_ARDUINO

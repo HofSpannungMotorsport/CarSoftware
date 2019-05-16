@@ -13,6 +13,7 @@
 #define LOW_DEMAND_SERVICE_REFRESH_RATE 3 // Hz
 
 #include "hardware/Pins_Master.h"
+#include "SDLog.h"
 
 // Communication
 Sync syncer(DEVICE_MASTER);
@@ -54,6 +55,7 @@ HardwareFan coolingFan(MASTER_PIN_FAN, COMPONENT_COOLING_FAN);
 HardwarePump coolingPump(MASTER_PIN_PUMP_PWM, MASTER_PIN_PUMP_ENABLE, COMPONENT_COOLING_PUMP);
 HardwareBuzzer buzzer(MASTER_PIN_BUZZER, COMPONENT_BUZZER_STARTUP);
 HardwareHvEnabled hvEnabled(MASTER_PIN_HV_ENABLED, COMPONENT_SYSTEM_HV_ENABLED);
+HardwareSDCard hardwareSD(MASTER_PIN_SPI_SD_MOSI, MASTER_PIN_SPI_SD_MISO, MASTER_PIN_SPI_SD_SCK, MASTER_PIN_SPI_SD_CS);
 
 // Services
 SCar carService((IButton*)&buttonReset, (IButton*)&buttonStart,
@@ -61,7 +63,8 @@ SCar carService((IButton*)&buttonReset, (IButton*)&buttonStart,
                 (IPedal*)&gasPedal, (IPedal*)&brakePedal,
                 (IBuzzer*)&buzzer,
                 (IMotorController*)&motorController,
-                (IHvEnabled*)&hvEnabled);
+                (IHvEnabled*)&hvEnabled,
+                (ISDCard*)&hardwareSD);
 
 PMotorController motorControllerService(carService,
                                         (IMotorController*)&motorController,
@@ -78,6 +81,8 @@ PCooling coolingService(carService,
                         (IFan*)&coolingFan, (IPump*)&coolingPump,
                         (IMotorController*)&motorController,
                         (IHvEnabled*)&hvEnabled);
+
+PLogger sdLogger(carService, hardwareSD);
 
 class Master : public Carpi {
     public:
@@ -110,9 +115,19 @@ class Master : public Carpi {
             lowDemandServices.addRunable((IRunable*)&speedService);
             lowDemandServices.addRunable((IRunable*)&coolingService);
 
-            // Add all Services and ServiceLists to our ServiceScheduler
-            services.addRunable((IRunable*)&highDemandServices, HIGH_DEMAND_SERVICE_REFRESH_RATE);
-            services.addRunable((IRunable*)&lowDemandServices, LOW_DEMAND_SERVICE_REFRESH_RATE);
+            // Add all Services and ServiceLists to the ServiceScheduler
+            serviceScheduler.addRunable((IRunable*)&highDemandServices, HIGH_DEMAND_SERVICE_REFRESH_RATE);
+            serviceScheduler.addRunable((IRunable*)&lowDemandServices, LOW_DEMAND_SERVICE_REFRESH_RATE);
+
+            // And then in the final service list
+            services.addRunable((IRunable*)&serviceScheduler);
+            services.addRunable((IRunable*)&sdLogger);
+
+            // After adding all, optimise them for ram
+            highDemandServices.finalize();
+            lowDemandServices.finalize();
+            serviceScheduler.finalize();
+            services.finalize();
 
             // Attach the Syncer to all components
             // Dashboard
@@ -130,6 +145,24 @@ class Master : public Carpi {
             //rpmFrontRight.attach(syncer);
             pedalAlive.attach(syncer);
 
+            
+            // Attach specific funktions to the SD Logger
+            sdLogger.addComponentToLog(brakePedal, brakePedal.getValue, SD_LOG_ID_PEDAL_POSITION, SD_LOG_REFRESH_RATE_PEDAL_POSITION);
+            sdLogger.addComponentToLog(gasPedal, gasPedal.getValue, SD_LOG_ID_PEDAL_POSITION, SD_LOG_REFRESH_RATE_PEDAL_POSITION);
+
+            sdLogger.addComponentToLog(motorController, motorController.getSpeed, SD_LOG_ID_MOTOR_CONTROLLER_SPEED, SD_LOG_REFRESH_RATE_MOTOR_CONTROLLER_SPEED);
+            sdLogger.addComponentToLog(motorController, motorController.getCurrent, SD_LOG_ID_MOTOR_CONTROLLER_CURRENT, SD_LOG_REFRESH_RATE_MOTOR_CONTROLLER_CURRENT);
+            sdLogger.addComponentToLog(motorController, motorController.getMotorTemp, SD_LOG_ID_MOTOR_CONTROLLER_MOTOR_TEMP, SD_LOG_REFRESH_RATE_MOTOR_CONTROLLER_MOTOR_TEMP);
+            sdLogger.addComponentToLog(motorController, motorController.getServoTemp, SD_LOG_ID_MOTOR_CONTROLLER_SERVO_TEMP, SD_LOG_REFRESH_RATE_MOTOR_CONTROLLER_SERVO_TEMP);
+            sdLogger.addComponentToLog(motorController, motorController.getAirTemp, SD_LOG_ID_MOTOR_CONTROLLER_AIR_TEMP, SD_LOG_REFRESH_RATE_MOTOR_CONTROLLER_AIR_TEMP);
+
+            //sdLogger.addComponentToLog(rpmFrontLeft, rpmFrontLeft.getFrequency, SD_LOG_ID_RPM, SD_LOG_REFRESH_RATE_RPM);
+            //sdLogger.addComponentToLog(rpmFrontRight, rpmFrontRight.getFrequency, SD_LOG_ID_RPM, SD_LOG_REFRESH_RATE_RPM);
+            //sdLogger.addComponentToLog(rpmRearLeft, rpmRearLeft.getFrequency, SD_LOG_ID_RPM, SD_LOG_REFRESH_RATE_RPM);
+            //sdLogger.addComponentToLog(rpmRearRight, rpmRearRight.getFrequency, SD_LOG_ID_RPM, SD_LOG_REFRESH_RATE_RPM);
+
+            sdLogger.finalize();
+
 
             // Start the Car
             carService.startUp();
@@ -138,13 +171,14 @@ class Master : public Carpi {
         // Called repeately after bootup
         void loop() {
             services.run();
-            wait(0.001);
+            wait(LOOP_WAIT_TIME);
         }
     
     protected:
         RunableList highDemandServices;
         RunableList lowDemandServices;
-        RunableScheduler services;
+        RunableScheduler serviceScheduler;
+        RunableList services;
 };
 
 Master runtime;

@@ -15,9 +15,11 @@ void SDCardTest() {
         FILE *fp = fopen("/sd/mydir/sdtest.txt", "w");
         if(fp == NULL) {
             error("Could not open file for write\n");
+        } else {
+            fprintf(fp, "Hello fun SD Card World!\n");
+            fprintf(fp, "Hello fun SD Card World!\n");
         }
-        fprintf(fp, "Hello fun SD Card World!\n");
-        fprintf(fp, "Hello fun SD Card World!\n");
+        
         fclose(fp);
     }
 
@@ -25,10 +27,12 @@ void SDCardTest() {
         FILE *fp = fopen("/sd/mydir/sdtest.txt", "a");
         if(fp == NULL) {
             error("Could not open file for write\n");
+        } else {
+            fprintf(fp, "Hello fun SD Card World!\n");
+            fprintf(fp, "Hello fun SD Card World!\n");
+            fprintf(fp, "Hello fun SD Card World!\n");
         }
-        fprintf(fp, "Hello fun SD Card World!\n");
-        fprintf(fp, "Hello fun SD Card World!\n");
-        fprintf(fp, "Hello fun SD Card World!\n");
+
         fclose(fp);
     }
  

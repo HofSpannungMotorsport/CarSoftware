@@ -9,6 +9,7 @@
 #include "components/interface/IBuzzer.h"
 #include "components/interface/IMotorController.h"
 #include "components/interface/IHvEnabled.h"
+#include "components/interface/ISDCard.h"
 
 
 #define STARTUP_WAIT 0.3 // s wait before system gets started
@@ -54,7 +55,8 @@ class SCar : public IService {
              IPedal* gasPedal, IPedal* brakePedal,
              IBuzzer* buzzer,
              IMotorController* motorController,
-             IHvEnabled* hvEnabled) {
+             IHvEnabled* hvEnabled,
+             ISDCard* sdCard) {
             _button.reset = buttonReset;
             _button.start = buttonStart;
 
@@ -70,6 +72,8 @@ class SCar : public IService {
             _motorController = motorController;
 
             _hvEnabled = hvEnabled;
+
+            _sdCard = sdCard;
         }
 
         virtual void run() {
@@ -203,6 +207,8 @@ class SCar : public IService {
         IMotorController* _motorController;
 
         IHvEnabled* _hvEnabled;
+
+        ISDCard* _sdCard;
 
         id_component_t _calculateComponentId(IComponent* component) {
             id_component_t id = component->getComponentId();
