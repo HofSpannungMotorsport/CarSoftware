@@ -35,6 +35,7 @@ class Pedal : public Carpi {
             //syncer.addComponent((ICommunication&)rpmFrontLeft, canIntern, DEVICE_MASTER);
             //syncer.addComponent((ICommunication&)rpmFrontRight, canIntern, DEVICE_MASTER);
             syncer.addComponent((ICommunication&)alive, canIntern, DEVICE_MASTER);
+            syncer.finalize();
 
             wait(0.1);
 
@@ -50,6 +51,7 @@ class Pedal : public Carpi {
     
         // Called repeately after bootup
         void loop() {
+            syncer.run();
             wait(LOOP_WAIT_TIME);
         }
 };

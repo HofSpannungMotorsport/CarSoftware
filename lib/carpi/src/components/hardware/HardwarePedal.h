@@ -203,13 +203,18 @@ class HardwarePedal : public IPedal {
             if (_syncerAttached) {
                 uint16_t pedalValue = ((float)getValue() * 65535);
 
-                _sendCommand(PEDAL_MESSAGE_COMMAND_SET_VALUE, pedalValue & 0xFF, (pedalValue >> 8) & 0xFF, SEND_PRIORITY_PEDAL, STD_PEDAL_MESSAGE_TIMEOUT, IS_DROPABLE);
+                _sendCommand(PEDAL_MESSAGE_COMMAND_SET_VALUE, pedalValue & 0xFF, (pedalValue >> 8) & 0xFF, SEND_PRIORITY_PEDAL, IS_DROPABLE);
             }
         }
 
+        status_t _lastSentStatus = 0;
         void _updateStatus() {
             if (_syncerAttached) {
-                _sendCommand(PEDAL_MESSAGE_COMMAND_SET_STATUS, getStatus(), SEND_PRIORITY_PEDAL, STD_PEDAL_MESSAGE_TIMEOUT, IS_NOT_DROPABLE);
+                status_t currentStatus = getStatus();
+                if(_lastSentStatus != currentStatus) {
+                    _lastSentStatus = currentStatus;
+                    _sendCommand(PEDAL_MESSAGE_COMMAND_SET_STATUS, currentStatus, SEND_PRIORITY_PEDAL, IS_NOT_DROPABLE);
+                }
             }
         }
 

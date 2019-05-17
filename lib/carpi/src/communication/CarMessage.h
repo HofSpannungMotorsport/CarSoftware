@@ -127,52 +127,6 @@ class CarMessage {
         car_message_dropable_t getDropable() {
             return _dropable;
         }
-
-        #ifdef USE_MBED
-
-            /*
-                Set the Timeout for a message, e.g. define the max. time a message can sit in the queue
-            */
-            void setTimeout(float timeout) {
-                _timeout = timeout;
-            }
-
-            /*
-                Get the Timeout for a message, e.g. get the max. time a message can sit in the queue
-            */
-            float getTimeout() {
-                return _timeout;
-            }
-
-            /*
-                Start the Timer from when on the message was sent. Should be called shortly before putting the message into the queue.
-            */
-            void startSentTimer() {
-                _sentTimer = std::shared_ptr<Timer>(new Timer());
-                _sentTimerSet = true;
-                _sentTimer->reset();
-                _sentTimer->start();
-            }
-
-            /*
-                Get the time passed since the message has been sent
-            */
-            float getTimeSinceSent() {
-                if (!_sentTimerSet) return 0;
-
-                return _sentTimer->read();
-            }
-
-            /*
-                Get the information (true/false) if the message got timed out
-            */
-            bool timeout() {
-                if (!_sentTimerSet) return false;
-
-                return (*_sentTimer >= _timeout);
-            }
-
-        #endif // USE_MBED
     
     protected:
         id_device_t _senderId = DEVICE_NOT_SET; // only 5 bits are useable
@@ -182,7 +136,6 @@ class CarMessage {
 
         car_message_priority_t _sendPriority = CAR_MESSAGE_PRIORITY_LOWEST;
 
-
         /*
             If a message is send often and repeadly, it could let overflow the outgoing bessage queue.
             These messages are not so importent and can be dropped because a new message will come really soon,
@@ -191,13 +144,6 @@ class CarMessage {
             A Configuration-Message is sent mostly only once and should not be dropped at all!
         */
         car_message_dropable_t _dropable = IS_NOT_DROPABLE;
-
-        #ifdef USE_MBED
-            float _timeout;
-
-            std::shared_ptr<Timer> _sentTimer;
-            bool _sentTimerSet = false;
-        #endif // USE_MBED
 };
 
 #endif

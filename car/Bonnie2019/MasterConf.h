@@ -89,7 +89,7 @@ class Master : public Carpi {
     public:
         // Called once at bootup
         void setup() {
-            // Add all Software Components to the CAN Service
+            // Add all Software Components to the Syncer
             // Dashboard
             syncer.addComponent(ledRed, canIntern, DEVICE_DASHBOARD);
             syncer.addComponent(ledYellow, canIntern, DEVICE_DASHBOARD);
@@ -104,6 +104,8 @@ class Master : public Carpi {
             //syncer.addComponent((ICommunication&)rpmFrontLeft, canIntern, DEVICE_PEDAL);
             //syncer.addComponent((ICommunication&)rpmFrontRight, canIntern, DEVICE_PEDAL);
             syncer.addComponent(pedalAlive, canIntern, DEVICE_PEDAL);
+
+            syncer.finalize();
 
 
 
@@ -123,6 +125,7 @@ class Master : public Carpi {
             // And then in the final service list
             services.addRunable((IRunable*)&serviceScheduler);
             services.addRunable((IRunable*)&sdLogger);
+            services.addRunable((IRunable*)&syncer);
 
             // After adding all, optimise them for ram
             highDemandServices.finalize();

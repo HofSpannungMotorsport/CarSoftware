@@ -36,6 +36,7 @@ class Dashboard : public Carpi {
             syncer.addComponent((ICommunication&)buttonReset, canIntern, DEVICE_MASTER);
             syncer.addComponent((ICommunication&)buttonStart, canIntern, DEVICE_MASTER);
             syncer.addComponent((ICommunication&)alive, canIntern, DEVICE_MASTER);
+            syncer.finalize();
 
             wait(0.1);
 
@@ -52,6 +53,7 @@ class Dashboard : public Carpi {
 
         // Called repeately after bootup
         void loop() {
+            syncer.run();
             wait(LOOP_WAIT_TIME);
         }
 };

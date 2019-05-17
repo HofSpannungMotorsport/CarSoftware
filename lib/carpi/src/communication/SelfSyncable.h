@@ -34,45 +34,40 @@ class SelfSyncable : public ICommunication {
             subMessage.data[4] = value4;
         }
 
-        virtual void _sendCommand(uint8_t command, uint8_t value, uint8_t priority, float timeout, car_message_dropable_t dropable) {
+        virtual void _sendCommand(uint8_t command, uint8_t value, uint8_t priority, car_message_dropable_t dropable) {
             CarMessage carMessage;
 
             car_sub_message_t subMessage;
             _getSubMessageCommand(subMessage, command, value);
             carMessage.addSubMessage(subMessage);
 
-            _send(carMessage, priority, timeout, dropable);
+            _send(carMessage, priority, dropable);
         }
 
-        virtual void _sendCommand(uint8_t command, uint8_t value, uint8_t value2, uint8_t priority, float timeout, car_message_dropable_t dropable) {
+        virtual void _sendCommand(uint8_t command, uint8_t value, uint8_t value2, uint8_t priority, car_message_dropable_t dropable) {
             CarMessage carMessage;
 
             car_sub_message_t subMessage;
             _getSubMessageCommand(subMessage, command, value, value2);
             carMessage.addSubMessage(subMessage);
 
-            _send(carMessage, priority, timeout, dropable);
+            _send(carMessage, priority, dropable);
         }
 
-        virtual void _sendCommand(uint8_t command, uint8_t value, uint8_t value2, uint8_t value3, uint8_t value4, uint8_t priority, float timeout, car_message_dropable_t dropable) {
+        virtual void _sendCommand(uint8_t command, uint8_t value, uint8_t value2, uint8_t value3, uint8_t value4, uint8_t priority, car_message_dropable_t dropable) {
             CarMessage carMessage;
 
             car_sub_message_t subMessage;
             _getSubMessageCommand(subMessage, command, value, value2, value3, value4);
             carMessage.addSubMessage(subMessage);
 
-            _send(carMessage, priority, timeout, dropable);
+            _send(carMessage, priority, dropable);
         }
 
-        virtual void _send(CarMessage &carMessage, uint8_t priority, float timeout, car_message_dropable_t dropable) {
+        virtual void _send(CarMessage &carMessage, uint8_t priority, car_message_dropable_t dropable) {
             carMessage.setSendPriority(priority);
             carMessage.setComponentId(getComponentId());
             carMessage.setDropable(dropable);
-
-            #ifdef USE_MBED
-                carMessage.setTimeout(timeout);
-                carMessage.startSentTimer();
-            #endif // USE_MBED
 
             if (_syncerAttached)
                 _syncer->send(carMessage);

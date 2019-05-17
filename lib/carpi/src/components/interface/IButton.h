@@ -3,8 +3,6 @@
 
 #include "communication/SelfSyncable.h"
 
-#define BUTTON_MESSAGE_TIMEOUT 0.1 // s
-
 enum button_message_command_t : uint8_t {
     BUTTON_MESSAGE_COMMAND_ADD_STATE = 0x0
 };

@@ -14,7 +14,7 @@ class SoftwareLed : public ILed {
 
         virtual void setState(led_state_t state) {
             if (_syncerAttached)
-                _sendCommand(LED_MESSAGE_COMMAND_SET_STATE, state, SEND_PRIORITY_LED, STD_LED_MESSAGE_TIMEOUT, IS_NOT_DROPABLE);
+                _sendCommand(LED_MESSAGE_COMMAND_SET_STATE, state, SEND_PRIORITY_LED, IS_NOT_DROPABLE);
         }
 
         virtual void setBrightness(led_brightness_t brightness) {
@@ -22,12 +22,12 @@ class SoftwareLed : public ILed {
             else if (brightness < 0.0) brightness = 0.0;
 
             if (_syncerAttached)
-                _sendCommand(LED_MESSAGE_COMMAND_SET_BRIGHTNESS, ((led_brightness_t)brightness * 255.0), SEND_PRIORITY_LED, STD_LED_MESSAGE_TIMEOUT, IS_NOT_DROPABLE);
+                _sendCommand(LED_MESSAGE_COMMAND_SET_BRIGHTNESS, ((led_brightness_t)brightness * 255.0), SEND_PRIORITY_LED, IS_NOT_DROPABLE);
         }
 
         virtual void setBlinking(led_blinking_t blinking) {
             if (_syncerAttached)
-                _sendCommand(LED_MESSAGE_COMMAND_SET_BLINKING, blinking, SEND_PRIORITY_LED, STD_LED_MESSAGE_TIMEOUT, IS_NOT_DROPABLE);
+                _sendCommand(LED_MESSAGE_COMMAND_SET_BLINKING, blinking, SEND_PRIORITY_LED, IS_NOT_DROPABLE);
         }
 
         virtual void receive(CarMessage &carMessage) {

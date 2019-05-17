@@ -3,7 +3,6 @@
 
 #include "communication/SelfSyncable.h"
 
-#define STD_ALIVE_MESSAGE_TIMEOUT 0.01 // s
 #define STD_ALIVE_SIGNAL_REFRESH_RATE 0.05 // s max allowed time between two alive signals
 #define STD_ALIVE_SIGNAL_SEND_RATE STD_ALIVE_SIGNAL_REFRESH_RATE/2 // s beetween two alive signals
 

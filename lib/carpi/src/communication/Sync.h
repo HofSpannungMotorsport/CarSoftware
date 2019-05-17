@@ -11,10 +11,11 @@ using namespace std;
 #include "IComponent.h"
 #include "IChannel.h"
 #include "components/interface/ICommunication.h"
+#include "runable/IRunable.h"
 
 //#define SYNC_DEBUG // for debugging
 
-class Sync {
+class Sync : public IRunable {
     public:
         Sync(id_device_t senderId) {
             _thisId = senderId;
@@ -42,6 +43,8 @@ class Sync {
                 pcSerial.printf("[Sync]@addComponent: Component with ID 0x%x successfully added\n", component.getComponentId());
             #endif
 
+            _addChannel(channel);
+
             return true;
         }
 
@@ -65,6 +68,9 @@ class Sync {
             #ifdef SYNC_DEBUG
                 pcSerial.printf("[Sync]@addBridge: Component with ID 0x%x successfully added to Bridge\n", componentId);
             #endif
+
+            _addChannel(channelDevice1);
+            _addChannel(channelDevice2);
 
             return true;
         }
@@ -127,7 +133,7 @@ class Sync {
             }
         }
 
-        void send(CarMessage &carMessage) {
+        virtual void send(CarMessage &carMessage) {
             #ifdef SYNC_SENDING_DEBUG
                 pcSerial.printf("[Sync]@send: Try to send Message for component 0x%x\n", carMessage.getComponentId());
             #endif
@@ -145,6 +151,18 @@ class Sync {
                     break;
                 }
             }
+        }
+
+        virtual void run() {
+            for(Channel &channel : channels) {
+                channel.channel->run();
+            }
+        }
+
+        void finalize() {
+            router.shrink_to_fit();
+            bridger.shrink_to_fit();
+            channels.shrink_to_fit();
         }
 
     private:
@@ -174,6 +192,13 @@ class Sync {
                 id_device_t deviceId2;
         };
 
+        class Channel {
+            public:
+                Channel(IChannel &_channel) : channel(&_channel) {}
+
+                IChannel *channel;
+        };
+
         // Using Vector, but why? Its faster to iterate over a whole vector than using a slow map
 
         // The Vector which will store all added components
@@ -181,6 +206,9 @@ class Sync {
 
         // The Vector which will store all devices that are bridged throu the current device
         vector<Bridge> bridger;
+
+        // The Vector which will save all Channels only once for the run() method
+        vector<Channel> channels;
 
         bool _checkComponentExist(id_component_t componentId) {
             for(Route &route : router) {
@@ -208,6 +236,23 @@ class Sync {
 
         void _send(CarMessage &carMessage, IChannel *channel) {
             channel->send(carMessage);
+        }
+
+        bool _checkChannelExist(IChannel &channel) {
+            IChannel *channelToCheck = &channel;
+            for(Channel &channel : channels) {
+                if (channel.channel == channelToCheck) return true;
+            }
+
+            return false;
+        }
+
+        void _addChannel(IChannel &channel) {
+            // At first, check if the Channel got regisered before
+            if (_checkChannelExist(channel)) return;
+
+            // If the channel did not got added before, add it now
+            channels.emplace_back(channel);
         }
 };
 
