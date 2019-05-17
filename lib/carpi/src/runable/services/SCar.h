@@ -155,6 +155,8 @@ class SCar : public IService {
             _resetLeds();
             _led.red->setState(LED_ON);
 
+            wait(0.1);
+
             // [QF]
             while(!(_hvEnabled->read())) {
                 wait(0.1);

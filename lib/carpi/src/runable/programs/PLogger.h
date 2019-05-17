@@ -1,168 +1,117 @@
-#ifndef LOGGER_H
-#define LOGGER_H
+#ifndef P_LOGGER_H
+#define P_LOGGER_H
 
-#include <vector>
-#include <memory>
 #include <string>
+#include <vector>
 using namespace std;
 
 #include "IProgram.h"
 #include "../services/SCar.h"
-#include "components/interface/ISDCard.h"
 #include "components/interface/IComponent.h"
+#include "components/interface/ISDCard.h"
 
-#define P_LOGGER_VERSION "Logger_Version_V0.0.1"
 #define STD_LOGGER_REFRESH_RATE 1
-
-enum p_logger_sd_log_id_t : sd_log_id_t {
-    P_LOGGER_SD_LOG_ID_BEGIN = 0x1,
-    P_LOGGER_SD_LOG_ID_VERSION = 0x2
-};
-
-enum log_component_type_t {
-    UINT8_T = 0x1,
-    UINT16_T,
-    UINT32_T,
-    FLOAT,
-    INT16_T
-};
+#define STD_FILE_BEGIN_MESSAGE "Begin_Logging"
 
 class PLogger : public IProgram {
     public:
         PLogger(SCar &carService, ISDCard &sdCard)
-        : _carService(carService), _sdCard(sdCard) {
-            string beginMessage = "Begin_Logging";
-            string loggerVersion = P_LOGGER_VERSION;
-            _sdCard.writeCustom(_sdCard, P_LOGGER_SD_LOG_ID_BEGIN, beginMessage);
-            _sdCard.writeCustom(_sdCard, P_LOGGER_SD_LOG_ID_VERSION, loggerVersion);
+        : _sdCard(sdCard), _carService(carService) {
+            string beginMessage = STD_FILE_BEGIN_MESSAGE;
+            _sdCard.write(_sdCard, SD_LOG_ID_BEGIN_FILE, beginMessage);
+
+            string versionMessage = CARPI_VERSION;
+            _sdCard.write(_sdCard, SD_LOG_ID_CARPI_VERSION, versionMessage);
         }
 
         virtual void run() {
-            if (_carService.getState() != READY_TO_DRIVE) return;
-
-            for (LogComponent &logComponent : _logComponents) {
-                if (logComponent.running) {
-                    if (logComponent.lastRun->read() > (1.0 / logComponent.refreshRate)) {
-                        logComponent.lastRun->reset();
-                        logComponent.send(_sdCard);
+            // At first the Values
+            for (LoggingValue &loggingValue : _loggingValues) {
+                if (loggingValue.logged) {
+                    if (loggingValue.lastRun->read() > (1.0 / loggingValue.refreshRate)) {
+                        loggingValue.lastRun->reset();
+                        loggingValue.send(_sdCard);
                     }
                 } else {
-                    logComponent.send(_sdCard);
-                    logComponent.lastRun->reset();
-                    logComponent.lastRun->start();
-                    logComponent.running = true;
+                    loggingValue.send(_sdCard);
+                    loggingValue.lastRun->reset();
+                    loggingValue.lastRun->start();
+                    loggingValue.logged = true;
+                }
+            }
+
+            // Then the complete Components
+            for (LoggingComponent &loggingComponent : _loggingComponents) {
+                if (loggingComponent.logged) {
+                    if (loggingComponent.lastRun->read() > (1.0 / loggingComponent.refreshRate)) {
+                        loggingComponent.lastRun->reset();
+                        loggingComponent.send(_sdCard);
+                    }
+                } else {
+                    loggingComponent.send(_sdCard);
+                    loggingComponent.lastRun->reset();
+                    loggingComponent.lastRun->start();
+                    loggingComponent.logged = true;
                 }
             }
         }
 
-        void addComponentToLog(IComponent &component, uint8_t (*logFunction)(), sd_log_id_t logId, float refreshRate = STD_LOGGER_REFRESH_RATE) {
-            _logComponents.emplace_back(component, logFunction, logId, refreshRate);
+        void addLogableValue(IComponent &logable, sd_log_id_t logId, float refreshRate = STD_LOGGER_REFRESH_RATE) {
+            _loggingValues.emplace_back(logable, logId, refreshRate);
         }
 
-        void addComponentToLog(IComponent &component, uint16_t (*logFunction)(), sd_log_id_t logId, float refreshRate = STD_LOGGER_REFRESH_RATE) {
-            _logComponents.emplace_back(component, logFunction, logId, refreshRate);
-        }
-
-        void addComponentToLog(IComponent &component, uint32_t (*logFunction)(), sd_log_id_t logId, float refreshRate = STD_LOGGER_REFRESH_RATE) {
-            _logComponents.emplace_back(component, logFunction, logId, refreshRate);
-        }
-
-        void addComponentToLog(IComponent &component, float (*logFunction)(), sd_log_id_t logId, float refreshRate = STD_LOGGER_REFRESH_RATE) {
-            _logComponents.emplace_back(component, logFunction, logId, refreshRate);
-        }
-
-        void addComponentToLog(IComponent &component, int16_t (*logFunction)(), sd_log_id_t logId, float refreshRate = STD_LOGGER_REFRESH_RATE) {
-            _logComponents.emplace_back(component, logFunction, logId, refreshRate);
+        void addLogableComponent(IComponent &logable, float refreshRate = STD_LOGGER_REFRESH_RATE) {
+            _loggingComponents.emplace_back(logable, refreshRate);
         }
 
         void finalize() {
-            _logComponents.shrink_to_fit();
+            _loggingValues.shrink_to_fit();
+            _loggingComponents.shrink_to_fit();
         }
     
     protected:
-        class LogComponent {
+        ISDCard &_sdCard;
+        SCar &_carService;
+
+        class LoggingComponent {
             public:
-                LogComponent(IComponent &_component, uint8_t (*logFunction)(), sd_log_id_t _logId, float _refreshRate) {
-                    logFunction8 = logFunction;
-                    _initRest(_component, UINT8_T, _logId, _refreshRate);
+                LoggingComponent(IComponent &_logable, float _refreshRate)
+                : logable(&_logable), refreshRate(_refreshRate) {
+                    lastRun = std::shared_ptr<Timer>(new Timer());
                 }
 
-                LogComponent(IComponent &_component, uint16_t (*logFunction)(), sd_log_id_t _logId, float _refreshRate) {
-                    logFunction16 = logFunction;
-                    _initRest(_component, UINT16_T, _logId, _refreshRate);
-                }
-
-                LogComponent(IComponent &_component, uint32_t (*logFunction)(), sd_log_id_t _logId, float _refreshRate) {
-                    logFunction32 = logFunction;
-                    _initRest(_component, UINT32_T, _logId, _refreshRate);
-                }
-
-                LogComponent(IComponent &_component, float (*logFunction)(), sd_log_id_t _logId, float _refreshRate) {
-                    logFunctionF = logFunction;
-                    _initRest(_component, FLOAT, _logId, _refreshRate);
-                }
-                LogComponent(IComponent &_component, int16_t (*logFunction)(), sd_log_id_t _logId, float _refreshRate) {
-                    logFunctionS16 = logFunction;
-                    _initRest(_component, INT16_T, _logId, _refreshRate);
-                }
-
-                void send(ISDCard &sdCard) {
-                    switch(type) {
-                        case UINT8_T:
-                            sdCard.writeValue(*component, logId, logFunction8());
-                            break;
-                        
-                        case UINT16_T:
-                            sdCard.writeValue(*component, logId, logFunction16());
-                            break;
-                        
-                        case UINT32_T:
-                            sdCard.writeValue(*component, logId, logFunction32());
-                            break;
-                        
-                        case FLOAT:
-                            sdCard.writeValue(*component, logId, logFunctionF());
-                            break;
-
-                        case INT16_T:
-                            sdCard.writeValue(*component, logId, logFunctionS16());
-                            break;
+                virtual void send(ISDCard &sdCard) {
+                    for (sd_log_id_t i = 0; i < logable->getLogValueCount(); i++) {
+                        string logValue = "";
+                        logable->getLogValue(logValue, i);
+                        sdCard.write(*logable, i, logValue);
                     }
                 }
 
-                IComponent *component;
+                IComponent *logable;
 
-                log_component_type_t type;
-                uint8_t (*logFunction8)();
-                uint16_t (*logFunction16)();
-                uint32_t (*logFunction32)();
-                float (*logFunctionF)();
-                int16_t (*logFunctionS16)();
+                float refreshRate = STD_SCHEDULER_REFRESH_RATE;
+                bool logged = false;
 
-                sd_log_id_t logId;
-
-                float refreshRate;
-                bool running = false;
-
-                shared_ptr<Timer> lastRun;
-    
-            protected:
-                void _initRest(IComponent &_component, log_component_type_t _type, sd_log_id_t _logId, float _refreshRate) {
-                    lastRun = shared_ptr<Timer>(new Timer());
-                    component = &_component;
-                    type = _type;
-                    logId = _logId;
-                    refreshRate = _refreshRate;
-                }
-            
-            private:
-                LogComponent() {}
+                std::shared_ptr<Timer> lastRun;
         };
 
-        vector<LogComponent> _logComponents;
+        class LoggingValue : public LoggingComponent {
+            public:
+                LoggingValue(IComponent &_logable, sd_log_id_t _logId, float _refreshRate)
+                : LoggingComponent(_logable, _refreshRate), logId(_logId) {}
 
-        ISDCard &_sdCard;
-        SCar &_carService;
+                virtual void send(ISDCard &sdCard) {
+                    string logValue = "";
+                    logable->getLogValue(logValue, logId);
+                    sdCard.write(*logable, logId, logValue);
+                }
+
+                sd_log_id_t logId;
+        };
+
+        vector<LoggingValue> _loggingValues;
+        vector<LoggingComponent> _loggingComponents;
 };
 
-#endif // LOGGER_H
+#endif // P_LOGGER_H

@@ -15,24 +15,4 @@
 
 #define SD_LOG_REFRESH_RATE_COOLING_PUMP_SPEED 1
 
-
-// IDs for the SD Log to identify between multiple values of only one component
-enum SDLogIDs : sd_log_id_t {
-    // Pedals
-    SD_LOG_ID_PEDAL_POSITION = 1,
-
-    // Motor Controller
-    SD_LOG_ID_MOTOR_CONTROLLER_SPEED = 1,
-    SD_LOG_ID_MOTOR_CONTROLLER_CURRENT = 2,
-    SD_LOG_ID_MOTOR_CONTROLLER_MOTOR_TEMP = 3,
-    SD_LOG_ID_MOTOR_CONTROLLER_SERVO_TEMP = 4,
-    SD_LOG_ID_MOTOR_CONTROLLER_AIR_TEMP = 5,
-
-    // RPM
-    SD_LOG_ID_RPM = 1,
-
-    // Cooling Pump
-    SD_LOG_ID_COOLING_PUMP_SPEED = 1,
-};
-
 #endif // SD_LOG_IDS_H

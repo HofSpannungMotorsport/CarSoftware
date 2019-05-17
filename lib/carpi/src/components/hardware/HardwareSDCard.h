@@ -23,44 +23,7 @@ class HardwareSDCard : public ISDCard {
             return _status;
         }
 
-        virtual void writeValue(IComponent &component, sd_log_id_t logId, uint8_t value) {
-            string line = "";
-            _addLineHeader(line, component, logId);
-            line += to_string(value) + ";";
-            _writeLine(line);
-        }
-
-        virtual void writeValue(IComponent &component, sd_log_id_t logId, uint16_t value) {
-            string line = "";
-            _addLineHeader(line, component, logId);
-            line += to_string(value) + ";";
-            _writeLine(line);
-        }
-
-        virtual void writeValue(IComponent &component, sd_log_id_t logId, uint32_t value) {
-            string line = "";
-            _addLineHeader(line, component, logId);
-            line += to_string(value) + ";";
-            _writeLine(line);
-        }
-
-        virtual void writeValue(IComponent &component, sd_log_id_t logId, float value) {
-            string line = "";
-            _addLineHeader(line, component, logId);
-            char buffer[256];
-            sprintf(buffer, "%.6f;", value);
-            line += buffer;
-            _writeLine(line);
-        }
-
-        virtual void writeValue(IComponent &component, sd_log_id_t logId, int16_t value) {
-            string line = "";
-            _addLineHeader(line, component, logId);
-            line += to_string(value) + ";";
-            _writeLine(line);
-        }
-
-        virtual void writeCustom(IComponent &component, sd_log_id_t logId, string &customString) {
+        virtual void write(IComponent &component, sd_log_id_t logId, string &customString) {
             string line = "";
             _addLineHeader(line, component, logId);
             line += customString + ";";

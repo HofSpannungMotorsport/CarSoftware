@@ -2,6 +2,16 @@
 #define IMOTORCONTROLLER_H
 
 #include "IComponent.h"
+#include "ILogable.h"
+
+#define MOTOR_CONTROLLER_SD_LOG_COUNT 5
+enum sd_log_id_motor_controller_t : sd_log_id_t {
+    SD_LOG_ID_MOTOR_CONTROLLER_SPEED = 0,
+    SD_LOG_ID_MOTOR_CONTROLLER_CURRENT = 1,
+    SD_LOG_ID_MOTOR_CONTROLLER_MOTOR_TEMP = 2,
+    SD_LOG_ID_MOTOR_CONTROLLER_SERVO_TEMP = 3,
+    SD_LOG_ID_MOTOR_CONTROLLER_AIR_TEMP = 4
+};
 
 typedef uint8_t motor_controller_status_t;
 enum motor_controller_error_type_t : motor_controller_status_t {
@@ -52,6 +62,40 @@ class IMotorController : public IComponent {
 
         // Method to send interval times
         virtual void beginCommunication() = 0;
+
+        // Logable
+        virtual sd_log_id_t getLogValueCount() {
+            return MOTOR_CONTROLLER_SD_LOG_COUNT;
+        }
+
+        virtual void getLogValue(string &logValue, sd_log_id_t logId) {
+            if (logId >= MOTOR_CONTROLLER_SD_LOG_COUNT) return;
+
+            char buffer[7];
+            switch (logId) {
+                case SD_LOG_ID_MOTOR_CONTROLLER_SPEED:
+                    sprintf(buffer, "%1.5f", getSpeed());
+                    logValue = buffer;
+                    break;
+                
+                case SD_LOG_ID_MOTOR_CONTROLLER_CURRENT:
+                    sprintf(buffer, "%1.5f", getCurrent());
+                    logValue = buffer;
+                    break;
+                
+                case SD_LOG_ID_MOTOR_CONTROLLER_MOTOR_TEMP:
+                    logValue = to_string(getMotorTemp());
+                    break;
+                
+                case SD_LOG_ID_MOTOR_CONTROLLER_SERVO_TEMP:
+                    logValue = to_string(getServoTemp());
+                    break;
+                
+                case SD_LOG_ID_MOTOR_CONTROLLER_AIR_TEMP:
+                    logValue = to_string(getAirTemp());
+                    break;
+            }
+        }
 };
 
 #endif // IMOTORCONTROLLER_H

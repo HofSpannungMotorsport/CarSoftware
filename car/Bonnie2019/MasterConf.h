@@ -7,6 +7,7 @@
 //#define SYNC_SENDING_DEBUG // Enables reporting while sending a message over Sync
 //#define CCAN_DEBUG // Enables CAN Channel Debug Output
 //#define CCAN_SENDING_DEBUG // Enables reporting at sending over Can
+//#define DISABLE_PUMP
 #include "carpi.h"
 
 #define HIGH_DEMAND_SERVICE_REFRESH_RATE 120 // Hz
@@ -145,21 +146,22 @@ class Master : public Carpi {
             //rpmFrontRight.attach(syncer);
             pedalAlive.attach(syncer);
 
-            
-            // Attach specific funktions to the SD Logger
-            sdLogger.addComponentToLog(brakePedal, brakePedal.getValue, SD_LOG_ID_PEDAL_POSITION, SD_LOG_REFRESH_RATE_PEDAL_POSITION);
-            sdLogger.addComponentToLog(gasPedal, gasPedal.getValue, SD_LOG_ID_PEDAL_POSITION, SD_LOG_REFRESH_RATE_PEDAL_POSITION);
+            // Add components to logger
+            sdLogger.addLogableValue(brakePedal, SD_LOG_ID_PEDAL_POSITION, SD_LOG_REFRESH_RATE_PEDAL_POSITION);
+            sdLogger.addLogableValue(gasPedal, SD_LOG_ID_PEDAL_POSITION, SD_LOG_REFRESH_RATE_PEDAL_POSITION);
 
-            sdLogger.addComponentToLog(motorController, motorController.getSpeed, SD_LOG_ID_MOTOR_CONTROLLER_SPEED, SD_LOG_REFRESH_RATE_MOTOR_CONTROLLER_SPEED);
-            sdLogger.addComponentToLog(motorController, motorController.getCurrent, SD_LOG_ID_MOTOR_CONTROLLER_CURRENT, SD_LOG_REFRESH_RATE_MOTOR_CONTROLLER_CURRENT);
-            sdLogger.addComponentToLog(motorController, motorController.getMotorTemp, SD_LOG_ID_MOTOR_CONTROLLER_MOTOR_TEMP, SD_LOG_REFRESH_RATE_MOTOR_CONTROLLER_MOTOR_TEMP);
-            sdLogger.addComponentToLog(motorController, motorController.getServoTemp, SD_LOG_ID_MOTOR_CONTROLLER_SERVO_TEMP, SD_LOG_REFRESH_RATE_MOTOR_CONTROLLER_SERVO_TEMP);
-            sdLogger.addComponentToLog(motorController, motorController.getAirTemp, SD_LOG_ID_MOTOR_CONTROLLER_AIR_TEMP, SD_LOG_REFRESH_RATE_MOTOR_CONTROLLER_AIR_TEMP);
+            sdLogger.addLogableValue(motorController, SD_LOG_ID_MOTOR_CONTROLLER_SPEED, SD_LOG_REFRESH_RATE_MOTOR_CONTROLLER_SPEED);
+            sdLogger.addLogableValue(motorController, SD_LOG_ID_MOTOR_CONTROLLER_CURRENT, SD_LOG_REFRESH_RATE_MOTOR_CONTROLLER_CURRENT);
+            sdLogger.addLogableValue(motorController, SD_LOG_ID_MOTOR_CONTROLLER_MOTOR_TEMP, SD_LOG_REFRESH_RATE_MOTOR_CONTROLLER_MOTOR_TEMP);
+            sdLogger.addLogableValue(motorController, SD_LOG_ID_MOTOR_CONTROLLER_SERVO_TEMP, SD_LOG_REFRESH_RATE_MOTOR_CONTROLLER_SERVO_TEMP);
+            sdLogger.addLogableValue(motorController, SD_LOG_ID_MOTOR_CONTROLLER_AIR_TEMP, SD_LOG_REFRESH_RATE_MOTOR_CONTROLLER_AIR_TEMP);
 
-            //sdLogger.addComponentToLog(rpmFrontLeft, rpmFrontLeft.getFrequency, SD_LOG_ID_RPM, SD_LOG_REFRESH_RATE_RPM);
-            //sdLogger.addComponentToLog(rpmFrontRight, rpmFrontRight.getFrequency, SD_LOG_ID_RPM, SD_LOG_REFRESH_RATE_RPM);
-            //sdLogger.addComponentToLog(rpmRearLeft, rpmRearLeft.getFrequency, SD_LOG_ID_RPM, SD_LOG_REFRESH_RATE_RPM);
-            //sdLogger.addComponentToLog(rpmRearRight, rpmRearRight.getFrequency, SD_LOG_ID_RPM, SD_LOG_REFRESH_RATE_RPM);
+            //sdLogger.addLogableValue(rpmFrontLeft, SD_LOG_ID_RPM, SD_LOG_REFRESH_RATE_RPM);
+            //sdLogger.addLogableValue(rpmFrontRight, SD_LOG_ID_RPM, SD_LOG_REFRESH_RATE_RPM);
+            //sdLogger.addLogableValue(rpmRearLeft, SD_LOG_ID_RPM, SD_LOG_REFRESH_RATE_RPM);
+            //sdLogger.addLogableValue(rpmRearRight, SD_LOG_ID_RPM, SD_LOG_REFRESH_RATE_RPM);
+
+            sdLogger.addLogableValue(coolingPump, SD_LOG_ID_PUMP_SPEED, SD_LOG_REFRESH_RATE_COOLING_PUMP_SPEED);
 
             sdLogger.finalize();
 

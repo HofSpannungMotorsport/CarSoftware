@@ -2,11 +2,17 @@
 #define IPEDAL_H
 
 #include "communication/SelfSyncable.h"
+#include "../interface/ILogable.h"
 
 #define STD_PEDAL_VALUE_REFRESH_RATE 60 // Hz
 #define STD_PEDAL_MESSAGE_TIMEOUT 0.005 // s
 
 #define STD_PEDAL_STATUS_REFRESH_TIME 0.05 // s -> 50ms
+
+#define PEDAL_SD_LOG_COUNT 1
+enum sd_log_id_pedal_t : sd_log_id_t {
+    SD_LOG_ID_PEDAL_POSITION = 0
+};
 
 enum pedal_message_command_t : uint8_t {
     PEDAL_MESSAGE_COMMAND_SET_PROPORTIONALITY_SENSOR_1 = 0x0,
@@ -51,6 +57,18 @@ class IPedal : public SelfSyncable {
 
         virtual void setStatus(pedal_status_t status) = 0;
         virtual void setValue(pedal_value_t value) = 0;
+
+        virtual sd_log_id_t getLogValueCount() {
+            return PEDAL_SD_LOG_COUNT;
+        }
+
+        virtual void getLogValue(string &logValue, sd_log_id_t logId) {
+            if (logId != 0) return;
+
+            char buffer[7];
+            sprintf(buffer, "%1.5f", getValue());
+            logValue = buffer;
+        }
 };
 
 #endif
