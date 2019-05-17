@@ -15,11 +15,11 @@ class HardwareSDCard : public ISDCard {
             mkdir(SD_LOG_FOLDER_PATH, 0777);
         }
 
-        virtual void setStatus(sd_status_t status) {
+        virtual void setStatus(status_t status) {
             // No implementation needed
         }
 
-        virtual sd_status_t getStatus() {
+        virtual status_t getStatus() {
             return _status;
         }
 
@@ -33,18 +33,24 @@ class HardwareSDCard : public ISDCard {
     protected:
         SDFileSystem sd;
 
-        sd_status_t _status = SD_OK;
+        status_t _status = SD_OK;
 
         void _addLineHeader(string &line, IComponent &component, sd_log_id_t logId) {
             line += to_string(component.getComponentId()) + ";" + to_string(logId) + ";";
         }
 
         void _writeLine(string &line) {
+            // Check if the SD Card was initialized correctly
+            if (sd.disk_status() != 0) {
+                _status |= SD_INITALIZATION_FAILED;
+                return;
+            }
+
             line += "\r\n";
 
             FILE *fp = fopen(SD_LOG_FILE_PATH, "a");
             if(fp == NULL) {
-                _status |= SD_INITALIZATION_FAILED;
+                _status |= SD_FILE_ACCESS_FAILED;
             } else {
                 fprintf(fp, "%s", line.c_str());
             }

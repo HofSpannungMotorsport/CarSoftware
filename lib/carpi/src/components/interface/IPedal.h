@@ -22,8 +22,7 @@ enum pedal_message_command_t : uint8_t {
     PEDAL_MESSAGE_COMMAND_SET_CALIBRATION_STATUS
 };
 
-typedef uint8_t pedal_status_t;
-enum pedal_error_type_t : uint8_t {
+enum pedal_error_type_t : status_t {
     SENSOR_DEVIANCE_TOO_HIGH =             0x1,
     CALIBRATION_FAILED_TOO_LOW_DEVIANCE =  0x2,
     CALIBRATION_FAILED_TOO_HIGH_DEVIANCE = 0x4,
@@ -46,7 +45,6 @@ class IPedal : public SelfSyncable {
     public:
         virtual void setProportionality(pedal_sensor_type_t proportionality, uint16_t sensorNumber = 0) = 0;
 
-        virtual pedal_status_t getStatus() = 0;
         virtual pedal_value_t getValue() = 0;
 
         virtual void setCalibrationStatus(pedal_calibration_t calibrationStatus) = 0;
@@ -55,7 +53,6 @@ class IPedal : public SelfSyncable {
         virtual void setMaxDeviance(pedal_value_t deviance) = 0;
         virtual void setMaxDevianceTime(uint16_t time) = 0;
 
-        virtual void setStatus(pedal_status_t status) = 0;
         virtual void setValue(pedal_value_t value) = 0;
 
         virtual sd_log_id_t getLogValueCount() {

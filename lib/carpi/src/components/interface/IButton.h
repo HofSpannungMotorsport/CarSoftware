@@ -9,8 +9,7 @@ enum button_message_command_t : uint8_t {
     BUTTON_MESSAGE_COMMAND_ADD_STATE = 0x0
 };
 
-typedef uint8_t button_status_t;
-enum button_error_type_t : uint8_t {
+enum button_error_type_t : status_t {
     UNDEFINED_BUTTON_ERROR =        0x1,
     STATE_BUFFER_FULL =             0x2,
     WRONG_STATE =                   0x4,
@@ -46,10 +45,6 @@ class IButton : public SelfSyncable {
         // Set the time for each Event. If not set, the standard Values will be used.
         virtual void setLongClickTime(button_time_t time) = 0;
         virtual void setDebounceTime(button_debounce_time_t time) = 0;
-
-        // Status...
-        virtual void setStatus(button_status_t status) = 0;
-        virtual button_status_t getStatus() = 0;
 
         // Return or set the current State of the button
         // Calculated throu the methods below

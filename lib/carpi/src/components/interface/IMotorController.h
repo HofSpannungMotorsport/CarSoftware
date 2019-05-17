@@ -13,8 +13,7 @@ enum sd_log_id_motor_controller_t : sd_log_id_t {
     SD_LOG_ID_MOTOR_CONTROLLER_AIR_TEMP = 4
 };
 
-typedef uint8_t motor_controller_status_t;
-enum motor_controller_error_type_t : motor_controller_status_t {
+enum motor_controller_error_type_t : status_t {
     MOTOR_CONTROLLER_OK = 0x0,
     MOTOR_CONTROLLER_BAD_VAR_GIVEN = 0x1,
     MOTOR_CONTROLLER_ERROR = 0x2
@@ -34,10 +33,6 @@ enum motor_controller_run_enable_t : bool {
 
 class IMotorController : public IComponent {
     public:
-        // Status
-        virtual motor_controller_status_t getStatus() = 0;
-        virtual void setStatus() = 0;
-
         // State (-> Status got from the Motor Controller)
         virtual motor_controller_state_t getState() = 0;
         virtual void setState() = 0;

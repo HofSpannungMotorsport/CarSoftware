@@ -17,8 +17,7 @@ enum buzzer_beep_type_t : uint8_t {
 
 typedef uint16_t buzzer_hz_t;
 
-typedef uint8_t buzzer_status_t;
-enum buzzer_error_type_t : buzzer_status_t {
+enum buzzer_error_type_t : status_t {
     BUZZER_OK = 0x0,
     BUZZER_ERROR_UNKNOWN = 0x1,
     BUZZER_WRONG_STATE = 0x2,
@@ -27,9 +26,6 @@ enum buzzer_error_type_t : buzzer_status_t {
 
 class IBuzzer : public IComponent {
     public:
-        virtual void setStatus(buzzer_status_t status) = 0;
-        virtual buzzer_status_t getStatus() = 0;
-
         virtual void setState(buzzer_state_t state) = 0;
         virtual buzzer_state_t getState() = 0;
 

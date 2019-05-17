@@ -174,13 +174,17 @@ class HardwareAnalogSensor : public IAnalogSensor {
             return returnValue;
         }
 
-        virtual analog_sensor_status_t getStatus() {
+        virtual void setStatus(status_t status) {
+            // No implementation needed
+        }
+
+        virtual status_t getStatus() {
             return _status;
         }
         
     protected:
         AnalogIn _pin;
-        analog_sensor_status_t _status = 0;
+        status_t _status = 0;
 
         struct _last {
             analog_sensor_t normal = 0;

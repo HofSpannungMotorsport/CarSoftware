@@ -30,11 +30,11 @@ class HardwarePwmBuzzer : public IBuzzer {
             setComponentSubId(componentSubId);
         }
 
-        virtual void setStatus(buzzer_status_t status) {
+        virtual void setStatus(status_t status) {
             // No implementation needed
         }
 
-        virtual buzzer_status_t getStatus() {
+        virtual status_t getStatus() {
             return _status;
         }
 
@@ -68,7 +68,7 @@ class HardwarePwmBuzzer : public IBuzzer {
     protected:
         PwmOut _port;
         Ticker _ticker;
-        buzzer_status_t _status;
+        status_t _status;
 
         struct _current {
             buzzer_state_t state = BUZZER_OFF;

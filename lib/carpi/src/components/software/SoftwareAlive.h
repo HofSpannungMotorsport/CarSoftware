@@ -19,7 +19,11 @@ class SoftwareAlive : public IAlive {
             return _alive;
         }
 
-        alive_status_t getStatus() {
+        virtual void setStatus(status_t status) {
+            // No implementation needed
+        }
+
+        virtual status_t getStatus() {
             if (getAlive()) {
                 return 0;
             } else {

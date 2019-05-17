@@ -53,6 +53,15 @@ class HardwareLed : public ILed {
             }
         }
 
+        virtual void setStatus(status_t status) {
+            // No implementation needed
+        }
+
+        virtual status_t getStatus() {
+            // No implementation needed
+            return 0;
+        }
+
     protected:
         DigitalOut _port;
 

@@ -16,17 +16,14 @@ enum sd_log_id_sd_card_t : sd_log_id_t {
     SD_LOG_ID_CARPI_VERSION = 1
 };
 
-typedef uint8_t sd_status_t;
-enum sd_error_type_t : sd_status_t {
+enum sd_error_type_t : status_t {
     SD_OK = 0x0,
-    SD_INITALIZATION_FAILED = 0x1
+    SD_INITALIZATION_FAILED = 0x1,
+    SD_FILE_ACCESS_FAILED = 0x2
 };
 
 class ISDCard : public IComponent {
     public:
-        virtual void setStatus(sd_status_t status) = 0;
-        virtual sd_status_t getStatus() = 0;
-
         virtual void write(IComponent &component, sd_log_id_t logId, string &customString) = 0;
 };
 

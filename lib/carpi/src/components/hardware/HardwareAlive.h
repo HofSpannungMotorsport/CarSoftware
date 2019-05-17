@@ -40,7 +40,11 @@ class HardwareAlive : public IAlive {
             return _alive;
         }
 
-        alive_status_t getStatus() {
+        virtual void setStatus(status_t status) {
+            // No implementation needed
+        }
+
+        virtual status_t getStatus() {
             if (_alive) {
                 return 0;
             } else {
