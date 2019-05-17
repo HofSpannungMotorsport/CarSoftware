@@ -33,11 +33,11 @@ class HardwareMotorController : public IMotorController {
             _bamocar.requestTemp(1000 / (float)STD_MOTOR_TEMP_REFRESH_TIME);
         }
 
-        virtual motor_controller_status_t getStatus() {
+        virtual status_t getStatus() {
             return _status;
         }
 
-        virtual void setStatus() {
+        virtual void setStatus(status_t status) {
             // No implementation needed
         }
 
@@ -122,7 +122,7 @@ class HardwareMotorController : public IMotorController {
         DigitalOut _rfe;
         DigitalOut _run;
 
-        motor_controller_status_t _status = 0;
+        status_t _status = 0;
 };
 
 #endif // HARDWAREMOTORCONTROLLER_H

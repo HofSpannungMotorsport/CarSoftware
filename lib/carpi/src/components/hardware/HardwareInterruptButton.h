@@ -56,11 +56,11 @@ class HardwareInterruptButton : public IButton {
         }
 
         // Status...
-        virtual void setStatus(button_status_t status) {
+        virtual void setStatus(status_t status) {
             // No implementation needed
         }
 
-        virtual button_status_t getStatus() {
+        virtual status_t getStatus() {
             return _status;
         }
 
@@ -92,7 +92,7 @@ class HardwareInterruptButton : public IButton {
         InterruptIn _interruptPin;
         Ticker _ticker;
         bool _lastHardwareState, _debouncing, _debounced;
-        button_status_t _status;
+        status_t _status;
         button_state_t _lastState;
         CircularBuffer<button_state_t, STATE_BUFFER_SIZE> _stateBuffer;
 

@@ -47,7 +47,7 @@ class HardwarePedal : public IPedal {
             }
         }
 
-        virtual pedal_status_t getStatus() {
+        virtual status_t getStatus() {
             _status |= (_pin1.getStatus() << 4);
             _status |= (_pin2.getStatus() << 4);
 
@@ -128,7 +128,7 @@ class HardwarePedal : public IPedal {
             _deviance.maxTime = time;
         }
 
-        virtual void setStatus(pedal_status_t status) {
+        virtual void setStatus(status_t status) {
             // No implementation needed
         }
         virtual void setValue(pedal_value_t value) {
@@ -162,7 +162,7 @@ class HardwarePedal : public IPedal {
         pedal_sensor_type_t _pin1Proportionality = DIRECT_PROPORTIONAL,
                             _pin2Proportionality = DIRECT_PROPORTIONAL;
         bool _secondSensor;
-        pedal_status_t _status = 0;
+        status_t _status = 0;
         bool _ready = false;
         pedal_value_t _last = 0;
 

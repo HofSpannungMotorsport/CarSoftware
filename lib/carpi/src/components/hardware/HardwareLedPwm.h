@@ -57,6 +57,15 @@ class HardwareLedPwm : public ILed {
             }
         }
 
+        virtual void setStatus(status_t status) {
+            // No implementation needed
+        }
+
+        virtual status_t getStatus() {
+            // No implementation needed
+            return 0;
+        }
+
     protected:
         PwmOut _port;
         led_state_t _state = LED_OFF;

@@ -33,6 +33,15 @@ class SoftwareLed : public ILed {
         virtual void receive(CarMessage &carMessage) {
             // No implementation needed yet
         }
+
+        virtual void setStatus(status_t status) {
+            // No implementation needed
+        }
+
+        virtual status_t getStatus() {
+            // No implementation needed
+            return 0;
+        }
 };
 
 #endif

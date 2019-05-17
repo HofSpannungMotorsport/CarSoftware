@@ -20,7 +20,7 @@ class SoftwarePedal : public IPedal {
             else if (sensorNumber == 1) _sendCommand(PEDAL_MESSAGE_COMMAND_SET_PROPORTIONALITY_SENSOR_2, proportionality, SEND_PRIORITY_PEDAL, STD_PEDAL_MESSAGE_TIMEOUT, IS_NOT_DROPABLE);
         }
 
-        virtual pedal_status_t getStatus() {
+        virtual status_t getStatus() {
             return _status;
         }
 
@@ -47,7 +47,7 @@ class SoftwarePedal : public IPedal {
             // [il]
         }
 
-        virtual void setStatus(pedal_status_t status) {
+        virtual void setStatus(status_t status) {
             _status = status;
         }
         
@@ -72,7 +72,7 @@ class SoftwarePedal : public IPedal {
         }
 
     private:
-        pedal_status_t _status;
+        status_t _status;
         pedal_value_t _value;
 
         pedal_calibration_t _calibrationStatus = CURRENTLY_NOT_CALIBRATING;

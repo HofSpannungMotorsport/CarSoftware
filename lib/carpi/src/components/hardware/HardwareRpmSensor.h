@@ -27,11 +27,11 @@ class HardwareRpmSensor : public IRpmSensor {
             _updateValuesTicker.attach(callback(this, &HardwareRpmSensor::_updateValues), 1.0/(float)RPM_SENSOR_MESSAGE_REFRESH_RATE);
         }
 
-        virtual void setStatus(rpm_sensor_status_t status) {
+        virtual void setStatus(status_t status) {
             // No implementation needed
         }
 
-        virtual rpm_sensor_status_t getStatus() {
+        virtual status_t getStatus() {
             return _status;
         }
 
@@ -69,7 +69,7 @@ class HardwareRpmSensor : public IRpmSensor {
         Ticker _updateValuesTicker;
 
         InterruptIn _pin;
-        rpm_sensor_status_t _status = 0;
+        status_t _status = 0;
 
         struct _measurement {
             Timer timer;

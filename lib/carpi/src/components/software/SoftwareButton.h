@@ -29,11 +29,11 @@ class SoftwareButton : public IButton {
         }
 
         // Status...
-        virtual void setStatus(button_status_t status) {
+        virtual void setStatus(status_t status) {
             _status = status;
         }
 
-        virtual button_status_t getStatus() {
+        virtual status_t getStatus() {
             return _status;
         }
 
@@ -84,7 +84,7 @@ class SoftwareButton : public IButton {
         }
 
     private:
-        button_status_t _status;
+        status_t _status;
         button_state_t _lastState;
         CircularBuffer<button_state_t, STATE_BUFFER_SIZE> _stateBuffer;
 

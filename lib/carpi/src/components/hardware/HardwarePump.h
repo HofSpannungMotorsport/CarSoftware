@@ -42,6 +42,15 @@ class HardwarePump : public IPump {
             return _enablePort.read();
         }
 
+        virtual void setStatus(status_t status) {
+            // No implementation needed
+        }
+
+        virtual status_t getStatus() {
+            // No implementation needed
+            return 0;
+        }
+
     protected:
         PwmOut _pwmPort;
         DigitalOut _enablePort;
