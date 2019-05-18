@@ -1,7 +1,6 @@
 #ifndef HARDWAREPEDAL_H
 #define HARDWAREPEDAL_H
 
-#include "platform/CircularBuffer.h"
 #include "../interface/IPedal.h"
 #include "../hardware/HardwareAnalogSensor.h"
 

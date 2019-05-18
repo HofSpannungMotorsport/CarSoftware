@@ -1,7 +1,6 @@
 #ifndef SOFTWAREBUTTON_H
 #define SOFTWAREBUTTON_H
 
-#include "platform/CircularBuffer.h"
 #include "../interface/IButton.h"
 
 

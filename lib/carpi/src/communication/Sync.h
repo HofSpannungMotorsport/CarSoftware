@@ -13,6 +13,8 @@ using namespace std;
 #include "components/interface/ICommunication.h"
 #include "runable/IRunable.h"
 
+#define SYNC_INCOMING_MESSAGES_BUFFER_SIZE 128 // max 255
+
 //#define SYNC_DEBUG // for debugging
 
 class Sync : public IRunable {
@@ -76,6 +78,144 @@ class Sync : public IRunable {
         }
 
         void receive(CarMessage &carMessage) {
+            _incomingMessages.push(carMessage);
+        }
+
+        virtual void send(CarMessage &carMessage) {
+            #ifdef SYNC_SENDING_DEBUG
+                pcSerial.printf("[Sync]@send: Try to send Message for component 0x%x\n", carMessage.getComponentId());
+            #endif
+
+            for (Route &route : router) {
+                if (carMessage.getComponentId() == route.component->getComponentId()) {
+                    carMessage.setSenderId(_thisId);
+                    carMessage.setReceiverId(route.receiverId);
+                    _send(carMessage, route.channel);
+
+                    #ifdef SYNC_SENDING_DEBUG
+                        pcSerial.printf("[Sync]@send: Sent Message for component 0x%x to channel\n", carMessage.getComponentId());
+                    #endif
+
+                    break;
+                }
+            }
+        }
+
+        /*
+            First send all messages sitting in the out queue,
+            then compute received messages.
+        */
+        virtual void run() {
+            for(Channel &channel : channels) {
+                channel.channel->run();
+            }
+
+            CarMessage carMessage;
+            while(_incomingMessages.pop(carMessage)) {
+                _receive(carMessage);
+            }
+        }
+
+        void finalize() {
+            router.shrink_to_fit();
+            bridger.shrink_to_fit();
+            channels.shrink_to_fit();
+        }
+
+    private:
+        id_device_t _thisId;
+
+        class Route {
+            public:
+                Route(ICommunication &_component, IChannel &_channel, id_device_t _receiverId)
+                : component(&_component), channel(&_channel), receiverId(_receiverId) {}
+
+                ICommunication *component;
+                IChannel *channel;
+                id_device_t receiverId;
+        };
+
+        class Bridge {
+            public:
+                Bridge(id_component_t _componentId, IChannel &_channelDevice1, IChannel &_channelDevice2,
+                                                  id_device_t _deviceId1,    id_device_t _deviceId2)
+                : componentId(_componentId), channelDevice1(&_channelDevice1), channelDevice2(&_channelDevice2),
+                                         deviceId1(_deviceId1),            deviceId2(_deviceId2) {}
+
+                id_component_t componentId;
+                IChannel *channelDevice1;
+                IChannel *channelDevice2;
+                id_device_t deviceId1;
+                id_device_t deviceId2;
+        };
+
+        class Channel {
+            public:
+                Channel(IChannel &_channel) : channel(&_channel) {}
+
+                IChannel *channel;
+        };
+
+        // Using Vector, but why? Its faster to iterate over a whole vector than using a slow map
+
+        // The Vector which will store all added components
+        vector<Route> router;
+
+        // The Vector which will store all devices that are bridged throu the current device
+        vector<Bridge> bridger;
+
+        // The Vector which will save all Channels only once for the run() method
+        vector<Channel> channels;
+
+        // The Vector which will temporarily store all incoming messages
+        CircularBuffer<CarMessage, SYNC_INCOMING_MESSAGES_BUFFER_SIZE, uint8_t> _incomingMessages;
+
+        bool _checkComponentExist(id_component_t componentId) {
+            for(Route &route : router) {
+                if (route.component->getComponentId() == componentId) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        bool _checkComponentExist(ICommunication &component) {
+            return _checkComponentExist(component.getComponentId());
+        }
+
+        bool _checkBridgeExist(id_component_t componentId) {
+            for(Bridge &bridge : bridger) {
+                if (bridge.componentId == componentId) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        void _send(CarMessage &carMessage, IChannel *channel) {
+            channel->send(carMessage);
+        }
+
+        bool _checkChannelExist(IChannel &channel) {
+            IChannel *channelToCheck = &channel;
+            for(Channel &channel : channels) {
+                if (channel.channel == channelToCheck) return true;
+            }
+
+            return false;
+        }
+
+        void _addChannel(IChannel &channel) {
+            // At first, check if the Channel got regisered before
+            if (_checkChannelExist(channel)) return;
+
+            // If the channel did not got added before, add it now
+            channels.emplace_back(channel);
+        }
+
+        void _receive(CarMessage &carMessage) {
             #ifdef SYNC_DEBUG
                 pcSerial.printf("[Sync]@receive: Received Message for component 0x%x\n", carMessage.getComponentId());
             #endif
@@ -131,128 +271,6 @@ class Sync : public IRunable {
                     }
                 }
             }
-        }
-
-        virtual void send(CarMessage &carMessage) {
-            #ifdef SYNC_SENDING_DEBUG
-                pcSerial.printf("[Sync]@send: Try to send Message for component 0x%x\n", carMessage.getComponentId());
-            #endif
-
-            for (Route &route : router) {
-                if (carMessage.getComponentId() == route.component->getComponentId()) {
-                    carMessage.setSenderId(_thisId);
-                    carMessage.setReceiverId(route.receiverId);
-                    _send(carMessage, route.channel);
-
-                    #ifdef SYNC_SENDING_DEBUG
-                        pcSerial.printf("[Sync]@send: Sent Message for component 0x%x to channel\n", carMessage.getComponentId());
-                    #endif
-
-                    break;
-                }
-            }
-        }
-
-        virtual void run() {
-            for(Channel &channel : channels) {
-                channel.channel->run();
-            }
-        }
-
-        void finalize() {
-            router.shrink_to_fit();
-            bridger.shrink_to_fit();
-            channels.shrink_to_fit();
-        }
-
-    private:
-        id_device_t _thisId;
-
-        class Route {
-            public:
-                Route(ICommunication &_component, IChannel &_channel, id_device_t _receiverId)
-                : component(&_component), channel(&_channel), receiverId(_receiverId) {}
-
-                ICommunication *component;
-                IChannel *channel;
-                id_device_t receiverId;
-        };
-
-        class Bridge {
-            public:
-                Bridge(id_component_t _componentId, IChannel &_channelDevice1, IChannel &_channelDevice2,
-                                                  id_device_t _deviceId1,    id_device_t _deviceId2)
-                : componentId(_componentId), channelDevice1(&_channelDevice1), channelDevice2(&_channelDevice2),
-                                         deviceId1(_deviceId1),            deviceId2(_deviceId2) {}
-
-                id_component_t componentId;
-                IChannel *channelDevice1;
-                IChannel *channelDevice2;
-                id_device_t deviceId1;
-                id_device_t deviceId2;
-        };
-
-        class Channel {
-            public:
-                Channel(IChannel &_channel) : channel(&_channel) {}
-
-                IChannel *channel;
-        };
-
-        // Using Vector, but why? Its faster to iterate over a whole vector than using a slow map
-
-        // The Vector which will store all added components
-        vector<Route> router;
-
-        // The Vector which will store all devices that are bridged throu the current device
-        vector<Bridge> bridger;
-
-        // The Vector which will save all Channels only once for the run() method
-        vector<Channel> channels;
-
-        bool _checkComponentExist(id_component_t componentId) {
-            for(Route &route : router) {
-                if (route.component->getComponentId() == componentId) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        bool _checkComponentExist(ICommunication &component) {
-            return _checkComponentExist(component.getComponentId());
-        }
-
-        bool _checkBridgeExist(id_component_t componentId) {
-            for(Bridge &bridge : bridger) {
-                if (bridge.componentId == componentId) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        void _send(CarMessage &carMessage, IChannel *channel) {
-            channel->send(carMessage);
-        }
-
-        bool _checkChannelExist(IChannel &channel) {
-            IChannel *channelToCheck = &channel;
-            for(Channel &channel : channels) {
-                if (channel.channel == channelToCheck) return true;
-            }
-
-            return false;
-        }
-
-        void _addChannel(IChannel &channel) {
-            // At first, check if the Channel got regisered before
-            if (_checkChannelExist(channel)) return;
-
-            // If the channel did not got added before, add it now
-            channels.emplace_back(channel);
         }
 };
 

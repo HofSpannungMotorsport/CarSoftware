@@ -11,6 +11,7 @@
 #ifdef USE_MBED
     // Include Framework
     #include "mbed.h"
+    #include "platform/CircularBuffer.h"
     #ifndef MESSAGE_REPORT
         #define MESSAGE_REPORT
         Serial pcSerial(USBTX, USBRX); // Connection to PC over Serial
@@ -20,15 +21,15 @@
 #ifdef USE_ARDUINO
     // Include Framework
     #include "Arduino.h"
+    #define pcSerial Serial
     #include "crossplatform/arduinoToMbed/arduinoToMbed.h"
-    HardwareSerial &pcSerial = Serial;
 #endif
 
 #ifdef USE_TEENSYDUINO
     // Include Framework
     #include "Arduino.h"
-    #include "crossplatform/arduinoToMbed/arduinoToMbed.h"
     #define pcSerial Serial
+    #include "crossplatform/arduinoToMbed/arduinoToMbed.h"
 #endif
 
 // ---------------------------------------------------------------------

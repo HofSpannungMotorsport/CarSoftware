@@ -1,7 +1,6 @@
 #ifndef HARDWAREINTERRUPTBUTTON_H
 #define HARDWAREINTERRUPTBUTTON_H
 
-#include "platform/CircularBuffer.h"
 #include "../interface/IButton.h"
 
 
