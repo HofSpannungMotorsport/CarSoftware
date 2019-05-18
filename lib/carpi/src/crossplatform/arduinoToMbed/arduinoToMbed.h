@@ -19,6 +19,7 @@ uint16_t uint16_t_pow(uint16_t base, uint16_t exponent) {
 #include "DigitalOut.h"
 #include "PwmOut.h"
 #include "Timer.h"
+#include "CircularBuffer.h"
 
 void wait(float s) {
     Timer timer;

@@ -2,8 +2,9 @@
 #define ICHANNEL_H
 
 #include "communication/CarMessage.h"
+#include "runable/IRunable.h"
 
-class IChannel {
+class IChannel : public IRunable {
     public:
         virtual void send(CarMessage &carMessage) = 0;
 };

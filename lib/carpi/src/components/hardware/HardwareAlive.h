@@ -76,9 +76,9 @@ class HardwareAlive : public IAlive {
 
         void _updateAlive() {
             if (_alive) {
-                _sendCommand(ALIVE_MESSAGE_SEND_ALIVE, 0x1, SEND_PRIORITY_ALIVE, STD_ALIVE_MESSAGE_TIMEOUT, IS_NOT_DROPABLE);
+                _sendCommand(ALIVE_MESSAGE_SEND_ALIVE, 0x1, SEND_PRIORITY_ALIVE, IS_NOT_DROPABLE);
             } else {
-                _sendCommand(ALIVE_MESSAGE_SEND_ALIVE, 0x0, SEND_PRIORITY_ALIVE, STD_ALIVE_MESSAGE_TIMEOUT, IS_NOT_DROPABLE);
+                _sendCommand(ALIVE_MESSAGE_SEND_ALIVE, 0x0, SEND_PRIORITY_ALIVE, IS_NOT_DROPABLE);
             }
         }
 };

@@ -3,8 +3,6 @@
 
 #include "communication/SelfSyncable.h"
 
-#define STD_LED_MESSAGE_TIMEOUT 0.05 // s
-
 enum led_message_command_t : uint8_t {
     LED_MESSAGE_COMMAND_SET_STATE = 0x0,
     LED_MESSAGE_COMMAND_SET_BLINKING = 0x1,

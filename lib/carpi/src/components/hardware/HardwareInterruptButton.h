@@ -1,7 +1,6 @@
 #ifndef HARDWAREINTERRUPTBUTTON_H
 #define HARDWAREINTERRUPTBUTTON_H
 
-#include "platform/CircularBuffer.h"
 #include "../interface/IButton.h"
 
 
@@ -144,7 +143,7 @@ class HardwareInterruptButton : public IButton {
 
         void _addState(button_state_t state) {
             if (_syncerAttached) {
-                _sendCommand(BUTTON_MESSAGE_COMMAND_ADD_STATE, state, SEND_PRIORITY_BUTTON, BUTTON_MESSAGE_TIMEOUT, IS_NOT_DROPABLE);
+                _sendCommand(BUTTON_MESSAGE_COMMAND_ADD_STATE, state, SEND_PRIORITY_BUTTON, IS_NOT_DROPABLE);
             } else {
                 if (_stateBuffer.full())
                     _stateBufferFull();

@@ -3,7 +3,6 @@
 
 #include "communication/SelfSyncable.h"
 
-#define STD_RPM_MESSAGE_TIMEOUT 0.005 // s
 #define RPM_SENSOR_MESSAGE_REFRESH_RATE 120 // Hz
 
 #define RPM_SD_LOG_COUNT 1

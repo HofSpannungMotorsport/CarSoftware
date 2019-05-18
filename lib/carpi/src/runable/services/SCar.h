@@ -1,7 +1,6 @@
 #ifndef SCAR_H
 #define SCAR_H
 
-#include "platform/CircularBuffer.h"
 #include "IService.h"
 #include "communication/componentIds.h"
 #include "components/interface/IButton.h"

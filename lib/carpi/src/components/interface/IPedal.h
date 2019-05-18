@@ -5,7 +5,6 @@
 #include "../interface/ILogable.h"
 
 #define STD_PEDAL_VALUE_REFRESH_RATE 60 // Hz
-#define STD_PEDAL_MESSAGE_TIMEOUT 0.005 // s
 
 #define STD_PEDAL_STATUS_REFRESH_TIME 0.05 // s -> 50ms
 
