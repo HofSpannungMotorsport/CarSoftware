@@ -117,7 +117,8 @@
 #endif
 
 #ifdef USE_TEENSYDUINO
-
+    // Communication
+    #include "communication/CCan.h"
 #endif
 
 // Include some Information about carpi (cross-platform)

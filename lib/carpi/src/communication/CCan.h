@@ -1,6 +1,10 @@
 #ifndef CCAN_H
 #define CCAN_H
 
+#ifdef USE_ARDUINO
+    #error "CCan does only support Teensyduino, not Arduino!"
+#endif
+
 #include <vector>
 using namespace std;
 
@@ -22,7 +26,9 @@ class CCan : public IChannel {
         CCan() = delete;
         CCan(Sync &syncer, PinName rx, PinName tx, int frequency = STD_CAN_FREQUENCY)
         : _syncer(syncer), _can(rx, tx, frequency) {
-            _can.attach(callback(this, &CCan::_canMessageReceive), CAN::RxIrq);
+            #ifdef USE_MBED
+                _can.attach(callback(this, &CCan::_canMessageReceive), CAN::RxIrq);
+            #endif
         }
 
         virtual void send(CarMessage &carMessage) {
@@ -41,6 +47,12 @@ class CCan : public IChannel {
         }
 
         virtual void run() {
+            #ifdef USE_TEENSYDUINO
+                if (_can.available() > 0) {
+                    _canMessageReceive();
+                }
+            #endif
+
             _send();
         }
     

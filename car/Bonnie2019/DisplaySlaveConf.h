@@ -5,14 +5,22 @@
 
 #include "hardware/Pins_Display.h"
 
-class Display : public Carpi{
+// Communication
+Sync syncer(DEVICE_DISPLAY);
+CCan canIntern(syncer, 0, 0); // Underlying FlexCAN Library using standard Teensy CAN Pins -> 0
+
+class Display : public Carpi {
     public:
         void setup() {
-            
+            syncer.finalize();
+
+            wait(0.1);
+
         }
 
         void loop() {
-            
+            syncer.run();
+            wait(LOOP_WAIT_TIME);
         }
 
     protected:

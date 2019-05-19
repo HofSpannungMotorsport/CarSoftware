@@ -11,8 +11,8 @@ uint16_t uint16_t_pow(uint16_t base, uint16_t exponent) {
     return base;
 }
 
-#include "NonCopyable.h"
 #include "PinName.h"
+#include "NonCopyable.h"
 #include "AnalogIn.h"
 #include "AnalogOut.h"
 #include "DigitalIn.h"
@@ -20,6 +20,7 @@ uint16_t uint16_t_pow(uint16_t base, uint16_t exponent) {
 #include "PwmOut.h"
 #include "Timer.h"
 #include "CircularBuffer.h"
+#include "CAN.h"
 
 void wait(float s) {
     Timer timer;
