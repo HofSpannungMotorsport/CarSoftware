@@ -9,6 +9,7 @@
 #include "components/interface/IMotorController.h"
 #include "components/interface/IHvEnabled.h"
 #include "components/interface/ISDCard.h"
+#include "communication/Sync.h"
 
 
 #define STARTUP_WAIT 0.3 // s wait before system gets started
@@ -49,13 +50,15 @@ class Error {
 
 class SCar : public IService {
     public:
-        SCar(IButton* buttonReset, IButton* buttonStart,
+        SCar(Sync &syncer,
+             IButton* buttonReset, IButton* buttonStart,
              ILed* ledRed, ILed* ledYellow, ILed* ledGreen,
              IPedal* gasPedal, IPedal* brakePedal,
              IBuzzer* buzzer,
              IMotorController* motorController,
              IHvEnabled* hvEnabled,
-             ISDCard* sdCard) {
+             ISDCard* sdCard)
+             : _syncer(syncer) {
             _button.reset = buttonReset;
             _button.start = buttonStart;
 
@@ -153,6 +156,7 @@ class SCar : public IService {
             // Turn on red LED while HV-Circuite is off
             _resetLeds();
             _led.red->setState(LED_ON);
+            _waitForSent();
 
             wait(0.1);
 
@@ -176,8 +180,10 @@ class SCar : public IService {
                 _led.red->setState(LED_ON);
                 _led.red->setBlinking(BLINKING_FAST);
                 _led.green->setState(LED_OFF);
-                while(1) {
-                    wait(100);
+                _waitForSent();
+                while(true) {
+                    _syncer.run();
+                    wait(0.1);
                 }
             }
         }
@@ -203,12 +209,10 @@ class SCar : public IService {
             IPedal* brake;
         } _pedal;
 
+        Sync &_syncer;
         IBuzzer* _buzzer;
-
         IMotorController* _motorController;
-
         IHvEnabled* _hvEnabled;
-
         ISDCard* _sdCard;
 
         id_component_t _calculateComponentId(IComponent* component) {
@@ -216,26 +220,37 @@ class SCar : public IService {
             return id;
         }
 
+        void _waitForSent() {
+            while(_syncer.messageInQueue()) {
+                _syncer.run();
+            }
+        }
+
         void _startupAnimationUp() {
             _resetLeds();
             _led.red->setState(LED_ON);
+            _waitForSent();
 
             wait(STARTUP_ANIMATION_SPEED);
 
             _led.yellow->setState(LED_ON);
+            _waitForSent();
 
             wait(STARTUP_ANIMATION_SPEED);
 
             _led.green->setState(LED_ON);
             _led.red->setState(LED_OFF);
+            _waitForSent();
 
             wait(STARTUP_ANIMATION_SPEED);
 
             _led.yellow->setState(LED_OFF);
+            _waitForSent();
 
             wait(STARTUP_ANIMATION_SPEED);
 
             _led.green->setState(LED_OFF);
+            _waitForSent();
 
             wait(STARTUP_ANIMATION_SPEED);
         }
@@ -243,23 +258,28 @@ class SCar : public IService {
         void _startupAnimationDown() {
             _resetLeds();
             _led.green->setState(LED_ON);
+            _waitForSent();
 
             wait(STARTUP_ANIMATION_SPEED);
 
             _led.yellow->setState(LED_ON);
+            _waitForSent();
 
             wait(STARTUP_ANIMATION_SPEED);
 
             _led.red->setState(LED_ON);
             _led.green->setState(LED_OFF);
+            _waitForSent();
 
             wait(STARTUP_ANIMATION_SPEED);
 
             _led.yellow->setState(LED_OFF);
+            _waitForSent();
 
             wait(STARTUP_ANIMATION_SPEED);
 
             _led.red->setState(LED_OFF);
+            _waitForSent();
 
             wait(STARTUP_ANIMATION_SPEED);
         }
@@ -276,6 +296,8 @@ class SCar : public IService {
             _led.red->setBlinking(BLINKING_OFF);
             _led.yellow->setBlinking(BLINKING_OFF);
             _led.green->setBlinking(BLINKING_OFF);
+
+            _waitForSent();
         }
 
         void _pedalError(IPedal* sensorId) {
@@ -305,9 +327,12 @@ class SCar : public IService {
             _pedal.gas->setCalibrationStatus(CURRENTLY_CALIBRATING);
             _pedal.brake->setCalibrationStatus(CURRENTLY_CALIBRATING);
 
+            _waitForSent();
+
 
             // Calibrate pedal until pressed Start once for long time
             while(_button.start->getState() != LONG_CLICKED) {
+                _syncer.run();
                 wait(0.1);
             }
 
@@ -315,20 +340,24 @@ class SCar : public IService {
             // Stop calibration
             _pedal.gas->setCalibrationStatus(CURRENTLY_NOT_CALIBRATING);
             _pedal.brake->setCalibrationStatus(CURRENTLY_NOT_CALIBRATING);
+            _waitForSent();
 
             wait(0.1);
             _led.yellow->setState(LED_OFF);
+            _waitForSent();
 
 
 
             // Wait till the Button got released again
             // Yellow -> Off
             while(_button.start->getState() != NOT_PRESSED) {
+                _syncer.run();
                 wait(0.1);
             }
 
             wait(0.1);
 
+            _syncer.run();
 
             // Check for Errors at Calibration
             if (_pedal.gas->getStatus() > 0) {
@@ -352,8 +381,10 @@ class SCar : public IService {
                 _resetLeds();
                 _led.red->setState(LED_ON);
                 _led.red->setBlinking(BLINKING_SLOW);
-                while(1) {
-                    wait(100);
+                _waitForSent();
+                while(true) {
+                    _syncer.run();
+                    wait(0.1);
                 }
             }
 
@@ -363,6 +394,7 @@ class SCar : public IService {
             _resetLeds();
             _led.green->setState(LED_ON);
             _led.green->setBlinking(BLINKING_FAST);
+            _waitForSent();
 
             wait(0.1);
         }
@@ -415,12 +447,14 @@ class SCar : public IService {
                             _resetLeds();
                             _led.red->setState(LED_ON);
                             _led.red->setBlinking(BLINKING_NORMAL);
+                            _waitForSent();
 
                             // Stop beeping!
                             _buzzer->setState(BUZZER_OFF);
 
-                            while(1) {
-                                wait(100);
+                            while(true) {
+                                _syncer.run();
+                                wait(0.1);
                             }
                         }
                     } while (waitTimer.read() < (float)HV_ENABLED_BEEP_TIME);
@@ -442,7 +476,12 @@ class SCar : public IService {
                         _resetLeds();
                         _led.red->setState(LED_ON);
                         _led.red->setBlinking(BLINKING_NORMAL);
-                        while(1);
+                        _waitForSent();
+
+                        while(true) {
+                            _syncer.run();
+                            wait(0.1);
+                        }
                     }
 
                     // Set car ready to drive (-> pressing the gas-pedal will move the car -> fun)
@@ -451,6 +490,8 @@ class SCar : public IService {
                     // Stop blinking greed to show car is primed
                     _resetLeds();
                     _led.green->setState(LED_ON);
+                    _waitForSent();
+
                     wait(0.1);
                 }
             }

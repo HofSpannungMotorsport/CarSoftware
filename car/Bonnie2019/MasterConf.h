@@ -59,7 +59,8 @@ HardwareHvEnabled hvEnabled(MASTER_PIN_HV_ENABLED, COMPONENT_SYSTEM_HV_ENABLED);
 HardwareSDCard hardwareSD(MASTER_PIN_SPI_SD_MOSI, MASTER_PIN_SPI_SD_MISO, MASTER_PIN_SPI_SD_SCK, MASTER_PIN_SPI_SD_CS);
 
 // Services
-SCar carService((IButton*)&buttonReset, (IButton*)&buttonStart,
+SCar carService(syncer,
+                (IButton*)&buttonReset, (IButton*)&buttonStart,
                 (ILed*)&ledRed, (ILed*)&ledYellow, (ILed*)&ledGreen,
                 (IPedal*)&gasPedal, (IPedal*)&brakePedal,
                 (IBuzzer*)&buzzer,

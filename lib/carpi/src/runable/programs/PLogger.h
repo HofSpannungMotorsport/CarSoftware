@@ -25,6 +25,9 @@ class PLogger : public IProgram {
         }
 
         virtual void run() {
+            // Only capture values if in READY_TO_DRIVE mode
+            if (_carService.getState() != READY_TO_DRIVE) return;
+
             // At first the Values
             for (LoggingValue &loggingValue : _loggingValues) {
                 if (loggingValue.logged) {

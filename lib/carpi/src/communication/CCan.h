@@ -36,6 +36,10 @@ class CCan : public IChannel {
             _send();
         }
 
+        virtual bool messageInQueue() {
+            return !_outQueue.empty();
+        }
+
         virtual void run() {
             _send();
         }

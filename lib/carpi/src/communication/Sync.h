@@ -116,6 +116,15 @@ class Sync : public IRunable {
             }
         }
 
+        bool messageInQueue() {
+            bool returnValue = false;
+            for(Channel &channel : channels) {
+                returnValue |= channel.channel->messageInQueue();
+            }
+
+            return returnValue;
+        }
+
         void finalize() {
             router.shrink_to_fit();
             bridger.shrink_to_fit();
