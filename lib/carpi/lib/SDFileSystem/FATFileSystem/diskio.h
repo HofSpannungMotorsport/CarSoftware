@@ -77,4 +77,6 @@ DRESULT disk_ioctl (BYTE pdrv, BYTE cmd, void* buff);
 }
 #endif
 
+#include "diskio.cpp"
+
 #endif

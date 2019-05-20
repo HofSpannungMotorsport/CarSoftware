@@ -93,4 +93,7 @@ public:
 
 };
 
+#include "FATFileSystem.cpp"
+#include "ff.cpp"
+
 #endif
