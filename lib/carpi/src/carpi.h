@@ -78,6 +78,7 @@
     #include "components/interface/IMotorController.h"
     #include "components/interface/IRpmSensor.h"
     #include "components/interface/ISDCard.h"
+    #include "components/interface/ISpringTravelSensor.h"
     //   Hardware
     #include "components/hardware/HardwareAlive.h"
     #include "components/hardware/HardwareBuzzer.h"
@@ -90,12 +91,14 @@
     #include "components/hardware/HardwareMotorController.h"
     #include "components/hardware/HardwareRpmSensor.h"
     #include "components/hardware/HardwareSDCard.h"
+    #include "components/hardware/HardwareSpringTravelSensor.h"
     //   Software
     #include "components/software/SoftwareAlive.h"
     #include "components/software/SoftwareButton.h"
     #include "components/software/SoftwareLed.h"
     #include "components/software/SoftwarePedal.h"
     #include "components/software/SoftwareRpmSensor.h"
+    #include "components/software/SoftwareSpringTravelSensor.h"
 
     // Services
     #include "runable/services/IService.h"
