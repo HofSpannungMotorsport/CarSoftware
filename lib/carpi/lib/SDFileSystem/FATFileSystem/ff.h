@@ -347,4 +347,6 @@ int ff_del_syncobj (_SYNC_t sobj);				/* Delete a sync object */
 }
 #endif
 
+#include "ccsbcs.cpp"
+
 #endif /* _FATFS */

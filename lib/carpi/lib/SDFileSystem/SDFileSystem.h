@@ -86,4 +86,6 @@ protected:
     int _is_initialized;
 };
 
+#include "SDFileSystem.cpp"
+
 #endif

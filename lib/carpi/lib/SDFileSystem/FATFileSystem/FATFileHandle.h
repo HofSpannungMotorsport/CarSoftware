@@ -19,33 +19,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef MBED_FATDIRHANDLE_H
-#define MBED_FATDIRHANDLE_H
+#ifndef MBED_FATFILEHANDLE_H
+#define MBED_FATFILEHANDLE_H
 
-#include "DirHandle.h"
+#include "FileHandle.h"
 
 using namespace mbed;
 
-class FATDirHandle : public DirHandle {
+class FATFileHandle : public FileHandle {
+public:
 
- public:
-    FATDirHandle(const FATFS_DIR &the_dir);
-    virtual int closedir();
-    virtual struct dirent *readdir();
-    virtual void rewinddir();
-    virtual off_t telldir();
-    virtual void seekdir(off_t location);
+    FATFileHandle(FIL fh);
+    virtual int close();
+    virtual ssize_t write(const void* buffer, size_t length);
+    virtual ssize_t read(void* buffer, size_t length);
+    virtual int isatty();
+    virtual off_t lseek(off_t position, int whence);
+    virtual int fsync();
+    virtual off_t flen();
+    
+    virtual off_t seek(off_t position, int whence) { return lseek(position, whence); }
+    virtual off_t size() { return flen(); }
 
-    virtual ssize_t read(struct dirent *ent);    
-    virtual int close() { return closedir(); };
-    virtual void seek(off_t offset) { seekdir(offset); };
-    virtual off_t tell() { return telldir(); };
-    virtual void rewind() { rewinddir(); };
-
- private:
-    FATFS_DIR dir;
-    struct dirent cur_entry;
+protected:
+    
+    FIL _fh;
 
 };
+
+#include "FATFileHandle.cpp"
 
 #endif
