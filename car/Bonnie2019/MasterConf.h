@@ -57,6 +57,7 @@ HardwarePump coolingPump(MASTER_PIN_PUMP_PWM, MASTER_PIN_PUMP_ENABLE, COMPONENT_
 HardwareBuzzer buzzer(MASTER_PIN_BUZZER, COMPONENT_BUZZER_STARTUP);
 HardwareHvEnabled hvEnabled(MASTER_PIN_HV_ENABLED, COMPONENT_SYSTEM_HV_ENABLED);
 HardwareSDCard hardwareSD(MASTER_PIN_SPI_SD_MOSI, MASTER_PIN_SPI_SD_MISO, MASTER_PIN_SPI_SD_SCK, MASTER_PIN_SPI_SD_CS);
+HardwareAlive masterAlive(COMPONENT_ALIVE_MASTER, MASTER_PIN_MICROCONTROLLER_OK);
 
 // Services
 SCar carService(syncer,
@@ -66,7 +67,8 @@ SCar carService(syncer,
                 (IBuzzer*)&buzzer,
                 (IMotorController*)&motorController,
                 (IHvEnabled*)&hvEnabled,
-                (ISDCard*)&hardwareSD);
+                (ISDCard*)&hardwareSD,
+                (IAlive*)&pedalAlive, (IAlive*)&dashboardAlive, (IAlive*)&masterAlive);
 
 PMotorController motorControllerService(carService,
                                         (IMotorController*)&motorController,

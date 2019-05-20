@@ -9,6 +9,7 @@
 #include "components/interface/IMotorController.h"
 #include "components/interface/IHvEnabled.h"
 #include "components/interface/ISDCard.h"
+#include "components/interface/IAlive.h"
 #include "communication/Sync.h"
 
 
@@ -23,7 +24,7 @@
 
 enum car_state_t : uint8_t {
     CAR_OFF = 0x0,
-    BOOT = 0x1,
+    CALIBRATION = 0x1,
     ALMOST_READY_TO_DRIVE = 0x2,
     READY_TO_DRIVE = 0x3,
     CAR_ERROR = 0x4
@@ -57,7 +58,8 @@ class SCar : public IService {
              IBuzzer* buzzer,
              IMotorController* motorController,
              IHvEnabled* hvEnabled,
-             ISDCard* sdCard)
+             ISDCard* sdCard,
+             IAlive* pedalAlive, IAlive* dashboardAlive, IAlive* masterAlive)
              : _syncer(syncer) {
             _button.reset = buttonReset;
             _button.start = buttonStart;
@@ -76,24 +78,20 @@ class SCar : public IService {
             _hvEnabled = hvEnabled;
 
             _sdCard = sdCard;
+
+            _pedalAlive = pedalAlive;
+            _dashboardAlive = dashboardAlive;
+            _masterAlive = masterAlive;
         }
 
         virtual void run() {
             _checkHvEnabled();
+            _checkAlive();
+            _checkButtonStatus();
+
+            processErrors();
 
             _checkInput();
-
-            if (_button.reset->getStatus() > 0) {
-                addError(Error(_calculateComponentId((IComponent*)_button.reset), _button.reset->getStatus(), ERROR_SYSTEM));
-            }
-
-            if (_button.start->getStatus() > 0) {
-                addError(Error(_calculateComponentId((IComponent*)_button.start), _button.start->getStatus(), ERROR_SYSTEM));
-            }
-
-            if (!(_errorRegister.empty())) {
-                processErrors();
-            }
         }
 
         void addError(Error error) {
@@ -162,6 +160,9 @@ class SCar : public IService {
 
             // [QF]
             while(!(_hvEnabled->read())) {
+                _syncer.run();
+                _checkAlive();
+                processErrors();
                 wait(0.1);
             }
 
@@ -214,6 +215,10 @@ class SCar : public IService {
         IMotorController* _motorController;
         IHvEnabled* _hvEnabled;
         ISDCard* _sdCard;
+
+        IAlive* _pedalAlive;
+        IAlive* _dashboardAlive;
+        IAlive* _masterAlive;
 
         id_component_t _calculateComponentId(IComponent* component) {
             id_component_t id = component->getComponentId();
@@ -311,11 +316,36 @@ class SCar : public IService {
             }
         }
 
+        void _checkAlive() {
+            // [QF]
+            if (!(_pedalAlive->getAlive())) {
+                addError(Error(_calculateComponentId((IComponent*)_pedalAlive), _pedalAlive->getStatus(), ERROR_CRITICAL));
+            }
+
+            if (!(_dashboardAlive->getAlive())) {
+                addError(Error(_calculateComponentId((IComponent*)_dashboardAlive), _dashboardAlive->getStatus(), ERROR_CRITICAL));
+            }
+
+            if (!(_masterAlive->getAlive())) {
+                addError(Error(_calculateComponentId((IComponent*)_masterAlive), _masterAlive->getStatus(), ERROR_CRITICAL));
+            }
+        }
+
+        void _checkButtonStatus() {
+            if (_button.reset->getStatus() > 0) {
+                addError(Error(_calculateComponentId((IComponent*)_button.reset), _button.reset->getStatus(), ERROR_SYSTEM));
+            }
+
+            if (_button.start->getStatus() > 0) {
+                addError(Error(_calculateComponentId((IComponent*)_button.start), _button.start->getStatus(), ERROR_SYSTEM));
+            }
+        }
+
         void _calibratePedals() {
             // Start bootup/calibration
             // Yellow -> On
             // Green  -> Normal Blinking
-            _state = BOOT;
+            _state = CALIBRATION;
             _resetLeds();
             _led.yellow->setState(LED_ON);
             _led.green->setState(LED_ON);
@@ -333,6 +363,7 @@ class SCar : public IService {
             // Calibrate pedal until pressed Start once for long time
             while(_button.start->getState() != LONG_CLICKED) {
                 _syncer.run();
+                _checkAlive();
                 wait(0.1);
             }
 
@@ -358,6 +389,7 @@ class SCar : public IService {
             wait(0.1);
 
             _syncer.run();
+            _checkAlive();
 
             // Check for Errors at Calibration
             if (_pedal.gas->getStatus() > 0) {
@@ -372,7 +404,7 @@ class SCar : public IService {
 
 
             // If all OK, go into Almost Ready to drive
-            if (_state == BOOT) {
+            if (_state == CALIBRATION) {
                 _state = ALMOST_READY_TO_DRIVE;
             } else {
                 // If an Error occured, stop continuing and glow Red

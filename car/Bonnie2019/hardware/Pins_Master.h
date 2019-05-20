@@ -57,4 +57,7 @@
 #define MASTER_PIN_SPI_SD_MOSI PE_14
 #define MASTER_PIN_SPI_SD_MISO PE_13
 
+// Dout Microcontroller OK
+#define MASTER_PIN_MICROCONTROLLER_OK       PA_9
+
 #endif // PINS_MASTER_H
