@@ -2,7 +2,6 @@
 #define IPEDAL_H
 
 #include "communication/SelfSyncable.h"
-#include "../interface/ILogable.h"
 
 #define STD_PEDAL_VALUE_REFRESH_RATE 60 // Hz
 
