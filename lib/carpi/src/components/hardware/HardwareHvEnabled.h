@@ -25,6 +25,15 @@ class HardwareHvEnabled : public IHvEnabled {
         virtual operator bool() {
             return read();
         }
+
+        virtual void setStatus(status_t status) {
+            // No implementation needed
+        }
+
+        virtual status_t getStatus() {
+            // No implementation needed
+            return 0;
+        }
     
     private:
         DigitalIn _pin;

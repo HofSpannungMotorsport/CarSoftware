@@ -12,45 +12,48 @@ using namespace std;
 class RunableScheduler : public IRunable {
     public:
         virtual void run() {
-            for (auto &service : _services) {
-                if (service.running) {
-                    if (service.lastRun->read() > (1.0 / service.refreshRate)) {
-                        service.lastRun->reset();
-                        service.service->run();
+            for (auto &runable : _runableSchedules) {
+                if (runable.running) {
+                    if (runable.lastRun->read() > (1.0 / runable.refreshRate)) {
+                        runable.lastRun->reset();
+                        runable.runable->run();
                     }
                 } else {
-                    service.service->run();
-                    service.lastRun->reset();
-                    service.lastRun->start();
-                    service.running = true;
+                    runable.runable->run();
+                    runable.lastRun->reset();
+                    runable.lastRun->start();
+                    runable.running = true;
                 }
             }
         }
 
-        /*
-            Add a Runable to the List.
-        */
-        void addRunable(IRunable* service, float refreshRate = STD_SCHEDULER_REFRESH_RATE) {
-            _services.emplace_back(service, refreshRate);
+        // Add a Runable to the List.
+        void addRunable(IRunable* runable, float refreshRate = STD_SCHEDULER_REFRESH_RATE) {
+            _runableSchedules.emplace_back(runable, refreshRate);
+        }
+
+        // Optimise List for RAM
+        void finalize() {
+            _runableSchedules.shrink_to_fit();
         }
 
     private:
         class RunableSchedule {
             public:
-                RunableSchedule(IRunable* servicePointer, float serviceRefreshRate) {
-                    service = servicePointer;
-                    refreshRate = serviceRefreshRate;
-                    lastRun = lastRun = std::shared_ptr<Timer>(new Timer());
+                RunableSchedule(IRunable* runablePointer, float runableRefreshRate) {
+                    runable = runablePointer;
+                    refreshRate = runableRefreshRate;
+                    lastRun = std::shared_ptr<Timer>(new Timer());
                 }
 
-                IRunable *service;
+                IRunable *runable;
                 float refreshRate = STD_SCHEDULER_REFRESH_RATE;
                 bool running = false;
 
                 std::shared_ptr<Timer> lastRun;
         };
 
-        vector<RunableSchedule> _services;
+        vector<RunableSchedule> _runableSchedules;
 };
 
 #endif // RUNABLESCHEDULER_H

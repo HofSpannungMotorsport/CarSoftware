@@ -1,7 +1,6 @@
 #ifndef HARDWAREPEDAL_H
 #define HARDWAREPEDAL_H
 
-#include "platform/CircularBuffer.h"
 #include "../interface/IPedal.h"
 #include "../hardware/HardwareAnalogSensor.h"
 
@@ -23,25 +22,17 @@
 
 class HardwarePedal : public IPedal {
     public:
-        HardwarePedal(PinName inputPin)
-            : _pin1(inputPin), _pin2(inputPin){
+        HardwarePedal(PinName inputPin, id_sub_component_t componentSubId)
+            :  _pin1(inputPin), _pin2(inputPin) {
             _secondSensor = false;
             _init();
-        }
-
-        HardwarePedal(PinName inputPin, id_sub_component_t componentSubId)
-            : HardwarePedal(inputPin) {
             setComponentSubId(componentSubId);
         }
 
-        HardwarePedal(PinName inputPin1, PinName inputPin2)
+        HardwarePedal(PinName inputPin1, PinName inputPin2, id_sub_component_t componentSubId)
             : _pin1(inputPin1), _pin2(inputPin2) {
             _secondSensor = true;
             _init();
-        }
-
-        HardwarePedal(PinName inputPin1, PinName inputPin2, id_sub_component_t componentSubId)
-            : HardwarePedal(inputPin1, inputPin2) {
             setComponentSubId(componentSubId);
         }
 
@@ -55,7 +46,7 @@ class HardwarePedal : public IPedal {
             }
         }
 
-        virtual pedal_status_t getStatus() {
+        virtual status_t getStatus() {
             _status |= (_pin1.getStatus() << 4);
             _status |= (_pin2.getStatus() << 4);
 
@@ -136,72 +127,41 @@ class HardwarePedal : public IPedal {
             _deviance.maxTime = time;
         }
 
-        virtual void setStatus(pedal_status_t status) {
+        virtual void setStatus(status_t status) {
             // No implementation needed
         }
         virtual void setValue(pedal_value_t value) {
             // No impemantation needed
         }
 
-        virtual message_build_result_t buildMessage(CarMessage &carMessage) {
-            car_sub_message_t subMessage;
-
-            subMessage.length = 3;
-
-            subMessage.data[0] = this->getStatus();
-
-            // change line below when type of pedal_value_t changes
-            float pedalValueFloat = this->getValue();
-            uint16_t pedalValue = ((float)pedalValueFloat * 65535);
-
-            #ifdef PEDAL_MESSAGE_HANDLER_DEBUG
-                pcSerial.printf("[HardwarePedal]@buildMessage: HardwareObject (float)pedalValue: %.3f\t(uint16_t)pedalValue: %i\t", pedalValueFloat, pedalValue);
-            #endif
-
-            subMessage.data[1] = pedalValue & 0xFF;
-            subMessage.data[2] = (pedalValue >> 8) & 0xFF;
-
-            #ifdef PEDAL_MESSAGE_HANDLER_DEBUG
-                pcSerial.printf("msg.data[1]: 0x%x\tmsg.data[2]: 0x%x\n", subMessage.data[1], subMessage.data[2]);
-            #endif
-
-            carMessage.addSubMessage(subMessage);
-
-            return MESSAGE_BUILD_OK;
-        }
-
-        virtual message_parse_result_t parseMessage(CarMessage &carMessage) {
-            message_parse_result_t result = MESSAGE_PARSE_OK;
+        virtual void receive(CarMessage &carMessage) {
             for (car_sub_message_t &subMessage : carMessage.subMessages) {
-                if(subMessage.length != 1) // not a valid message
-                    result = MESSAGE_PARSE_ERROR;
-
-                uint8_t gotValue = subMessage.data[0];
-                pedal_calibration_t calibrationStatus = CURRENTLY_NOT_CALIBRATING;
-
-                if (gotValue == 1) {
-                    calibrationStatus = CURRENTLY_NOT_CALIBRATING;
-                } else if (gotValue == 2) {
-                    calibrationStatus = CURRENTLY_CALIBRATING;
+                switch (subMessage.data[0]) {
+                    case PEDAL_MESSAGE_COMMAND_SET_CALIBRATION_STATUS:
+                        setCalibrationStatus((pedal_calibration_t)subMessage.data[1]);
+                        break;
+                    
+                    case PEDAL_MESSAGE_COMMAND_SET_PROPORTIONALITY_SENSOR_1:
+                        setProportionality((pedal_sensor_type_t)subMessage.data[1], 0);
+                        break;
+                    
+                    case PEDAL_MESSAGE_COMMAND_SET_PROPORTIONALITY_SENSOR_2:
+                        setProportionality((pedal_sensor_type_t)subMessage.data[1], 1);
+                        break;
                 }
-
-                this->setCalibrationStatus(calibrationStatus);
-
-                #ifdef PEDAL_MESSAGE_HANDLER_DEBUG
-                    pcSerial.printf("[HardwarePedal]@parseMessage: SoftwareObject calibrationStatus: 0x%x\tmsg.data[0]: 0x%x\tgotValue: %i\n", calibrationStatus, subMessage.data[0], gotValue);
-                #endif
             }
-            
-            return result;
         }
 
     protected:
+        Ticker _pedalPositionTicker;
+        Ticker _statusTicker;
+
         HardwareAnalogSensor _pin1;
         HardwareAnalogSensor _pin2;
         pedal_sensor_type_t _pin1Proportionality = DIRECT_PROPORTIONAL,
                             _pin2Proportionality = DIRECT_PROPORTIONAL;
         bool _secondSensor;
-        pedal_status_t _status = 0;
+        status_t _status = 0;
         bool _ready = false;
         pedal_value_t _last = 0;
 
@@ -238,6 +198,25 @@ class HardwarePedal : public IPedal {
             bool timerStarted = false;
         } _deviance;
 
+        void _updatePedalPosition() {
+            if (_syncerAttached) {
+                uint16_t pedalValue = ((float)getValue() * 65535);
+
+                _sendCommand(PEDAL_MESSAGE_COMMAND_SET_VALUE, pedalValue & 0xFF, (pedalValue >> 8) & 0xFF, SEND_PRIORITY_PEDAL, IS_DROPABLE);
+            }
+        }
+
+        status_t _lastSentStatus = 0;
+        void _updateStatus() {
+            if (_syncerAttached) {
+                status_t currentStatus = getStatus();
+                if(_lastSentStatus != currentStatus) {
+                    _lastSentStatus = currentStatus;
+                    _sendCommand(PEDAL_MESSAGE_COMMAND_SET_STATUS, currentStatus, SEND_PRIORITY_PEDAL, IS_NOT_DROPABLE);
+                }
+            }
+        }
+
         void _init() {
             setComponentType(COMPONENT_PEDAL);
             setObjectType(OBJECT_HARDWARE);
@@ -253,6 +232,9 @@ class HardwarePedal : public IPedal {
                 _pin2.setBoundary(STD_MAPPED_BOUNDARY_PERCENTAGE);
                 _pin2.setBoundaryOutTime(STD_MAX_OUT_OF_BOUNDARY_TIME);
             }
+
+            _pedalPositionTicker.attach(callback(this, &HardwarePedal::_updatePedalPosition), 1.0/(float)STD_PEDAL_VALUE_REFRESH_RATE);
+            _statusTicker.attach(callback(this, &HardwarePedal::_updateStatus), STD_PEDAL_STATUS_REFRESH_TIME);
         }
 
         analog_sensor_raw_t _getAverageValue(CircularBuffer<analog_sensor_raw_t, STD_CALIBRATION_SAMPLE_BUFFER_SIZE> &buffer) {

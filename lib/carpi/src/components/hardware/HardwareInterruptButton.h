@@ -1,7 +1,6 @@
 #ifndef HARDWAREINTERRUPTBUTTON_H
 #define HARDWAREINTERRUPTBUTTON_H
 
-#include "platform/CircularBuffer.h"
 #include "../interface/IButton.h"
 
 
@@ -56,11 +55,11 @@ class HardwareInterruptButton : public IButton {
         }
 
         // Status...
-        virtual void setStatus(button_status_t status) {
+        virtual void setStatus(status_t status) {
             // No implementation needed
         }
 
-        virtual button_status_t getStatus() {
+        virtual status_t getStatus() {
             return _status;
         }
 
@@ -84,28 +83,15 @@ class HardwareInterruptButton : public IButton {
                 return true;
         }
 
-        virtual message_build_result_t buildMessage(CarMessage &carMessage) {
-            while(getStateChanged()) {
-                car_sub_message_t subMessage;
-                subMessage.length = 2;
-                subMessage.data[0] = getState();
-                subMessage.data[1] = getStatus();
-                carMessage.addSubMessage(subMessage);
-            }
-
-            return MESSAGE_BUILD_OK;
-        }
-
-        virtual message_parse_result_t parseMessage(CarMessage &carMessage) {
+        virtual void receive(CarMessage &carMessage) {
             // No implementation needed yet
-            return MESSAGE_PARSE_ERROR;
         }
 
     protected:
         InterruptIn _interruptPin;
         Ticker _ticker;
         bool _lastHardwareState, _debouncing, _debounced;
-        button_status_t _status;
+        status_t _status;
         button_state_t _lastState;
         CircularBuffer<button_state_t, STATE_BUFFER_SIZE> _stateBuffer;
 
@@ -156,10 +142,14 @@ class HardwareInterruptButton : public IButton {
         }
 
         void _addState(button_state_t state) {
-            if (_stateBuffer.full())
-                _stateBufferFull();
+            if (_syncerAttached) {
+                _sendCommand(BUTTON_MESSAGE_COMMAND_ADD_STATE, state, SEND_PRIORITY_BUTTON, IS_NOT_DROPABLE);
+            } else {
+                if (_stateBuffer.full())
+                    _stateBufferFull();
 
-            _stateBuffer.push(state);
+                _stateBuffer.push(state);
+            }
         }
 
         button_state_t _readState() {

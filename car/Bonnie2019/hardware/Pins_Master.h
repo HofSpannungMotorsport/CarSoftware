@@ -51,4 +51,10 @@
 // Din User Button (Normally closed)
 #define MASTER_PIN_USER_BUTTON              USER_BUTTON // PC_13
 
+// SPI SD Card
+#define MASTER_PIN_SPI_SD_CS   PE_15
+#define MASTER_PIN_SPI_SD_SCK  PE_12
+#define MASTER_PIN_SPI_SD_MOSI PE_14
+#define MASTER_PIN_SPI_SD_MISO PE_13
+
 #endif // PINS_MASTER_H

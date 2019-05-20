@@ -2,6 +2,7 @@
 #define ICOMPONENT_H
 
 #include "communication/componentIds.h"
+#include "ILogable.h"
 
 typedef uint8_t component_object_type_datatype_t;
 enum component_object_type_t : component_object_type_datatype_t {
@@ -10,7 +11,7 @@ enum component_object_type_t : component_object_type_datatype_t {
     OBJECT_SOFTWARE = 0x2
 };
 
-class IComponent : private NonCopyable<IComponent> {
+class IComponent : public ILogable {
     public:
         IComponent() {}
         IComponent(id_sub_component_t componentSubId)

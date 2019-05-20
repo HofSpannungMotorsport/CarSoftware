@@ -11,7 +11,7 @@
 
 class HardwareRpmSensor : public IRpmSensor {
     public:
-        HardwareRpmSensor(PinName pin)
+        HardwareRpmSensor(PinName pin, id_sub_component_t componentSubId, uint8_t measurementPointsPerRevolution = STD_MEASUREMENT_POINTS_PER_REVOLUTION)
             : _pin(pin) {
             #ifdef USE_FALL
                 _pin.fall(callback(this, &HardwareRpmSensor::_measurementEvent));
@@ -21,19 +21,17 @@ class HardwareRpmSensor : public IRpmSensor {
 
             setComponentType(COMPONENT_RPM_SENSOR);
             setObjectType(OBJECT_HARDWARE);
-        }
-
-        HardwareRpmSensor(PinName pin, id_sub_component_t componentSubId, uint8_t measurementPointsPerRevolution = STD_MEASUREMENT_POINTS_PER_REVOLUTION)
-            : HardwareRpmSensor(pin) {
             setComponentSubId(componentSubId);
             _measurement.pointsPerRevolution = measurementPointsPerRevolution;
+
+            _updateValuesTicker.attach(callback(this, &HardwareRpmSensor::_updateValues), 1.0/(float)RPM_SENSOR_MESSAGE_REFRESH_RATE);
         }
 
-        virtual void setStatus(rpm_sensor_status_t status) {
+        virtual void setStatus(status_t status) {
             // No implementation needed
         }
 
-        virtual rpm_sensor_status_t getStatus() {
+        virtual status_t getStatus() {
             return _status;
         }
 
@@ -63,33 +61,15 @@ class HardwareRpmSensor : public IRpmSensor {
             return returnValue;
         }
 
-        virtual message_build_result_t buildMessage(CarMessage &carMessage) {
-            car_sub_message_t subMessage;
-            subMessage.length = 4;
-
-            subMessage.data[0] = this->getStatus();
-
-            rpm_sensor_frequency_t frequency = this->getFrequency();
-            uint32_t frequencyBinary = *((uint32_t*)&frequency);
-
-            // Slice data in 4 Byte -> 32bit float
-            for (uint8_t i = 1; i < 5; i++) {
-                subMessage.data[i] = (uint8_t)((frequencyBinary >> ((i - 1) * 8)) & 0xFF);
-            }
-
-            carMessage.addSubMessage(subMessage);
-
-            return MESSAGE_BUILD_OK;
-        }
-
-        virtual message_parse_result_t parseMessage(CarMessage &carMessage) {
+        virtual void receive(CarMessage &carMessage) {
             // No implementation needed
-            return MESSAGE_PARSE_ERROR;
         }
 
     protected:
+        Ticker _updateValuesTicker;
+
         InterruptIn _pin;
-        rpm_sensor_status_t _status = 0;
+        status_t _status = 0;
 
         struct _measurement {
             Timer timer;
@@ -140,6 +120,18 @@ class HardwareRpmSensor : public IRpmSensor {
             _measurement.zero = true;
             _measurement.started = false;
             _measurement.bufferSize = 0;
+        }
+
+        virtual void _updateValues() {
+            _sendCommand(RPM_MESSAGE_COMMAND_SET_STATUS, getStatus(), SEND_PRIORITY_RPM, IS_DROPABLE);
+
+            rpm_sensor_frequency_t frequency = this->getFrequency();
+            uint32_t frequencyBinary = *((uint32_t*)&frequency);
+
+            _sendCommand(RPM_MESSAGE_COMMAND_SET_FREQUENCY, (uint8_t)(frequencyBinary & 0xFF),
+                                                            (uint8_t)((frequencyBinary >> 8) & 0xFF),
+                                                            (uint8_t)((frequencyBinary >> 16) & 0xFF),
+                                                            (uint8_t)((frequencyBinary >> 24) & 0xFF), SEND_PRIORITY_RPM, IS_DROPABLE);
         }
 };
 

@@ -21,7 +21,11 @@ class HardwarePump : public IPump {
             if (speed > 1) speed = 1;
             if (speed < 0) speed = 0;
 
-            _pwmPort.write(1 - speed);
+            #ifdef DISABLE_PUMP
+                _pwmPort.write(1);
+            #else
+                _pwmPort.write(1 - speed);
+            #endif
         }
 
         virtual pump_speed_t getSpeed() {
@@ -29,11 +33,22 @@ class HardwarePump : public IPump {
         }
 
         virtual void setEnable(pump_enable_t enable) {
-            _enablePort.write(enable);
+            #ifndef DISABLE_PUMP
+                _enablePort.write(enable);
+            #endif
         }
 
         virtual pump_enable_t getEnable() {
             return _enablePort.read();
+        }
+
+        virtual void setStatus(status_t status) {
+            // No implementation needed
+        }
+
+        virtual status_t getStatus() {
+            // No implementation needed
+            return 0;
         }
 
     protected:

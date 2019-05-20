@@ -3,6 +3,8 @@
 
 #include "SanityCheck.h"
 
+#define LOOP_WAIT_TIME 0.0001
+
 #ifdef BOARD_DASHBOARD
 #include "DashboardSlaveConf.h"
 #endif

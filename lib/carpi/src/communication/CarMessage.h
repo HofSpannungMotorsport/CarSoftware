@@ -1,6 +1,7 @@
 #ifndef CARMESSAGE_H
 #define CARMESSAGE_H
 
+#include <memory>
 #include <vector>
 #include <stdint.h>
 #include "deviceIds.h"
@@ -13,7 +14,19 @@ struct car_sub_message_t {
     uint8_t data[7];
 };
 
-class CarMessage : private NonCopyable<CarMessage> {
+enum car_message_dropable_t : bool {
+    IS_NOT_DROPABLE = false,
+    IS_DROPABLE = true
+};
+
+typedef uint8_t car_message_priority_t;
+
+#include "SendPriority.h"
+
+#define CAR_MESSAGE_PRIORITY_LOWEST 255
+#define CAR_MESSAGE_PRIORITY_HIGHEST 0
+
+class CarMessage {
     public:
         CarMessage() {}
 
@@ -40,7 +53,7 @@ class CarMessage : private NonCopyable<CarMessage> {
             Set the receiverId for the device which should reveive the message
         */
         void setReceiverId(id_device_t receiverId) {
-            _receiverId = _receiverId;
+            _receiverId = receiverId;
         }
 
         /*
@@ -48,6 +61,14 @@ class CarMessage : private NonCopyable<CarMessage> {
         */
         id_device_t getReceiverId() {
             return _receiverId;
+        }
+
+        /*
+            Seth the Sender and Receiver Id from a message header
+        */
+        void setIdsFromMessageHeader(id_message_header_t messageHeader) {
+            setSenderId(deviceId::getDeviceIdFromMessageHeader(messageHeader, DEVICE_TYPE_SENDER));
+            setReceiverId(deviceId::getDeviceIdFromMessageHeader(messageHeader, DEVICE_TYPE_RECEIVER));
         }
 
         /*
@@ -62,6 +83,13 @@ class CarMessage : private NonCopyable<CarMessage> {
         */
         void addSubMessage(car_sub_message_t &subMessage) {
             subMessages.push_back(subMessage);
+        }
+
+        /*
+            Remove first subMessage
+        */
+        void removeFirstSubMessage() {
+            subMessages.erase(subMessages.begin());
         }
 
         /*
@@ -81,56 +109,41 @@ class CarMessage : private NonCopyable<CarMessage> {
         /*
             Set the send Priority. Should be a Value between 1 and 255
         */
-        void setSendPriority(uint8_t sendPriority) {
+        void setSendPriority(car_message_priority_t sendPriority) {
             _sendPriority = sendPriority;
         }
 
         /*
             Get the send Priority. Should be a Value between 0 and 255
         */
-        uint8_t getSendPriority() {
+        car_message_priority_t getSendPriority() {
             return _sendPriority;
         }
 
-        /*
-            Set the Timeout for a message, e.g. define the max. time a message can sit in the queue
-        */
-        void setTimeout(float timeout) {
-            _timeout = timeout;
+        void setDropable(car_message_dropable_t dropable) {
+            _dropable = dropable;
         }
 
-        /*
-            Get the Timeout for a message, e.g. get the max. time a message can sit in the queue
-        */
-        float getTimeout() {
-            return _timeout;
-        }
-
-        /*
-            Start the Timer from when on the message was sent. Should be called shortly before putting the message into the queue.
-        */
-        void startSentTimer() {
-            _sentTimer.reset();
-            _sentTimer.start();
-        }
-
-        /*
-            Get the time passed since the message has been sent
-        */
-        float getTimeSinceSent() {
-            return _sentTimer.read();
+        car_message_dropable_t getDropable() {
+            return _dropable;
         }
     
     protected:
-        id_device_t _senderId; // only 5 bits are useable
-        id_device_t _receiverId; // only 5 bits are usable
+        id_device_t _senderId = DEVICE_NOT_SET; // only 5 bits are useable
+        id_device_t _receiverId = DEVICE_NOT_SET; // only 5 bits are usable
 
-        id_component_t _componentId;
-        
-        uint8_t _sendPriority;
-        float _timeout;
-        
-        Timer _sentTimer;
+        id_component_t _componentId = 0;
+
+        car_message_priority_t _sendPriority = CAR_MESSAGE_PRIORITY_LOWEST;
+
+        /*
+            If a message is send often and repeadly, it could let overflow the outgoing bessage queue.
+            These messages are not so importent and can be dropped because a new message will come really soon,
+            being more uptodate and making the last message useless.
+
+            A Configuration-Message is sent mostly only once and should not be dropped at all!
+        */
+        car_message_dropable_t _dropable = IS_NOT_DROPABLE;
 };
 
 #endif
