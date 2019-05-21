@@ -24,6 +24,7 @@ enum sd_error_type_t : status_t {
 
 class ISDCard : public IComponent {
     public:
+        virtual bool begin();
         virtual void write(IComponent &component, sd_log_id_t logId, string &customString) = 0;
 };
 

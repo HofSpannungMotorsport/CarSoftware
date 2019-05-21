@@ -13,7 +13,6 @@
 #include "communication/Sync.h"
 
 
-#define STARTUP_WAIT 0.3 // s wait before system gets started
 #define ERROR_REGISTER_SIZE 64 // errors, max: 255
 #define STARTUP_ANIMATION_SPEED 0.075 // s between led-changes
 #define STARTUP_ANIMATION_PLAYBACKS 2 // times the animation should be played
@@ -142,8 +141,6 @@ class SCar : public IService {
         }
 
         void startUp() {
-            wait(STARTUP_WAIT);
-
             for (uint8_t i = 0; i < STARTUP_ANIMATION_PLAYBACKS; i++) {
                 _startupAnimationUp();
                 _startupAnimationDown();
@@ -189,7 +186,12 @@ class SCar : public IService {
             }
         }
 
+    #ifdef TESTING_MODE
+    protected:
+        SCar(Sync &syncer) : _syncer(syncer) {} // Only use for testing outside of the car!
+    #else
     private:
+    #endif
         CircularBuffer<Error, ERROR_REGISTER_SIZE, uint8_t> _errorRegister;
 
         car_state_t _state = CAR_OFF;
@@ -318,16 +320,29 @@ class SCar : public IService {
 
         void _checkAlive() {
             // [QF]
+            bool anyControllerDead = false;
+
             if (!(_pedalAlive->getAlive())) {
                 addError(Error(_calculateComponentId((IComponent*)_pedalAlive), _pedalAlive->getStatus(), ERROR_CRITICAL));
+                anyControllerDead = true;
             }
 
             if (!(_dashboardAlive->getAlive())) {
                 addError(Error(_calculateComponentId((IComponent*)_dashboardAlive), _dashboardAlive->getStatus(), ERROR_CRITICAL));
+                anyControllerDead = true;
             }
 
             if (!(_masterAlive->getAlive())) {
                 addError(Error(_calculateComponentId((IComponent*)_masterAlive), _masterAlive->getStatus(), ERROR_CRITICAL));
+                anyControllerDead = true;
+            }
+
+            if (anyControllerDead) {
+                _buzzer->setBeep(BUZZER_BEEP_FAST_HIGH_LOW);
+                _buzzer->setState(BUZZER_ON);
+            } else {
+                _buzzer->setBeep(BUZZER_MONO_TONE);
+                _buzzer->setState(BUZZER_OFF);
             }
         }
 

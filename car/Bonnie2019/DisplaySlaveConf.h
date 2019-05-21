@@ -14,7 +14,7 @@ class Display : public Carpi {
         void setup() {
             syncer.finalize();
 
-            wait(0.1);
+            wait(STARTUP_WAIT_TIME_SLAVE);
 
         }
 

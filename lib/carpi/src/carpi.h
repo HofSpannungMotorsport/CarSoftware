@@ -1,3 +1,6 @@
+#ifndef CARPI_H
+#define CARPI_H
+
 /*
     This is the main include file of the cArPI
 
@@ -156,3 +159,5 @@ class Carpi {
         string _version = CARPI_VERSION;
         string _environment = ENVIRONMENT;
 };
+
+#endif // CARPI_H

@@ -10,9 +10,21 @@ using namespace std;
 
 class HardwareSDCard : public ISDCard {
     public:
-        HardwareSDCard(PinName mosi, PinName miso, PinName sck, PinName cs)
+        HardwareSDCard(id_sub_component_t componentSubId, PinName mosi, PinName miso, PinName sck, PinName cs)
         : sd(mosi, miso, sck, cs, SD_LOG_ROOT) {
-            mkdir(SD_LOG_FOLDER_PATH, 0777);
+            setComponentType(COMPONENT_SYSTEM);
+            setComponentSubId(componentSubId);
+            setObjectType(OBJECT_HARDWARE);
+        }
+
+        virtual bool begin() {
+            if (sd.disk_status() == 0) {
+                mkdir(SD_LOG_FOLDER_PATH, 0777);
+                return true;
+            }
+
+            _status |= SD_INITALIZATION_FAILED;
+            return false;
         }
 
         virtual void setStatus(status_t status) {

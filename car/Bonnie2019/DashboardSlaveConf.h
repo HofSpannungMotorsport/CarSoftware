@@ -38,7 +38,7 @@ class Dashboard : public Carpi {
             syncer.addComponent((ICommunication&)alive, canIntern, DEVICE_MASTER);
             syncer.finalize();
 
-            wait(0.1);
+            wait(STARTUP_WAIT_TIME_SLAVE);
 
             // Attach the Syncer to all components
             ledRed.attach(syncer);

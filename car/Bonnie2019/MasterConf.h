@@ -56,7 +56,7 @@ HardwareFan coolingFan(MASTER_PIN_FAN, COMPONENT_COOLING_FAN);
 HardwarePump coolingPump(MASTER_PIN_PUMP_PWM, MASTER_PIN_PUMP_ENABLE, COMPONENT_COOLING_PUMP);
 HardwareBuzzer buzzer(MASTER_PIN_BUZZER, COMPONENT_BUZZER_STARTUP);
 HardwareHvEnabled hvEnabled(MASTER_PIN_HV_ENABLED, COMPONENT_SYSTEM_HV_ENABLED);
-HardwareSDCard hardwareSD(MASTER_PIN_SPI_SD_MOSI, MASTER_PIN_SPI_SD_MISO, MASTER_PIN_SPI_SD_SCK, MASTER_PIN_SPI_SD_CS);
+HardwareSDCard hardwareSD(COMPONENT_SYSTEM_SD_CARD, MASTER_PIN_SPI_SD_MOSI, MASTER_PIN_SPI_SD_MISO, MASTER_PIN_SPI_SD_SCK, MASTER_PIN_SPI_SD_CS);
 HardwareAlive masterAlive(COMPONENT_ALIVE_MASTER, MASTER_PIN_MICROCONTROLLER_OK);
 
 // Services
@@ -111,7 +111,6 @@ class Master : public Carpi {
             syncer.finalize();
 
 
-
             // Add all high demand Services to our Service list
             highDemandServices.addRunable((IRunable*)&carService);
             highDemandServices.addRunable((IRunable*)&motorControllerService);
@@ -136,6 +135,10 @@ class Master : public Carpi {
             serviceScheduler.finalize();
             services.finalize();
 
+
+            wait(STARTUP_WAIT_TIME_MASTER);
+
+
             // Attach the Syncer to all components
             // Dashboard
             ledRed.attach(syncer);
@@ -151,6 +154,7 @@ class Master : public Carpi {
             //rpmFrontLeft.attach(syncer);
             //rpmFrontRight.attach(syncer);
             pedalAlive.attach(syncer);
+
 
             // Add components to logger
             sdLogger.addLogableValue(brakePedal, SD_LOG_ID_PEDAL_POSITION, SD_LOG_REFRESH_RATE_PEDAL_POSITION);
@@ -170,6 +174,8 @@ class Master : public Carpi {
             sdLogger.addLogableValue(coolingPump, SD_LOG_ID_PUMP_SPEED, SD_LOG_REFRESH_RATE_COOLING_PUMP_SPEED);
 
             sdLogger.finalize();
+            hardwareSD.begin();
+            sdLogger.begin();
 
 
             // Start the Car
