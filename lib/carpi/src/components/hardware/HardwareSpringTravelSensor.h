@@ -38,7 +38,7 @@ class HardwareSpringTravelSensor : public ISpringTravelSensor {
         }
 
         virtual void setProportionality(spring_sensor_type_t proportionality) {
-            if (proportionality == DIRECT_PROPORTIONAL || proportionality == INDIRECT_PROPORTIONAL) {
+            if (proportionality == SPRING_DIRECT_PROPORTIONAL || proportionality == SPRING_INDIRECT_PROPORTIONAL) {
                 _proportionality = proportionality;
             }
         }
@@ -56,8 +56,6 @@ class HardwareSpringTravelSensor : public ISpringTravelSensor {
         virtual spring_value_t getValue() {
             if (_ready) {
                 spring_value_t returnValue = _pin.getValue();
-                bool devianceTooHigh = false;
-
                 return returnValue;
             }
 
