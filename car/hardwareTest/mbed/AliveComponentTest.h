@@ -8,7 +8,7 @@ SynteticSync syncer(DEVICE_MASTER);
 HardwareAlive hardwareAlive(COMPONENT_SUB_ID_1, LED2);
 SoftwareAlive softwareAlive(COMPONENT_SUB_ID_2);
 
-void AliveComponentTest() {
+bool AliveComponentTest() {
     wait(1);
 
     pcSerial.printf("AliveComponentTest\n\n");
@@ -32,12 +32,14 @@ void AliveComponentTest() {
         pcSerial.printf("Alive\n");
     } else {
         pcSerial.printf("Not Alive -> Error\n");
+        return false;
     }
 
     if (softwareAlive.getStatus() == 0) {
         pcSerial.printf("Alive\n");
     } else {
         pcSerial.printf("Not Alive -> Error\n");
+        return false;
     }
 
     hardwareAlive.detach();
@@ -50,12 +52,14 @@ void AliveComponentTest() {
 
     if (softwareAlive.getAlive()){
         pcSerial.printf("Still Alive -> Error\n");
+        return false;
     } else {
         pcSerial.printf("Not Alive anymore!\n");
     }
 
     if (softwareAlive.getStatus() == 0){
         pcSerial.printf("Still Alive -> Error\n");
+        return false;
     } else {
         pcSerial.printf("Not Alive anymore!\n");
     }
@@ -72,12 +76,14 @@ void AliveComponentTest() {
         pcSerial.printf("Alive again\n");
     } else {
         pcSerial.printf("Not Alive now -> Error\n");
+        return false;
     }
 
     if (softwareAlive.getStatus() == 0) {
         pcSerial.printf("Alive again\n");
     } else {
         pcSerial.printf("Not Alive now -> Error\n");
+        return false;
     }
 
     hardwareAlive.setAlive(false);
@@ -90,17 +96,19 @@ void AliveComponentTest() {
 
     if (softwareAlive.getAlive()){
         pcSerial.printf("Still Alive after set -> Error\n");
+        return false;
     } else {
         pcSerial.printf("Not Alive after set!\n");
     }
 
     if (softwareAlive.getStatus() == 0){
         pcSerial.printf("Still Alive after set -> Error\n");
+        return false;
     } else {
         pcSerial.printf("Not Alive after set!\n");
     }
 
-    while(true) {}
+    return true;
 }
 
 #endif // ALIVE_COMPONENT_TEST

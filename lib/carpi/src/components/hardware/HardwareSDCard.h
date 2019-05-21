@@ -18,6 +18,7 @@ class HardwareSDCard : public ISDCard {
         }
 
         virtual bool begin() {
+            sd.disk_initialize();
             if (sd.disk_status() == 0) {
                 mkdir(SD_LOG_FOLDER_PATH, 0777);
                 return true;
@@ -48,7 +49,7 @@ class HardwareSDCard : public ISDCard {
         status_t _status = SD_OK;
 
         void _addLineHeader(string &line, IComponent &component, sd_log_id_t logId) {
-            line += to_string(component.getComponentId()) + ";" + to_string(logId) + ";";
+            line += to_string(us_ticker_read()/1000) + ";" + to_string(component.getComponentId()) + ";" + to_string(logId) + ";";
         }
 
         void _writeLine(string &line) {

@@ -17,13 +17,16 @@ PLogger logger(dummySCar, hardwareSD);
 
 HardwareAlive alive(COMPONENT_ALIVE_MASTER, LED2);
 
-void HardwareSDCardTest() {
+bool HardwareSDCardTest() {
+    wait(2);
+    alive.setAlive(false);
+
     pcSerial.printf("HardwareSDCardTest\n\nBegin SD: ");
     if (hardwareSD.begin()) {
         pcSerial.printf("Success!\n");
     } else {
         pcSerial.printf("Error!\n");
-        while(true);
+        return false;
     }
 
     pcSerial.printf("Writing custom String: ");
@@ -36,34 +39,49 @@ void HardwareSDCardTest() {
         pcSerial.printf("Success!\n");
     } else {
         pcSerial.printf("Error! sdCard Status Code: 0x%x\n", hardwareSD.getStatus());
-        while(true);
+        return false;
     }
 
-    pcSerial.printf("Adding alive as LoggableValue to logger and begin: \n");
-    logger.addLogableValue(alive, SD_LOG_ID_ALIVE);
-    logger.finalize();
+    static bool _added = false;
+    if (!_added) {
+        pcSerial.printf("Adding alive as LoggableValue to logger and begin: ");
+        logger.addLogableValue(alive, SD_LOG_ID_ALIVE);
+        logger.finalize();
+        _added = true;
 
-    if (logger.begin()) {
-        pcSerial.printf("Success!\n");
-    } else {
-        pcSerial.printf("Error!\n");
-        while(true);
+        if (logger.begin()) {
+            pcSerial.printf("Success!\n");
+        } else {
+            pcSerial.printf("Error!\n");
+            return false;
+        }
     }
 
     dummySCar.setState(READY_TO_DRIVE); // That the logger really logs
 
 
-    pcSerial.printf("Now let logger run for 10 seconds\n");
+    pcSerial.printf("Now let logger run for 5 seconds\n");
     Timer timer;
+    timer.reset();
     timer.start();
-    while (timer < 10) {
+    Timer dotTimer;
+    dotTimer.reset();
+    dotTimer.start();
+    while (timer < 5) {
+        if (timer > 2) alive.setAlive(true);
         logger.run();
+        
+        if (dotTimer > 0.5) {
+            dotTimer.reset();
+            pcSerial.printf(".");
+        }
+
         wait(LOOP_WAIT_TIME);
     }
 
-    pcSerial.printf("Finish! Check SD Card for content\n\n");
+    pcSerial.printf("\nFinish! Check SD Card for content\n\n");
 
-    while(true);
+    return true;
 }
 
 #endif // HARDWARE_SD_CARD_TEST_H
