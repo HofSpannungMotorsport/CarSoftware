@@ -175,6 +175,7 @@ class Master : public Carpi {
 
             sdLogger.finalize();
             hardwareSD.begin();
+            hardwareSD.open();
             sdLogger.begin();
 
 

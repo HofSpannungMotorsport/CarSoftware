@@ -24,7 +24,7 @@
 #endif // USE_TEENSYDUINO
 
 // Include the test program here
-#include "mbed/HardwareSDCardTest.h"
+#include 
 
 class UnitTest {
     public:
@@ -39,7 +39,7 @@ class UnitTest {
 
         void loop() {
             // Loop Function here, it will be called constantly
-            HardwareSDCardTest();
+            
         }
 };
 

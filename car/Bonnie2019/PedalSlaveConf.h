@@ -24,7 +24,7 @@ HardwarePedal brakePedal(PEDAL_PIN_ROTATION_ANGLE_BRAKE, COMPONENT_PEDAL_BRAKE);
 //HardwareRpmSensor rpmFrontRight(PEDAL_PIN_RPM_SENSOR_FR, COMPONENT_RPM_FRONT_RIGHT);
 
 // Alive
-HardwareAlive alive(COMPONENT_ALIVE_PEDAL, LED2);
+HardwareAlive alive(COMPONENT_ALIVE_PEDAL, PEDAL_PIN_ALIVE);
 
 class Pedal : public Carpi {
     public:

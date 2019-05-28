@@ -7,7 +7,7 @@
     With this, all components, services and programs are included in the actual CarSoftware.
 */
 
-#define CARPI_VERSION "V0.2.0-P1"
+#define CARPI_VERSION "V0.2.0-P2"
 
 // Prior include Platform-specific Components
 

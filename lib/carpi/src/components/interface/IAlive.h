@@ -32,9 +32,9 @@ class IAlive : public SelfSyncable {
             if (logId != 0) return;
 
             if (getAlive()) {
-                logValue = "true";
+                logValue = "t";
             } else {
-                logValue = "false";
+                logValue = "f";
             }
         }
 };

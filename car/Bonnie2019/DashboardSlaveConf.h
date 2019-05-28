@@ -24,7 +24,7 @@ HardwareInterruptButton buttonReset(DASHBOARD_PIN_BUTTON_RESET, COMPONENT_BUTTON
 HardwareInterruptButton buttonStart(DASHBOARD_PIN_BUTTON_START, COMPONENT_BUTTON_START);
 
 // Alive
-HardwareAlive alive(COMPONENT_ALIVE_DASHBOARD, LED2);
+HardwareAlive alive(COMPONENT_ALIVE_DASHBOARD, DASHBOARD_PIN_ALIVE);
 
 class Dashboard : public Carpi {
     public:

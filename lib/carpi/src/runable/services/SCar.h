@@ -1,6 +1,8 @@
 #ifndef SCAR_H
 #define SCAR_H
 
+#include <string>
+
 #include "IService.h"
 #include "communication/componentIds.h"
 #include "components/interface/IButton.h"
@@ -87,6 +89,7 @@ class SCar : public IService {
             _checkHvEnabled();
             _checkAlive();
             _checkButtonStatus();
+            _checkSDCard();
 
             processErrors();
 
@@ -98,10 +101,17 @@ class SCar : public IService {
         }
 
         void processErrors() {
-            while(!_errorRegister.empty()) {
-                Error error;
-                _errorRegister.pop(error);
+            Error error;
+            while(_errorRegister.pop(error)) {
+                // Send error over Serial to PC
                 pcSerial.printf("[SCar]@processErrors: Got Error at 0x%x with error code 0x%x and error type 0x%x !\n", error.componentId, error.code, error.type);
+
+                // Document raw error to SD
+                char buffer[32];
+                sprintf(buffer, "0x%x;0x%x;0x%x", error.componentId, error.code, error.type);
+                string errorSDLog = buffer;
+                _sdCard->write(*_sdCard, SD_LOG_ID_SCAR_ERROR, errorSDLog);
+
                 if (error.type >= ERROR_UNDEFINED) {
                     _resetLeds();
                     if (error.type >= ERROR_SYSTEM) {
@@ -114,7 +124,7 @@ class SCar : public IService {
                             _led.red->setBlinking(BLINKING_FAST);
 
                             _led.green->setState(LED_OFF);
-                            _state = CAR_ERROR;
+                            setState(CAR_ERROR);
 
                             _motorController->setRUN(MOTOR_CONTROLLER_RUN_DISABLE);
                             _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
@@ -123,14 +133,17 @@ class SCar : public IService {
                             // Yellow -> Fast Blinking
                             _led.yellow->setState(LED_ON);
                             _led.yellow->setBrightness(1);
-                            _led.yellow->setBlinking(BLINKING_FAST);
+                            _led.yellow->setBlinking(BLINKING_OFF);
                         }
                     } else {
                         // Issue / Undefined
-                        // Yellow -> On @ 70%
-                        _led.yellow->setState(LED_ON);
-                        _led.yellow->setBrightness(0.51);
-                        _led.yellow->setBlinking(BLINKING_OFF);
+                        // Yellow -> On @ 25%
+                        // But only if not already on (probably because of System Error)
+                        if (_led.yellow->getBrightness() < 0.25 || _led.yellow->getState() != LED_ON) {
+                            _led.yellow->setState(LED_ON);
+                            _led.yellow->setBrightness(0.25);
+                            _led.yellow->setBlinking(BLINKING_OFF);
+                        }
                     }
                 }
             }
@@ -138,6 +151,12 @@ class SCar : public IService {
 
         car_state_t getState() {
             return _state;
+        }
+
+        void setState(car_state_t state) {
+            _state = state;
+            string newState = to_string(_state);
+            _sdCard->write(*_sdCard, SD_LOG_ID_SCAR_STATE, newState);
         }
 
         void startUp() {
@@ -171,7 +190,7 @@ class SCar : public IService {
 
             _checkHvEnabled();
             processErrors();
-            if (_state != ALMOST_READY_TO_DRIVE) {
+            if (getState() != ALMOST_READY_TO_DRIVE) {
                 // If an Error occured, stop continuing and glow Red
                 // Red   -> Blinking Fast
                 // Green -> Off
@@ -348,11 +367,17 @@ class SCar : public IService {
 
         void _checkButtonStatus() {
             if (_button.reset->getStatus() > 0) {
-                addError(Error(_calculateComponentId((IComponent*)_button.reset), _button.reset->getStatus(), ERROR_SYSTEM));
+                addError(Error(_calculateComponentId((IComponent*)_button.reset), _button.reset->getStatus(), ERROR_ISSUE));
             }
 
             if (_button.start->getStatus() > 0) {
-                addError(Error(_calculateComponentId((IComponent*)_button.start), _button.start->getStatus(), ERROR_SYSTEM));
+                addError(Error(_calculateComponentId((IComponent*)_button.start), _button.start->getStatus(), ERROR_ISSUE));
+            }
+        }
+
+        void _checkSDCard() {
+            if (_sdCard->getStatus() > 0) {
+                addError(Error(_sdCard->getComponentId(), _sdCard->getStatus(), ERROR_SYSTEM));
             }
         }
 
@@ -360,7 +385,7 @@ class SCar : public IService {
             // Start bootup/calibration
             // Yellow -> On
             // Green  -> Normal Blinking
-            _state = CALIBRATION;
+            setState(CALIBRATION);
             _resetLeds();
             _led.yellow->setState(LED_ON);
             _led.green->setState(LED_ON);
@@ -419,8 +444,8 @@ class SCar : public IService {
 
 
             // If all OK, go into Almost Ready to drive
-            if (_state == CALIBRATION) {
-                _state = ALMOST_READY_TO_DRIVE;
+            if (getState() == CALIBRATION) {
+                setState(ALMOST_READY_TO_DRIVE);
             } else {
                 // If an Error occured, stop continuing and glow Red
                 // Red   -> Blinking Slow
@@ -449,17 +474,17 @@ class SCar : public IService {
         void _checkInput() {
             if (_button.reset->getStateChanged()) {
                 if (_button.reset->getState() == PRESSED) {
-                    if (_state == READY_TO_DRIVE) {
+                    if (getState() == READY_TO_DRIVE) {
                         // Disable RFE and RUN
                         _motorController->setRUN(MOTOR_CONTROLLER_RUN_DISABLE);
                         _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
 
-                        _state = ALMOST_READY_TO_DRIVE;
+                        setState(ALMOST_READY_TO_DRIVE);
 
                         _led.green->setBlinking(BLINKING_FAST);
                     }
                 } else if (_button.reset->getState() == LONG_CLICKED) {
-                    if (_state != READY_TO_DRIVE) {
+                    if (getState() != READY_TO_DRIVE) {
                         // ReCalibrate the Pedals
                         _calibratePedals();
                     }
@@ -467,7 +492,7 @@ class SCar : public IService {
             }
 
             // [QF]
-            if (_state == ALMOST_READY_TO_DRIVE) {
+            if (getState() == ALMOST_READY_TO_DRIVE) {
                 if ((_button.start->getState() == LONG_CLICKED) && (_pedal.brake->getValue() >= BRAKE_START_THRESHHOLD)) {
                     // Optimize later!!
                     // [il]
@@ -486,7 +511,7 @@ class SCar : public IService {
                     do {
                         _checkHvEnabled();
                         processErrors();
-                        if (_state != ALMOST_READY_TO_DRIVE) {
+                        if (getState() != ALMOST_READY_TO_DRIVE) {
                             _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
                             // If an Error occured, stop continuing and glow Red
                             // Red   -> Blinking Normal
@@ -513,7 +538,7 @@ class SCar : public IService {
                     // Stop beeping!
                     _buzzer->setState(BUZZER_OFF);
 
-                    if (_state == ALMOST_READY_TO_DRIVE) {
+                    if (getState() == ALMOST_READY_TO_DRIVE) {
                         _motorController->setRUN(MOTOR_CONTROLLER_RUN_ENABLE);
                     } else {
                         _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
@@ -532,7 +557,7 @@ class SCar : public IService {
                     }
 
                     // Set car ready to drive (-> pressing the gas-pedal will move the car -> fun)
-                    _state = READY_TO_DRIVE;
+                    setState(READY_TO_DRIVE);
 
                     // Stop blinking greed to show car is primed
                     _resetLeds();
