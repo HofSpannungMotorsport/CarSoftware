@@ -1,9 +1,9 @@
 #include "carpi.h"
-#include "../Bonnie2019/hardware/Pins_Master.h"
+#include "../../Bonnie2019/hardware/Pins_Master_PCB.h"
 #include <string>
 
 
-HardwareInterruptButton buttonNext(MASTER_PIN_USER_BUTTON, BUTTON_START);
+HardwareInterruptButton buttonNext(MASTER_PIN_USER_BUTTON, COMPONENT_BUTTON_START);
 
 // AnalogIn Spring Travel Sensor
 AnalogIn springTravelSensorHL(MASTER_PIN_SPRING_TRAVEL_SENSOR_HL);
@@ -29,11 +29,11 @@ PwmOut pumpPWM(MASTER_PIN_PUMP_PWM);
 DigitalOut coolingFans(MASTER_PIN_FAN);
 
 // HV Enable
-DigitalIn enabledHV(MASTER_PIN_HV_ENABLED);
+DigitalIn enabledHV(MASTER_PIN_HV_ENABLED_TSMS);
 
 // Din RPM Sensors
-DigitalIn rpmHL(MASTER_PIN_RPM_SENSOR_HL);
-DigitalIn rpmHR(MASTER_PIN_RPM_SENSOR_HR);
+//DigitalIn rpmHL(MASTER_PIN_RPM_SENSOR_HL);
+//DigitalIn rpmHR(MASTER_PIN_RPM_SENSOR_HR);
 
 // Dout LED HV Enabled
 DigitalOut ledHVEnabled(MASTER_PIN_LED_HV_ENABLED);
@@ -42,7 +42,7 @@ DigitalOut ledHVEnabled(MASTER_PIN_LED_HV_ENABLED);
 DigitalOut ledError(MASTER_PIN_LED_ERROR);
 
 // DOUT LED Extra
-DigitalOut ledExtra(MASTER_PIN_LED_EXTRA);
+DigitalOut ledExtra(MASTER_PIN_LED_ALIVE);
 
 void waitForClick() {
     while(buttonNext.getState() != NOT_PRESSED);
@@ -91,8 +91,8 @@ void MasterOutputTest() {
     pcSerial.printf("\nHi! I'm Bert. I am your pin test bot. Let's Start! Just press the Blue Button on the Master Board\n\n");
     waitForClick();
 
-    pcSerial.printf("Current input Values:\n\tSpringTravelSensor HL: %i\n\tSpringTravelSensor HR: %i\n\tHV Enable: %i\n\tRPM HL: %i\n\tRPM HR: %i\n\n",
-        springTravelSensorHL.read_u16(), springTravelSensorHR.read_u16(), enabledHV.read(), rpmHL.read(), rpmHR.read());
+    pcSerial.printf("Current input Values:\n\tSpringTravelSensor HL: %i\n\tSpringTravelSensor HR: %i\n\tHV Enable: %i\n\n",
+        springTravelSensorHL.read_u16(), springTravelSensorHR.read_u16(), enabledHV.read()/*, rpmHL.read(), rpmHR.read()*/);
 
 
     testPin("Buzzer", buzzer);
