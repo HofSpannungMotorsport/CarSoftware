@@ -23,8 +23,4 @@
 #include "DisplaySlaveConf.h"
 #endif
 
-#ifdef BOARD_DASHBOARD_DEMO
-#include "DashboardDemoConf.h"
-#endif
-
 #endif

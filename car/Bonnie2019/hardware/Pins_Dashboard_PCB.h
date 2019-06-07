@@ -9,4 +9,6 @@
 
 #define DASHBOARD_CAN PB_8,PB_9
 
+#define DASHBOARD_PIN_ALIVE LED2
+
 #endif // PINS_DASHBOARD_H
