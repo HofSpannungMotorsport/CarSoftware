@@ -1,7 +1,7 @@
 #ifndef BONNIE_2019_H
 #define BONNIE_2019_H
 
-#include "SanityCheck.h"
+//#include "SanityCheck.h"
 
 #ifdef BOARD_DASHBOARD
 #include "DashboardSlaveConf.h"

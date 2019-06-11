@@ -3,7 +3,12 @@
 
 #include "carpi.h"
 
-#include "hardware/Pins_Dashboard_PCB.h"
+#ifdef DASHBOARD_NEW
+    #include "hardware/Pins_Dashboard_NEW_PCB.h"
+#else
+    #include "hardware/Pins_Dashboard_PCB.h"
+#endif
+
 
 CANService canService(DASHBOARD_CAN);
 
@@ -11,7 +16,7 @@ CANService canService(DASHBOARD_CAN);
 HardwareLed ledRed(DASHBOARD_PIN_LED_RED, COMPONENT_LED_ERROR);
 HardwareLed ledYellow(DASHBOARD_PIN_LED_YELLOW, COMPONENT_LED_ISSUE);
 HardwareLed ledGreen(DASHBOARD_PIN_LED_GREEN, COMPONENT_LED_READY_TO_DRIVE);
-HardwareLed ledCI(COMPONENT_LED_CI);
+HardwareLed ledCI(DASHBOARD_PIN_LED_EXTRA, COMPONENT_LED_CI);
 
 
 // Buttons

@@ -4,7 +4,12 @@
 //#define CAN_DEBUG
 #include "carpi.h"
 
-#include "hardware/Pins_Pedal_PCB.h"
+#ifdef PEDAL_NEW
+    #include "hardware/Pins_Pedal_NEW_PCB.h"
+#else
+    #include "hardware/Pins_Pedal_PCB.h"
+#endif
+
 
 CANService canService(PEDAL_CAN);
 
