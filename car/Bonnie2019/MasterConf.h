@@ -20,6 +20,7 @@ CANService canService(MASTER_PIN_CAR_INTERN_CAN_RD, MASTER_PIN_CAR_INTERN_CAN_TD
 SoftwareLed ledRed(COMPONENT_LED_ERROR);
 SoftwareLed ledYellow(COMPONENT_LED_ISSUE);
 SoftwareLed ledGreen(COMPONENT_LED_READY_TO_DRIVE);
+SoftwareLed ledCI(COMPONENT_LED_CI);
 
 //       Buttons
 SoftwareButton buttonReset(COMPONENT_BUTTON_RESET);
@@ -69,6 +70,8 @@ PCooling coolingService(carService,
                         (IMotorController*)&motorController,
                         (IHvEnabled*)&hvEnabled);
 
+PCockpitIndicator cockpitIndicatorProgram(canService, hvEnabled, ledCI);
+
 class Master : public Carpi {
     public:
         // Called once at bootup
@@ -82,6 +85,7 @@ class Master : public Carpi {
             canService.addComponent((ICommunication*)&ledRed);
             canService.addComponent((ICommunication*)&ledYellow);
             canService.addComponent((ICommunication*)&ledGreen);
+            canService.addComponent((ICommunication*)&ledCI);
             canService.addComponent((ICommunication*)&buttonReset);
             canService.addComponent((ICommunication*)&buttonStart);
 
@@ -102,6 +106,7 @@ class Master : public Carpi {
             // Add all low demand Services to our Service list
             lowDemandServices.addRunable((IRunable*)&speedService);
             lowDemandServices.addRunable((IRunable*)&coolingService);
+            lowDemandServices.addRunable((IRunable*)&cockpitIndicatorProgram);
 
             // Add all Services and ServiceLists to our ServiceScheduler
             services.addRunable((IRunable*)&highDemandServices, HIGH_DEMAND_SERVICE_REFRESH_RATE);

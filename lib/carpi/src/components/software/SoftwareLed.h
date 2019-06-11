@@ -3,7 +3,7 @@
 
 #include "../interface/ILed.h"
 
-class SoftwareLed : ILed {
+class SoftwareLed : public ILed {
     public:
         SoftwareLed() {
             setComponentType(COMPONENT_LED);

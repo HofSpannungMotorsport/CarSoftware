@@ -11,6 +11,7 @@ CANService canService(DASHBOARD_CAN);
 HardwareLed ledRed(DASHBOARD_PIN_LED_RED, COMPONENT_LED_ERROR);
 HardwareLed ledYellow(DASHBOARD_PIN_LED_YELLOW, COMPONENT_LED_ISSUE);
 HardwareLed ledGreen(DASHBOARD_PIN_LED_GREEN, COMPONENT_LED_READY_TO_DRIVE);
+HardwareLed ledCI(COMPONENT_LED_CI);
 
 
 // Buttons
@@ -26,6 +27,7 @@ class Dashboard : public Carpi {
             canService.addComponent((ICommunication*)&ledRed);
             canService.addComponent((ICommunication*)&ledYellow);
             canService.addComponent((ICommunication*)&ledGreen);
+            canService.addComponent((ICommunication*)&ledCI);
             canService.addComponent((ICommunication*)&buttonReset);
             canService.addComponent((ICommunication*)&buttonStart);
         }

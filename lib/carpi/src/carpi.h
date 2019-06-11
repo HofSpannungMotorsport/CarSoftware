@@ -93,6 +93,7 @@
     #include "runable/programs/PBrakeLight.h"
     #include "runable/programs/PCooling.h"
     #include "runable/programs/PMotorController.h"
+    #include "runable/programs/PCockpitIndicator.h"
 #endif
 
 #ifdef USE_ARDUINO
