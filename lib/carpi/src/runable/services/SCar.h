@@ -206,7 +206,7 @@ class SCar : public IService {
 
         car_state_t _state = CAR_OFF;
 
-        gas_curve_t _gasCurve = GAS_CURVE_LINEAR;
+        gas_curve_t _gasCurve = GAS_CURVE_X_POW_2;
 
         struct _button {
             IButton* reset;
@@ -487,7 +487,7 @@ class SCar : public IService {
                         if (_resetButton.longPressed && _resetButton.pressed) {
                             _calibratePedals();
                         } else if (_resetButton.pressed) {
-                            _rotateGasCurve();
+                            //_rotateGasCurve();
                         }
 
                         _resetButton.released = false;
