@@ -541,6 +541,7 @@ class SCar : public IService {
 
                             while(true) {
                                 _syncer.run();
+                                _ci.run();
                                 wait(0.1);
                             }
                         }
@@ -567,6 +568,7 @@ class SCar : public IService {
 
                         while(true) {
                             _syncer.run();
+                            _ci.run();
                             wait(0.1);
                         }
                     }
