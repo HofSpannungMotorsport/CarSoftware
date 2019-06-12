@@ -13,7 +13,7 @@
 #define HIGH_DEMAND_SERVICE_REFRESH_RATE 120 // Hz
 #define LOW_DEMAND_SERVICE_REFRESH_RATE 3 // Hz
 
-#include "hardware/Pins_Master.h"
+#include "hardware/Pins_Master_PCB.h"
 #include "SDLog.h"
 
 // Communication
@@ -27,6 +27,7 @@ CCan canIntern(syncer, MASTER_PIN_CAR_INTERN_CAN_RD, MASTER_PIN_CAR_INTERN_CAN_T
 SoftwareLed ledRed(COMPONENT_LED_ERROR);
 SoftwareLed ledYellow(COMPONENT_LED_ISSUE);
 SoftwareLed ledGreen(COMPONENT_LED_READY_TO_DRIVE);
+SoftwareLed ledCI(COMPONENT_LED_CI);
 
 //       Buttons
 SoftwareButton buttonReset(COMPONENT_BUTTON_RESET);
@@ -55,11 +56,15 @@ HardwareMotorController motorController(MASTER_PIN_MOTOR_CONTROLLER_CAN_RD, MAST
 HardwareFan coolingFan(MASTER_PIN_FAN, COMPONENT_COOLING_FAN);
 HardwarePump coolingPump(MASTER_PIN_PUMP_PWM, MASTER_PIN_PUMP_ENABLE, COMPONENT_COOLING_PUMP);
 HardwareBuzzer buzzer(MASTER_PIN_BUZZER, COMPONENT_BUZZER_STARTUP);
-HardwareHvEnabled hvEnabled(MASTER_PIN_HV_ENABLED, COMPONENT_SYSTEM_HV_ENABLED);
+HardwareHvEnabled hvEnabled(MASTER_PIN_HV_ENABLED_TSMS, COMPONENT_SYSTEM_HV_ENABLED);
 HardwareSDCard hardwareSD(COMPONENT_SYSTEM_SD_CARD, MASTER_PIN_SPI_SD_MOSI, MASTER_PIN_SPI_SD_MISO, MASTER_PIN_SPI_SD_SCK, MASTER_PIN_SPI_SD_CS);
 HardwareAlive masterAlive(COMPONENT_ALIVE_MASTER, MASTER_PIN_MICROCONTROLLER_OK);
 
+DigitalOut microcontrollerOk(MASTER_PIN_MICROCONTROLLER_OK);
+
 // Services
+PCockpitIndicator cockpitIndicatorProgram(hvEnabled, ledCI);
+
 SCar carService(syncer,
                 (IButton*)&buttonReset, (IButton*)&buttonStart,
                 (ILed*)&ledRed, (ILed*)&ledYellow, (ILed*)&ledGreen,
@@ -68,7 +73,8 @@ SCar carService(syncer,
                 (IMotorController*)&motorController,
                 (IHvEnabled*)&hvEnabled,
                 (ISDCard*)&hardwareSD,
-                (IAlive*)&pedalAlive, (IAlive*)&dashboardAlive, (IAlive*)&masterAlive);
+                (IAlive*)&pedalAlive, (IAlive*)&dashboardAlive, (IAlive*)&masterAlive,
+                cockpitIndicatorProgram);
 
 PMotorController motorControllerService(carService,
                                         (IMotorController*)&motorController,
@@ -97,6 +103,7 @@ class Master : public Carpi {
             syncer.addComponent(ledRed, canIntern, DEVICE_DASHBOARD);
             syncer.addComponent(ledYellow, canIntern, DEVICE_DASHBOARD);
             syncer.addComponent(ledGreen, canIntern, DEVICE_DASHBOARD);
+            syncer.addComponent(ledCI, canIntern, DEVICE_DASHBOARD);
             syncer.addComponent(buttonReset, canIntern, DEVICE_DASHBOARD);
             syncer.addComponent(buttonStart, canIntern, DEVICE_DASHBOARD);
             syncer.addComponent(dashboardAlive, canIntern, DEVICE_DASHBOARD);
@@ -119,6 +126,7 @@ class Master : public Carpi {
             // Add all low demand Services to our Service list
             lowDemandServices.addRunable((IRunable*)&speedService);
             lowDemandServices.addRunable((IRunable*)&coolingService);
+            lowDemandServices.addRunable((IRunable*)&cockpitIndicatorProgram);
 
             // Add all Services and ServiceLists to the ServiceScheduler
             serviceScheduler.addRunable((IRunable*)&highDemandServices, HIGH_DEMAND_SERVICE_REFRESH_RATE);
@@ -180,6 +188,7 @@ class Master : public Carpi {
 
 
             // Start the Car
+            microcontrollerOk = 1;
             carService.startUp();
         }
 

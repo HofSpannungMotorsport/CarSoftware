@@ -4,6 +4,7 @@
 #include <string>
 
 #include "IService.h"
+#include "runable/programs/PCockpitIndicator.h"
 #include "communication/componentIds.h"
 #include "components/interface/IButton.h"
 #include "components/interface/ILed.h"
@@ -60,8 +61,9 @@ class SCar : public IService {
              IMotorController* motorController,
              IHvEnabled* hvEnabled,
              ISDCard* sdCard,
-             IAlive* pedalAlive, IAlive* dashboardAlive, IAlive* masterAlive)
-             : _syncer(syncer) {
+             IAlive* pedalAlive, IAlive* dashboardAlive, IAlive* masterAlive,
+             PCockpitIndicator &ci)
+             : _syncer(syncer), _ci(ci) {
             _button.reset = buttonReset;
             _button.start = buttonStart;
 
@@ -160,12 +162,18 @@ class SCar : public IService {
         }
 
         void startUp() {
+            _ci.run();
+
             for (uint8_t i = 0; i < STARTUP_ANIMATION_PLAYBACKS; i++) {
                 _startupAnimationUp();
+                _ci.run();
                 _startupAnimationDown();
+                _ci.run();
             }
 
             wait(STARTUP_ANIMATION_WAIT_AFTER);
+
+            _ci.run();
 
             // Turn on red LED while HV-Circuite is off
             _resetLeds();
@@ -178,6 +186,7 @@ class SCar : public IService {
             while(!(_hvEnabled->read())) {
                 _syncer.run();
                 _checkAlive();
+                _ci.run();
                 processErrors();
                 wait(0.1);
             }
@@ -200,6 +209,7 @@ class SCar : public IService {
                 _waitForSent();
                 while(true) {
                     _syncer.run();
+                    _ci.run();
                     wait(0.1);
                 }
             }
@@ -240,6 +250,8 @@ class SCar : public IService {
         IAlive* _pedalAlive;
         IAlive* _dashboardAlive;
         IAlive* _masterAlive;
+
+        PCockpitIndicator &_ci;
 
         id_component_t _calculateComponentId(IComponent* component) {
             id_component_t id = component->getComponentId();
@@ -404,6 +416,7 @@ class SCar : public IService {
             while(_button.start->getState() != LONG_CLICKED) {
                 _syncer.run();
                 _checkAlive();
+                _ci.run();
                 wait(0.1);
             }
 
@@ -423,6 +436,7 @@ class SCar : public IService {
             // Yellow -> Off
             while(_button.start->getState() != NOT_PRESSED) {
                 _syncer.run();
+                _ci.run();
                 wait(0.1);
             }
 
@@ -456,6 +470,7 @@ class SCar : public IService {
                 _waitForSent();
                 while(true) {
                     _syncer.run();
+                    _ci.run();
                     wait(0.1);
                 }
             }

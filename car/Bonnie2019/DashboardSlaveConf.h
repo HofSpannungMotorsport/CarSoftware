@@ -17,6 +17,7 @@ CCan canIntern(syncer, DASHBOARD_CAN);
 HardwareLed ledRed(DASHBOARD_PIN_LED_RED, COMPONENT_LED_ERROR);
 HardwareLed ledYellow(DASHBOARD_PIN_LED_YELLOW, COMPONENT_LED_ISSUE);
 HardwareLed ledGreen(DASHBOARD_PIN_LED_GREEN, COMPONENT_LED_READY_TO_DRIVE);
+HardwareLed ledCI(DASHBOARD_PIN_LED_EXTRA, COMPONENT_LED_CI);
 
 
 // Buttons
@@ -33,6 +34,7 @@ class Dashboard : public Carpi {
             syncer.addComponent((ICommunication&)ledRed, canIntern, DEVICE_MASTER);
             syncer.addComponent((ICommunication&)ledYellow, canIntern, DEVICE_MASTER);
             syncer.addComponent((ICommunication&)ledGreen, canIntern, DEVICE_MASTER);
+            syncer.addComponent((ICommunication&)ledCI, canIntern, DEVICE_MASTER);
             syncer.addComponent((ICommunication&)buttonReset, canIntern, DEVICE_MASTER);
             syncer.addComponent((ICommunication&)buttonStart, canIntern, DEVICE_MASTER);
             syncer.addComponent((ICommunication&)alive, canIntern, DEVICE_MASTER);

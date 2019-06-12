@@ -7,7 +7,7 @@
     With this, all components, services and programs are included in the actual CarSoftware.
 */
 
-#define CARPI_VERSION "V0.2.0-P2"
+#define CARPI_VERSION "V0.2.0-P3 - Alive"
 
 // Prior include Platform-specific Components
 
@@ -112,6 +112,7 @@
 
     // Programs
     #include "runable/programs/IProgram.h"
+    #include "runable/programs/PCockpitIndicator.h"
     #include "runable/programs/PBrakeLight.h"
     #include "runable/programs/PCooling.h"
     #include "runable/programs/PMotorController.h"
