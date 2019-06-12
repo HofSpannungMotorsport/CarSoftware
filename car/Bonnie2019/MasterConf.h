@@ -46,13 +46,16 @@ HardwareBuzzer buzzer(MASTER_PIN_BUZZER, COMPONENT_BUZZER_STARTUP);
 HardwareHvEnabled hvEnabled(MASTER_PIN_HV_ENABLED_TSMS, COMPONENT_SYSTEM_HV_ENABLED);
 
 // Services
+PCockpitIndicator cockpitIndicatorProgram(canService, hvEnabled, ledCI);
+
 SCar carService(canService,
                 (IButton*)&buttonReset, (IButton*)&buttonStart,
                 (ILed*)&ledRed, (ILed*)&ledYellow, (ILed*)&ledGreen,
                 (IPedal*)&gasPedal, (IPedal*)&brakePedal,
                 (IBuzzer*)&buzzer,
                 (IMotorController*)&motorController,
-                (IHvEnabled*)&hvEnabled);
+                (IHvEnabled*)&hvEnabled,
+                cockpitIndicatorProgram);
 
 PMotorController motorControllerService(carService,
                                         (IMotorController*)&motorController,
@@ -69,8 +72,6 @@ PCooling coolingService(carService,
                         (IFan*)&coolingFan, (IPump*)&coolingPump,
                         (IMotorController*)&motorController,
                         (IHvEnabled*)&hvEnabled);
-
-PCockpitIndicator cockpitIndicatorProgram(canService, hvEnabled, ledCI);
 
 DigitalOut microcontrollerOk(MASTER_PIN_MICROCONTROLLER_OK);
 

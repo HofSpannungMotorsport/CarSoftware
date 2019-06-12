@@ -3,6 +3,7 @@
 
 #include "platform/CircularBuffer.h"
 #include "IService.h"
+#include "runable/programs/PCockpitIndicator.h"
 #include "communication/componentIds.h"
 #include "communication/CANService.h"
 #include "components/interface/IButton.h"
@@ -66,8 +67,9 @@ class SCar : public IService {
              IPedal* gasPedal, IPedal* brakePedal,
              IBuzzer* buzzer,
              IMotorController* motorController,
-             IHvEnabled* hvEnabled)
-            : _canService(canService) {
+             IHvEnabled* hvEnabled,
+             PCockpitIndicator &ci)
+            : _canService(canService), _ci(ci) {
             _button.reset = buttonReset;
             _button.start = buttonStart;
 
@@ -154,6 +156,7 @@ class SCar : public IService {
 
         void startUp() {
             wait(STARTUP_WAIT);
+            _ci.run();
 
             for (uint8_t i = 0; i < STARTUP_ANIMATION_PLAYBACKS; i++) {
                 _startupAnimation();
@@ -169,6 +172,7 @@ class SCar : public IService {
             // [QF]
             while(!(_hvEnabled->read())) {
                 _canService.processInbound();
+                _ci.run();
             }
 
            	_resetLeds();
@@ -190,7 +194,8 @@ class SCar : public IService {
                 _led.green->setState(LED_OFF);
                 _sendLedsOverCan();
                 while(1) {
-                    wait(100);
+                    _ci.run();
+                    wait(0.1);
                 }
             }
         }
@@ -229,6 +234,8 @@ class SCar : public IService {
         IMotorController* _motorController;
 
         IHvEnabled* _hvEnabled;
+
+        PCockpitIndicator &_ci;
 
         id_component_t _calculateComponentId(IComponent* component) {
             id_component_t id = component->getComponentId();
@@ -329,6 +336,7 @@ class SCar : public IService {
             // Calibrate pedal until pressed Start once for long time
             while(_button.start->getState() != LONG_CLICKED) {
                 _canService.processInbound();
+                _ci.run();
             }
 
 
@@ -348,6 +356,7 @@ class SCar : public IService {
             // Yellow -> Off
             while(_button.start->getState() != NOT_PRESSED) {
                 _canService.processInbound();
+                _ci.run();
             }
 
             wait(0.1);
@@ -378,7 +387,8 @@ class SCar : public IService {
                 _led.red->setBlinking(BLINKING_SLOW);
                 _sendLedsOverCan();
                 while(1) {
-                    wait(100);
+                    _ci.run();
+                    wait(0.1);
                 }
             }
 
@@ -420,6 +430,7 @@ class SCar : public IService {
                     do {
                         _canService.processInbound();
                         _checkHvEnabled();
+                        _ci.run();
                         processErrors();
                         if (_state != ALMOST_READY_TO_DRIVE) {
                             _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
@@ -435,7 +446,8 @@ class SCar : public IService {
                             _buzzer->setState(BUZZER_OFF);
 
                             while(1) {
-                                wait(100);
+                                _ci.run();
+                                wait(0.1);
                             }
                         }
                     } while (waitTimer.read() < (float)HV_ENABLED_BEEP_TIME);
@@ -459,7 +471,10 @@ class SCar : public IService {
                         _led.red->setState(LED_ON);
                         _led.red->setBlinking(BLINKING_NORMAL);
                         _sendLedsOverCan();
-                        while(1);
+                        while(1) {
+                            _ci.run();
+                            wait(0.1);
+                        }
                     }
 
                     // Set car ready to drive (-> pressing the gas-pedal will move the car -> fun)
