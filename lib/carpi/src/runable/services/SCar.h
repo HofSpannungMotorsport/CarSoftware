@@ -217,7 +217,7 @@ class SCar : public IService {
 
     #ifdef TESTING_MODE
     protected:
-        SCar(Sync &syncer) : _syncer(syncer) {} // Only use for testing outside of the car!
+        SCar(Sync &syncer, PCockpitIndicator &ci) : _syncer(syncer), _ci(ci) {} // Only use for testing outside of the car!
     #else
     private:
     #endif
