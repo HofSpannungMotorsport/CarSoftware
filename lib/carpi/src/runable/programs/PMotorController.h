@@ -71,7 +71,7 @@ class PMotorController : public IProgram {
             // ...maybe a drivers scream ;)
             _motorController->setTorque(returnValue);
 
-            #ifdef MOTORCONTROLLER_OUTPUT
+            #if defined(MOTORCONTROLLER_OUTPUT) && defined(MESSAGE_REPORT)
                 pcSerial.printf("%f\n", returnValue);
             #endif
         }

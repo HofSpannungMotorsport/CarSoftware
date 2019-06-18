@@ -7,7 +7,8 @@
 //#define SYNC_SENDING_DEBUG // Enables reporting while sending a message over Sync
 //#define CCAN_DEBUG // Enables CAN Channel Debug Output
 //#define CCAN_SENDING_DEBUG // Enables reporting at sending over Can
-//#define DISABLE_PUMP
+//#define DISABLE_PUMP // Disables the Pump entirly, usefull if the cooling system is not filled with water
+//#define DISABLE_SERIAL // Disables the serial report funktion
 #include "carpi.h"
 
 #define HIGH_DEMAND_SERVICE_REFRESH_RATE 120 // Hz

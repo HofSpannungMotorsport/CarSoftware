@@ -9,7 +9,7 @@
 #define STD_BRAKE_LIGHT_LOWER_THRESHHOLD 0.20 // 30%
 #define STD_BRAKE_LIGHT_UPPER_THRESHHOLD 0.35
 
-class PBrakeLight : public IService {
+class PBrakeLight : public IProgram {
     public:
         PBrakeLight(SCar &carService, IPedal* brakePedal, ILed* brakeLight)
             : _carService(carService), _brakePedal(brakePedal), _brakeLight(brakeLight) {

@@ -26,7 +26,7 @@ class Sync : public IRunable {
         bool addComponent(ICommunication &component, IChannel &channel, id_device_t receiverId) {
             // If component has already been added, deny adding it again
             if (_checkComponentExist(component)) {
-                #ifdef SYNC_DEBUG
+                #if defined(SYNC_DEBUG) && defined(MESSAGE_REPORT)
                     pcSerial.printf("[Sync]@addComponent: Component with ID 0x%x already added!\n", component.getComponentId());
                 #endif
 
@@ -41,7 +41,7 @@ class Sync : public IRunable {
                 router.push_back(route);
             #endif // USE_MBED
 
-            #ifdef SYNC_DEBUG
+            #if defined(SYNC_DEBUG) && defined(MESSAGE_REPORT)
                 pcSerial.printf("[Sync]@addComponent: Component with ID 0x%x successfully added\n", component.getComponentId());
             #endif
 
@@ -53,7 +53,7 @@ class Sync : public IRunable {
         bool addBridge(id_component_t componentId, IChannel &channelDevice1, IChannel &channelDevice2,
                                                    id_device_t deviceId1,    id_device_t deviceId2) {
             if (_checkBridgeExist(componentId)) {
-                #ifdef SYNC_DEBUG
+                #if defined(SYNC_DEBUG) && defined(MESSAGE_REPORT)
                     pcSerial.printf("[Sync]@addBridge: Component with ID %i already added to Bridge!\n", componentId);
                 #endif
 
@@ -67,7 +67,7 @@ class Sync : public IRunable {
                 bridger.push_back(bridge);
             #endif // USE_MBED
 
-            #ifdef SYNC_DEBUG
+            #if defined(SYNC_DEBUG) && defined(MESSAGE_REPORT)
                 pcSerial.printf("[Sync]@addBridge: Component with ID 0x%x successfully added to Bridge\n", componentId);
             #endif
 
@@ -82,7 +82,7 @@ class Sync : public IRunable {
         }
 
         virtual void send(CarMessage &carMessage) {
-            #ifdef SYNC_SENDING_DEBUG
+            #if defined(SYNC_SENDING_DEBUG) && defined(MESSAGE_REPORT)
                 pcSerial.printf("[Sync]@send: Try to send Message for component 0x%x\n", carMessage.getComponentId());
             #endif
 
@@ -92,7 +92,7 @@ class Sync : public IRunable {
                     carMessage.setReceiverId(route.receiverId);
                     _send(carMessage, route.channel);
 
-                    #ifdef SYNC_SENDING_DEBUG
+                    #if defined(SYNC_SENDING_DEBUG) && defined(MESSAGE_REPORT)
                         pcSerial.printf("[Sync]@send: Sent Message for component 0x%x to channel\n", carMessage.getComponentId());
                     #endif
 
@@ -225,7 +225,7 @@ class Sync : public IRunable {
         }
 
         void _receive(CarMessage &carMessage) {
-            #ifdef SYNC_DEBUG
+            #if defined(SYNC_DEBUG) && defined(MESSAGE_REPORT)
                 pcSerial.printf("[Sync]@receive: Received Message for component 0x%x\n", carMessage.getComponentId());
             #endif
 
@@ -236,7 +236,7 @@ class Sync : public IRunable {
                     if (route.component->getComponentId() == carMessage.getComponentId()) {
                         route.component->receive(carMessage);
 
-                        #ifdef SYNC_DEBUG
+                        #if defined(SYNC_DEBUG) && defined(MESSAGE_REPORT)
                             pcSerial.printf("[Sync]@receive: Pushed message to Component 0x%x\n", carMessage.getComponentId());
                         #endif
 
@@ -248,27 +248,27 @@ class Sync : public IRunable {
                 // -> Maybe it could be bridged over this device?
                 for(Bridge &bridge : bridger) {
                     if (carMessage.getComponentId() == bridge.componentId) {
-                        #ifdef SYNC_DEBUG
+                        #if defined(SYNC_DEBUG) && defined(MESSAGE_REPORT)
                             bool bridged = false;
                         #endif
 
                         if (bridge.deviceId1 == carMessage.getSenderId()) {
                             if (bridge.deviceId2 == carMessage.getReceiverId()) {
                                 _send(carMessage, bridge.channelDevice2);
-                                #ifdef SYNC_DEBUG
+                                #if defined(SYNC_DEBUG) && defined(MESSAGE_REPORT)
                                     bridged = true;
                                 #endif
                             }
                         } else if (bridge.deviceId2 == carMessage.getSenderId()) {
                             if (bridge.deviceId1 == carMessage.getReceiverId()) {
                                 _send(carMessage, bridge.channelDevice1);
-                                #ifdef SYNC_DEBUG
+                                #if defined(SYNC_DEBUG) && defined(MESSAGE_REPORT)
                                     bridged = true;
                                 #endif
                             }
                         }
 
-                        #ifdef SYNC_DEBUG
+                        #if defined(SYNC_DEBUG) && defined(MESSAGE_REPORT)
                             if(bridged) {
                                 pcSerial.printf("[Sync]@receive: Succesfully bridged message for component 0x%x\n", carMessage.getComponentId());
                             } else {
