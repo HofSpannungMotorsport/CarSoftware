@@ -116,7 +116,7 @@ void MasterOutputTest() {
 
     pcSerial.printf("Click button to turn On:  Pump PWM\n");
     waitForClick();
-    pumpPWM = 0.5;
+    pumpPWM = 1;
 
     pcSerial.printf("Click button to turn Off: Pump PWM\n");
     waitForClick();
