@@ -16,12 +16,12 @@ enum analog_sensor_error_type_t : status_t {
 
 class IAnalogSensor : private NonCopyable<IAnalogSensor> {
     public:
-        virtual bool setMapping(analog_sensor_raw_t minIn, analog_sensor_raw_t maxIn, analog_sensor_t minOut, analog_sensor_t maxOut);
+        virtual bool setMapping(analog_sensor_raw_t minIn, analog_sensor_raw_t maxIn, analog_sensor_t minOut, analog_sensor_t maxOut) = 0;
         
-        virtual bool setRawBoundary(analog_sensor_raw_t lowerEnd, analog_sensor_raw_t upperEnd);
-        virtual void setRawBoundaryOutTime(uint16_t time);
-        virtual void setBoundary(analog_sensor_boundary_t bounderyPercentage);
-        virtual void setBoundaryOutTime(uint16_t time);
+        virtual bool setRawBoundary(analog_sensor_raw_t lowerEnd, analog_sensor_raw_t upperEnd) = 0;
+        virtual void setRawBoundaryOutTime(uint16_t time) = 0;
+        virtual void setBoundary(analog_sensor_boundary_t bounderyPercentage) = 0;
+        virtual void setBoundaryOutTime(uint16_t time) = 0;
 
         virtual analog_sensor_raw_t getRawValue() = 0;
         virtual analog_sensor_t getValue() = 0;
