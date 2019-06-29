@@ -7,7 +7,7 @@ class HardwarePump : public IPump {
     public:
         HardwarePump(PinName pwmPort, PinName enablePort) : _pwmPort(pwmPort), _enablePort(enablePort) {
             _enablePort = 0;
-            _pwmPort = 0;
+            _pwmPort = 1;
 
             setComponentType(COMPONENT_COOLING);
             setObjectType(OBJECT_HARDWARE);

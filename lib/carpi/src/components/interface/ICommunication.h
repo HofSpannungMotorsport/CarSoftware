@@ -16,8 +16,8 @@ enum message_parse_result_t : uint8_t {
 
 class ICommunication : public IComponent {
     public:
-        virtual message_build_result_t buildMessage(CarMessage &carMessage);
-        virtual message_parse_result_t parseMessage(CarMessage &carMessage);
+        virtual message_build_result_t buildMessage(CarMessage &carMessage) = 0;
+        virtual message_parse_result_t parseMessage(CarMessage &carMessage) = 0;
 };
 
 #endif // ICOMMUNICATION_H
