@@ -4,6 +4,7 @@
 //#define CAN_DEBUG // Enables CAN Service Debug Output (Log almost every step done by the CANService over Serial)
 //#define MOTORCONTROLLER_OUTPUT // Output the Value sent to the MotorController over Serial
 //#define FORCE_DISABLE_HV_CHECK // Disables HV-Checks (HardwareHvEnabled always returns true) !!! ONLY USE FOR DEBUGGING WITHOUT HV-ACCU INSTALLED !!!
+//#define PRINT_SPEED
 #include "carpi.h"
 
 #define HIGH_DEMAND_SERVICE_REFRESH_RATE 120 // Hz

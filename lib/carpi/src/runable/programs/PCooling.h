@@ -52,6 +52,10 @@ class PCooling : public IProgram {
             if (_hvEnabled->read()) {
                 speed_value_t currentSpeed = _speedService.getSpeed();
 
+                #ifdef PRINT_SPEED
+                    pcSerial.printf("%.3f\n", currentSpeed);
+                #endif
+
                 // Activate Fan according to driving speed
                 if (currentSpeed <= STD_COOLING_FAN_ON_UNTIL_SPEED) {
                     // Turn fan on if driving too slow

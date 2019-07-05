@@ -5,15 +5,15 @@
 #include "../interface/IPedal.h"
 #include "../hardware/HardwareAnalogSensor.h"
 
-#define STD_MAX_DEVIANCE 0.10 // 10%
-#define STD_MAX_DEVIANCE_TIME 100 // 100ms
+#define STD_MAX_DEVIANCE 0.25 // 10%
+#define STD_MAX_DEVIANCE_TIME 200 // 100ms
 
-#define STD_MAPPED_BOUNDARY_PERCENTAGE 0.10 // 10%
-#define STD_MAX_OUT_OF_BOUNDARY_TIME 100 // 100ms
+#define STD_MAPPED_BOUNDARY_PERCENTAGE 0.20 // 10%
+#define STD_MAX_OUT_OF_BOUNDARY_TIME 200 // 100ms
 
 #define STD_CALIBRATION_REFRESH_TIME        0.030 // 30ms
 #define STD_CALIBRATION_MIN_DEVIANCE        500 // Raw analog
-#define STD_CALIBRATION_MAX_DEVIANCE        30000 // Raw analog
+#define STD_CALIBRATION_MAX_DEVIANCE        50000 // Raw analog
 #define STD_CALIBRATION_SAMPLE_BUFFER_SIZE  20 // How many values should be combined during calibration to get the fu***** deviance away
 
 #define STD_ANALOG_LOWER_BOUNDARY   655 // uint16_t min ->     0

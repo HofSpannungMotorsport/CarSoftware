@@ -114,36 +114,24 @@ class SCar : public IService {
                 Error error;
                 _errorRegister.pop(error);
                 pcSerial.printf("[SCar]@processErrors: Got Error at 0x%x with error code 0x%x and error type 0x%x !\n", error.componentId, error.code, error.type);
-                if (error.type >= ERROR_UNDEFINED) {
+
+                if (error.type >= ERROR_CRITICAL) {
+                    // Critical Error
+                    // Red -> Fast Blinking
+                    // Green -> Off
+                    // Car -> Error -> No driving anymore, Error must be solved
+
                     _resetLeds();
-                    if (error.type >= ERROR_SYSTEM) {
-                        if (error.type >= ERROR_CRITICAL) {
-                            // Critical Error
-                            // Red -> Fast Blinking
-                            // Green -> Off
-                            _led.red->setState(LED_ON);
-                            _led.red->setBrightness(1);
-                            _led.red->setBlinking(BLINKING_FAST);
 
-                            _led.green->setState(LED_OFF);
-                            _state = CAR_ERROR;
+                    _led.red->setState(LED_ON);
+                    _led.red->setBrightness(1);
+                    _led.red->setBlinking(BLINKING_FAST);
 
-                            _motorController->setRUN(MOTOR_CONTROLLER_RUN_DISABLE);
-                            _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
-                        } else {
-                            // System Error
-                            // Yellow -> Fast Blinking
-                            _led.yellow->setState(LED_ON);
-                            _led.yellow->setBrightness(1);
-                            _led.yellow->setBlinking(BLINKING_FAST);
-                        }
-                    } else {
-                        // Issue / Undefined
-                        // Yellow -> On @ 70%
-                        _led.yellow->setState(LED_ON);
-                        _led.yellow->setBrightness(0.51);
-                        _led.yellow->setBlinking(BLINKING_OFF);
-                    }
+                    _led.green->setState(LED_OFF);
+                    _state = CAR_ERROR;
+
+                    _motorController->setRUN(MOTOR_CONTROLLER_RUN_DISABLE);
+                    _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
 
                     _sendLedsOverCan();
                 }
@@ -309,8 +297,23 @@ class SCar : public IService {
 
         void _checkHvEnabled() {
             // [QF]
+            static bool errorAdded = false;
+
             if (!(_hvEnabled->read())) {
-                addError(Error(componentId::getComponentId(COMPONENT_SYSTEM, COMPONENT_SYSTEM_HV_ENABLED), 0x1, ERROR_CRITICAL));
+                if (_state == READY_TO_DRIVE) {
+                    _state = ALMOST_READY_TO_DRIVE;
+                    _motorController->setRUN(MOTOR_CONTROLLER_RUN_DISABLE);
+                    _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
+                    _led.green->setBlinking(BLINKING_FAST);
+                    _sendLedsOverCan();
+                }
+
+                if (!errorAdded) {
+                    addError(Error(componentId::getComponentId(COMPONENT_SYSTEM, COMPONENT_SYSTEM_HV_ENABLED), 0x1, ERROR_ISSUE));
+                    errorAdded = true;
+                }
+            } else {
+                errorAdded = false;
             }
         }
 
@@ -403,16 +406,14 @@ class SCar : public IService {
             wait(0.1);
         }
 
-        struct _resetButton {
-            bool pressed = false,
-                 longPressed = false,
-                 released = false;
-        } _resetButton;
-
         void _checkInput() {
             // [QF]
             if (_state == ALMOST_READY_TO_DRIVE) {
-                if ((_button.start->getState() == LONG_CLICKED) && (_pedal.brake->getValue() >= BRAKE_START_THRESHHOLD)) {
+
+                // Clear start button at first
+                while (_button.start->getStateChanged()) _button.start->getState();
+
+                if ((_button.start->getState() == LONG_CLICKED) && (_pedal.brake->getValue() >= BRAKE_START_THRESHHOLD) && (_hvEnabled->read())) {
                     // Optimize later!!
                     // [il]
                     // Set RFE enable
@@ -487,30 +488,12 @@ class SCar : public IService {
                     wait(0.1);
                 }
 
-                if (_button.reset->getStateChanged()) {
-                    button_state_t buttonState = _button.reset->getState();
+                // Clear Reset Button
+                while (_button.reset->getStateChanged()) _button.reset->getState();
 
-                    if (buttonState == PRESSED) {
-                        _resetButton.pressed = true;
-                    } else if (buttonState == LONG_CLICKED) {
-                        _resetButton.longPressed = true;
-                    } else if (buttonState == NOT_PRESSED) {
-                        _resetButton.released = true;
-                    }
-
-                    if (_resetButton.released) {
-                        if (_resetButton.longPressed && _resetButton.pressed) {
-                            _calibratePedals();
-                        } else if (_resetButton.pressed) {
-                            //_rotateGasCurve();
-                        }
-
-                        _resetButton.released = false;
-                        _resetButton.pressed = false;
-                        _resetButton.longPressed = false;
-                    }
+                if (_button.reset->getState() == LONG_CLICKED) {
+                    _calibratePedals();
                 }
-                
 
                 return;
             }
@@ -529,31 +512,6 @@ class SCar : public IService {
 
                 return;
             }
-        }
-
-        void _beepTimes(uint8_t times) {
-            for (uint8_t i = 0; i < times; i++) {
-                _buzzer->setState(BUZZER_ON);
-                wait(BEEP_MULTI_BEEP_TIME);
-                _buzzer->setState(BUZZER_OFF);
-                wait(BEEP_MULTI_SILENT_TIME);
-            }
-        }
-
-        void _rotateGasCurve() {
-            if (_gasCurve == GAS_CURVE_LINEAR) {
-                _gasCurve = GAS_CURVE_X_POW_2;
-                _beepTimes(2);
-            } else if (_gasCurve == GAS_CURVE_X_POW_2) {
-                _gasCurve = GAS_CURVE_X_POW_3;
-                _beepTimes(3);
-            } else if (_gasCurve == GAS_CURVE_X_POW_3) {
-                _gasCurve = GAS_CURVE_X_POW_4;
-                _beepTimes(4);
-            } else if (_gasCurve == GAS_CURVE_X_POW_4) {
-                _gasCurve = GAS_CURVE_LINEAR;
-                _beepTimes(1);
-            } else _gasCurve = GAS_CURVE_LINEAR;
         }
 };
 

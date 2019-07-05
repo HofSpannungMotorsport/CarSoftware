@@ -3,10 +3,15 @@
 
 #include "../interface/IHvEnabled.h"
 
+enum hv_enabled_on_state_t : bool {
+    HV_ENABLED_ON_AT_HIGH = true,
+    HV_ENABLED_ON_AT_LOW = false
+};
+
 class HardwareHvEnabled : public IHvEnabled {
     public:
-        HardwareHvEnabled(PinName pin, id_sub_component_t componentSubId)
-        : _pin(pin) {
+        HardwareHvEnabled(PinName pin, id_sub_component_t componentSubId, hv_enabled_on_state_t onState = HV_ENABLED_ON_AT_HIGH)
+        : _pin(pin), _onState(onState) {
             setComponentType(COMPONENT_SYSTEM);
             setObjectType(OBJECT_HARDWARE);
             setComponentSubId(componentSubId);
@@ -17,7 +22,13 @@ class HardwareHvEnabled : public IHvEnabled {
             #ifdef FORCE_DISABLE_HV_CHECK
                 return true;
             #else
-                return _pin;
+                if (_onState == HV_ENABLED_ON_AT_HIGH) {
+                    return _pin;
+                } else if (_onState == HV_ENABLED_ON_AT_LOW) {
+                    return !(_pin);
+                } else {
+                    return false;
+                }
             #endif
         }
 
@@ -28,6 +39,7 @@ class HardwareHvEnabled : public IHvEnabled {
     
     private:
         DigitalIn _pin;
+        hv_enabled_on_state_t _onState;
 };
 
 #endif // HARDWARE_HV_ENABLED_H
