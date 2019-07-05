@@ -25,7 +25,8 @@
 #define MASTER_PIN_FAN                      PG_2
 
 // HV Enable
-#define MASTER_PIN_HV_ENABLED               PE_4
+#define MASTER_PIN_TSMS                     PE_4
+#define MASTER_PIN_60V_OK                   PC_7
 
 // CAN Car intern
 #define MASTER_PIN_CAR_INTERN_CAN_RD        PD_0

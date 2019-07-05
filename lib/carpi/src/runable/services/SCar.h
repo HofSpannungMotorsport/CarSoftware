@@ -68,6 +68,7 @@ class SCar : public IService {
              IBuzzer* buzzer,
              IMotorController* motorController,
              IHvEnabled* hvEnabled,
+             IHvEnabled* tsms,
              PCockpitIndicator &ci)
             : _canService(canService), _ci(ci) {
             _button.reset = buttonReset;
@@ -85,6 +86,7 @@ class SCar : public IService {
             _motorController = motorController;
 
             _hvEnabled = hvEnabled;
+            _tsms = tsms;
         }
 
         virtual void run() {
@@ -158,7 +160,7 @@ class SCar : public IService {
             _sendLedsOverCan();
 
             // [QF]
-            while(!(_hvEnabled->read())) {
+            while(!(_hvEnabled->read()) || !(_tsms->read())) {
                 _canService.processInbound();
                 _ci.run();
             }
@@ -222,6 +224,7 @@ class SCar : public IService {
         IMotorController* _motorController;
 
         IHvEnabled* _hvEnabled;
+        IHvEnabled* _tsms;
 
         PCockpitIndicator &_ci;
 
@@ -297,9 +300,10 @@ class SCar : public IService {
 
         void _checkHvEnabled() {
             // [QF]
-            static bool errorAdded = false;
+            static bool hvEnabledErrorAdded = false;
+            static bool tsmsErrorAdded = false;
 
-            if (!(_hvEnabled->read())) {
+            if (!(_hvEnabled->read()) || !(_tsms->read())) {
                 if (_state == READY_TO_DRIVE) {
                     _state = ALMOST_READY_TO_DRIVE;
                     _motorController->setRUN(MOTOR_CONTROLLER_RUN_DISABLE);
@@ -308,12 +312,17 @@ class SCar : public IService {
                     _sendLedsOverCan();
                 }
 
-                if (!errorAdded) {
+                if (!hvEnabledErrorAdded) {
+                    addError(Error(componentId::getComponentId(COMPONENT_SYSTEM, COMPONENT_SYSTEM_60V_OK), 0x1, ERROR_ISSUE));
+                    hvEnabledErrorAdded = true;
+                }
+                if (!tsmsErrorAdded) {
                     addError(Error(componentId::getComponentId(COMPONENT_SYSTEM, COMPONENT_SYSTEM_HV_ENABLED), 0x1, ERROR_ISSUE));
-                    errorAdded = true;
+                    tsmsErrorAdded = true;
                 }
             } else {
-                errorAdded = false;
+                hvEnabledErrorAdded = false;
+                tsmsErrorAdded = false;
             }
         }
 
@@ -413,7 +422,7 @@ class SCar : public IService {
                 // Clear start button at first
                 while (_button.start->getStateChanged()) _button.start->getState();
 
-                if ((_button.start->getState() == LONG_CLICKED) && (_pedal.brake->getValue() >= BRAKE_START_THRESHHOLD) && (_hvEnabled->read())) {
+                if ((_button.start->getState() == LONG_CLICKED) && (_pedal.brake->getValue() >= BRAKE_START_THRESHHOLD) && (_hvEnabled->read()) && (_tsms->read())) {
                     // Optimize later!!
                     // [il]
                     // Set RFE enable

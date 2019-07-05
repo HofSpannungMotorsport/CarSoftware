@@ -44,7 +44,8 @@ HardwareMotorController motorController(MASTER_PIN_MOTOR_CONTROLLER_CAN_RD, MAST
 HardwareFan coolingFan(MASTER_PIN_FAN, COMPONENT_COOLING_FAN);
 HardwarePump coolingPump(MASTER_PIN_PUMP_PWM, MASTER_PIN_PUMP_ENABLE, COMPONENT_COOLING_PUMP);
 HardwareBuzzer buzzer(MASTER_PIN_BUZZER, COMPONENT_BUZZER_STARTUP);
-HardwareHvEnabled hvEnabled(MASTER_PIN_HV_ENABLED, COMPONENT_SYSTEM_HV_ENABLED);
+HardwareHvEnabled hvEnabled(MASTER_PIN_60V_OK, COMPONENT_SYSTEM_HV_ENABLED, HV_ENABLED_ON_AT_LOW);
+HardwareHvEnabled tsms(MASTER_PIN_TSMS, COMPONENT_SYSTEM_HV_ENABLED);
 
 // Services
 PCockpitIndicator cockpitIndicatorProgram(canService, hvEnabled, ledCI);
@@ -56,6 +57,7 @@ SCar carService(canService,
                 (IBuzzer*)&buzzer,
                 (IMotorController*)&motorController,
                 (IHvEnabled*)&hvEnabled,
+                (IHvEnabled*)&tsms,
                 cockpitIndicatorProgram);
 
 PMotorController motorControllerService(carService,
