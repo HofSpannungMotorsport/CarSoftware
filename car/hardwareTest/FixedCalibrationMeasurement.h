@@ -56,7 +56,7 @@ void FixedCalibrationMeasurement() {
 
     wait(5);
 
-    pcSerial.printf("\nTo start again, press both pedals more than 50%\n");
+    pcSerial.printf("\nTo start again, press both pedals more than 50%%\n");
 
     while (gas.getValue() < 0.5 || brake.getValue() < 0.5);
 
