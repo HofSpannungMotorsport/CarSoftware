@@ -83,7 +83,7 @@ enum id_sub_component_t : uint8_t {
     COMPONENT_SYSTEM_MOTOR_CONTROLLER = 0x4,
     COMPONENT_SYSTEM_SPEED =            0x5,
     COMPONENT_SYSTEM_COOLING =          0x6,
-    COMPONENT_SYSTEM_HV_ENABLED =       0x7,
+    COMPONENT_SYSTEM_TSMS =             0x7,
     COMPONENT_SYSTEM_60V_OK =           0x8
 };
 

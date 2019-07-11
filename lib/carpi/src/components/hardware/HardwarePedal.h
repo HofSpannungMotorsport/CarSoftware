@@ -5,10 +5,21 @@
 #include "../interface/IPedal.h"
 #include "../hardware/HardwareAnalogSensor.h"
 
-#define STD_MAX_DEVIANCE 0.25 // 10%
+// Hardcoded Calibration. Can be overwritten by recalibration if any fault
+#define STD_GAS_1_MIN 18400
+#define STD_GAS_1_MAX 45800
+
+#define STD_GAS_2_MIN 13450
+#define STD_GAS_2_MAX 43500
+
+#define STD_BRAKE_MIN 13470
+#define STD_BRAKE_MAX 19200
+
+// Devinance Settings
+#define STD_MAX_DEVIANCE 0.35 // 10%
 #define STD_MAX_DEVIANCE_TIME 200 // 100ms
 
-#define STD_MAPPED_BOUNDARY_PERCENTAGE 0.20 // 10%
+#define STD_MAPPED_BOUNDARY_PERCENTAGE 0.25 // 10%
 #define STD_MAX_OUT_OF_BOUNDARY_TIME 200 // 100ms
 
 #define STD_CALIBRATION_REFRESH_TIME        0.030 // 30ms
@@ -20,6 +31,11 @@
 #define STD_ANALOG_UPPER_BOUNDARY 64880 // uint16_t max -> 65535
 
 #define STD_PEDAL_THRESHHOLD 0.15 // 15%
+
+struct pedal_calibration_data_t {
+    uint16_t min[2] = {0,0}, max[2] = {0,0};
+    bool secondSensor = false;
+};
 
 class HardwarePedal : public IPedal {
     public:
@@ -34,6 +50,13 @@ class HardwarePedal : public IPedal {
             setComponentSubId(componentSubId);
         }
 
+        HardwarePedal(PinName inputPin, id_sub_component_t componentSubId, uint16_t min, uint16_t max)
+            : HardwarePedal(inputPin, componentSubId) {
+            _pin1.setMapping(min, max, 0.0, 1.0);
+            _calibrationSet = true;
+            _ready = true;
+        }
+
         HardwarePedal(PinName inputPin1, PinName inputPin2)
             : _pin1(inputPin1), _pin2(inputPin2) {
             _secondSensor = true;
@@ -43,6 +66,14 @@ class HardwarePedal : public IPedal {
         HardwarePedal(PinName inputPin1, PinName inputPin2, id_sub_component_t componentSubId)
             : HardwarePedal(inputPin1, inputPin2) {
             setComponentSubId(componentSubId);
+        }
+
+        HardwarePedal(PinName inputPin1, PinName inputPin2, id_sub_component_t componentSubId, uint16_t minPin1, uint16_t maxPin1, uint16_t minPin2, uint16_t maxPin2)
+            : HardwarePedal(inputPin1, inputPin2, componentSubId) {
+            _pin1.setMapping(minPin1, maxPin1, 0.0, 1.0);
+            _pin2.setMapping(minPin2, maxPin2, 0.0, 1.0);
+            _calibrationSet = true;
+            _ready = true;
         }
 
         virtual void setProportionality(pedal_sensor_type_t proportionality, uint16_t sensorNumber = 0) {
@@ -128,6 +159,30 @@ class HardwarePedal : public IPedal {
             return _calibrationStatus;
         }
 
+        virtual bool getCalibration(pedal_calibration_data_t &pedalCalibration) {
+            if (!_calibration.sensor1.initPointSet) return false;
+
+            if (_secondSensor) {
+                if (!_calibration.sensor2.initPointSet) return false;
+            }
+
+            pedalCalibration.secondSensor = _secondSensor;
+
+            uint16_t min = 0, max = 0, temp1, temp2;
+
+            _pin1.getMapping(min, max, temp1, temp2);
+            pedalCalibration.min[0] = min;
+            pedalCalibration.max[0] = max;
+
+            if (_secondSensor) {
+                _pin2.getMapping(min, max, temp1, temp2);
+                pedalCalibration.min[1] = min;
+                pedalCalibration.max[1] = max;
+            }
+
+            return true;
+        }
+
         virtual void setMaxDeviance(pedal_value_t deviance) {
             _deviance.max = deviance;
         }
@@ -204,6 +259,7 @@ class HardwarePedal : public IPedal {
         pedal_status_t _status = 0;
         bool _ready = false;
         pedal_value_t _last = 0;
+        bool _calibrationSet = false;
 
         float _calibrationRefreshTime = STD_CALIBRATION_REFRESH_TIME;
         uint16_t _calibrationMinDeviance = STD_CALIBRATION_MIN_DEVIANCE;
@@ -307,6 +363,8 @@ class HardwarePedal : public IPedal {
         }
 
         virtual void _beginCalibration() {
+            _ready = false;
+
             _calibration.sensor1.initPointSet = false;
             _calibration.sensor1.buffer.reset();
 
@@ -392,6 +450,8 @@ class HardwarePedal : public IPedal {
             }
 
             _ready = maybeReady;
+
+            if (_ready) _calibrationSet = true;
         }
 
         void _restartTimer(Timer &timer) {

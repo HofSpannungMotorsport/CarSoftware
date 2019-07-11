@@ -4,6 +4,7 @@
 #include "platform/CircularBuffer.h"
 #include "IService.h"
 #include "runable/programs/PCockpitIndicator.h"
+#include "runable/programs/PBrakeLight.h"
 #include "communication/componentIds.h"
 #include "communication/CANService.h"
 #include "components/interface/IButton.h"
@@ -69,8 +70,9 @@ class SCar : public IService {
              IMotorController* motorController,
              IHvEnabled* hvEnabled,
              IHvEnabled* tsms,
-             PCockpitIndicator &ci)
-            : _canService(canService), _ci(ci) {
+             PCockpitIndicator &ci,
+             PBrakeLight &brakeLightService)
+            : _canService(canService), _ci(ci), _brakeLightService(brakeLightService) {
             _button.reset = buttonReset;
             _button.start = buttonStart;
 
@@ -147,9 +149,12 @@ class SCar : public IService {
         void startUp() {
             wait(STARTUP_WAIT);
             _ci.run();
+            _brakeLightService.run();
 
             for (uint8_t i = 0; i < STARTUP_ANIMATION_PLAYBACKS; i++) {
                 _startupAnimation();
+                _ci.run();
+                _brakeLightService.run();
             }
 
             wait(STARTUP_ANIMATION_WAIT_AFTER);
@@ -162,7 +167,9 @@ class SCar : public IService {
             // [QF]
             while(!(_hvEnabled->read()) || !(_tsms->read())) {
                 _canService.processInbound();
+                processErrors();
                 _ci.run();
+                _brakeLightService.run();
             }
 
            	_resetLeds();
@@ -170,10 +177,9 @@ class SCar : public IService {
 
             wait(0.1);
 
-            _calibratePedals();
-
             _canService.processInbound();
             _checkHvEnabled();
+            _state = ALMOST_READY_TO_DRIVE;
             processErrors();
             if (_state != ALMOST_READY_TO_DRIVE) {
                 // If an Error occured, stop continuing and glow Red
@@ -185,9 +191,14 @@ class SCar : public IService {
                 _sendLedsOverCan();
                 while(1) {
                     _ci.run();
+                    _brakeLightService.run();
                     wait(0.1);
                 }
             }
+
+            _led.green->setState(LED_ON);
+            _led.green->setBlinking(BLINKING_FAST);
+            _sendLedsOverCan();
         }
 
         gas_curve_t getGasCurve() {
@@ -227,6 +238,7 @@ class SCar : public IService {
         IHvEnabled* _tsms;
 
         PCockpitIndicator &_ci;
+        PBrakeLight &_brakeLightService;
 
         id_component_t _calculateComponentId(IComponent* component) {
             id_component_t id = component->getComponentId();
@@ -317,7 +329,7 @@ class SCar : public IService {
                     hvEnabledErrorAdded = true;
                 }
                 if (!tsmsErrorAdded) {
-                    addError(Error(componentId::getComponentId(COMPONENT_SYSTEM, COMPONENT_SYSTEM_HV_ENABLED), 0x1, ERROR_ISSUE));
+                    addError(Error(componentId::getComponentId(COMPONENT_SYSTEM, COMPONENT_SYSTEM_TSMS), 0x1, ERROR_ISSUE));
                     tsmsErrorAdded = true;
                 }
             } else {
@@ -400,6 +412,7 @@ class SCar : public IService {
                 _sendLedsOverCan();
                 while(1) {
                     _ci.run();
+                    _brakeLightService.run();
                     wait(0.1);
                 }
             }
@@ -441,6 +454,7 @@ class SCar : public IService {
                         _canService.processInbound();
                         _checkHvEnabled();
                         _ci.run();
+                        _brakeLightService.run();
                         processErrors();
                         if (_state != ALMOST_READY_TO_DRIVE) {
                             _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
@@ -457,6 +471,7 @@ class SCar : public IService {
 
                             while(1) {
                                 _ci.run();
+                                _brakeLightService.run();
                                 wait(0.1);
                             }
                         }
@@ -483,6 +498,7 @@ class SCar : public IService {
                         _sendLedsOverCan();
                         while(1) {
                             _ci.run();
+                            _brakeLightService.run();
                             wait(0.1);
                         }
                     }
