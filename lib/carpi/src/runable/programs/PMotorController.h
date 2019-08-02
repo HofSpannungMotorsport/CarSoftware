@@ -162,7 +162,8 @@ class PMotorController : public IProgram {
         }
 
         void _pedalError(IPedal* sensorId) {
-            _carService.addError(Error(sensorId->getComponentId(), sensorId->getStatus(), ERROR_CRITICAL));
+            _carService.addError(Error(sensorId->getComponentId(), sensorId->getStatus(), ERROR_ISSUE));
+            _carService.calibrationNeeded();
         }
 
         void _asrError() {

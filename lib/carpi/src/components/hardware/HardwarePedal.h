@@ -6,23 +6,23 @@
 #include "../hardware/HardwareAnalogSensor.h"
 
 // Hardcoded Calibration. Can be overwritten by recalibration if any fault
-#define STD_GAS_1_MIN 18400
-#define STD_GAS_1_MAX 45800
+#define STD_GAS_1_MIN 18196
+#define STD_GAS_1_MAX 45250
 
-#define STD_GAS_2_MIN 13450
-#define STD_GAS_2_MAX 43500
+#define STD_GAS_2_MIN 12663
+#define STD_GAS_2_MAX 42444
 
-#define STD_BRAKE_MIN 13470
-#define STD_BRAKE_MAX 19200
+#define STD_BRAKE_MIN 12684
+#define STD_BRAKE_MAX 20113
 
 // Devinance Settings
 #define STD_MAX_DEVIANCE 0.35 // 10%
 #define STD_MAX_DEVIANCE_TIME 200 // 100ms
 
 #define STD_MAPPED_BOUNDARY_PERCENTAGE 0.25 // 10%
-#define STD_MAX_OUT_OF_BOUNDARY_TIME 200 // 100ms
+#define STD_MAX_OUT_OF_BOUNDARY_TIME 200 // 100ms [ahh... should be implementet, huh?][il]
 
-#define STD_CALIBRATION_REFRESH_TIME        0.030 // 30ms
+#define STD_CALIBRATION_REFRESH_TIME        0.010 // 30ms
 #define STD_CALIBRATION_MIN_DEVIANCE        500 // Raw analog
 #define STD_CALIBRATION_MAX_DEVIANCE        50000 // Raw analog
 #define STD_CALIBRATION_SAMPLE_BUFFER_SIZE  20 // How many values should be combined during calibration to get the fu***** deviance away
@@ -364,6 +364,18 @@ class HardwarePedal : public IPedal {
 
         virtual void _beginCalibration() {
             _ready = false;
+
+            // Reset Status and deviance Timer to continue after calibration without an preveouse error
+            _status = 0;
+            _last = 0;
+            if (_deviance.timerStarted) {
+                _deviance.timer.stop();
+                _deviance.timerStarted = false;
+            }
+            _pin1.reset();
+            if (_secondSensor) {
+                _pin2.reset();
+            }
 
             _calibration.sensor1.initPointSet = false;
             _calibration.sensor1.buffer.reset();

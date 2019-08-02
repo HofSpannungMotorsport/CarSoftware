@@ -11,7 +11,7 @@ void FixedCalibrationMeasurement() {
     pcSerial.printf("FixedCalibrationMeasurement\n\nStarting with Calibration in 5 \t");
     wait(1);
     
-    for(int i = 4; 0 >= 0; i--) {
+    for(int i = 4; i >= 0; i--) {
         pcSerial.printf("%i\t", i);
 
         if (i != 0) {
@@ -44,11 +44,11 @@ void FixedCalibrationMeasurement() {
     pedal_calibration_data_t brakeCalibration;
     
     bool calibrationOk = gas.getCalibration(gasCalibration) && brake.getCalibration(brakeCalibration);
-    
+
     if (calibrationOk) {
-        pcSerial.printf("Gas1:\tMin: %i\tMax: %i\n", gasCalibration.min[0], gasCalibration.max[0]);
-        pcSerial.printf("Gas2:\tMin: %i\tMax: %i\n", gasCalibration.min[1], gasCalibration.max[1]);
-        pcSerial.printf("Brake:\tMin: %i\tMax: %i\n", brakeCalibration.min[0], gasCalibration.max[0]);
+        pcSerial.printf("#define STD_GAS_1_MIN %i\n#define STD_GAS_1_MAX %i\n\n", gasCalibration.min[0], gasCalibration.max[0]);
+        pcSerial.printf("#define STD_GAS_2_MIN %i\n#define STD_GAS_2_MAX %i\n\n", gasCalibration.min[1], gasCalibration.max[1]);
+        pcSerial.printf("#define STD_BRAKE_MIN %i\n#define STD_BRAKE_MAX %i\n\n", brakeCalibration.min[0], brakeCalibration.max[0]);
     } else {
         pcSerial.printf("Got calibration Error. Please try again!\nGas Error Code: 0x%x\nBrake Error Code: 0x%x\n", gas.getStatus(), brake.getStatus());
         while(true);

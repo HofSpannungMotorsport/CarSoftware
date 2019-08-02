@@ -271,6 +271,7 @@ class CANService : public IService {
 
             if (_can.tderror() > 0 || _can.rderror() > 0) {
                 pcSerial.printf("[CANService]@run: Detected CAN Error: td: %i\t rd: %i\n", _can.tderror(), _can.rderror());
+                _can.reset();
             }
         }
 

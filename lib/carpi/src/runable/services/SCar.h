@@ -38,7 +38,8 @@ enum car_state_t : uint8_t {
     BOOT = 0x1,
     ALMOST_READY_TO_DRIVE = 0x2,
     READY_TO_DRIVE = 0x3,
-    CAR_ERROR = 0x4
+    CAR_ERROR = 0x4,
+    CALIBRATION_NEEDED = 0x5
 };
 
 enum error_type_t : uint8_t {
@@ -146,6 +147,14 @@ class SCar : public IService {
             return _state;
         }
 
+        void calibrationNeeded() {
+            _state = CALIBRATION_NEEDED;
+            _resetLeds();
+            _led.yellow->setState(LED_ON);
+            _led.yellow->setBlinking(BLINKING_NORMAL);
+            _sendLedsOverCan();
+        }
+
         void startUp() {
             wait(STARTUP_WAIT);
             _ci.run();
@@ -165,11 +174,14 @@ class SCar : public IService {
             _sendLedsOverCan();
 
             // [QF]
-            while(!(_hvEnabled->read()) || !(_tsms->read())) {
+            while(_button.start->getStateChanged()) _button.start->getState();
+            while((!(_hvEnabled->read()) || !(_tsms->read())) && !(_button.start->getState() == LONG_CLICKED)) {
                 _canService.processInbound();
                 processErrors();
                 _ci.run();
                 _brakeLightService.run();
+
+                while(_button.start->getStateChanged()) _button.start->getState();
             }
 
            	_resetLeds();
@@ -307,7 +319,8 @@ class SCar : public IService {
         }
 
         void _pedalError(IPedal* sensorId) {
-            addError(Error(sensorId->getComponentId(), sensorId->getStatus(), ERROR_CRITICAL));
+            addError(Error(sensorId->getComponentId(), sensorId->getStatus(), ERROR_ISSUE));
+            calibrationNeeded();
         }
 
         void _checkHvEnabled() {
@@ -403,18 +416,11 @@ class SCar : public IService {
             if (_state == BOOT) {
                 _state = ALMOST_READY_TO_DRIVE;
             } else {
-                // If an Error occured, stop continuing and glow Red
-                // Red   -> Blinking Slow
-                // Green -> Off
                 _resetLeds();
                 _led.red->setState(LED_ON);
-                _led.red->setBlinking(BLINKING_SLOW);
-                _sendLedsOverCan();
-                while(1) {
-                    _ci.run();
-                    _brakeLightService.run();
-                    wait(0.1);
-                }
+                wait(0.5);
+                calibrationNeeded();
+                return;
             }
 
 
@@ -521,6 +527,16 @@ class SCar : public IService {
                 }
 
                 return;
+            }
+
+            if (_state == CALIBRATION_NEEDED) {
+                // Clear Reset Button
+                while (_button.reset->getStateChanged()) _button.reset->getState();
+
+                // Start Calibration after Calibration failure, clearing the error at beginning on pedals
+                if (_button.reset->getState() == LONG_CLICKED) {
+                    _calibratePedals();
+                }
             }
 
             if (_state == READY_TO_DRIVE) {

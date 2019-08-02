@@ -10,7 +10,7 @@
 #define HIGH_DEMAND_SERVICE_REFRESH_RATE 120 // Hz
 #define LOW_DEMAND_SERVICE_REFRESH_RATE 3 // Hz
 
-#include "hardware/Pins_Master.h"
+#include "hardware/Pins_Master_PCB.h"
 
 CANService canService(MASTER_PIN_CAR_INTERN_CAN_RD, MASTER_PIN_CAR_INTERN_CAN_TD);
 

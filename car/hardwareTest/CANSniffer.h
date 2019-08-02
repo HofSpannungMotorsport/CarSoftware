@@ -2,14 +2,7 @@
 
 #include "mbed.h"
 
-#ifdef STM32F446xx
-    #define CAN1_CONF PB_8,PB_9 // Car intern
-#else
-    //#define CAN1_CONF PD_0,PD_1 // Car intern
-    #define CAN1_CONF PB_12,PB_6 // Motor Controller
-#endif
-
-CAN can1(CAN1_CONF, 250000);
+CAN can1(D10,D2, 250000);
 
 void receivedMessage() {
     CANMessage msg;
@@ -25,7 +18,15 @@ void receivedMessage() {
 void CANSniffer() {
     printf("CANSniffer listening\n\n");
     can1.attach(receivedMessage);
+
+    Timer timer;
+    timer.start();
     while(1) {
+        if (timer > 1.0) {
+            timer.reset();
+            printf("Nix\n");
+        }
+
         if(can1.rderror() || can1.tderror()) {
             printf("\nCAN Errors:\n\tRD: %i\n\tTD: %i\n\n", can1.rderror(), can1.tderror());
             can1.reset();

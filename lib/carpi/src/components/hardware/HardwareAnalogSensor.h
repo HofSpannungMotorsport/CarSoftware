@@ -188,6 +188,11 @@ class HardwareAnalogSensor : public IAnalogSensor {
         virtual analog_sensor_status_t getStatus() {
             return _status;
         }
+
+        void reset() {
+            _map.set = false;
+            _status = 0;
+        }
         
     protected:
         AnalogIn _pin;
