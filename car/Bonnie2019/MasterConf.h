@@ -58,7 +58,8 @@ HardwareMotorController motorController(MASTER_PIN_MOTOR_CONTROLLER_CAN_RD, MAST
 HardwareFan coolingFan(MASTER_PIN_FAN, COMPONENT_COOLING_FAN);
 HardwarePump coolingPump(MASTER_PIN_PUMP_PWM, MASTER_PIN_PUMP_ENABLE, COMPONENT_COOLING_PUMP);
 HardwareBuzzer buzzer(MASTER_PIN_BUZZER, COMPONENT_BUZZER_STARTUP);
-HardwareHvEnabled hvEnabled(MASTER_PIN_HV_ENABLED_TSMS, COMPONENT_SYSTEM_HV_ENABLED);
+HardwareHvEnabled hvEnabled(MASTER_PIN_60V_OK, COMPONENT_SYSTEM_60V_OK, HV_ENABLED_ON_AT_LOW);
+HardwareHvEnabled tsms(MASTER_PIN_TSMS, COMPONENT_SYSTEM_TSMS);
 HardwareSDCard hardwareSD(COMPONENT_SYSTEM_SD_CARD, MASTER_PIN_SPI_SD_MOSI, MASTER_PIN_SPI_SD_MISO, MASTER_PIN_SPI_SD_SCK, MASTER_PIN_SPI_SD_CS);
 HardwareAlive masterAlive(COMPONENT_ALIVE_MASTER, MASTER_PIN_MICROCONTROLLER_OK);
 
@@ -67,6 +68,8 @@ DigitalOut microcontrollerOk(MASTER_PIN_MICROCONTROLLER_OK);
 // Services
 PCockpitIndicator cockpitIndicatorProgram(hvEnabled, ledCI);
 
+PBrakeLight brakeLightService((IPedal*)&brakePedal, (ILed*)&brakeLight);
+
 SCar carService(syncer,
                 (IButton*)&buttonReset, (IButton*)&buttonStart,
                 (ILed*)&ledRed, (ILed*)&ledYellow, (ILed*)&ledGreen,
@@ -74,15 +77,15 @@ SCar carService(syncer,
                 (IBuzzer*)&buzzer,
                 (IMotorController*)&motorController,
                 (IHvEnabled*)&hvEnabled,
+                (IHvEnabled*)&tsms,
                 (ISDCard*)&hardwareSD,
                 (IAlive*)&pedalAlive, (IAlive*)&dashboardAlive, (IAlive*)&masterAlive,
-                cockpitIndicatorProgram);
+                cockpitIndicatorProgram,
+                brakeLightService);
 
 PMotorController motorControllerService(carService,
                                         (IMotorController*)&motorController,
                                         (IPedal*)&gasPedal, (IPedal*)&brakePedal);
-
-PBrakeLight brakeLightService(carService, (IPedal*)&brakePedal, (ILed*)&brakeLight);
 
 SSpeed speedService(carService,
                     /*(IRpmSensor*)&rpmFrontLeft, (IRpmSensor*)&rpmFrontRight, (IRpmSensor*)&rpmRearLeft, (IRpmSensor*)&rpmRearRight, */ // [il]

@@ -69,6 +69,9 @@ class PMotorController : public IProgram {
 
             // Send new Power to Motor -> Brum Brum (but without the Brum Brum)
             // ...maybe a drivers scream ;)
+
+            returnValue = _applyGasCurve(returnValue);
+
             _motorController->setTorque(returnValue);
 
             #if defined(MOTORCONTROLLER_OUTPUT) && defined(MESSAGE_REPORT)
@@ -159,7 +162,8 @@ class PMotorController : public IProgram {
         }
 
         void _pedalError(IPedal* sensorId) {
-            _carService.addError(Error(sensorId->getComponentId(), sensorId->getStatus(), ERROR_CRITICAL));
+            _carService.addError(Error(sensorId->getComponentId(), sensorId->getStatus(), ERROR_ISSUE));
+            _carService.calibrationNeeded();
         }
 
         void _asrError() {
@@ -335,6 +339,15 @@ class PMotorController : public IProgram {
             // Implementing later
             // [il]
             return returnValue;
+        }
+
+        float _applyGasCurve(float pedalPosition) {
+            float gasValue = pedalPosition * pedalPosition;
+
+            if (gasValue > 1.0) gasValue = 1.0;
+            else if (gasValue < 0.0) gasValue = 0.0;
+
+            return gasValue;
         }
 };
 
