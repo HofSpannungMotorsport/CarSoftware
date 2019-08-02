@@ -9,6 +9,7 @@
 //#define CCAN_SENDING_DEBUG // Enables reporting at sending over Can
 //#define DISABLE_PUMP // Disables the Pump entirly, usefull if the cooling system is not filled with water !!! DISCONNECT PUMP ON UPLOAD IF NOT FILLED WITH WATER, OTHERWISE IT WILL START !!!
 //#define DISABLE_SERIAL // Disables the serial report funktion
+//#define PRINT_SPEED
 #include "carpi.h"
 
 #define HIGH_DEMAND_SERVICE_REFRESH_RATE 120 // Hz

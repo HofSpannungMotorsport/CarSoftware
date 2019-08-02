@@ -7,9 +7,9 @@ DigitalIn bspdError(MASTER_PIN_ERROR_BSPD);
 DigitalIn bmsError(MASTER_PIN_ERROR_BMS);
 DigitalIn imdError(MASTER_PIN_ERROR_IMD);
 
-DigitalOut bspdLed(LED1); // green
+DigitalOut bspdLed(LED3); // red
 DigitalOut bmsLed(LED2); // blue
-DigitalOut imdLed(LED3); // red
+DigitalOut imdLed(LED1); // green
 
 void MasterPCBErrorStorageTest() {
     pcSerial.printf("MasterPCBErrorStorageTest\n");
