@@ -4,7 +4,7 @@
     With this, all components, services and programs are included in the actual CarSoftware.
 */
 
-#define CARPI_VERSION "V0.1.1-P4 - Added Gas Curve & Correct Power Setting & CI & PCB & 60V OK"
+#define CARPI_VERSION "V0.1.2-P1 - Reduced Power Option"
 
 // Prior include Platform-specific Components
 

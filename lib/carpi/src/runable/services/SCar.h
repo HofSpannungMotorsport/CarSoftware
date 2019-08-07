@@ -26,11 +26,19 @@
 #define BEEP_MULTI_BEEP_TIME 0.15 // s
 #define BEEP_MULTI_SILENT_TIME 0.1 // s
 
+#define BEEP_TIME_POWER_MAX     1.0 // s
+#define BEEP_TIME_POWER_REDUCED 0.3 // s
+
 enum gas_curve_t : uint8_t {
     GAS_CURVE_LINEAR = 0x0,
     GAS_CURVE_X_POW_2,
     GAS_CURVE_X_POW_3,
     GAS_CURVE_X_POW_4
+};
+
+enum power_mode_t : bool {
+    REDUCED = true,
+    UNLIMITED = false
 };
 
 enum car_state_t : uint8_t {
@@ -211,10 +219,16 @@ class SCar : public IService {
             _led.green->setState(LED_ON);
             _led.green->setBlinking(BLINKING_FAST);
             _sendLedsOverCan();
+
+            while (_button.reset->getStateChanged()) _button.reset->getState();
         }
 
         gas_curve_t getGasCurve() {
             return _gasCurve;
+        }
+
+        power_mode_t getPowerMode() {
+            return _powerMode;
         }
 
     private:
@@ -225,6 +239,7 @@ class SCar : public IService {
         car_state_t _state = CAR_OFF;
 
         gas_curve_t _gasCurve = GAS_CURVE_X_POW_2;
+        power_mode_t _powerMode = UNLIMITED;
 
         struct _button {
             IButton* reset;
@@ -434,6 +449,12 @@ class SCar : public IService {
             wait(0.1);
         }
 
+        struct _resetButton {
+            bool pressed = false,
+                 longPressed = false,
+                 released = false;
+        } _resetButton;
+
         void _checkInput() {
             // [QF]
             if (_state == ALMOST_READY_TO_DRIVE) {
@@ -517,13 +538,38 @@ class SCar : public IService {
                     _led.green->setState(LED_ON);
                     _sendLedsOverCan();
                     wait(0.1);
+
+                    while (_button.reset->getStateChanged()) _button.reset->getState();
                 }
 
-                // Clear Reset Button
-                while (_button.reset->getStateChanged()) _button.reset->getState();
+                if (_button.reset->getStateChanged()) {
+                    button_state_t state = _button.reset->getState();
 
-                if (_button.reset->getState() == LONG_CLICKED) {
+                    if (state == PRESSED) {
+                        _resetButton.pressed = true;
+                    }
+
+                    if (state == LONG_CLICKED && _resetButton.pressed) {
+                        _resetButton.longPressed = true;
+                    }
+
+                    if (state == NOT_PRESSED && _resetButton.pressed) {
+                        _resetButton.released = true;
+                    }
+                }
+
+                if (_resetButton.pressed && _resetButton.longPressed) {
                     _calibratePedals();
+                    _resetButton.pressed = false;
+                    _resetButton.longPressed = false;
+                    _resetButton.released = false;
+                }
+
+                if (_resetButton.pressed && _resetButton.released) {
+                    _changePowerMode();
+                    _resetButton.pressed = false;
+                    _resetButton.longPressed = false;
+                    _resetButton.released = false;
                 }
 
                 return;
@@ -532,6 +578,9 @@ class SCar : public IService {
             if (_state == CALIBRATION_NEEDED) {
                 // Clear Reset Button
                 while (_button.reset->getStateChanged()) _button.reset->getState();
+                _resetButton.pressed = false;
+                _resetButton.longPressed = false;
+                _resetButton.released = false;
 
                 // Start Calibration after Calibration failure, clearing the error at beginning on pedals
                 if (_button.reset->getState() == LONG_CLICKED) {
@@ -553,6 +602,21 @@ class SCar : public IService {
 
                 return;
             }
+        }
+
+        void _changePowerMode() {
+            _buzzer->setBeep(BUZZER_MONO_TONE);
+            _buzzer->setState(BUZZER_ON);
+
+            if (_powerMode == REDUCED) {
+                _powerMode = UNLIMITED;
+                wait(BEEP_TIME_POWER_MAX);
+            } else {
+                _powerMode = REDUCED;
+                wait(BEEP_TIME_POWER_REDUCED);
+            }
+
+            _buzzer->setState(BUZZER_OFF);
         }
 };
 

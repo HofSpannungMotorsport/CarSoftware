@@ -72,6 +72,8 @@ class PMotorController : public IProgram {
 
             returnValue = _applyGasCurve(returnValue);
 
+            returnValue = _applyPowerMode(returnValue);
+
             _motorController->setTorque(returnValue);
 
             #ifdef MOTORCONTROLLER_OUTPUT
@@ -358,6 +360,17 @@ class PMotorController : public IProgram {
 
             if (gasValue > 1.0) gasValue = 1.0;
             else if (gasValue < 0.0) gasValue = 0.0;
+
+            return gasValue;
+        }
+
+        float _applyPowerMode(float pedalPosition) {
+            float gasValue = pedalPosition;
+            power_mode_t powerMode = _carService.getPowerMode();
+
+            if (powerMode == REDUCED) {
+                gasValue *= 1.0 / 1.5;
+            }
 
             return gasValue;
         }
