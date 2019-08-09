@@ -21,13 +21,12 @@
 #define STARTUP_ANIMATION_WAIT_AFTER 0.3 // s wait after animation
 #define BRAKE_START_THRESHHOLD 0.60 // %
 
+#define LAUNCH_CONTROL_RELEASE_VALUE 0.95 // % where the gas is activated again
+
 #define HV_ENABLED_BEEP_TIME 2.2 // s (has to be at least 0.5)
 
-#define BEEP_MULTI_BEEP_TIME 0.15 // s
-#define BEEP_MULTI_SILENT_TIME 0.1 // s
-
-#define BEEP_TIME_POWER_MAX     1.0 // s
-#define BEEP_TIME_POWER_REDUCED 0.3 // s
+#define BEEP_MULTI_BEEP_TIME 0.1 // s
+#define BEEP_MULTI_SILENT_TIME 0.08 // s
 
 enum gas_curve_t : uint8_t {
     GAS_CURVE_LINEAR = 0x0,
@@ -36,18 +35,14 @@ enum gas_curve_t : uint8_t {
     GAS_CURVE_X_POW_4
 };
 
-enum power_mode_t : bool {
-    REDUCED = true,
-    UNLIMITED = false
-};
-
 enum car_state_t : uint8_t {
     CAR_OFF = 0x0,
     BOOT = 0x1,
     ALMOST_READY_TO_DRIVE = 0x2,
     READY_TO_DRIVE = 0x3,
     CAR_ERROR = 0x4,
-    CALIBRATION_NEEDED = 0x5
+    CALIBRATION_NEEDED = 0x5,
+    LAUNCH_CONTROL = 0x6
 };
 
 enum error_type_t : uint8_t {
@@ -227,8 +222,8 @@ class SCar : public IService {
             return _gasCurve;
         }
 
-        power_mode_t getPowerMode() {
-            return _powerMode;
+        float getPowerSetting() {
+            return (float)_currentPower / 10.0;
         }
 
     private:
@@ -239,7 +234,7 @@ class SCar : public IService {
         car_state_t _state = CAR_OFF;
 
         gas_curve_t _gasCurve = GAS_CURVE_X_POW_2;
-        power_mode_t _powerMode = UNLIMITED;
+        uint8_t _currentPower = 10;
 
         struct _button {
             IButton* reset;
@@ -589,6 +584,9 @@ class SCar : public IService {
             }
 
             if (_state == READY_TO_DRIVE) {
+                while (_button.reset->getStateChanged()) _button.reset->getState();
+                while (_button.start->getStateChanged()) _button.start->getState();
+
                 if (_button.reset->getState() == PRESSED) {
                     // Disable RFE and RUN
                     _motorController->setRUN(MOTOR_CONTROLLER_RUN_DISABLE);
@@ -598,25 +596,56 @@ class SCar : public IService {
 
                     _led.green->setBlinking(BLINKING_FAST);
                     _sendLedsOverCan();
+
+                    return;
+                }
+
+                if ((_button.start->getState() == PRESSED) && (_pedal.brake->getValue() >= BRAKE_START_THRESHHOLD)) {
+                    _beepTimes(10, 0.02, 0.02);
+                    _state = LAUNCH_CONTROL;
+                }
+
+                return;
+            }
+
+            if (_state == LAUNCH_CONTROL) {
+                while (_button.reset->getStateChanged()) _button.reset->getState();
+                
+                if (_pedal.gas->getValue() >= LAUNCH_CONTROL_RELEASE_VALUE) {
+                    _state = READY_TO_DRIVE;
+                }
+
+                if (_button.reset->getState() == PRESSED) {
+                    // Disable RFE and RUN
+                    _motorController->setRUN(MOTOR_CONTROLLER_RUN_DISABLE);
+                    _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
+
+                    _state = ALMOST_READY_TO_DRIVE;
+
+                    _led.green->setBlinking(BLINKING_FAST);
+                    _sendLedsOverCan();
+
+                    return;
                 }
 
                 return;
             }
         }
 
-        void _changePowerMode() {
+        void _beepTimes(uint8_t times, float beepOnTime = BEEP_MULTI_BEEP_TIME, float beepOffTime = BEEP_MULTI_SILENT_TIME) {
             _buzzer->setBeep(BUZZER_MONO_TONE);
-            _buzzer->setState(BUZZER_ON);
-
-            if (_powerMode == REDUCED) {
-                _powerMode = UNLIMITED;
-                wait(BEEP_TIME_POWER_MAX);
-            } else {
-                _powerMode = REDUCED;
-                wait(BEEP_TIME_POWER_REDUCED);
+            for (uint8_t i = 0; i < times; i++) {
+                _buzzer->setState(BUZZER_ON);
+                wait(beepOnTime);
+                _buzzer->setState(BUZZER_OFF);
+                wait(beepOffTime);
             }
+        }
 
-            _buzzer->setState(BUZZER_OFF);
+        void _changePowerMode() {
+            if (_currentPower >= 10) _currentPower = 0;
+            _currentPower++;
+            _beepTimes(_currentPower);
         }
 };
 

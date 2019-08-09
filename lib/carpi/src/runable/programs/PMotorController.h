@@ -74,6 +74,8 @@ class PMotorController : public IProgram {
 
             returnValue = _applyPowerMode(returnValue);
 
+            returnValue = _setLaunchControl(returnValue);
+
             _motorController->setTorque(returnValue);
 
             #ifdef MOTORCONTROLLER_OUTPUT
@@ -156,7 +158,7 @@ class PMotorController : public IProgram {
             }
 
             _carService.run();
-            if (_carService.getState() == READY_TO_DRIVE) {
+            if (_carService.getState() == READY_TO_DRIVE || _carService.getState() == LAUNCH_CONTROL) {
                 _ready = true;
             } else {
                 _ready = false;
@@ -365,14 +367,15 @@ class PMotorController : public IProgram {
         }
 
         float _applyPowerMode(float pedalPosition) {
-            float gasValue = pedalPosition;
-            power_mode_t powerMode = _carService.getPowerMode();
+            return pedalPosition * _carService.getPowerSetting();
+        }
 
-            if (powerMode == REDUCED) {
-                gasValue *= 1.0 / 1.5;
+        float _setLaunchControl(float pedalPosition) {
+            if (_carService.getState() == LAUNCH_CONTROL) {
+                return 0.0;
             }
 
-            return gasValue;
+            return pedalPosition;
         }
 };
 
