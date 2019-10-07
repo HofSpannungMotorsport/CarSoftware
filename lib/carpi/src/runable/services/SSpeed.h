@@ -12,6 +12,10 @@
 #define STD_DISTANCE_PER_REVOLUTION 1.4451326206513048896928159563086 // m -> The distance a wheel will travel over one whole rotation
 #define STD_MOTOR_TO_WHEEL_RATIO (1.0/3.6) // The gear Ratio from the Motor to the rear Wheels
 
+#define THROTTLE_FROM 30 // kM/h
+#define THROTTLE_TO 80 // kM/h
+#define THROTTLE_END_VALUE 0.55 // %
+
 /*
     Speed is measured by the front Wheels -> most accurat result.
     If the Sensors in the front have a problem, the ones in the back will be used instead.
@@ -46,7 +50,7 @@ class SSpeed : public IService {
 
             if ((_rpm.front.left->getStatus() > 0) || (_rpm.front.right->getStatus() > 0)) {
                 // One of the front Sensors has a problem
-                //if ((_rpm.front.left->getStatus() > 0) || (_rpm.front.right->getStatus() > 0)) {
+                //if ((_rpm.rear.left->getStatus() > 0) || (_rpm.rear.right->getStatus() > 0)) {
                     // One of the rear Sensors has a problem too
                     if (_motorController->getStatus() > 0) {
                         _speed = 0;
@@ -62,23 +66,27 @@ class SSpeed : public IService {
                 useSensor = FRONT;
             }
 
+            #ifdef SSPEED_FORCED_USE_MOTOR
+                useSensor = MOTOR;
+            #endif
+
             if (useSensor == FRONT) {
-                if (_checkPlausibility(_rpm.front.left, _rpm.front.right)) {
+                if (/*_checkPlausibility(_rpm.front.left, _rpm.front.right)*/ true) {
                     // Calculate mid. of both sensors, then rpm -> m/min -> km/h
-                    _speed = (_getSpeed(_rpm.front.left) + _getSpeed(_rpm.front.right)) / 2;
+                    _speed = _getSpeed(_rpm.front.left, _rpm.front.right);
                 } else {
-                    if ((_rpm.front.left->getStatus() > 0) || (_rpm.front.right->getStatus() > 0)) {
+                    //if ((_rpm.rear.left->getStatus() > 0) || (_rpm.rear.right->getStatus() > 0)) {
                         useSensor = MOTOR;
-                    } else {
-                        useSensor = REAR;
-                    }
+                    //} else {
+                    //    useSensor = REAR;
+                    //}
                 }
             }
 
             /*
             if (useSensor == REAR) {
                 if (_checkPlausibility(_rpm.rear.left, _rpm.rear.right)) {
-                    _speed = (_getSpeed(_rpm.rear.left) + _getSpeed(_rpm.rear.right)) / 2;
+                    _speed = _getSpeed(_rpm.rear.left, _rpm.rear.right);
                 } else {
                     useSensor = MOTOR;
                 }
@@ -89,6 +97,12 @@ class SSpeed : public IService {
                 _speed = _getSpeed(_motorController);
                 //_carService.addError(Error(ID::getComponentId(SYSTEM, SYSTEM_SPEED), SPEED_SERVICE_USING_MOTOR, ERROR_ISSUE));
             }
+
+            #ifdef SSPEED_REPORT_SPEED
+                pcSerial.printf("[SSpeed]@run: Current Speed: %.3f kM/h\n", _speed);
+            #endif
+
+            _setThrottle(_speed);
         }
 
         speed_value_t getSpeed() {
@@ -116,7 +130,11 @@ class SSpeed : public IService {
         } _rpm;
 
         speed_value_t _getSpeed(IRpmSensor* sensor) {
-            return (sensor->getFrequency() * STD_DISTANCE_PER_REVOLUTION * 0.06);
+            return (sensor->getFrequency() * (speed_value_t)STD_DISTANCE_PER_REVOLUTION * (speed_value_t)0.06);
+        }
+
+        speed_value_t _getSpeed(IRpmSensor* sensor1, IRpmSensor* sensor2) {
+            return ((sensor1->getFrequency() + sensor2->getFrequency()) / 2.0) * (speed_value_t)STD_DISTANCE_PER_REVOLUTION * (speed_value_t)0.06;
         }
 
         speed_value_t _getSpeed(IMotorController* sensor) {
@@ -142,6 +160,21 @@ class SSpeed : public IService {
             }
 
             return true;
+        }
+
+        float _map(float x, float in_min, float in_max, float out_min, float out_max) {
+            return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+        }
+
+        void _setThrottle(speed_value_t speed) {
+            if (speed > (float)THROTTLE_FROM) {
+                float powerLimit = _map(speed, THROTTLE_FROM, THROTTLE_TO, 1.0, THROTTLE_END_VALUE);
+
+                if (powerLimit < 0.0) powerLimit = 0.0;
+                if (powerLimit > 1.0) powerLimit = 1.0;
+
+                _carService.setMaxPower(powerLimit);
+            }
         }
 };
 
