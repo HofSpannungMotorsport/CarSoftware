@@ -12,4 +12,6 @@
 
 #define PEDAL_CAN PB_8,PB_9
 
+#define PEDAL_PIN_ALIVE LED2
+
 #endif // PINS_PEDAL_H

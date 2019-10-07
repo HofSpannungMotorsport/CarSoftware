@@ -11,6 +11,10 @@ class SelfSyncable : public ICommunication {
             _syncerAttached = true;
         }
 
+        virtual void detach() {
+            _syncerAttached = false;
+        }
+
     protected:
         Sync *_syncer;
         bool _syncerAttached = false;

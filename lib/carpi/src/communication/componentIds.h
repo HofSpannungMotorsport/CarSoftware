@@ -62,14 +62,15 @@ enum id_sub_component_t : uint8_t {
 
     // LEDs
     COMPONENT_LED_BRAKE =          0x0, // The braking light on the back of the car
-    COMPONENT_LED_ERROR =          0x1, // red LED dashboard
-    COMPONENT_LED_ISSUE =          0x2, // yellow LED dashboard
-    COMPONENT_LED_READY_TO_DRIVE = 0x3, // greed LED dashboard
-    COMPONENT_LED_MASTER_RED =     0x4, // red LED on the board PCB (master)
-    COMPONENT_LED_MASTER_BLUE =    0x5, // blue LED on the board PCB (master)
-    COMPONENT_LED_MASTER_GREEN =   0x6, // green LED on the board PCB (master)
-    COMPONENT_LED_DASHBOARD =      0x7, // green LED on the board PCB (dashboard)
-    COMPONENT_LED_PEDAL =          0x8, // green LED on the board PCB (pedal)
+    COMPONENT_LED_CI =             0x1,
+    COMPONENT_LED_ERROR =          0x2, // red LED dashboard
+    COMPONENT_LED_ISSUE =          0x3, // yellow LED dashboard
+    COMPONENT_LED_READY_TO_DRIVE = 0x4, // greed LED dashboard
+    COMPONENT_LED_MASTER_RED =     0x5, // red LED on the board PCB (master)
+    COMPONENT_LED_MASTER_BLUE =    0x6, // blue LED on the board PCB (master)
+    COMPONENT_LED_MASTER_GREEN =   0x7, // green LED on the board PCB (master)
+    COMPONENT_LED_DASHBOARD =      0x8, // green LED on the board PCB (dashboard)
+    COMPONENT_LED_PEDAL =          0x9, // green LED on the board PCB (pedal)
 
     // Suspension travel sensors
     COMPONENT_SUSPENSION_TRAVEL_FR = 0x0,
@@ -88,7 +89,9 @@ enum id_sub_component_t : uint8_t {
     COMPONENT_SYSTEM_MOTOR_CONTROLLER = 0x4,
     COMPONENT_SYSTEM_SPEED =            0x5,
     COMPONENT_SYSTEM_COOLING =          0x6,
-    COMPONENT_SYSTEM_HV_ENABLED =       0x7
+    COMPONENT_SYSTEM_TSMS =             0x7,
+    COMPONENT_SYSTEM_60V_OK =           0x8,
+    COMPONENT_SYSTEM_SD_CARD =          0x9
 };
 
 typedef uint8_t id_component_t;

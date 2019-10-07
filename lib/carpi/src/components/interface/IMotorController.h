@@ -47,13 +47,17 @@ class IMotorController : public IComponent {
         virtual float getCurrent() = 0;
 
         // Temperature
-        virtual int16_t getMotorTemp() = 0;
-        virtual int16_t getServoTemp() = 0;
-        virtual int16_t getAirTemp() = 0;
+        virtual float getMotorTemp() = 0;
+        virtual float getServoTemp() = 0;
+        virtual float getAirTemp() = 0;
 
         // Enable setter
         virtual void setRFE(motor_controller_rfe_enable_t state) = 0;
         virtual void setRUN(motor_controller_run_enable_t state) = 0;
+
+        // Enable getters
+        virtual motor_controller_rfe_enable_t getRFE() = 0;
+        virtual motor_controller_run_enable_t getRUN() = 0;
 
         // Method to send interval times
         virtual void beginCommunication() = 0;
@@ -79,15 +83,18 @@ class IMotorController : public IComponent {
                     break;
                 
                 case SD_LOG_ID_MOTOR_CONTROLLER_MOTOR_TEMP:
-                    logValue = to_string(getMotorTemp());
+                    sprintf(buffer, "%.2f", getMotorTemp());
+                    logValue = buffer;
                     break;
                 
                 case SD_LOG_ID_MOTOR_CONTROLLER_SERVO_TEMP:
-                    logValue = to_string(getServoTemp());
+                    sprintf(buffer, "%.2f", getServoTemp());
+                    logValue = buffer;
                     break;
                 
                 case SD_LOG_ID_MOTOR_CONTROLLER_AIR_TEMP:
-                    logValue = to_string(getAirTemp());
+                    sprintf(buffer, "%.2f", getAirTemp());
+                    logValue = buffer;
                     break;
             }
         }

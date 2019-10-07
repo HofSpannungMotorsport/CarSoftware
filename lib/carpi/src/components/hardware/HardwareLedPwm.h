@@ -39,6 +39,18 @@ class HardwareLedPwm : public ILed {
             _refresh();
         }
 
+        virtual led_state_t getState() {
+            return _state;
+        }
+
+        virtual led_brightness_t getBrightness() {
+            return _brightness;
+        }
+
+        virtual led_blinking_t getBlinking() {
+            return _mode;
+        }
+
         virtual void receive(CarMessage &carMessage) {
             for (car_sub_message_t &subMessage : carMessage.subMessages) {
                 switch (subMessage.data[0]) {

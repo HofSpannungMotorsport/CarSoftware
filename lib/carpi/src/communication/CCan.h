@@ -2,7 +2,7 @@
 #define CCAN_H
 
 #ifdef USE_ARDUINO
-    #error "CCan does only support Teensyduino, not Arduino!"
+    #error "CCan does only support mbed and Teensyduino, not Arduino!"
 #endif
 
 #include <vector>
@@ -54,6 +54,13 @@ class CCan : public IChannel {
             #endif
 
             _send();
+
+            #if defined(MESSAGE_REPORT) && defined(USE_MBED)
+                if (_can.tderror() > 0 || _can.rderror() > 0) {
+                    pcSerial.printf("[CCan]@run: Detected CAN Error: td: %i\t rd: %i\n", _can.tderror(), _can.rderror());
+                    _can.reset();
+                }
+            #endif
         }
     
     private:
@@ -99,7 +106,7 @@ class CCan : public IChannel {
             carMessage.setIdsFromMessageHeader(canMessage.id);
             carMessage.setComponentId((id_component_t)canMessage.data[0]);
 
-            #ifdef CCAN_DEBUG
+            #if defined(CCAN_DEBUG) && defined(MESSAGE_REPORT)
                 pcSerial.printf("[CCAN]@_getCarMessage: Made Car Message for component with ID 0x%x (carMessageId: 0x%x)\n", canMessage.data[0], carMessage.getComponentId());
             #endif
 
@@ -124,7 +131,7 @@ class CCan : public IChannel {
                 canMessage.data[i+1] = subMessage.data[i];
             }
 
-            #ifdef CCAN_SENDING_DEBUG
+            #if defined(CCAN_SENDING_DEBUG) && defined(MESSAGE_REPORT)
                 pcSerial.printf("[CCAN]@_getCanMessage: Made CAN Message with component ID 0x%x and message ID 0x%x\n", canMessage.data[0], canMessage.id);
             #endif
         }
@@ -165,7 +172,7 @@ class CCan : public IChannel {
                         }
                         
 
-                        #ifdef CCAN_SENDING_DEBUG
+                        #if defined(CCAN_SENDING_DEBUG) && defined(MESSAGE_REPORT)
                             pcSerial.printf("[CCan]@_send->_outQueue: Try to send canMessage with component ID 0x%x and message ID 0x%x\n", canMessage.data[0], canMessage.id);
                         #endif
 
@@ -182,7 +189,7 @@ class CCan : public IChannel {
                                 carMessageIterator->setDropable(IS_NOT_DROPABLE);
                             }
 
-                            #ifdef CCAN_SENDING_DEBUG
+                            #if defined(CCAN_SENDING_DEBUG) && defined(MESSAGE_REPORT)
                                 pcSerial.printf("[CCan]@_send->_outQueue: Successfully sent canMessage with component ID 0x%x and message ID 0x%x\n", canMessage.data[0], canMessage.id);
                             #endif
                         }

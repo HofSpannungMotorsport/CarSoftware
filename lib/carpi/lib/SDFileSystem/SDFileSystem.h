@@ -51,7 +51,7 @@ public:
      * @param cs   DigitalOut pin used as SD Card chip select
      * @param name The name used to access the virtual filesystem
      */
-    SDFileSystem(PinName mosi, PinName miso, PinName sclk, PinName cs, const char* name);
+    SDFileSystem(PinName mosi, PinName miso, PinName sclk, PinName cs, const char* name, uint32_t transfer_sck = 1000000);
     virtual int disk_initialize();
     virtual int disk_status();
     virtual int disk_read(uint8_t* buffer, uint32_t block_number, uint32_t count);

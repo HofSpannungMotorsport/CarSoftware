@@ -9,6 +9,7 @@
 #define PEDAL_PIN_ROTATION_ANGLE_BRAKE    A2
 #define PEDAL_PIN_RPM_SENSOR_FL           D12
 #define PEDAL_PIN_RPM_SENSOR_FR           D11
+#define PEDAL_PIN_ALIVE                   LED2
 
 #define PEDAL_CAN D10,D2
 

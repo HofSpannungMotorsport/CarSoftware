@@ -119,13 +119,13 @@
 
 #define SD_DBG             0
 
-SDFileSystem::SDFileSystem(PinName mosi, PinName miso, PinName sclk, PinName cs, const char* name) :
+SDFileSystem::SDFileSystem(PinName mosi, PinName miso, PinName sclk, PinName cs, const char* name, uint32_t transfer_sck) :
     FATFileSystem(name), _spi(mosi, miso, sclk), _cs(cs), _is_initialized(0) {
     _cs = 1;
 
     // Set default to 100kHz for initialisation and 1MHz for data transfer
     _init_sck = 100000;
-    _transfer_sck = 1000000;
+    _transfer_sck = transfer_sck;
 }
 
 #define R1_IDLE_STATE           (1 << 0)

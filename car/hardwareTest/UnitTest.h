@@ -14,7 +14,7 @@
 #ifdef USE_ARDUINO
     // Include Framework
     #include "Arduino.h"
-    HardwareSerial &pcSerial = Serial;
+    #define pcSerial Serial
 #endif // USE_ARDUINO
 
 #ifdef USE_TEENSYDUINO
@@ -24,7 +24,7 @@
 #endif // USE_TEENSYDUINO
 
 // Include the test program here
-#include ""
+#include 
 
 class UnitTest {
     public:

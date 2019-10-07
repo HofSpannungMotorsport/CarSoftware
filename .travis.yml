@@ -38,7 +38,7 @@ install:
     - platformio update
 
 script:
-    - platformio run -e Dashboard -e Pedal -e Master -e Display -e Dashboard_new_small -e Pedal_new_small
+    - platformio run -e Master -e Display -e Dashboard_new_small -e Pedal_new_small
 
 
 #

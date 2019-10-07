@@ -16,15 +16,15 @@ Sync syncer(DEVICE_PEDAL);
 CCan canIntern(syncer, PEDAL_CAN);
 
 // Pedals
-HardwarePedal gasPedal(PEDAL_PIN_ROTATION_ANGLE_GAS_1, PEDAL_PIN_ROTATION_ANGLE_GAS_2, COMPONENT_PEDAL_GAS);
-HardwarePedal brakePedal(PEDAL_PIN_ROTATION_ANGLE_BRAKE, COMPONENT_PEDAL_BRAKE);
+HardwarePedal gasPedal(PEDAL_PIN_ROTATION_ANGLE_GAS_1, PEDAL_PIN_ROTATION_ANGLE_GAS_2, COMPONENT_PEDAL_GAS, STD_GAS_1_MIN, STD_GAS_1_MAX, STD_GAS_2_MIN, STD_GAS_2_MAX);
+HardwarePedal brakePedal(PEDAL_PIN_ROTATION_ANGLE_BRAKE, COMPONENT_PEDAL_BRAKE, STD_BRAKE_MIN, STD_BRAKE_MAX);
 
 // RPM Sensor
 //HardwareRpmSensor rpmFrontLeft(PEDAL_PIN_RPM_SENSOR_FL, COMPONENT_RPM_FRONT_LEFT);
 //HardwareRpmSensor rpmFrontRight(PEDAL_PIN_RPM_SENSOR_FR, COMPONENT_RPM_FRONT_RIGHT);
 
 // Alive
-HardwareAlive alive(COMPONENT_ALIVE_PEDAL, LED2);
+HardwareAlive alive(COMPONENT_ALIVE_PEDAL, PEDAL_PIN_ALIVE);
 
 class Pedal : public Carpi {
     public:
@@ -37,7 +37,7 @@ class Pedal : public Carpi {
             syncer.addComponent((ICommunication&)alive, canIntern, DEVICE_MASTER);
             syncer.finalize();
 
-            wait(0.1);
+            wait(STARTUP_WAIT_TIME_SLAVE);
 
             // Attach the Syncer to all components
             gasPedal.attach(syncer);

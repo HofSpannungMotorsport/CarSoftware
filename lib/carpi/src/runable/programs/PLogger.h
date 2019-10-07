@@ -16,17 +16,28 @@ using namespace std;
 class PLogger : public IProgram {
     public:
         PLogger(SCar &carService, ISDCard &sdCard)
-        : _sdCard(sdCard), _carService(carService) {
+        : _sdCard(sdCard), _carService(carService) {}
+
+        bool begin() {
+            if (_sdCard.getStatus() != 0) return false;
+
             string beginMessage = STD_FILE_BEGIN_MESSAGE;
             _sdCard.write(_sdCard, SD_LOG_ID_BEGIN_FILE, beginMessage);
 
             string versionMessage = CARPI_VERSION;
             _sdCard.write(_sdCard, SD_LOG_ID_CARPI_VERSION, versionMessage);
+
+            begun = true;
+            return true;
         }
 
         virtual void run() {
             // Only capture values if in READY_TO_DRIVE mode
             if (_carService.getState() != READY_TO_DRIVE) return;
+
+            // Check for errors
+            if (!begun) return;
+            if (_sdCard.getStatus() != 0) return;
 
             // At first the Values
             for (LoggingValue &loggingValue : _loggingValues) {
@@ -75,6 +86,8 @@ class PLogger : public IProgram {
     protected:
         ISDCard &_sdCard;
         SCar &_carService;
+
+        bool begun = false;
 
         class LoggingComponent {
             public:

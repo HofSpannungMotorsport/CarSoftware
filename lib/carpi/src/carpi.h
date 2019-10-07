@@ -1,10 +1,13 @@
+#ifndef CARPI_H
+#define CARPI_H
+
 /*
     This is the main include file of the cArPI
 
     With this, all components, services and programs are included in the actual CarSoftware.
 */
 
-#define CARPI_VERSION "V0.2.0-P1"
+#define CARPI_VERSION "V0.2.0-P4 - Alive & Report & Bugfix"
 
 // Prior include Platform-specific Components
 
@@ -13,22 +16,30 @@
     #include "mbed.h"
     #include "platform/CircularBuffer.h"
     #ifndef MESSAGE_REPORT
-        #define MESSAGE_REPORT
-        Serial pcSerial(USBTX, USBRX); // Connection to PC over Serial
+        #ifndef DISABLE_SERIAL
+            #define MESSAGE_REPORT
+            Serial pcSerial(USBTX, USBRX); // Connection to PC over Serial
+        #endif
+    #else
+        #ifdef DISABLE_SERIAL
+            #undef MESSAGE_REPORT
+        #endif
     #endif
 #endif
 
-#ifdef USE_ARDUINO
+#if defined(USE_ARDUINO) || defined(USE_TEENSYDUINO)
     // Include Framework
     #include "Arduino.h"
-    #define pcSerial Serial
-    #include "crossplatform/arduinoToMbed/arduinoToMbed.h"
-#endif
-
-#ifdef USE_TEENSYDUINO
-    // Include Framework
-    #include "Arduino.h"
-    #define pcSerial Serial
+    #ifndef MESSAGE_REPORT
+        #ifndef DISABLE_SERIAL
+            #define MESSAGE_REPORT
+            #define pcSerial Serial
+        #endif
+    #else
+        #ifdef DISABLE_SERIAL
+            #undef MESSAGE_REPORT
+        #endif
+    #endif
     #include "crossplatform/arduinoToMbed/arduinoToMbed.h"
 #endif
 
@@ -109,6 +120,7 @@
 
     // Programs
     #include "runable/programs/IProgram.h"
+    #include "runable/programs/PCockpitIndicator.h"
     #include "runable/programs/PBrakeLight.h"
     #include "runable/programs/PCooling.h"
     #include "runable/programs/PMotorController.h"
@@ -130,9 +142,12 @@ class Carpi {
     public:
         Carpi() {
             // Print out the current Verison of Carpi
+            #ifdef MESSAGE_REPORT
             printInfo();
+            #endif
         }
 
+        #ifdef MESSAGE_REPORT
         void printInfo() {
             #if defined(USE_ARDUINO) || defined(USE_TEENSYDUINO)
                 pcSerial.print("Carpi Version: "); pcSerial.println(_version.c_str());
@@ -143,6 +158,7 @@ class Carpi {
                 pcSerial.printf("Carpi Version: %s\nEnvironment: %s\n", _version.c_str(), _environment.c_str());
             #endif
         }
+        #endif
 
         string getVersion() {
             return _version;
@@ -156,3 +172,5 @@ class Carpi {
         string _version = CARPI_VERSION;
         string _environment = ENVIRONMENT;
 };
+
+#endif // CARPI_H

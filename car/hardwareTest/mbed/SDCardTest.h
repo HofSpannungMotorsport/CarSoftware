@@ -5,9 +5,18 @@
 #include "../../Bonnie2019/hardware/Pins_Master.h"
 
 SDFileSystem sd(MASTER_PIN_SPI_SD_MOSI, MASTER_PIN_SPI_SD_MISO, MASTER_PIN_SPI_SD_SCK, MASTER_PIN_SPI_SD_CS, "sd");
+SDFileSystem sd(D11, D12, D13, A3, "sd");
 
 void SDCardTest() {
-    printf("Hello World!\n");   
+    wait(3);
+    printf("Hello World!\n");
+
+    sd.disk_initialize();
+    if (sd.disk_status() == 0) {
+        printf("Disk OK\n");
+    } else {
+        printf("Disk Error\n");
+    }
  
     mkdir("/sd/mydir", 0777);
     
@@ -38,7 +47,7 @@ void SDCardTest() {
  
     printf("Goodbye World!\n");
 
-    while(true);
+    wait(3);
 }
 
 #endif // SD_CARD_TEST_H

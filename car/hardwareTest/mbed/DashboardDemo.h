@@ -1,5 +1,5 @@
-#ifndef DASHBOARDDEMOCONF_H
-#define DASHBOARDDEMOCONF_H
+#ifndef DASHBOARDDEMO_H
+#define DASHBOARDDEMO_H
 
 #include "carpi.h"
 
@@ -7,9 +7,9 @@
 
 #define RED_MAX 0.8
 #define YELLOW_MAX 0.8
-#define GREEN_MAX 0.05
+#define GREEN_MAX 0.8
 
-#include "hardware/Pins_Dashboard.h"
+#include "../../Bonnie2019/hardware/Pins_Dashboard_PCB.h"
 
 //LED's
 HardwareLedPwm ledRed(DASHBOARD_PIN_LED_RED, COMPONENT_LED_ERROR);
@@ -25,6 +25,7 @@ class Dashboard {
     public:
         // Called once at bootup
         void setup() {
+            pcSerial.printf("Dashboard Demo 2");
             ledRed.setState(LED_ON);
             ledYellow.setState(LED_ON);
             ledGreen.setState(LED_ON);
@@ -116,6 +117,13 @@ class Dashboard {
         } _last;
 };
 
-Dashboard runtime;
+Dashboard DashboardDemoObject;
+void DashboardDemo() {
+    DashboardDemoObject.setup();
 
-#endif // DASHBOARDDEMOCONF_H
+    while(true) {
+        DashboardDemoObject.loop();
+    }
+}
+
+#endif // DASHBOARDDEMO_H

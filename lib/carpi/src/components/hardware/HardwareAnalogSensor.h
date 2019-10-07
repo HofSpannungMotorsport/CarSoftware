@@ -26,6 +26,17 @@ class HardwareAnalogSensor : public IAnalogSensor {
             return true;
         }
 
+        virtual bool getMapping(analog_sensor_raw_t &minIn, analog_sensor_raw_t &maxIn, analog_sensor_raw_t &minOut, analog_sensor_raw_t &maxOut) {
+            if (!_map.set) return false;
+            
+            minIn = _map.from.min;
+            maxIn = _map.from.max;
+            minOut = _map.to.min;
+            maxOut = _map.to.max;
+
+            return true;
+        }
+
         virtual bool setRawBoundary(analog_sensor_raw_t lowerEnd, analog_sensor_raw_t upperEnd) {
             if (upperEnd > lowerEnd) {
                 _boundary.raw.upperEnd = upperEnd;
@@ -180,6 +191,11 @@ class HardwareAnalogSensor : public IAnalogSensor {
 
         virtual status_t getStatus() {
             return _status;
+        }
+
+        void reset() {
+            _map.set = false;
+            _status = 0;
         }
         
     protected:

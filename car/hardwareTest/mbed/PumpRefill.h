@@ -1,10 +1,10 @@
 #include "carpi.h"
-#include "../Bonnie2019/hardware/Pins_Master.h"
+#include "../../Bonnie2019/hardware/Pins_Master.h"
 
 #define PUMP_TIME_UNTIL_MAX_POWER 5.0 // s
 
 
-HardwareInterruptButton buttonNext(MASTER_PIN_USER_BUTTON, BUTTON_START);
+HardwareInterruptButton buttonNext(MASTER_PIN_USER_BUTTON, COMPONENT_BUTTON_START);
 
 // Dout Pump enable
 DigitalOut pumpEnable(MASTER_PIN_PUMP_ENABLE);

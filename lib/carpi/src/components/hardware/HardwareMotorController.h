@@ -89,15 +89,15 @@ class HardwareMotorController : public IMotorController {
             return _bamocar.getCurrent();
         }
 
-        virtual int16_t getMotorTemp() {
+        virtual float getMotorTemp() {
             return _bamocar.getMotorTemp();
         }
 
-        virtual int16_t getServoTemp() {
+        virtual float getServoTemp() {
             return _bamocar.getServoTemp();
         }
 
-        virtual int16_t getAirTemp() {
+        virtual float getAirTemp() {
             return _bamocar.getAirTemp();
         }
 
@@ -114,6 +114,22 @@ class HardwareMotorController : public IMotorController {
                 _run = 1;
             } else {
                 _run = 0;
+            }
+        }
+
+        virtual motor_controller_rfe_enable_t getRFE() {
+            if (_rfe == 1) {
+                return MOTOR_CONTROLLER_RFE_ENABLE;
+            } else {
+                return MOTOR_CONTROLLER_RFE_DISABLE;
+            }
+        }
+
+        virtual motor_controller_run_enable_t getRUN() {
+            if (_run == 1) {
+                return MOTOR_CONTROLLER_RUN_ENABLE;
+            } else {
+                return MOTOR_CONTROLLER_RUN_DISABLE;
             }
         }
 
