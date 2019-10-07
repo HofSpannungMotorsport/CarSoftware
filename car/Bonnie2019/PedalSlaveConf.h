@@ -5,11 +5,7 @@
 //#define CCAN_DEBUG
 #include "carpi.h"
 
-#ifdef NEW_SMALL
-    #include "hardware/Pins_Pedal_NEW_PCB.h"
-#else
-    #include "hardware/Pins_Pedal_PCB.h"
-#endif
+#include "hardware/Pins_Pedal_NEW_PCB.h"
 
 // Communication
 Sync syncer(DEVICE_PEDAL);

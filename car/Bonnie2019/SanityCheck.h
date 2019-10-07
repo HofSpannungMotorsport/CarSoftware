@@ -3,12 +3,8 @@
     #ifdef STM32F446xx
         // OK
     #else
-        #ifdef NEW_SMALL
-            #ifndef STM32L432xx
-                #error "Wrong Board choosen! Select Nucleo L432KC as your desiered Board (Dashboard_new_small Controller). Check platformio.ini"
-            #endif
-        #else
-            #error "Wrong Board choosen! Select Nucleo F446RE as your desiered Board (Dashboard Controller). Check platformio.ini"
+        #ifndef STM32L432xx
+            #error "Wrong Board choosen! Select Nucleo L432KC as your desiered Board (Dashboard_new_small Controller). Check platformio.ini"
         #endif
     #endif
 #endif
@@ -17,12 +13,8 @@
     #ifdef STM32F446xx
         // OK
     #else
-        #ifdef NEW_SMALL
-            #ifndef STM32L432xx
-                #error "Wrong Board choosen! Select Nucleo L432KC as your desiered Board (Dashboard_new_small Controller). Check platformio.ini"
-            #endif
-        #else
-            #error "Wrong Board choosen! Select Nucleo F446RE as your desiered Board (Dashboard Controller). Check platformio.ini"
+        #ifndef STM32L432xx
+            #error "Wrong Board choosen! Select Nucleo L432KC as your desiered Board (Dashboard_new_small Controller). Check platformio.ini"
         #endif
     #endif
 #endif
