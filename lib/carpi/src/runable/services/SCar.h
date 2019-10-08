@@ -56,41 +56,25 @@ class Error {
 class SCar : public IService {
     public:
         SCar(Sync &syncer,
-             IButton* buttonReset, IButton* buttonStart,
-             ILed* ledRed, ILed* ledYellow, ILed* ledGreen,
-             IPedal* gasPedal, IPedal* brakePedal,
-             IBuzzer* buzzer,
-             IMotorController* motorController,
-             IHvEnabled* hvEnabled,
-             IHvEnabled* tsms,
-             ISDCard* sdCard,
-             IAlive* pedalAlive, IAlive* dashboardAlive, IAlive* masterAlive,
+             IButton &buttonReset, IButton &buttonStart,
+             ILed &ledRed, ILed &ledYellow, ILed &ledGreen,
+             IPedal &gasPedal, IPedal &brakePedal,
+             IBuzzer &buzzer,
+             IMotorController &motorController,
+             IHvEnabled& hvEnabled,
+             IHvEnabled& tsms,
+             ISDCard& sdCard,
+             IAlive& pedalAlive, IAlive& dashboardAlive, IAlive& masterAlive,
              PCockpitIndicator &ci,
              PBrakeLight &brakeLightService)
-             : _syncer(syncer), _ci(ci), _brakeLightService(brakeLightService) {
-            _button.reset = buttonReset;
-            _button.start = buttonStart;
-
-            _led.red = ledRed;
-            _led.yellow = ledYellow;
-            _led.green = ledGreen;
-
-            _pedal.gas = gasPedal;
-            _pedal.brake = brakePedal;
-
-            _buzzer = buzzer;
-
-            _motorController = motorController;
-
-            _hvEnabled = hvEnabled;
-            _tsms = tsms;
-
-            _sdCard = sdCard;
-
-            _pedalAlive = pedalAlive;
-            _dashboardAlive = dashboardAlive;
-            _masterAlive = masterAlive;
-        }
+             : _syncer(syncer), _ci(ci), _brakeLightService(brakeLightService),
+               _button(buttonReset, buttonStart),
+               _led(ledRed, ledYellow, ledGreen),
+               _pedal(gasPedal, brakePedal),
+               _buzzer(buzzer), _motorController(motorController),
+               _hvEnabled(hvEnabled), _tsms(tsms),
+               _sdCard(sdCard),
+               _pedalAlive(pedalAlive), _dashboardAlive(dashboardAlive), _masterAlive(masterAlive) {}
 
         virtual void run() {
             _checkHvEnabled();
@@ -119,7 +103,7 @@ class SCar : public IService {
                 char buffer[32];
                 sprintf(buffer, "0x%x;0x%x;0x%x", error.componentId, error.code, error.type);
                 string errorSDLog = buffer;
-                _sdCard->write(*_sdCard, SD_LOG_ID_SCAR_ERROR, errorSDLog);
+                _sdCard.write(_sdCard, SD_LOG_ID_SCAR_ERROR, errorSDLog);
 
                 
                 if (error.type >= ERROR_CRITICAL) {
@@ -129,15 +113,15 @@ class SCar : public IService {
 
                     _resetLeds();
 
-                    _led.red->setState(LED_ON);
-                    _led.red->setBrightness(1);
-                    _led.red->setBlinking(BLINKING_FAST);
+                    _led.red.setState(LED_ON);
+                    _led.red.setBrightness(1);
+                    _led.red.setBlinking(BLINKING_FAST);
 
-                    _led.green->setState(LED_OFF);
+                    _led.green.setState(LED_OFF);
                     setState(CAR_ERROR);
 
-                    _motorController->setRUN(MOTOR_CONTROLLER_RUN_DISABLE);
-                    _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
+                    _motorController.setRUN(MOTOR_CONTROLLER_RUN_DISABLE);
+                    _motorController.setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
                 }
             }
         }
@@ -149,14 +133,14 @@ class SCar : public IService {
         void setState(car_state_t state) {
             _state = state;
             string newState = to_string(_state);
-            _sdCard->write(*_sdCard, SD_LOG_ID_SCAR_STATE, newState);
+            _sdCard.write(_sdCard, SD_LOG_ID_SCAR_STATE, newState);
         }
 
         void calibrationNeeded() {
             setState(CALIBRATION_NEEDED);
             _resetLeds();
-            _led.yellow->setState(LED_ON);
-            _led.yellow->setBlinking(BLINKING_NORMAL);
+            _led.yellow.setState(LED_ON);
+            _led.yellow.setBlinking(BLINKING_NORMAL);
             _waitForSent();
         }
 
@@ -176,21 +160,21 @@ class SCar : public IService {
 
             // Turn on red LED while HV-Circuite is off
             _resetLeds();
-            _led.red->setState(LED_ON);
+            _led.red.setState(LED_ON);
             _waitForSent();
 
             wait(0.1);
 
             // [QF]
-            while(_button.start->getStateChanged()) _button.start->getState();
-            while((!(_hvEnabled->read()) || !(_tsms->read())) && !(_button.start->getState() == LONG_CLICKED)) {
+            while(_button.start.getStateChanged()) _button.start.getState();
+            while((!(_hvEnabled.read()) || !(_tsms.read())) && !(_button.start.getState() == LONG_CLICKED)) {
                 _syncer.run();
                 _checkAlive();
                 _ci.run();
                 processErrors();
                 _brakeLightService.run();
 
-                while(_button.start->getStateChanged()) _button.start->getState();
+                while(_button.start.getStateChanged()) _button.start.getState();
 
                 wait(0.1);
             }
@@ -208,9 +192,9 @@ class SCar : public IService {
                 // If an Error occured, stop continuing and glow Red
                 // Red   -> Blinking Fast
                 // Green -> Off
-                _led.red->setState(LED_ON);
-                _led.red->setBlinking(BLINKING_FAST);
-                _led.green->setState(LED_OFF);
+                _led.red.setState(LED_ON);
+                _led.red.setBlinking(BLINKING_FAST);
+                _led.green.setState(LED_OFF);
                 _waitForSent();
                 while(true) {
                     _syncer.run();
@@ -220,8 +204,8 @@ class SCar : public IService {
                 }
             }
 
-            _led.green->setState(LED_ON);
-            _led.green->setBlinking(BLINKING_FAST);
+            _led.green.setState(LED_ON);
+            _led.green.setBlinking(BLINKING_FAST);
         }
 
     #ifdef TESTING_MODE
@@ -235,37 +219,43 @@ class SCar : public IService {
         car_state_t _state = CAR_OFF;
 
         struct _button {
-            IButton* reset;
-            IButton* start;
+            _button(IButton &_reset, IButton &_start) : reset(_reset), start(_start) {}
+
+            IButton &reset;
+            IButton &start;
         } _button;
 
         struct _led {
-            ILed* red;
-            ILed* yellow;
-            ILed* green;
+            _led(ILed &_red, ILed &_yellow, ILed &_green) : red(_red), yellow(_yellow), green(_green) {}
+
+            ILed &red;
+            ILed &yellow;
+            ILed &green;
         } _led;
 
         struct _pedal {
-            IPedal* gas;
-            IPedal* brake;
+            _pedal(IPedal &_gas, IPedal &_brake) : gas(_gas), brake(_brake) {}
+
+            IPedal &gas;
+            IPedal &brake;
         } _pedal;
 
         Sync &_syncer;
-        IBuzzer* _buzzer;
-        IMotorController* _motorController;
-        IHvEnabled* _hvEnabled;
-        IHvEnabled* _tsms;
-        ISDCard* _sdCard;
+        IBuzzer &_buzzer;
+        IMotorController &_motorController;
+        IHvEnabled &_hvEnabled;
+        IHvEnabled &_tsms;
+        ISDCard &_sdCard;
 
-        IAlive* _pedalAlive;
-        IAlive* _dashboardAlive;
-        IAlive* _masterAlive;
+        IAlive &_pedalAlive;
+        IAlive &_dashboardAlive;
+        IAlive &_masterAlive;
 
         PCockpitIndicator &_ci;
         PBrakeLight &_brakeLightService;
 
-        id_component_t _calculateComponentId(IComponent* component) {
-            id_component_t id = component->getComponentId();
+        id_component_t _calculateComponentId(IComponent &component) {
+            id_component_t id = component.getComponentId();
             return id;
         }
 
@@ -277,28 +267,28 @@ class SCar : public IService {
 
         void _startupAnimationUp() {
             _resetLeds();
-            _led.red->setState(LED_ON);
+            _led.red.setState(LED_ON);
             _waitForSent();
 
             wait(STARTUP_ANIMATION_SPEED);
 
-            _led.yellow->setState(LED_ON);
+            _led.yellow.setState(LED_ON);
             _waitForSent();
 
             wait(STARTUP_ANIMATION_SPEED);
 
-            _led.green->setState(LED_ON);
-            _led.red->setState(LED_OFF);
+            _led.green.setState(LED_ON);
+            _led.red.setState(LED_OFF);
             _waitForSent();
 
             wait(STARTUP_ANIMATION_SPEED);
 
-            _led.yellow->setState(LED_OFF);
+            _led.yellow.setState(LED_OFF);
             _waitForSent();
 
             wait(STARTUP_ANIMATION_SPEED);
 
-            _led.green->setState(LED_OFF);
+            _led.green.setState(LED_OFF);
             _waitForSent();
 
             wait(STARTUP_ANIMATION_SPEED);
@@ -306,51 +296,51 @@ class SCar : public IService {
 
         void _startupAnimationDown() {
             _resetLeds();
-            _led.green->setState(LED_ON);
+            _led.green.setState(LED_ON);
             _waitForSent();
 
             wait(STARTUP_ANIMATION_SPEED);
 
-            _led.yellow->setState(LED_ON);
+            _led.yellow.setState(LED_ON);
             _waitForSent();
 
             wait(STARTUP_ANIMATION_SPEED);
 
-            _led.red->setState(LED_ON);
-            _led.green->setState(LED_OFF);
+            _led.red.setState(LED_ON);
+            _led.green.setState(LED_OFF);
             _waitForSent();
 
             wait(STARTUP_ANIMATION_SPEED);
 
-            _led.yellow->setState(LED_OFF);
+            _led.yellow.setState(LED_OFF);
             _waitForSent();
 
             wait(STARTUP_ANIMATION_SPEED);
 
-            _led.red->setState(LED_OFF);
+            _led.red.setState(LED_OFF);
             _waitForSent();
 
             wait(STARTUP_ANIMATION_SPEED);
         }
 
         void _resetLeds() {
-            _led.red->setBrightness(1);
-            _led.yellow->setBrightness(1);
-            _led.green->setBrightness(1);
+            _led.red.setBrightness(1);
+            _led.yellow.setBrightness(1);
+            _led.green.setBrightness(1);
 
-            _led.red->setState(LED_OFF);
-            _led.yellow->setState(LED_OFF);
-            _led.green->setState(LED_OFF);
+            _led.red.setState(LED_OFF);
+            _led.yellow.setState(LED_OFF);
+            _led.green.setState(LED_OFF);
 
-            _led.red->setBlinking(BLINKING_OFF);
-            _led.yellow->setBlinking(BLINKING_OFF);
-            _led.green->setBlinking(BLINKING_OFF);
+            _led.red.setBlinking(BLINKING_OFF);
+            _led.yellow.setBlinking(BLINKING_OFF);
+            _led.green.setBlinking(BLINKING_OFF);
 
             _waitForSent();
         }
 
-        void _pedalError(IPedal* sensorId) {
-            addError(Error(sensorId->getComponentId(), sensorId->getStatus(), ERROR_ISSUE));
+        void _pedalError(IPedal &sensorId) {
+            addError(Error(sensorId.getComponentId(), sensorId.getStatus(), ERROR_ISSUE));
             calibrationNeeded();
         }
 
@@ -359,12 +349,12 @@ class SCar : public IService {
             static bool hvEnabledErrorAdded = false;
             static bool tsmsErrorAdded = false;
 
-            if (!(_hvEnabled->read()) || !(_tsms->read())) {
+            if (!(_hvEnabled.read()) || !(_tsms.read())) {
                 if (getState() == READY_TO_DRIVE) {
                     setState(ALMOST_READY_TO_DRIVE);
-                    _motorController->setRUN(MOTOR_CONTROLLER_RUN_DISABLE);
-                    _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
-                    _led.green->setBlinking(BLINKING_FAST);
+                    _motorController.setRUN(MOTOR_CONTROLLER_RUN_DISABLE);
+                    _motorController.setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
+                    _led.green.setBlinking(BLINKING_FAST);
                     _waitForSent();
                 }
 
@@ -386,44 +376,44 @@ class SCar : public IService {
             // [QF]
             bool anyControllerDead = false;
 
-            if (!(_pedalAlive->getAlive())) {
-                addError(Error(_calculateComponentId((IComponent*)_pedalAlive), _pedalAlive->getStatus(), ERROR_CRITICAL));
+            if (!(_pedalAlive.getAlive())) {
+                addError(Error(_calculateComponentId(_pedalAlive), _pedalAlive.getStatus(), ERROR_CRITICAL));
                 anyControllerDead = true;
             }
 
-            if (!(_dashboardAlive->getAlive())) {
-                addError(Error(_calculateComponentId((IComponent*)_dashboardAlive), _dashboardAlive->getStatus(), ERROR_CRITICAL));
+            if (!(_dashboardAlive.getAlive())) {
+                addError(Error(_calculateComponentId(_dashboardAlive), _dashboardAlive.getStatus(), ERROR_CRITICAL));
                 anyControllerDead = true;
             }
 
-            if (!(_masterAlive->getAlive())) {
-                addError(Error(_calculateComponentId((IComponent*)_masterAlive), _masterAlive->getStatus(), ERROR_CRITICAL));
+            if (!(_masterAlive.getAlive())) {
+                addError(Error(_calculateComponentId(_masterAlive), _masterAlive.getStatus(), ERROR_CRITICAL));
                 anyControllerDead = true;
             }
 
             // Beep only for testing !!!
             if (anyControllerDead) {
-                _buzzer->setBeep(BUZZER_BEEP_FAST_HIGH_LOW);
-                _buzzer->setState(BUZZER_ON);
+                _buzzer.setBeep(BUZZER_BEEP_FAST_HIGH_LOW);
+                _buzzer.setState(BUZZER_ON);
             } else {
-                _buzzer->setBeep(BUZZER_MONO_TONE);
-                _buzzer->setState(BUZZER_OFF);
+                _buzzer.setBeep(BUZZER_MONO_TONE);
+                _buzzer.setState(BUZZER_OFF);
             }
         }
 
         void _checkButtonStatus() {
-            if (_button.reset->getStatus() > 0) {
-                addError(Error(_calculateComponentId((IComponent*)_button.reset), _button.reset->getStatus(), ERROR_ISSUE));
+            if (_button.reset.getStatus() > 0) {
+                addError(Error(_calculateComponentId(_button.reset), _button.reset.getStatus(), ERROR_ISSUE));
             }
 
-            if (_button.start->getStatus() > 0) {
-                addError(Error(_calculateComponentId((IComponent*)_button.start), _button.start->getStatus(), ERROR_ISSUE));
+            if (_button.start.getStatus() > 0) {
+                addError(Error(_calculateComponentId(_button.start), _button.start.getStatus(), ERROR_ISSUE));
             }
         }
 
         void _checkSDCard() {
-            if (_sdCard->getStatus() > 0) {
-                addError(Error(_sdCard->getComponentId(), _sdCard->getStatus(), ERROR_SYSTEM));
+            if (_sdCard.getStatus() > 0) {
+                addError(Error(_sdCard.getComponentId(), _sdCard.getStatus(), ERROR_SYSTEM));
             }
         }
 
@@ -433,21 +423,21 @@ class SCar : public IService {
             // Green  -> Normal Blinking
             setState(CALIBRATION);
             _resetLeds();
-            _led.yellow->setState(LED_ON);
-            _led.green->setState(LED_ON);
+            _led.yellow.setState(LED_ON);
+            _led.green.setState(LED_ON);
 
-            _led.yellow->setBlinking(BLINKING_OFF);
-            _led.green->setBlinking(BLINKING_NORMAL);
+            _led.yellow.setBlinking(BLINKING_OFF);
+            _led.green.setBlinking(BLINKING_NORMAL);
 
-            _pedal.gas->setCalibrationStatus(CURRENTLY_CALIBRATING);
-            _pedal.brake->setCalibrationStatus(CURRENTLY_CALIBRATING);
+            _pedal.gas.setCalibrationStatus(CURRENTLY_CALIBRATING);
+            _pedal.brake.setCalibrationStatus(CURRENTLY_CALIBRATING);
 
             _waitForSent();
 
 
             // Calibrate pedal until pressed Start once for long time
-            while(_button.start->getStateChanged()) _button.start->getState();
-            while(_button.start->getState() != LONG_CLICKED) {
+            while(_button.start.getStateChanged()) _button.start.getState();
+            while(_button.start.getState() != LONG_CLICKED) {
                 _syncer.run();
                 _checkAlive();
                 _ci.run();
@@ -456,19 +446,19 @@ class SCar : public IService {
 
 
             // Stop calibration
-            _pedal.gas->setCalibrationStatus(CURRENTLY_NOT_CALIBRATING);
-            _pedal.brake->setCalibrationStatus(CURRENTLY_NOT_CALIBRATING);
+            _pedal.gas.setCalibrationStatus(CURRENTLY_NOT_CALIBRATING);
+            _pedal.brake.setCalibrationStatus(CURRENTLY_NOT_CALIBRATING);
             _waitForSent();
 
             wait(0.1);
-            _led.yellow->setState(LED_OFF);
+            _led.yellow.setState(LED_OFF);
             _waitForSent();
 
 
 
             // Wait till the Button got released again
             // Yellow -> Off
-            while(_button.start->getState() != NOT_PRESSED) {
+            while(_button.start.getState() != NOT_PRESSED) {
                 _syncer.run();
                 _ci.run();
                 wait(0.1);
@@ -480,11 +470,11 @@ class SCar : public IService {
             _checkAlive();
 
             // Check for Errors at Calibration
-            if (_pedal.gas->getStatus() > 0) {
+            if (_pedal.gas.getStatus() > 0) {
                 _pedalError(_pedal.gas);
             }
 
-            if (_pedal.brake->getStatus() > 0) {
+            if (_pedal.brake.getStatus() > 0) {
                 _pedalError(_pedal.brake);
             }
 
@@ -499,7 +489,7 @@ class SCar : public IService {
                 // Red   -> Blinking Slow
                 // Green -> Off
                 _resetLeds();
-                _led.red->setState(LED_ON);
+                _led.red.setState(LED_ON);
                 _waitForSent();
                 wait(0.5);
                 calibrationNeeded();
@@ -510,8 +500,8 @@ class SCar : public IService {
             // If no Error, start blinking fast to show ready, but need to start car
             // Green -> Fast Blinking
             _resetLeds();
-            _led.green->setState(LED_ON);
-            _led.green->setBlinking(BLINKING_FAST);
+            _led.green.setState(LED_ON);
+            _led.green.setBlinking(BLINKING_FAST);
             _waitForSent();
 
             wait(0.1);
@@ -522,18 +512,18 @@ class SCar : public IService {
             if (getState() == ALMOST_READY_TO_DRIVE) {
 
                 // Clear start button at first
-                while (_button.start->getStateChanged()) _button.start->getState();
+                while (_button.start.getStateChanged()) _button.start.getState();
 
-                if ((_button.start->getState() == LONG_CLICKED) && (_pedal.brake->getValue() >= BRAKE_START_THRESHHOLD) && (_hvEnabled->read()) && (_tsms->read())) {
+                if ((_button.start.getState() == LONG_CLICKED) && (_pedal.brake.getValue() >= BRAKE_START_THRESHHOLD) && (_hvEnabled.read()) && (_tsms.read())) {
                     // Optimize later!!
                     // [il]
                     // Set RFE enable
-                    _motorController->setRFE(MOTOR_CONTROLLER_RFE_ENABLE);
+                    _motorController.setRFE(MOTOR_CONTROLLER_RFE_ENABLE);
 
                     // [QF]
                     //Start beeping to signalize car is started
-                    _buzzer->setBeep(BUZZER_MONO_TONE);
-                    _buzzer->setState(BUZZER_ON);
+                    _buzzer.setBeep(BUZZER_MONO_TONE);
+                    _buzzer.setState(BUZZER_ON);
 
                     // Wait the set Time until enabling RUN
                     Timer waitTimer;
@@ -546,17 +536,17 @@ class SCar : public IService {
                         _brakeLightService.run();
                         processErrors();
                         if (getState() != ALMOST_READY_TO_DRIVE) {
-                            _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
+                            _motorController.setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
                             // If an Error occured, stop continuing and glow Red
                             // Red   -> Blinking Normal
                             // Green -> Off
                             _resetLeds();
-                            _led.red->setState(LED_ON);
-                            _led.red->setBlinking(BLINKING_NORMAL);
+                            _led.red.setState(LED_ON);
+                            _led.red.setBlinking(BLINKING_NORMAL);
                             _waitForSent();
 
                             // Stop beeping!
-                            _buzzer->setState(BUZZER_OFF);
+                            _buzzer.setState(BUZZER_OFF);
 
                             while(1) {
                                 _syncer.run();
@@ -573,18 +563,18 @@ class SCar : public IService {
                     processErrors();
 
                     // Stop beeping!
-                    _buzzer->setState(BUZZER_OFF);
+                    _buzzer.setState(BUZZER_OFF);
 
                     if (getState() == ALMOST_READY_TO_DRIVE) {
-                        _motorController->setRUN(MOTOR_CONTROLLER_RUN_ENABLE);
+                        _motorController.setRUN(MOTOR_CONTROLLER_RUN_ENABLE);
                     } else {
-                        _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
+                        _motorController.setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
                         // If an Error occured, stop continuing and glow Red
                         // Red   -> Blinking Normal
                         // Green -> Off
                         _resetLeds();
-                        _led.red->setState(LED_ON);
-                        _led.red->setBlinking(BLINKING_NORMAL);
+                        _led.red.setState(LED_ON);
+                        _led.red.setBlinking(BLINKING_NORMAL);
                         _waitForSent();
                         while(1) {
                             _syncer.run();
@@ -599,15 +589,15 @@ class SCar : public IService {
 
                     // Stop blinking greed to show car is primed
                     _resetLeds();
-                    _led.green->setState(LED_ON);
+                    _led.green.setState(LED_ON);
                     _waitForSent();
                     wait(0.1);
                 }
 
                 // Clear Reset Button
-                while (_button.reset->getStateChanged()) _button.reset->getState();
+                while (_button.reset.getStateChanged()) _button.reset.getState();
 
-                if (_button.reset->getState() == LONG_CLICKED) {
+                if (_button.reset.getState() == LONG_CLICKED) {
                     _calibratePedals();
                 }
 
@@ -616,23 +606,23 @@ class SCar : public IService {
 
             if (getState() == CALIBRATION_NEEDED) {
                 // Clear Reset Button
-                while (_button.reset->getStateChanged()) _button.reset->getState();
+                while (_button.reset.getStateChanged()) _button.reset.getState();
 
                 // Start Calibration after Calibration failure, clearing the error at beginning on pedals
-                if (_button.reset->getState() == LONG_CLICKED) {
+                if (_button.reset.getState() == LONG_CLICKED) {
                     _calibratePedals();
                 }
             }
 
             if (getState() == READY_TO_DRIVE) {
-                if (_button.reset->getState() == PRESSED) {
+                if (_button.reset.getState() == PRESSED) {
                     // Disable RFE and RUN
-                    _motorController->setRUN(MOTOR_CONTROLLER_RUN_DISABLE);
-                    _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
+                    _motorController.setRUN(MOTOR_CONTROLLER_RUN_DISABLE);
+                    _motorController.setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
 
                     setState(ALMOST_READY_TO_DRIVE);
 
-                    _led.green->setBlinking(BLINKING_FAST);
+                    _led.green.setBlinking(BLINKING_FAST);
                     _waitForSent();
                 }
 

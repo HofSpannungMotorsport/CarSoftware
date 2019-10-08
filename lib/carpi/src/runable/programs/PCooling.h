@@ -32,24 +32,21 @@ enum cooling_service_error_type_t {
 class PCooling : public IProgram {
     public:
         PCooling(SCar &carService,
-                       SSpeed &speedService,
-                       IFan* fan, IPump* pump,
-                       IMotorController* motorController,
-                       IHvEnabled* hvEnabled)
-            : _carService(carService), _speedService(speedService) {
-            _fan = fan;
-            _pump = pump;
-            _motorController = motorController;
-            _hvEnabled = hvEnabled;
+                 SSpeed &speedService,
+                 IFan &fan, IPump &pump,
+                 IMotorController &motorController,
+                 IHvEnabled &hvEnabled)
+            : _carService(carService), _speedService(speedService),
+              _fan(fan), _pump(pump), _motorController(motorController), _hvEnabled(hvEnabled) {
 
-            _pump->setSpeed(0);
-            _pump->setEnable(1);
-            _fan->setState(FAN_OFF);
+            _pump.setSpeed(0);
+            _pump.setEnable(1);
+            _fan.setState(FAN_OFF);
         }
 
         virtual void run() {
             // [QF]
-            if (_hvEnabled->read()) {
+            if (_hvEnabled.read()) {
                 speed_value_t currentSpeed = _speedService.getSpeed();
 
                 #ifdef PRINT_SPEED
@@ -59,14 +56,14 @@ class PCooling : public IProgram {
                 // Activate Fan according to driving speed
                 if (currentSpeed <= STD_COOLING_FAN_ON_UNTIL_SPEED) {
                     // Turn fan on if driving too slow
-                    _fan->setState(FAN_ON);
+                    _fan.setState(FAN_ON);
                 } else if (currentSpeed >= STD_COOLING_FAN_OFF_UNTIL_SPEED) {
                     // Turn fan off if driving too fast
-                    _fan->setState(FAN_OFF);
+                    _fan.setState(FAN_OFF);
                 }
 
-                float motorTemp = _motorController->getMotorTemp();
-                float controllerTemp = _motorController->getServoTemp();
+                float motorTemp = _motorController.getMotorTemp();
+                float controllerTemp = _motorController.getServoTemp();
 
                 // Set Pump speed according to the temperature of the devices
                 float pumpMotor = ((float)motorTemp - (float)STD_MOTOR_TEMP_START_PUMP) / ((float)STD_MOTOR_TEMP_FULL_PUMP - (float)STD_MOTOR_TEMP_START_PUMP);
@@ -87,7 +84,7 @@ class PCooling : public IProgram {
                     newPumpPower = 0;
 
                 // Apply pump power
-                _pump->setSpeed(newPumpPower);
+                _pump.setSpeed(newPumpPower);
 
                 // At least after setting the pump, check if the temperature of any device is too high
                 if (motorTemp > STD_MAX_MOTOR_TEMP) {
@@ -100,18 +97,18 @@ class PCooling : public IProgram {
                     _carService.addError(Error(componentId::getComponentId(COMPONENT_SYSTEM, COMPONENT_SYSTEM_COOLING), controllerOverheatError, ERROR_CRITICAL));
                 }
             } else {
-                _pump->setSpeed(0);
-                _fan->setState(FAN_OFF);
+                _pump.setSpeed(0);
+                _fan.setState(FAN_OFF);
             }
         }
 
     protected:
         SCar &_carService;
         SSpeed &_speedService;
-        IFan* _fan;
-        IPump* _pump;
-        IMotorController* _motorController;
-        IHvEnabled* _hvEnabled;
+        IFan &_fan;
+        IPump &_pump;
+        IMotorController &_motorController;
+        IHvEnabled &_hvEnabled;
 };
 
 #endif // PCOOLING_H

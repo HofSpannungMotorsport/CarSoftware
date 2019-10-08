@@ -27,19 +27,25 @@
 class PMotorController : public IProgram {
     public:
         PMotorController(SCar &carService,
-                               IMotorController* motorController,
-                               IPedal* gasPedal, IPedal* brakePedal)
-            : _carService(carService) {
-            _setBasicComponents(motorController, gasPedal, brakePedal);
-        }
+                         IMotorController &motorController,
+                         IPedal &gasPedal, IPedal &brakePedal)
+            : _carService(carService),
+              _motorController(motorController), _gasPedal(gasPedal), _brakePedal(brakePedal) {}
 
         PMotorController(SCar &carService,
-                               IMotorController* motorController,
-                               IPedal* gasPedal, IPedal* brakePedal,
-                               IRpmSensor* frontLeftWheel, IRpmSensor* frontRightWheel, IRpmSensor* rearLeftWheel, IRpmSensor* rearRightWheel)
-            : _carService(carService) {
-            _setBasicComponents(motorController, gasPedal, brakePedal);
-            _setASRComponents(frontLeftWheel, frontRightWheel, rearLeftWheel, rearRightWheel);
+                         IMotorController &motorController,
+                         IPedal &gasPedal, IPedal &brakePedal,
+                         IRpmSensor &frontLeftWheel, IRpmSensor &frontRightWheel, IRpmSensor &rearLeftWheel, IRpmSensor &rearRightWheel)
+            : _carService(carService),
+              _motorController(motorController), _gasPedal(gasPedal), _brakePedal(brakePedal) {
+            _asrActive = true;
+            _asrSave.lastRun.stop();
+            _asrSave.lastRun.reset();
+
+            _frontLeftWheel.object = &frontLeftWheel;
+            _frontRightWheel.object = &frontRightWheel;
+            _rearLeftWheel.object = &rearLeftWheel;
+            _rearRightWheel.object = &rearRightWheel;
         }
 
         virtual void run() {
@@ -72,7 +78,7 @@ class PMotorController : public IProgram {
 
             returnValue = _applyGasCurve(returnValue);
 
-            _motorController->setTorque(returnValue);
+            _motorController.setTorque(returnValue);
 
             #if defined(MOTORCONTROLLER_OUTPUT) && defined(MESSAGE_REPORT)
                 pcSerial.printf("%f\n", returnValue);
@@ -85,7 +91,7 @@ class PMotorController : public IProgram {
 
     protected:
         SCar &_carService;
-        IMotorController* _motorController;
+        IMotorController &_motorController;
         bool _ready = false;
         bool _communicationStarted = false;
 
@@ -95,7 +101,9 @@ class PMotorController : public IProgram {
         } _power;
 
         struct _pedalStruct_t {
-            IPedal* object;
+            _pedalStruct_t(IPedal &pedalObject) : object(pedalObject) {}
+
+            IPedal &object;
             pedal_value_t lastValue;
             Timer age;
             bool ageStarted;
@@ -109,7 +117,7 @@ class PMotorController : public IProgram {
         bool _hardBrakeingStarted = false;
 
         struct _rpmSensorStruct_t {
-            IRpmSensor* object;
+            IRpmSensor* object; // Using Pointer to also be able NOT to use
             rpm_sensor_frequency_t lastValue;
             Timer age;
             bool ageStarted;
@@ -128,8 +136,8 @@ class PMotorController : public IProgram {
         } _asrSave;
 
         void _checkErrors() {
-            if (_motorController->getStatus() > 0) {
-                _carService.addError(Error(_motorController->getComponentId(), _motorController->getStatus(), ERROR_CRITICAL));
+            if (_motorController.getStatus() > 0) {
+                _carService.addError(Error(_motorController.getComponentId(), _motorController.getStatus(), ERROR_CRITICAL));
             }
 
             if (_asrActive) {
@@ -145,11 +153,11 @@ class PMotorController : public IProgram {
                 }
             }
 
-            if ((_gasPedal.object->getStatus() > 0) || (_getAge(_gasPedal) > STD_AGE_LIMIT)) {
+            if ((_gasPedal.object.getStatus() > 0) || (_getAge(_gasPedal) > STD_AGE_LIMIT)) {
                 _pedalError(_gasPedal.object);
             }
 
-            if ((_brakePedal.object->getStatus() > 0) || (_getAge(_brakePedal) > STD_AGE_LIMIT)) {
+            if ((_brakePedal.object.getStatus() > 0) || (_getAge(_brakePedal) > STD_AGE_LIMIT)) {
                 _pedalError(_brakePedal.object);
             }
 
@@ -161,8 +169,8 @@ class PMotorController : public IProgram {
             }
         }
 
-        void _pedalError(IPedal* sensorId) {
-            _carService.addError(Error(sensorId->getComponentId(), sensorId->getStatus(), ERROR_ISSUE));
+        void _pedalError(IPedal &sensorId) {
+            _carService.addError(Error(sensorId.getComponentId(), sensorId.getStatus(), ERROR_ISSUE));
             _carService.calibrationNeeded();
         }
 
@@ -199,14 +207,14 @@ class PMotorController : public IProgram {
             }
 
             if (!_communicationStarted) {
-                _motorController->beginCommunication();
+                _motorController.beginCommunication();
                 _communicationStarted = true;
             }
         }
 
         void _update(_pedalStruct_t &pedal) {
             // Update value and age of Pedal
-            pedal_value_t newPedalValue = pedal.object->getValue();
+            pedal_value_t newPedalValue = pedal.object.getValue();
             if ((newPedalValue != pedal.lastValue) || newPedalValue == 0) {
                 if (pedal.ageStarted) {
                     pedal.age.reset();
@@ -234,22 +242,6 @@ class PMotorController : public IProgram {
 
                 rpmSensor.lastValue = newRpmSensorValue;
             }
-        }
-
-        void _setBasicComponents(IMotorController* motorController, IPedal* gasPedal, IPedal* brakePedal) {
-            _motorController = motorController;
-            _gasPedal.object = gasPedal;
-            _brakePedal.object = brakePedal;
-        }
-
-        void _setASRComponents(IRpmSensor* frontLeftWheel, IRpmSensor* frontRightWheel, IRpmSensor* rearLeftWheel, IRpmSensor* rearRightWheel) {
-            _asrActive = true;
-            _asrSave.lastRun.stop();
-            _asrSave.lastRun.reset();
-            _frontLeftWheel.object = frontLeftWheel;
-            _frontRightWheel.object = frontRightWheel;
-            _rearLeftWheel.object = rearLeftWheel;
-            _rearRightWheel.object = rearRightWheel;
         }
 
         pedal_value_t _getPedalPower() {

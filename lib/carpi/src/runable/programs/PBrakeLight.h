@@ -10,31 +10,31 @@
 
 class PBrakeLight : public IProgram {
     public:
-        PBrakeLight(IPedal* brakePedal, ILed* brakeLight)
+        PBrakeLight(IPedal &brakePedal, ILed &brakeLight)
             : _brakePedal(brakePedal), _brakeLight(brakeLight) {
-            _brakeLight->setBlinking(BLINKING_OFF);
-            _brakeLight->setBrightness(1);
+            _brakeLight.setBlinking(BLINKING_OFF);
+            _brakeLight.setBrightness(1);
         }
 
         virtual void run() {
             // If Brakeing -> light on
             // If not Brakeing -> light off
             // If Error or something else -> light on
-            pedal_value_t brakePedalValue = _brakePedal->getValue();
-            if (_brakePedal->getStatus() == 0) {
+            pedal_value_t brakePedalValue = _brakePedal.getValue();
+            if (_brakePedal.getStatus() == 0) {
                 if (brakePedalValue >= STD_BRAKE_LIGHT_UPPER_THRESHHOLD) {
-                    _brakeLight->setState(LED_ON);
+                    _brakeLight.setState(LED_ON);
                 } else if (brakePedalValue < STD_BRAKE_LIGHT_LOWER_THRESHHOLD) {
-                    _brakeLight->setState(LED_OFF);
+                    _brakeLight.setState(LED_OFF);
                 }
             } else {
-                _brakeLight->setState(LED_OFF);
+                _brakeLight.setState(LED_OFF);
             }
         }
 
     protected:
-        IPedal* _brakePedal;
-        ILed* _brakeLight;
+        IPedal &_brakePedal;
+        ILed &_brakeLight;
 
 };
 

@@ -26,11 +26,11 @@ class Pedal : public Carpi {
     public:
         // Called once at bootup
         void setup() {
-            syncer.addComponent((ICommunication&)gasPedal, canIntern, DEVICE_MASTER);
-            syncer.addComponent((ICommunication&)brakePedal, canIntern, DEVICE_MASTER);
-            //syncer.addComponent((ICommunication&)rpmFrontLeft, canIntern, DEVICE_MASTER);
-            //syncer.addComponent((ICommunication&)rpmFrontRight, canIntern, DEVICE_MASTER);
-            syncer.addComponent((ICommunication&)alive, canIntern, DEVICE_MASTER);
+            syncer.addComponent(gasPedal, canIntern, DEVICE_MASTER);
+            syncer.addComponent(brakePedal, canIntern, DEVICE_MASTER);
+            //syncer.addComponent(rpmFrontLeft, canIntern, DEVICE_MASTER);
+            //syncer.addComponent(rpmFrontRight, canIntern, DEVICE_MASTER);
+            syncer.addComponent(alive, canIntern, DEVICE_MASTER);
             syncer.finalize();
 
             wait(STARTUP_WAIT_TIME_SLAVE);

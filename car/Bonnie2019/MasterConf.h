@@ -68,34 +68,34 @@ DigitalOut microcontrollerOk(MASTER_PIN_MICROCONTROLLER_OK);
 // Services
 PCockpitIndicator cockpitIndicatorProgram(hvEnabled, ledCI);
 
-PBrakeLight brakeLightService((IPedal*)&brakePedal, (ILed*)&brakeLight);
+PBrakeLight brakeLightService(brakePedal, brakeLight);
 
 SCar carService(syncer,
-                (IButton*)&buttonReset, (IButton*)&buttonStart,
-                (ILed*)&ledRed, (ILed*)&ledYellow, (ILed*)&ledGreen,
-                (IPedal*)&gasPedal, (IPedal*)&brakePedal,
-                (IBuzzer*)&buzzer,
-                (IMotorController*)&motorController,
-                (IHvEnabled*)&hvEnabled,
-                (IHvEnabled*)&tsms,
-                (ISDCard*)&hardwareSD,
-                (IAlive*)&pedalAlive, (IAlive*)&dashboardAlive, (IAlive*)&masterAlive,
+                buttonReset, buttonStart,
+                ledRed, ledYellow, ledGreen,
+                gasPedal, brakePedal,
+                buzzer,
+                motorController,
+                hvEnabled,
+                tsms,
+                hardwareSD,
+                pedalAlive, dashboardAlive, masterAlive,
                 cockpitIndicatorProgram,
                 brakeLightService);
 
 PMotorController motorControllerService(carService,
-                                        (IMotorController*)&motorController,
-                                        (IPedal*)&gasPedal, (IPedal*)&brakePedal);
+                                        motorController,
+                                        gasPedal, brakePedal);
 
 SSpeed speedService(carService,
-                    /*(IRpmSensor*)&rpmFrontLeft, (IRpmSensor*)&rpmFrontRight, (IRpmSensor*)&rpmRearLeft, (IRpmSensor*)&rpmRearRight, */ // [il]
-                    (IMotorController*)&motorController);
+                    /*rpmFrontLeft, rpmFrontRight, rpmRearLeft, rpmRearRight, */ // [il]
+                    motorController);
 
 PCooling coolingService(carService,
                         speedService,
-                        (IFan*)&coolingFan, (IPump*)&coolingPump,
-                        (IMotorController*)&motorController,
-                        (IHvEnabled*)&hvEnabled);
+                        coolingFan, coolingPump,
+                        motorController,
+                        hvEnabled);
 
 PLogger sdLogger(carService, hardwareSD);
 
@@ -116,31 +116,31 @@ class Master : public Carpi {
             // Pedal
             syncer.addComponent(gasPedal, canIntern, DEVICE_PEDAL);
             syncer.addComponent(brakePedal, canIntern, DEVICE_PEDAL);
-            //syncer.addComponent((ICommunication&)rpmFrontLeft, canIntern, DEVICE_PEDAL);
-            //syncer.addComponent((ICommunication&)rpmFrontRight, canIntern, DEVICE_PEDAL);
+            //syncer.addComponent(rpmFrontLeft, canIntern, DEVICE_PEDAL);
+            //syncer.addComponent(rpmFrontRight, canIntern, DEVICE_PEDAL);
             syncer.addComponent(pedalAlive, canIntern, DEVICE_PEDAL);
 
             syncer.finalize();
 
 
             // Add all high demand Services to our Service list
-            highDemandServices.addRunable((IRunable*)&carService);
-            highDemandServices.addRunable((IRunable*)&motorControllerService);
-            highDemandServices.addRunable((IRunable*)&brakeLightService);
+            highDemandServices.addRunable(carService);
+            highDemandServices.addRunable(motorControllerService);
+            highDemandServices.addRunable(brakeLightService);
 
             // Add all low demand Services to our Service list
-            lowDemandServices.addRunable((IRunable*)&speedService);
-            lowDemandServices.addRunable((IRunable*)&coolingService);
-            lowDemandServices.addRunable((IRunable*)&cockpitIndicatorProgram);
+            lowDemandServices.addRunable(speedService);
+            lowDemandServices.addRunable(coolingService);
+            lowDemandServices.addRunable(cockpitIndicatorProgram);
 
             // Add all Services and ServiceLists to the ServiceScheduler
-            serviceScheduler.addRunable((IRunable*)&highDemandServices, HIGH_DEMAND_SERVICE_REFRESH_RATE);
-            serviceScheduler.addRunable((IRunable*)&lowDemandServices, LOW_DEMAND_SERVICE_REFRESH_RATE);
+            serviceScheduler.addRunable(highDemandServices, HIGH_DEMAND_SERVICE_REFRESH_RATE);
+            serviceScheduler.addRunable(lowDemandServices, LOW_DEMAND_SERVICE_REFRESH_RATE);
 
             // And then in the final service list
-            services.addRunable((IRunable*)&serviceScheduler);
-            services.addRunable((IRunable*)&sdLogger);
-            services.addRunable((IRunable*)&syncer);
+            services.addRunable(serviceScheduler);
+            services.addRunable(sdLogger);
+            services.addRunable(syncer);
 
             // After adding all, optimise them for ram
             highDemandServices.finalize();

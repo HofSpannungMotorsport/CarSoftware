@@ -27,15 +27,11 @@ typedef float speed_value_t;
 class SSpeed : public IService {
     public:
         SSpeed(SCar &carService,
-                     /*IRpmSensor* rpmFrontLeft, IRpmSensor* rpmFrontRight,  IRpmSensor* rpmRearLeft, IRpmSensor* rpmRearRight, */
-                     IMotorController* motorController)
-            : _carService(carService) {
-            //_rpm.front.left = rpmFrontLeft;
-            //_rpm.front.right = rpmFrontRight;
-            //_rpm.rear.left = rpmRearLeft;
-            //_rpm.rear.right = rpmRearRight;
-            _motorController = motorController;
-        }
+                     /*IRpmSensor &rpmFrontLeft, IRpmSensor &rpmFrontRight,  IRpmSensor &rpmRearLeft, IRpmSensor &rpmRearRight, */
+                     IMotorController &motorController)
+            : _carService(carService),
+            /*_rpm.front.left(rpmFrontLeft), _rpm.front.right(rpmFrontRight), _rpm.rear.left(rpmRearLeft), _rpm.rear.right(rpmRearRight), */
+              _motorController(motorController) {}
 
         virtual void run() {
             enum useSensor : uint8_t {
@@ -44,11 +40,11 @@ class SSpeed : public IService {
                 MOTOR
             } useSensor;
 
-            //if ((_rpm.front.left->getStatus() > 0) || (_rpm.front.right->getStatus() > 0)) {
+            //if ((_rpm.front.left.getStatus() > 0) || (_rpm.front.right.getStatus() > 0)) {
                 // One of the front Sensors has a problem
-                //if ((_rpm.front.left->getStatus() > 0) || (_rpm.front.right->getStatus() > 0)) {
+                //if ((_rpm.front.left.getStatus() > 0) || (_rpm.front.right.getStatus() > 0)) {
                     // One of the rear Sensors has a problem too
-                    if (_motorController->getStatus() > 0) {
+                    if (_motorController.getStatus() > 0) {
                         _speed = 0;
                         _carService.addError(Error(componentId::getComponentId(COMPONENT_SYSTEM, COMPONENT_SYSTEM_SPEED), SPEED_SERVICE_NO_SENSOR_WORKING, ERROR_ISSUE));
                         return;
@@ -68,7 +64,7 @@ class SSpeed : public IService {
                     // Calculate mid. of both sensors, then rpm -> m/min -> km/h
                     _speed = (_getSpeed(_rpm.front.left) + _getSpeed(_rpm.front.right)) / 2;
                 } else {
-                    if ((_rpm.front.left->getStatus() > 0) || (_rpm.front.right->getStatus() > 0)) {
+                    if ((_rpm.front.left.getStatus() > 0) || (_rpm.front.right.getStatus() > 0)) {
                         useSensor = MOTOR;
                     } else {
                         useSensor = REAR;
@@ -99,33 +95,33 @@ class SSpeed : public IService {
 
     protected:
         SCar &_carService;
-        IMotorController* _motorController;
+        IMotorController &_motorController;
 
         speed_value_t _speed;
         
         struct _rpm {
+            /*
             struct front {
-                IRpmSensor* left;
-                IRpmSensor* right;
+                IRpmSensor &left;
+                IRpmSensor &right;
             } front;
 
-            /*
             struct rear {
-                IRpmSensor* left;
-                IRpmSensor* right;
+                IRpmSensor &left;
+                IRpmSensor &right;
             } rear;
             */
         } _rpm;
 
-        speed_value_t _getSpeed(IRpmSensor* sensor) {
-            return (sensor->getFrequency() * STD_DISTANCE_PER_REVOLUTION * 0.06);
+        speed_value_t _getSpeed(IRpmSensor &sensor) {
+            return (sensor.getFrequency() * STD_DISTANCE_PER_REVOLUTION * 0.06);
         }
 
-        speed_value_t _getSpeed(IMotorController* sensor) {
-            return (sensor->getSpeed() * STD_MOTOR_TO_WHEEL_RATIO * STD_DISTANCE_PER_REVOLUTION * 0.06);
+        speed_value_t _getSpeed(IMotorController &sensor) {
+            return (sensor.getSpeed() * STD_MOTOR_TO_WHEEL_RATIO * STD_DISTANCE_PER_REVOLUTION * 0.06);
         }
 
-        bool _checkPlausibility(IRpmSensor* sensor1, IRpmSensor* sensor2) {
+        bool _checkPlausibility(IRpmSensor &sensor1, IRpmSensor &sensor2) {
             speed_value_t sensor1speed = _getSpeed(sensor1),
                           sensor2speed = _getSpeed(sensor2);
             

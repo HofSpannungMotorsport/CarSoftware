@@ -28,8 +28,8 @@ class RunableScheduler : public IRunable {
         }
 
         // Add a Runable to the List.
-        void addRunable(IRunable* runable, float refreshRate = STD_SCHEDULER_REFRESH_RATE) {
-            _runableSchedules.emplace_back(runable, refreshRate);
+        void addRunable(IRunable &runable, float refreshRate = STD_SCHEDULER_REFRESH_RATE) {
+            _runableSchedules.emplace_back(&runable, refreshRate);
         }
 
         // Optimise List for RAM

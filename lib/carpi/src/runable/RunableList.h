@@ -13,8 +13,8 @@ class RunableList : public IRunable {
         }
 
         // Add a Runable to the List.
-        void addRunable(IRunable* runable) {
-            _runables.push_back(runable);
+        void addRunable(IRunable &runable) {
+            _runables.push_back(&runable);
         }
 
         // Optimise List for RAM
