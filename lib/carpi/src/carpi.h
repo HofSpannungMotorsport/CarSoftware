@@ -58,6 +58,7 @@
 
 // Components
 //   Interface
+#include "components/interface/IRegistry.h"
 #include "components/interface/IComponent.h"
 #include "components/interface/IAnalogSensor.h"
 #include "components/interface/IPump.h"
@@ -67,6 +68,9 @@
 #include "components/hardware/HardwarePump.h"
 #include "components/hardware/HardwareHvEnabled.h"
 //   Software
+
+//   Internal
+#include "components/internal/InternalRegistry.h"
 
 
 // ---------------------------------------------------------------------

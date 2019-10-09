@@ -23,6 +23,10 @@ Sync syncer(DEVICE_MASTER);
 CCan canIntern(syncer, MASTER_PIN_CAR_INTERN_CAN_RD, MASTER_PIN_CAR_INTERN_CAN_TD);
 
 // Components
+//   Internal
+//     Registry
+InternalRegistry registry(COMPONENT_SYSTEM_REGISTRY);
+
 //   Software
 //     Dashboard
 //       LED's
