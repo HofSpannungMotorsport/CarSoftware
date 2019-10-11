@@ -18,14 +18,24 @@ class HardwareHvEnabled : public IHvEnabled {
             setObjectType(OBJECT_HARDWARE);
             setComponentSubId(componentSubId);
 
-            _debounceTime = STD_HV_DEBOUNCE_TIME;
-
             if (onState == HV_ENABLED_ON_AT_HIGH) {
                 _pin.fall(callback(this, &HardwareHvEnabled::_deactivated));
                 _pin.rise(callback(this, &HardwareHvEnabled::_activated));
+
+                if (_pin.read()) {
+                    _activated();
+                } else {
+                    _deactivated();
+                }
             } else if (onState == HV_ENABLED_ON_AT_LOW) {
                 _pin.fall(callback(this, &HardwareHvEnabled::_activated));
                 _pin.rise(callback(this, &HardwareHvEnabled::_deactivated));
+
+                if (_pin.read()) {
+                    _deactivated();
+                } else {
+                    _activated();
+                }
             } else {
                 #ifdef MESSAGE_REPORT
                     pcSerial.printf("Cannot assign method to a hv-enabled-state. Wrong hv-enabled-type choosen?");
@@ -49,35 +59,47 @@ class HardwareHvEnabled : public IHvEnabled {
     
     private:
         InterruptIn _pin;
-        bool _currentState;
-        bool _lastHardwareState, _debouncing, _debounced;
-        float _debounceTime;
+        bool _currentState = false;
+        float _debounceTime = STD_HV_DEBOUNCE_TIME;
         Ticker _ticker;
 
-        void _debounce() {
+        bool _lastHardwareState = false,
+             _change = false;
+
+
+        void _activationChecker() {
             _ticker.detach();
-            _debouncing = false;
 
             if (_lastHardwareState) {
-                _debounced = true;
                 _currentState = true;
+                _change = false;
+            }
+        }
+
+        void _deactivationChecker() {
+            _ticker.detach();
+
+            if (!_lastHardwareState) {
+                _currentState = false;
+                _change = false;
             }
         }
 
         void _activated() {
             _lastHardwareState = true;
-            if (!_debouncing && !_debounced) {
-                _debouncing = true;
-                _ticker.attach(callback(this, &HardwareHvEnabled::_debounce), _debounceTime);
+
+            if (!_change) {
+                _change = true;
+                _ticker.attach(callback(this, &HardwareHvEnabled::_activationChecker), _debounceTime);
             }
         }
 
         void _deactivated() {
             _lastHardwareState = false;
-            if (_debounced)  {
-                _ticker.detach();
-                _debounced = false;
-                _currentState = false;
+
+            if (!_change) {
+                _change = true;
+                _ticker.attach(callback(this, &HardwareHvEnabled::_deactivationChecker), _debounceTime);
             }
         }
 };
