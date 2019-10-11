@@ -6,7 +6,7 @@
 //#define FORCE_DISABLE_HV_CHECK // Disables HV-Checks (HardwareHvEnabled always returns true) !!! ONLY USE FOR DEBUGGING WITHOUT HV-ACCU INSTALLED !!!
 //#define PRINT_SPEED
 //#define SSPEED_REPORT_SPEED
-//#define SSPEED_FORCED_USE_MOTOR
+#define SSPEED_FORCED_USE_MOTOR
 //#define SSPEED_DISABLE_CURRENT_LIMITATION // Disable current limit depending on the speed
 #include "carpi.h"
 
