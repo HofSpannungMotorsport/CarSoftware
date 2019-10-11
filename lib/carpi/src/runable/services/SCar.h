@@ -222,8 +222,14 @@ class SCar : public IService {
             return _gasCurve;
         }
 
+        void setMaxPower(float power) {
+            if (power < 0.0) power = 0;
+            if (power > 1.0) power = 1.0;
+            _currentPower = power;
+        }
+
         float getPowerSetting() {
-            return (float)_currentPower / 10.0;
+            return _currentPower;
         }
 
     private:
@@ -234,7 +240,7 @@ class SCar : public IService {
         car_state_t _state = CAR_OFF;
 
         gas_curve_t _gasCurve = GAS_CURVE_X_POW_2;
-        uint8_t _currentPower = 10;
+        float _currentPower = 1.0;
 
         struct _button {
             IButton* reset;
@@ -561,7 +567,6 @@ class SCar : public IService {
                 }
 
                 if (_resetButton.pressed && _resetButton.released) {
-                    _changePowerMode();
                     _resetButton.pressed = false;
                     _resetButton.longPressed = false;
                     _resetButton.released = false;
@@ -640,12 +645,6 @@ class SCar : public IService {
                 _buzzer->setState(BUZZER_OFF);
                 wait(beepOffTime);
             }
-        }
-
-        void _changePowerMode() {
-            if (_currentPower >= 10) _currentPower = 0;
-            _currentPower++;
-            _beepTimes(_currentPower);
         }
 };
 
