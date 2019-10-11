@@ -42,11 +42,9 @@
 #include "components/interface/ICommunication.h"
 #include "components/interface/IAnalogSensor.h"
 #include "components/interface/IPump.h"
-#include "components/interface/IHvEnabled.h"
 //   Hardware
 #include "components/hardware/HardwareAnalogSensor.h"
 #include "components/hardware/HardwarePump.h"
-#include "components/hardware/HardwareHvEnabled.h"
 //   Software
 
 
@@ -65,6 +63,7 @@
     #include "components/interface/IPedal.h"
     #include "components/interface/IMotorController.h"
     #include "components/interface/IRpmSensor.h"
+    #include "components/interface/IHvEnabled.h"
     //   Hardware
     #include "components/hardware/HardwareBuzzer.h"
     #include "components/hardware/HardwarePwmBuzzer.h"
@@ -75,6 +74,7 @@
     #include "components/hardware/HardwarePedal.h"
     #include "components/hardware/HardwareMotorController.h"
     #include "components/hardware/HardwareRpmSensor.h"
+    #include "components/hardware/HardwareHvEnabled.h"
     //   Software
     #include "components/software/SoftwareButton.h"
     #include "components/software/SoftwareLed.h"
