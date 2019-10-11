@@ -7,6 +7,7 @@
 //#define PRINT_SPEED
 //#define SSPEED_REPORT_SPEED
 //#define SSPEED_FORCED_USE_MOTOR
+//#define SSPEED_DISABLE_CURRENT_LIMITATION // Disable current limit depending on the speed
 #include "carpi.h"
 
 #define HIGH_DEMAND_SERVICE_REFRESH_RATE 120 // Hz

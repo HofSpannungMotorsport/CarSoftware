@@ -102,7 +102,9 @@ class SSpeed : public IService {
                 pcSerial.printf("[SSpeed]@run: Current Speed: %.3f kM/h\n", _speed);
             #endif
 
-            _setThrottle(_speed);
+            #ifndef SSPEED_DISABLE_CURRENT_LIMITATION
+                _setThrottle(_speed);
+            #endif
         }
 
         speed_value_t getSpeed() {
