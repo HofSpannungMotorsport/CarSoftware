@@ -72,8 +72,10 @@ class HardwareHvEnabled : public IHvEnabled {
 
             if (_lastHardwareState) {
                 _currentState = true;
-                _change = false;
+                
             }
+
+            _change = false;
         }
 
         void _deactivationChecker() {
@@ -81,8 +83,10 @@ class HardwareHvEnabled : public IHvEnabled {
 
             if (!_lastHardwareState) {
                 _currentState = false;
-                _change = false;
+                
             }
+
+            _change = false;
         }
 
         void _activated() {

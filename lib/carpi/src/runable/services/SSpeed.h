@@ -140,7 +140,13 @@ class SSpeed : public IService {
         }
 
         speed_value_t _getSpeed(IMotorController* sensor) {
-            return (sensor->getSpeed() * STD_MOTOR_TO_WHEEL_RATIO * STD_DISTANCE_PER_REVOLUTION * 0.06);
+            float motorControllerRpm = sensor->getSpeed();
+
+            #ifdef SSPEED_REPORT_MOTOR_RPM
+                pcSerial.printf("[SSpeed]@run: Current Motor RPM: %.3f RPM\n", motorControllerRpm);
+            #endif
+
+            return (motorControllerRpm * STD_MOTOR_TO_WHEEL_RATIO * STD_DISTANCE_PER_REVOLUTION * 0.06);
         }
 
         bool _checkPlausibility(IRpmSensor* sensor1, IRpmSensor* sensor2) {
@@ -176,6 +182,8 @@ class SSpeed : public IService {
                 if (powerLimit > 1.0) powerLimit = 1.0;
 
                 _carService.setMaxPower(powerLimit);
+            } else {
+                _carService.setMaxPower(1.0);
             }
         }
 };

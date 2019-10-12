@@ -4,10 +4,12 @@
 //#define CAN_DEBUG // Enables CAN Service Debug Output (Log almost every step done by the CANService over Serial)
 //#define MOTORCONTROLLER_OUTPUT // Output the Value sent to the MotorController over Serial
 //#define FORCE_DISABLE_HV_CHECK // Disables HV-Checks (HardwareHvEnabled always returns true) !!! ONLY USE FOR DEBUGGING WITHOUT HV-ACCU INSTALLED !!!
-//#define PRINT_SPEED
+//#define PRINT_SPEED // Speed red in PCooling
 //#define SSPEED_REPORT_SPEED
 #define SSPEED_FORCED_USE_MOTOR
 //#define SSPEED_DISABLE_CURRENT_LIMITATION // Disable current limit depending on the speed
+//#define SSPEED_REPORT_MOTOR_RPM
+//#define SCAR_PRINT_POWER_SETTING
 #include "carpi.h"
 
 #define HIGH_DEMAND_SERVICE_REFRESH_RATE 120 // Hz
@@ -118,9 +120,9 @@ class Master : public Carpi {
             highDemandServices.addRunable((IRunable*)&carService);
             highDemandServices.addRunable((IRunable*)&motorControllerService);
             highDemandServices.addRunable((IRunable*)&brakeLightService);
+            highDemandServices.addRunable((IRunable*)&speedService);
 
             // Add all low demand Services to our Service list
-            lowDemandServices.addRunable((IRunable*)&speedService);
             lowDemandServices.addRunable((IRunable*)&coolingService);
             lowDemandServices.addRunable((IRunable*)&cockpitIndicatorProgram);
 
