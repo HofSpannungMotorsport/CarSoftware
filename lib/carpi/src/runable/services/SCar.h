@@ -15,15 +15,7 @@
 #include "components/interface/ISDCard.h"
 #include "components/interface/IAlive.h"
 #include "communication/Sync.h"
-
-
-#define ERROR_REGISTER_SIZE 64 // errors, max: 255
-#define STARTUP_ANIMATION_SPEED 0.075 // s between led-changes
-#define STARTUP_ANIMATION_PLAYBACKS 2 // times the animation should be played
-#define STARTUP_ANIMATION_WAIT_AFTER 0.25 // s wait after animation
-#define BRAKE_START_THRESHHOLD 0.60 // %
-
-#define HV_ENABLED_BEEP_TIME 2.2 // s (has to be at least 0.5)
+#include "HardConfig.h"
 
 enum car_state_t : uint8_t {
     CAR_OFF = 0x0,
@@ -56,6 +48,7 @@ class Error {
 class SCar : public IService {
     public:
         SCar(Sync &syncer,
+             IRegistry &registry,
              IButton &buttonReset, IButton &buttonStart,
              ILed &ledRed, ILed &ledYellow, ILed &ledGreen,
              IPedal &gasPedal, IPedal &brakePedal,
@@ -67,7 +60,7 @@ class SCar : public IService {
              IAlive& pedalAlive, IAlive& dashboardAlive, IAlive& masterAlive,
              PCockpitIndicator &ci,
              PBrakeLight &brakeLightService)
-             : _syncer(syncer), _ci(ci), _brakeLightService(brakeLightService),
+             : _syncer(syncer), _registry(registry), _ci(ci), _brakeLightService(brakeLightService),
                _button(buttonReset, buttonStart),
                _led(ledRed, ledYellow, ledGreen),
                _pedal(gasPedal, brakePedal),
@@ -147,14 +140,14 @@ class SCar : public IService {
         void startUp() {
             _ci.run();
 
-            for (uint8_t i = 0; i < STARTUP_ANIMATION_PLAYBACKS; i++) {
+            for (uint8_t i = 0; i < _registry.getUInt8(STD_SCAR_STARTUP_ANIMATION_PLAYBACKS); i++) {
                 _startupAnimationUp();
                 _ci.run();
                 _startupAnimationDown();
                 _ci.run();
             }
 
-            wait(STARTUP_ANIMATION_WAIT_AFTER);
+            wait(_registry.getFloat(STD_SCAR_STARTUP_ANIMATION_WAIT_AFTER));
 
             _ci.run();
 
@@ -214,7 +207,10 @@ class SCar : public IService {
     #else
     private:
     #endif
-        CircularBuffer<Error, ERROR_REGISTER_SIZE, uint8_t> _errorRegister;
+        CircularBuffer<Error, SCAR_ERROR_REGISTER_SIZE, uint8_t> _errorRegister;
+
+        IRegistry &_registry;
+        bool _initialized = false;
 
         car_state_t _state = CAR_OFF;
 
@@ -270,28 +266,28 @@ class SCar : public IService {
             _led.red.setState(LED_ON);
             _waitForSent();
 
-            wait(STARTUP_ANIMATION_SPEED);
+            wait(_registry.getFloat(STD_SCAR_STARTUP_ANIMATION_SPEED));
 
             _led.yellow.setState(LED_ON);
             _waitForSent();
 
-            wait(STARTUP_ANIMATION_SPEED);
+            wait(_registry.getFloat(STD_SCAR_STARTUP_ANIMATION_SPEED));
 
             _led.green.setState(LED_ON);
             _led.red.setState(LED_OFF);
             _waitForSent();
 
-            wait(STARTUP_ANIMATION_SPEED);
+            wait(_registry.getFloat(STD_SCAR_STARTUP_ANIMATION_SPEED));
 
             _led.yellow.setState(LED_OFF);
             _waitForSent();
 
-            wait(STARTUP_ANIMATION_SPEED);
+            wait(_registry.getFloat(STD_SCAR_STARTUP_ANIMATION_SPEED));
 
             _led.green.setState(LED_OFF);
             _waitForSent();
 
-            wait(STARTUP_ANIMATION_SPEED);
+            wait(_registry.getFloat(STD_SCAR_STARTUP_ANIMATION_SPEED));
         }
 
         void _startupAnimationDown() {
@@ -299,28 +295,28 @@ class SCar : public IService {
             _led.green.setState(LED_ON);
             _waitForSent();
 
-            wait(STARTUP_ANIMATION_SPEED);
+            wait(_registry.getFloat(STD_SCAR_STARTUP_ANIMATION_SPEED));
 
             _led.yellow.setState(LED_ON);
             _waitForSent();
 
-            wait(STARTUP_ANIMATION_SPEED);
+            wait(_registry.getFloat(STD_SCAR_STARTUP_ANIMATION_SPEED));
 
             _led.red.setState(LED_ON);
             _led.green.setState(LED_OFF);
             _waitForSent();
 
-            wait(STARTUP_ANIMATION_SPEED);
+            wait(_registry.getFloat(STD_SCAR_STARTUP_ANIMATION_SPEED));
 
             _led.yellow.setState(LED_OFF);
             _waitForSent();
 
-            wait(STARTUP_ANIMATION_SPEED);
+            wait(_registry.getFloat(STD_SCAR_STARTUP_ANIMATION_SPEED));
 
             _led.red.setState(LED_OFF);
             _waitForSent();
 
-            wait(STARTUP_ANIMATION_SPEED);
+            wait(_registry.getFloat(STD_SCAR_STARTUP_ANIMATION_SPEED));
         }
 
         void _resetLeds() {
@@ -514,7 +510,7 @@ class SCar : public IService {
                 // Clear start button at first
                 while (_button.start.getStateChanged()) _button.start.getState();
 
-                if ((_button.start.getState() == LONG_CLICKED) && (_pedal.brake.getValue() >= BRAKE_START_THRESHHOLD) && (_hvEnabled.read()) && (_tsms.read())) {
+                if ((_button.start.getState() == LONG_CLICKED) && (_pedal.brake.getValue() >= _registry.getFloat(SCAR_BRAKE_START_THRESHHOLD)) && (_hvEnabled.read()) && (_tsms.read())) {
                     // Optimize later!!
                     // [il]
                     // Set RFE enable
@@ -555,7 +551,7 @@ class SCar : public IService {
                                 wait(0.1);
                             }
                         }
-                    } while (waitTimer.read() < (float)HV_ENABLED_BEEP_TIME);
+                    } while (waitTimer.read() < _registry.getFloat(SCAR_HV_ENABLED_BEEP_TIME));
 
                     // Set RUN enable if no Error
                     _syncer.run();

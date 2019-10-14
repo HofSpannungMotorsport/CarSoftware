@@ -5,15 +5,11 @@
 
 class HardwarePump : public IPump {
     public:
-        HardwarePump(PinName pwmPort, PinName enablePort) : _pwmPort(pwmPort), _enablePort(enablePort) {
+        HardwarePump(PinName pwmPort, PinName enablePort, id_sub_component_t componentSubId) : _pwmPort(pwmPort), _enablePort(enablePort) {
             _enablePort = 0;
             _pwmPort = 1;
 
-            setComponentType(COMPONENT_COOLING);
             setObjectType(OBJECT_HARDWARE);
-        }
-
-        HardwarePump(PinName pwmPort, PinName enablePort, id_sub_component_t componentSubId) : HardwarePump(pwmPort, enablePort) {
             setComponentSubId(componentSubId);
         }
 

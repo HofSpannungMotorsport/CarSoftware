@@ -5,14 +5,9 @@
 
 class SoftwareRpmSensor : public IRpmSensor {
     public:
-        SoftwareRpmSensor() {
-            setComponentType(COMPONENT_RPM_SENSOR);
-            setObjectType(OBJECT_SOFTWARE);
-        }
-
-        SoftwareRpmSensor(id_sub_component_t componentSubId)
-            : SoftwareRpmSensor() {
+        SoftwareRpmSensor(id_sub_component_t componentSubId) {
             setComponentSubId(componentSubId);
+            setObjectType(OBJECT_SOFTWARE);
         }
 
         virtual void setStatus(status_t status) {

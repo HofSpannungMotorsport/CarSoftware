@@ -9,19 +9,22 @@
 Sync syncer(DEVICE_DASHBOARD);
 CCan canIntern(syncer, DASHBOARD_CAN);
 
+// Registry
+InternalRegistry registry(COMPONENT_SYSTEM_REGISTRY);
+
 // LED's
-HardwareLed ledRed(DASHBOARD_PIN_LED_RED, COMPONENT_LED_ERROR);
-HardwareLed ledYellow(DASHBOARD_PIN_LED_YELLOW, COMPONENT_LED_ISSUE);
-HardwareLed ledGreen(DASHBOARD_PIN_LED_GREEN, COMPONENT_LED_READY_TO_DRIVE);
-HardwareLed ledCI(DASHBOARD_PIN_LED_EXTRA, COMPONENT_LED_CI);
+HardwareLed ledRed(DASHBOARD_PIN_LED_RED, COMPONENT_LED_ERROR, registry);
+HardwareLed ledYellow(DASHBOARD_PIN_LED_YELLOW, COMPONENT_LED_ISSUE, registry);
+HardwareLed ledGreen(DASHBOARD_PIN_LED_GREEN, COMPONENT_LED_READY_TO_DRIVE, registry);
+HardwareLed ledCI(DASHBOARD_PIN_LED_EXTRA, COMPONENT_LED_CI, registry);
 
 
 // Buttons
-HardwareInterruptButton buttonReset(DASHBOARD_PIN_BUTTON_RESET, COMPONENT_BUTTON_RESET);
-HardwareInterruptButton buttonStart(DASHBOARD_PIN_BUTTON_START, COMPONENT_BUTTON_START);
+HardwareInterruptButton buttonReset(DASHBOARD_PIN_BUTTON_RESET, COMPONENT_BUTTON_RESET, registry);
+HardwareInterruptButton buttonStart(DASHBOARD_PIN_BUTTON_START, COMPONENT_BUTTON_START, registry);
 
 // Alive
-HardwareAlive alive(COMPONENT_ALIVE_DASHBOARD, DASHBOARD_PIN_ALIVE);
+HardwareAlive alive(COMPONENT_ALIVE_DASHBOARD, DASHBOARD_PIN_ALIVE, registry);
 
 class Dashboard : public Carpi {
     public:

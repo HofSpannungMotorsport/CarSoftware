@@ -3,25 +3,12 @@
 
 #include "../interface/IBuzzer.h"
 
-#define STD_BUZZER_ON_OFF_TIME  0.5 // s
-
-#ifdef STD_BUZZER_FAST_HIGH_LOW_TIME
-    #undef STD_BUZZER_FAST_HIGH_LOW_TIME
-#endif
-
-#define STD_BUZZER_FAST_HIGH_LOW_TIME 0.075 // s
-
 class HardwareBuzzer : public IBuzzer {
     public:
-        HardwareBuzzer(PinName port)
-            : _port(port) {
-            setComponentType(COMPONENT_BUZZER);
-            setObjectType(OBJECT_HARDWARE);
-        }
-        
-        HardwareBuzzer(PinName port, id_sub_component_t componentSubId)
-            : HardwareBuzzer(port) {
+        HardwareBuzzer(PinName port, id_sub_component_t componentSubId, IRegistry &registry)
+            : _port(port), _registry(registry) {
             setComponentSubId(componentSubId);
+            setObjectType(OBJECT_HARDWARE);
         }
 
         virtual void setStatus(status_t status) {
@@ -60,6 +47,9 @@ class HardwareBuzzer : public IBuzzer {
         }
 
     protected:
+        IRegistry &_registry;
+        bool _stdValuesLoaded = false;
+
         DigitalOut _port;
         Ticker _ticker;
         status_t _status;
@@ -76,9 +66,14 @@ class HardwareBuzzer : public IBuzzer {
         bool _lastBeepState;
 
         struct _time {
-            float onOff = STD_BUZZER_ON_OFF_TIME,
-                  fastHighToLow = STD_BUZZER_FAST_HIGH_LOW_TIME;
+            float onOff,
+                  fastHighToLow;
         } _time;
+
+        void _loadStdValues() {
+            _time.onOff = _registry.getFloat(STD_BUZZER_ON_OFF_TIME);
+            _time.fastHighToLow = _registry.getFloat(STD_BUZZER_FAST_HIGH_LOW_TIME);
+        }
 
         void _beep() {
             _lastBeepState = !_lastBeepState;
@@ -92,6 +87,11 @@ class HardwareBuzzer : public IBuzzer {
         }
 
         void _update() {
+            if (!_stdValuesLoaded) {
+                _loadStdValues();
+                _stdValuesLoaded = true;
+            }
+
             if (_current.state == BUZZER_OFF) {
                 _port.write(0);
                 _ticker.detach();

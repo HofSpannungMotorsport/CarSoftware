@@ -5,7 +5,8 @@
 
 class SoftwareAlive : public IAlive {
     public:
-        SoftwareAlive(id_sub_component_t componentSubId) {
+        SoftwareAlive(id_sub_component_t componentSubId, IRegistry &registry)
+        : _registry(registry) {
             setComponentSubId(componentSubId);
             setComponentType(COMPONENT_ALIVE);
             setObjectType(OBJECT_SOFTWARE);
@@ -40,7 +41,7 @@ class SoftwareAlive : public IAlive {
                             _aliveTicker.detach();
                             if (subMessage.data[1] == 0x1) {
                                 _alive = true;
-                                _aliveTicker.attach(callback(this, &SoftwareAlive::_noMessageReceived), (float)STD_ALIVE_SIGNAL_REFRESH_RATE);
+                                _aliveTicker.attach(callback(this, &SoftwareAlive::_noMessageReceived), _registry.getFloat(ALIVE_SIGNAL_REFRESH_RATE));
                             } else _alive = false;
                             break;
                     }
@@ -49,6 +50,8 @@ class SoftwareAlive : public IAlive {
         }
     
     private:
+        IRegistry &_registry;
+        
         bool _alive;
         Ticker _aliveTicker;
 

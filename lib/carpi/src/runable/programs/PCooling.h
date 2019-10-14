@@ -9,20 +9,6 @@
 #include "components/interface/IPump.h"
 #include "components/interface/IMotorController.h"
 
-
-#define STD_COOLING_FAN_OFF_UNTIL_SPEED 7 // kM/h
-#define STD_COOLING_FAN_ON_UNTIL_SPEED 5 // kM/h
-
-// Temperatures at which the Pump will start or reach its maximum
-#define STD_MOTOR_TEMP_START_PUMP   30 // °C
-#define STD_MOTOR_TEMP_FULL_PUMP    60 // °C
-#define STD_CONTROLLER_TEMP_START_PUMP  30 // °C
-#define STD_CONTROLLER_TEMP_FULL_PUMP   40 // °C
-
-// Absolut Max temperatures which will stop the car to prevent overheating
-#define STD_MAX_MOTOR_TEMP 110 // °C (120 in datasheet, but we don't want to stress the limit)
-#define STD_MAX_CONTROLLER_TEMP 65 // °C
-
 enum cooling_service_error_type_t {
     COOLING_SERVICE_OK = 0x0,
     COOLING_SERVICE_MOTOR_OVERHEAT = 0x1,
@@ -35,9 +21,11 @@ class PCooling : public IProgram {
                  SSpeed &speedService,
                  IFan &fan, IPump &pump,
                  IMotorController &motorController,
-                 IHvEnabled &hvEnabled)
+                 IHvEnabled &hvEnabled,
+                 IRegistry &registry)
             : _carService(carService), _speedService(speedService),
-              _fan(fan), _pump(pump), _motorController(motorController), _hvEnabled(hvEnabled) {
+              _fan(fan), _pump(pump), _motorController(motorController), _hvEnabled(hvEnabled),
+              _registry(registry) {
 
             _pump.setSpeed(0);
             _pump.setEnable(1);
@@ -54,10 +42,10 @@ class PCooling : public IProgram {
                 #endif
 
                 // Activate Fan according to driving speed
-                if (currentSpeed <= STD_COOLING_FAN_ON_UNTIL_SPEED) {
+                if (currentSpeed <= _registry.getFloat(COOLING_FAN_ON_UNITL_SPEED)) {
                     // Turn fan on if driving too slow
                     _fan.setState(FAN_ON);
-                } else if (currentSpeed >= STD_COOLING_FAN_OFF_UNTIL_SPEED) {
+                } else if (currentSpeed >= _registry.getFloat(COOLING_FAN_OFF_UNTIL_SPEED)) {
                     // Turn fan off if driving too fast
                     _fan.setState(FAN_OFF);
                 }
@@ -66,8 +54,14 @@ class PCooling : public IProgram {
                 float controllerTemp = _motorController.getServoTemp();
 
                 // Set Pump speed according to the temperature of the devices
-                float pumpMotor = ((float)motorTemp - (float)STD_MOTOR_TEMP_START_PUMP) / ((float)STD_MOTOR_TEMP_FULL_PUMP - (float)STD_MOTOR_TEMP_START_PUMP);
-                float pumpController = ((float)controllerTemp - (float)STD_CONTROLLER_TEMP_START_PUMP) / ((float)STD_CONTROLLER_TEMP_FULL_PUMP - (float)STD_CONTROLLER_TEMP_START_PUMP);
+                float motorTempStartPump = _registry.getFloat(COOLING_MOTOR_TEMP_START_PUMP);
+                float motorTempFullPump = _registry.getFloat(COOLING_MOTOR_TEMP_FULL_PUMP);
+
+                float controllerTempStartPump = _registry.getFloat(COOLING_CONTROLLER_TEMP_START_PUMP);
+                float controllerTempFullPump = _registry.getFloat(COOLING_CONTROLLER_TEMP_FULL_PUMP);
+
+                float pumpMotor = (motorTemp - motorTempStartPump) / (motorTempFullPump - motorTempStartPump);
+                float pumpController = (controllerTemp - controllerTempStartPump) / (controllerTempFullPump - controllerTempStartPump);
 
                 // Use the highest power given from the "hottest" device
                 float newPumpPower = 1;
@@ -87,12 +81,12 @@ class PCooling : public IProgram {
                 _pump.setSpeed(newPumpPower);
 
                 // At least after setting the pump, check if the temperature of any device is too high
-                if (motorTemp > STD_MAX_MOTOR_TEMP) {
+                if (motorTemp > _registry.getFloat(COOLING_MAX_MOTOR_TEMP)) {
                     cooling_service_error_type_t motorOverheatError = COOLING_SERVICE_MOTOR_OVERHEAT;
                     _carService.addError(Error(componentId::getComponentId(COMPONENT_SYSTEM, COMPONENT_SYSTEM_COOLING), motorOverheatError, ERROR_CRITICAL));
                 }
 
-                if (controllerTemp > STD_MAX_CONTROLLER_TEMP) {
+                if (controllerTemp > _registry.getFloat(COOLING_MAX_CONTROLLER_TEMP)) {
                     cooling_service_error_type_t controllerOverheatError = COOLING_SERVICE_CONTROLLER_OVERHEAT;
                     _carService.addError(Error(componentId::getComponentId(COMPONENT_SYSTEM, COMPONENT_SYSTEM_COOLING), controllerOverheatError, ERROR_CRITICAL));
                 }
@@ -103,6 +97,8 @@ class PCooling : public IProgram {
         }
 
     protected:
+        IRegistry &_registry;
+    
         SCar &_carService;
         SSpeed &_speedService;
         IFan &_fan;

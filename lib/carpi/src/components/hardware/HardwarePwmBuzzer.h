@@ -3,31 +3,12 @@
 
 #include "../interface/IBuzzer.h"
 
-#define STD_BUZZER_HIGH_HZ 300
-
-#define STD_BUZZER_ON_OFF_TIME  0.5 // s
-#define STD_BUZZER_HIGH_LOW_TIME 0.6 // s
-
-#ifdef STD_BUZZER_FAST_HIGH_LOW_TIME
-    #undef STD_BUZZER_FAST_HIGH_LOW_TIME
-#endif
-
-#define STD_BUZZER_FAST_HIGH_LOW_TIME 0.15 // s
-#define STD_BUZZER_BEEP_HIGH_TO_LOW_RATIO 0.6 // -> Low = 60% of High
-
-#define STD_BUZZER_PWM_HIGH_TO_LOW_RATIO 0.5 // -> 50% of time High
-
 class HardwarePwmBuzzer : public IBuzzer {
     public:
-        HardwarePwmBuzzer(PinName port) 
-            : _port(port) {
-            setComponentType(COMPONENT_BUZZER);
-            setObjectType(OBJECT_HARDWARE);
-        }
-        
-        HardwarePwmBuzzer(PinName port, id_sub_component_t componentSubId)
-            : HardwarePwmBuzzer(port) {
+        HardwarePwmBuzzer(PinName port, id_sub_component_t componentSubId, IRegistry &registry)
+        : _port(port), _registry(registry) {
             setComponentSubId(componentSubId);
+            setObjectType(OBJECT_HARDWARE);
         }
 
         virtual void setStatus(status_t status) {
@@ -66,14 +47,17 @@ class HardwarePwmBuzzer : public IBuzzer {
         }
 
     protected:
+        IRegistry &_registry;
+        bool _stdValuesLoaded = false;
+
         PwmOut _port;
         Ticker _ticker;
         status_t _status;
 
         struct _current {
             buzzer_state_t state = BUZZER_OFF;
-            buzzer_hz_t hz = STD_BUZZER_HIGH_HZ;
-            float highToLowRatio = STD_BUZZER_PWM_HIGH_TO_LOW_RATIO;
+            buzzer_hz_t hz;
+            float highToLowRatio;
 
             struct beep {
                 float valueHigh,
@@ -93,10 +77,23 @@ class HardwarePwmBuzzer : public IBuzzer {
         } _last;
 
         struct _time {
-            float onOff = STD_BUZZER_ON_OFF_TIME,
-                  highToLow = STD_BUZZER_HIGH_LOW_TIME,
-                  fastHighToLow = STD_BUZZER_FAST_HIGH_LOW_TIME;
+            float onOff,
+                  highToLow,
+                  fastHighToLow;
         } _time;
+
+        float _pwmHighToLowRatio;
+
+        void _loadStdValues() {
+            _current.hz = _registry.getUInt16(STD_BUZZER_HIGH_HZ);
+            _current.highToLowRatio = _registry.getFloat(STD_BUZZER_PWM_HIGH_TO_LOW_RATIO);
+
+            _time.onOff = _registry.getFloat(STD_BUZZER_ON_OFF_TIME);
+            _time.highToLow = _registry.getFloat(STD_BUZZER_HIGH_LOW_TIME);
+            _time.fastHighToLow = _registry.getFloat(STD_BUZZER_FAST_HIGH_LOW_TIME);
+
+            _pwmHighToLowRatio = _registry.getFloat(STD_BUZZER_PWM_HIGH_TO_LOW_RATIO);
+        }
 
         void _beep() {
             float newValue = 0;
@@ -129,6 +126,11 @@ class HardwarePwmBuzzer : public IBuzzer {
         }
 
         void _update() {
+            if (!_stdValuesLoaded) {
+                _loadStdValues();
+                _stdValuesLoaded = true;
+            }
+
             if (_current.state == BUZZER_OFF) {
                 _port.write(0);
                 _ticker.detach();
@@ -147,7 +149,7 @@ class HardwarePwmBuzzer : public IBuzzer {
                     }
                 } else if (_current.beep.type == BUZZER_BEEP_HIGH_BEEP_LOW) {
                     _current.beep.valueHigh = _current.hz;
-                    _current.beep.highToLowRatio = STD_BUZZER_BEEP_HIGH_TO_LOW_RATIO;
+                    _current.beep.highToLowRatio = _pwmHighToLowRatio;
                     if (_time.highToLow != _current.beep.switchTime) {
                         _ticker.detach();
                         _current.beep.switchTime = _time.highToLow;
@@ -155,7 +157,7 @@ class HardwarePwmBuzzer : public IBuzzer {
                     }
                 } else if (_current.beep.type == BUZZER_BEEP_FAST_HIGH_LOW) {
                     _current.beep.valueHigh = _current.hz;
-                    _current.beep.highToLowRatio = STD_BUZZER_BEEP_HIGH_TO_LOW_RATIO;
+                    _current.beep.highToLowRatio = _pwmHighToLowRatio;
                     if (_time.fastHighToLow != _current.beep.switchTime) {
                         _ticker.detach();
                         _current.beep.switchTime = _time.fastHighToLow;

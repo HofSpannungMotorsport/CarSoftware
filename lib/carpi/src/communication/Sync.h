@@ -12,8 +12,7 @@ using namespace std;
 #include "IChannel.h"
 #include "components/interface/ICommunication.h"
 #include "runable/IRunable.h"
-
-#define SYNC_INCOMING_MESSAGES_BUFFER_SIZE 128 // max 255
+#include "HardConfig.h"
 
 //#define SYNC_DEBUG // for debugging
 
@@ -177,7 +176,7 @@ class Sync : public IRunable {
         vector<Channel> channels;
 
         // The Vector which will temporarily store all incoming messages
-        CircularBuffer<CarMessage, SYNC_INCOMING_MESSAGES_BUFFER_SIZE, uint8_t> _incomingMessages;
+        CircularBuffer<CarMessage, STD_SYNC_INCOMING_MESSAGES_BUFFER_SIZE, uint8_t> _incomingMessages;
 
         bool _checkComponentExist(id_component_t componentId) {
             for(Route &route : router) {

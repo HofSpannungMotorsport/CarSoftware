@@ -9,9 +9,7 @@ using namespace std;
 #include "../services/SCar.h"
 #include "components/interface/IComponent.h"
 #include "components/interface/ISDCard.h"
-
-#define STD_LOGGER_REFRESH_RATE 1
-#define STD_FILE_BEGIN_MESSAGE "Begin_Logging"
+#include "HardConfig.h"
 
 class PLogger : public IProgram {
     public:
@@ -21,7 +19,7 @@ class PLogger : public IProgram {
         bool begin() {
             if (_sdCard.getStatus() != 0) return false;
 
-            string beginMessage = STD_FILE_BEGIN_MESSAGE;
+            string beginMessage = STD_LOGGER_FILE_BEGIN_MESSAGE;
             _sdCard.write(_sdCard, SD_LOG_ID_BEGIN_FILE, beginMessage);
 
             string versionMessage = CARPI_VERSION;

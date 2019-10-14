@@ -26,6 +26,10 @@ enum buzzer_error_type_t : status_t {
 
 class IBuzzer : public IComponent {
     public:
+        IBuzzer() {
+            setComponentType(COMPONENT_BUZZER);
+        }
+
         virtual void setState(buzzer_state_t state) = 0;
         virtual buzzer_state_t getState() = 0;
 

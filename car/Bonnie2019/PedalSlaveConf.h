@@ -11,21 +11,32 @@
 Sync syncer(DEVICE_PEDAL);
 CCan canIntern(syncer, PEDAL_CAN);
 
+// Registry
+InternalRegistry registry(COMPONENT_SYSTEM_REGISTRY);
+
 // Pedals
-HardwarePedal gasPedal(PEDAL_PIN_ROTATION_ANGLE_GAS_1, PEDAL_PIN_ROTATION_ANGLE_GAS_2, COMPONENT_PEDAL_GAS, STD_GAS_1_MIN, STD_GAS_1_MAX, STD_GAS_2_MIN, STD_GAS_2_MAX);
-HardwarePedal brakePedal(PEDAL_PIN_ROTATION_ANGLE_BRAKE, COMPONENT_PEDAL_BRAKE, STD_BRAKE_MIN, STD_BRAKE_MAX);
+HardwarePedal gasPedal(PEDAL_PIN_ROTATION_ANGLE_GAS_1, PEDAL_PIN_ROTATION_ANGLE_GAS_2, COMPONENT_PEDAL_GAS, registry);
+HardwarePedal brakePedal(PEDAL_PIN_ROTATION_ANGLE_BRAKE, COMPONENT_PEDAL_BRAKE, registry);
 
 // RPM Sensor
 //HardwareRpmSensor rpmFrontLeft(PEDAL_PIN_RPM_SENSOR_FL, COMPONENT_RPM_FRONT_LEFT);
 //HardwareRpmSensor rpmFrontRight(PEDAL_PIN_RPM_SENSOR_FR, COMPONENT_RPM_FRONT_RIGHT);
 
 // Alive
-HardwareAlive alive(COMPONENT_ALIVE_PEDAL, PEDAL_PIN_ALIVE);
+HardwareAlive alive(COMPONENT_ALIVE_PEDAL, PEDAL_PIN_ALIVE, registry);
 
 class Pedal : public Carpi {
     public:
         // Called once at bootup
         void setup() {
+            // Pedal Pre-Calibration
+            pedal_calibration_data_t gasCalibration(registry.getUInt16(STD_PEDAL_GAS_1_MIN), registry.getUInt16(STD_PEDAL_GAS_1_MAX), registry.getUInt16(STD_PEDAL_GAS_2_MIN), registry.getUInt16(STD_PEDAL_GAS_2_MAX));
+            pedal_calibration_data_t brakeCalibration(registry.getUInt16(STD_PEDAL_BRAKE_MIN), registry.getUInt16(STD_PEDAL_BRAKE_MAX));
+
+            gasPedal.setCalibration(gasCalibration);
+            brakePedal.setCalibration(brakeCalibration);
+
+
             syncer.addComponent(gasPedal, canIntern, DEVICE_MASTER);
             syncer.addComponent(brakePedal, canIntern, DEVICE_MASTER);
             //syncer.addComponent(rpmFrontLeft, canIntern, DEVICE_MASTER);

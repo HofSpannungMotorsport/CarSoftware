@@ -5,13 +5,8 @@
 
 class SoftwarePedal : public IPedal {
     public:
-        SoftwarePedal() {
-            setComponentType(COMPONENT_PEDAL);
+        SoftwarePedal(id_sub_component_t componentSubId) {
             setObjectType(OBJECT_SOFTWARE);
-        }
-
-        SoftwarePedal(id_sub_component_t componentSubId)
-            : SoftwarePedal() {
             setComponentSubId(componentSubId);
         }
 

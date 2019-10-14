@@ -6,12 +6,6 @@
 #include "../interface/IRpmSensor.h"
 #include "../interface/IMotorController.h"
 
-#define STD_SPEED_DEVIANCE_THRESHHOLD 3 // kM/h -> if one sensor gives a higher Value than this, the other one will be compared
-#define STD_MAX_SPEED_DEVIANCE 0.1 // 10%
-
-#define STD_DISTANCE_PER_REVOLUTION 1.4451326206513048896928159563086 // m -> The distance a wheel will travel over one whole rotation
-#define STD_MOTOR_TO_WHEEL_RATIO (1.0/3.6) // The gear Ratio from the Motor to the rear Wheels
-
 /*
     Speed is measured by the front Wheels -> most accurat result.
     If the Sensors in the front have a problem, the ones in the back will be used instead.
@@ -28,10 +22,10 @@ class SSpeed : public IService {
     public:
         SSpeed(SCar &carService,
                      /*IRpmSensor &rpmFrontLeft, IRpmSensor &rpmFrontRight,  IRpmSensor &rpmRearLeft, IRpmSensor &rpmRearRight, */
-                     IMotorController &motorController)
+                     IMotorController &motorController, IRegistry &registry)
             : _carService(carService),
             /*_rpm.front.left(rpmFrontLeft), _rpm.front.right(rpmFrontRight), _rpm.rear.left(rpmRearLeft), _rpm.rear.right(rpmRearRight), */
-              _motorController(motorController) {}
+              _motorController(motorController), _registry(registry) {}
 
         virtual void run() {
             enum useSensor : uint8_t {
@@ -94,6 +88,8 @@ class SSpeed : public IService {
         }
 
     protected:
+        IRegistry &_registry;
+
         SCar &_carService;
         IMotorController &_motorController;
 
@@ -114,18 +110,19 @@ class SSpeed : public IService {
         } _rpm;
 
         speed_value_t _getSpeed(IRpmSensor &sensor) {
-            return (sensor.getFrequency() * STD_DISTANCE_PER_REVOLUTION * 0.06);
+            return (sensor.getFrequency() * _registry.getFloat(SSPEED_DISTANCE_PER_REVOLUTION) * 0.06);
         }
 
         speed_value_t _getSpeed(IMotorController &sensor) {
-            return (sensor.getSpeed() * STD_MOTOR_TO_WHEEL_RATIO * STD_DISTANCE_PER_REVOLUTION * 0.06);
+            return (sensor.getSpeed() * _registry.getFloat(SSPEED_MOTOR_TO_WHEEL_RATIO) * _registry.getFloat(SSPEED_DISTANCE_PER_REVOLUTION) * 0.06);
         }
 
         bool _checkPlausibility(IRpmSensor &sensor1, IRpmSensor &sensor2) {
             speed_value_t sensor1speed = _getSpeed(sensor1),
                           sensor2speed = _getSpeed(sensor2);
             
-            if ((sensor1speed > STD_SPEED_DEVIANCE_THRESHHOLD) || (sensor2speed > STD_SPEED_DEVIANCE_THRESHHOLD)) {
+            float speedDevianceThreshhold = _registry.getFloat(SSPEED_SPEED_DEVIANCE_THRESHHOLD);
+            if ((sensor1speed > speedDevianceThreshhold) || (sensor2speed > speedDevianceThreshhold)) {
                 float deviance = 0;
 
                 if (sensor1speed > sensor2speed) {
@@ -134,7 +131,7 @@ class SSpeed : public IService {
                     deviance = 1 - (sensor1speed / sensor2speed);
                 }
 
-                if (deviance > STD_MAX_SPEED_DEVIANCE) {
+                if (deviance > _registry.getFloat(SSPEED_MAX_SPEED_DEVIANCE)) {
                     return false;
                 }
             }

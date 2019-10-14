@@ -40,7 +40,7 @@ SoftwareButton buttonReset(COMPONENT_BUTTON_RESET);
 SoftwareButton buttonStart(COMPONENT_BUTTON_START);
 
 //       Alive
-SoftwareAlive dashboardAlive(COMPONENT_ALIVE_DASHBOARD);
+SoftwareAlive dashboardAlive(COMPONENT_ALIVE_DASHBOARD, registry);
 
 //     Pedal
 //       Pedals
@@ -52,29 +52,30 @@ SoftwarePedal brakePedal(COMPONENT_PEDAL_BRAKE);
 //SoftwareRpmSensor rpmFrontRight(COMPONENT_RPM_FRONT_RIGHT);
 
 //       Alive
-SoftwareAlive pedalAlive(COMPONENT_ALIVE_PEDAL);
+SoftwareAlive pedalAlive(COMPONENT_ALIVE_PEDAL, registry);
 
 //   Hardware
-HardwareLed brakeLight(MASTER_PIN_BRAKE_LIGHT, COMPONENT_LED_BRAKE);
-HardwareMotorController motorController(MASTER_PIN_MOTOR_CONTROLLER_CAN_RD, MASTER_PIN_MOTOR_CONTROLLER_CAN_TD, MASTER_PIN_RFE_ENABLE, MASTER_PIN_RUN_ENABLE, COMPONENT_MOTOR_MAIN);
+HardwareLed brakeLight(MASTER_PIN_BRAKE_LIGHT, COMPONENT_LED_BRAKE, registry);
+HardwareMotorController motorController(MASTER_PIN_MOTOR_CONTROLLER_CAN_RD, MASTER_PIN_MOTOR_CONTROLLER_CAN_TD, MASTER_PIN_RFE_ENABLE, MASTER_PIN_RUN_ENABLE, COMPONENT_MOTOR_MAIN, registry);
 //HardwareRpmSensor rpmRearLeft(MASTER_PIN_RPM_SENSOR_HL, RPM_REAR_LEFT); // [il]
 //HardwareRpmSensor rpmRearRight(MASTER_PIN_RPM_SENSOR_HR, RPM_REAR_RIGHT); // [il]
 HardwareFan coolingFan(MASTER_PIN_FAN, COMPONENT_COOLING_FAN);
 HardwarePump coolingPump(MASTER_PIN_PUMP_PWM, MASTER_PIN_PUMP_ENABLE, COMPONENT_COOLING_PUMP);
-HardwareBuzzer buzzer(MASTER_PIN_BUZZER, COMPONENT_BUZZER_STARTUP);
+HardwareBuzzer buzzer(MASTER_PIN_BUZZER, COMPONENT_BUZZER_STARTUP, registry);
 HardwareHvEnabled hvEnabled(MASTER_PIN_60V_OK, COMPONENT_SYSTEM_60V_OK, HV_ENABLED_ON_AT_LOW);
 HardwareHvEnabled tsms(MASTER_PIN_TSMS, COMPONENT_SYSTEM_TSMS);
 HardwareSDCard hardwareSD(COMPONENT_SYSTEM_SD_CARD, MASTER_PIN_SPI_SD_MOSI, MASTER_PIN_SPI_SD_MISO, MASTER_PIN_SPI_SD_SCK, MASTER_PIN_SPI_SD_CS);
-HardwareAlive masterAlive(COMPONENT_ALIVE_MASTER, MASTER_PIN_MICROCONTROLLER_OK);
+HardwareAlive masterAlive(COMPONENT_ALIVE_MASTER, MASTER_PIN_MICROCONTROLLER_OK, registry);
 
 DigitalOut microcontrollerOk(MASTER_PIN_MICROCONTROLLER_OK);
 
 // Services
 PCockpitIndicator cockpitIndicatorProgram(hvEnabled, ledCI);
 
-PBrakeLight brakeLightService(brakePedal, brakeLight);
+PBrakeLight brakeLightService(brakePedal, brakeLight, registry);
 
 SCar carService(syncer,
+                registry,
                 buttonReset, buttonStart,
                 ledRed, ledYellow, ledGreen,
                 gasPedal, brakePedal,
@@ -87,19 +88,20 @@ SCar carService(syncer,
                 cockpitIndicatorProgram,
                 brakeLightService);
 
-PMotorController motorControllerService(carService,
+PMotorController motorControllerService(carService, registry,
                                         motorController,
                                         gasPedal, brakePedal);
 
 SSpeed speedService(carService,
                     /*rpmFrontLeft, rpmFrontRight, rpmRearLeft, rpmRearRight, */ // [il]
-                    motorController);
+                    motorController, registry);
 
 PCooling coolingService(carService,
                         speedService,
                         coolingFan, coolingPump,
                         motorController,
-                        hvEnabled);
+                        hvEnabled,
+                        registry);
 
 PLogger sdLogger(carService, hardwareSD);
 

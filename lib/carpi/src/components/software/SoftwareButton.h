@@ -6,25 +6,9 @@
 
 class SoftwareButton : public IButton {
     public:
-        SoftwareButton() {
-            _status = 0;
-            _lastState = NOT_PRESSED;
-            
-            setComponentType(COMPONENT_BUTTON);
-            setObjectType(OBJECT_SOFTWARE);
-        }
-
-        SoftwareButton(id_sub_component_t componentSubId)
-            : SoftwareButton() {
+        SoftwareButton(id_sub_component_t componentSubId) {
             setComponentSubId(componentSubId);
-        }
-
-        virtual void setLongClickTime(button_time_t time) {
-            // No Implementation needed
-        }
-
-        virtual void setDebounceTime(button_debounce_time_t time) {
-            // No Implementation needed
+            setObjectType(OBJECT_SOFTWARE);
         }
 
         // Status...
@@ -38,7 +22,7 @@ class SoftwareButton : public IButton {
 
         // State...
         virtual void setState(button_state_t state) {
-            CircularBuffer<button_state_t, STATE_BUFFER_SIZE> stateBufferCopy = _stateBuffer;
+            CircularBuffer<button_state_t, BUTTON_STATE_BUFFER_SIZE> stateBufferCopy = _stateBuffer;
 
             // Get last State saved in Buffer
             button_state_t lastState = _lastState;
@@ -83,9 +67,9 @@ class SoftwareButton : public IButton {
         }
 
     private:
-        status_t _status;
-        button_state_t _lastState;
-        CircularBuffer<button_state_t, STATE_BUFFER_SIZE> _stateBuffer;
+        status_t _status = 0;
+        button_state_t _lastState = NOT_PRESSED;
+        CircularBuffer<button_state_t, BUTTON_STATE_BUFFER_SIZE> _stateBuffer;
 
         void _addState(button_state_t state) {
             if (_stateBuffer.full())

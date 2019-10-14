@@ -3,21 +3,12 @@
 
 #include "../interface/ILed.h"
 
-#define BLINKING_SLOW_HZ    0.66
-#define BLINKING_NORMAL_HZ  3
-#define BLINKING_FAST_HZ    6
-
 class HardwareLed : public ILed {
     public:
-        HardwareLed(PinName port)
-            : _port(port) {
-            setComponentType(COMPONENT_LED);
-            setObjectType(OBJECT_HARDWARE);
-        }
-
-        HardwareLed(PinName port, id_sub_component_t componentSubId)
-            : HardwareLed(port) {
+        HardwareLed(PinName port, id_sub_component_t componentSubId, IRegistry &registry)
+            : _port(port), _registry(registry) {
             setComponentSubId(componentSubId);
+            setObjectType(OBJECT_HARDWARE);
         }
 
         // setters
@@ -75,6 +66,8 @@ class HardwareLed : public ILed {
         }
 
     protected:
+        IRegistry &_registry;
+
         DigitalOut _port;
 
         led_state_t _state = LED_OFF;
@@ -84,12 +77,6 @@ class HardwareLed : public ILed {
         led_blinking_t _modeLast = BLINKING_OFF;
 
         bool _lastBlinkingState = false;
-
-        struct _blinkingTime {
-            float   slow = (1 / (float)BLINKING_SLOW_HZ) / 2,
-                    normal = (1 / (float)BLINKING_NORMAL_HZ) / 2,
-                    fast = (1 / (float)BLINKING_FAST_HZ) / 2;
-        } _blinkingTime;
 
         Ticker _blinkingTicker;
 
@@ -108,15 +95,15 @@ class HardwareLed : public ILed {
             } else if (_mode != _modeLast) {
                 switch (_mode){
                     case BLINKING_SLOW:
-                        _attachBlinkingTicker(_blinkingTime.slow);
+                        _attachBlinkingTicker(1 / _registry.getFloat(LED_BLINKING_SLOW_HZ) / 2);
                         break;
                 
                     case BLINKING_NORMAL:
-                        _attachBlinkingTicker(_blinkingTime.normal);
+                        _attachBlinkingTicker(1 / _registry.getFloat(LED_BLINKING_NORMAL_HZ) / 2);
                         break;
 
                     case BLINKING_FAST:
-                        _attachBlinkingTicker(_blinkingTime.fast);
+                        _attachBlinkingTicker(1 / _registry.getFloat(LED_BLINKING_FAST_HZ) / 2);
                         break;
 
                     default:

@@ -3,6 +3,10 @@
 
 #include "../interface/IRegistry.h"
 
+/*
+    RAM Based Registry (including Syncing accross multiple Microcontrollers)
+*/
+
 class InternalRegistry : public IRegistry {
     public:
         InternalRegistry(id_sub_component_t componentSubId) {
@@ -11,35 +15,43 @@ class InternalRegistry : public IRegistry {
             // Initializing all values in all arrays with 0
 
             for (registry_index_t i = 0; i < float_registry_size; i++) 
-                floatRegistry[i] = 0;
+                _floatRegistry[i] = 0;
             
             for (registry_index_t i = 0; i < uint8_registry_size; i++)
-                uint8Registry[i] = 0;
+                _uint8Registry[i] = 0;
             
             for (registry_index_t i = 0; i < uint16_registry_size; i++)
-                uint16Registry[i] = 0;
+                _uint16Registry[i] = 0;
 
             for (registry_index_t i = 0; i < uint32_registry_size; i++)
-                uint32Registry[i] = 0;
+                _uint32Registry[i] = 0;
             
             for (registry_index_t i = 0; i < int8_registry_size; i++)
-                int8Registry[i] = 0;
+                _int8Registry[i] = 0;
             
             for (registry_index_t i = 0; i < int16_registry_size; i++)
-                int16Registry[i] = 0;
+                _int16Registry[i] = 0;
             
             for (registry_index_t i = 0; i < int32_registry_size; i++)
-                int32Registry[i] = 0;
+                _int32Registry[i] = 0;
             
             for (registry_index_t i = 0; i < bool_registry_size; i++)
-                boolRegistry[i] = false;
+                _boolRegistry[i] = false;
+        }
+
+        virtual bool getReady() {
+            return _ready;
+        }
+
+        virtual void setReady(bool ready) {
+            _ready = ready;
         }
 
         // Getter
         // float
         virtual float getFloat(float_registry_index_t index) {
             if (index < float_registry_size)
-                return floatRegistry[index];
+                return _floatRegistry[index];
             else
                 _status |= REGISTRY_ERROR_ARRAY_OUT_OF_BOUNDS;
 
@@ -49,7 +61,7 @@ class InternalRegistry : public IRegistry {
         // int
         virtual uint8_t getUInt8(uint8_registry_index_t index) {
             if (index < uint8_registry_size)
-                return uint8Registry[index];
+                return _uint8Registry[index];
             else
                 _status |= REGISTRY_ERROR_ARRAY_OUT_OF_BOUNDS;
 
@@ -58,7 +70,7 @@ class InternalRegistry : public IRegistry {
 
         virtual uint16_t getUInt16(uint16_registry_index_t index) {
             if (index < uint16_registry_size)
-                return uint16Registry[index];
+                return _uint16Registry[index];
             else
                 _status |= REGISTRY_ERROR_ARRAY_OUT_OF_BOUNDS;
 
@@ -67,7 +79,7 @@ class InternalRegistry : public IRegistry {
 
         virtual uint32_t getUInt32(uint32_registry_index_t index) {
             if (index < uint32_registry_size)
-                return uint32Registry[index];
+                return _uint32Registry[index];
             else
                 _status |= REGISTRY_ERROR_ARRAY_OUT_OF_BOUNDS;
 
@@ -76,7 +88,7 @@ class InternalRegistry : public IRegistry {
 
         virtual int8_t getInt8(int8_registry_index_t index) {
             if (index < int8_registry_size)
-                return int8Registry[index];
+                return _int8Registry[index];
             else
                 _status |= REGISTRY_ERROR_ARRAY_OUT_OF_BOUNDS;
 
@@ -85,7 +97,7 @@ class InternalRegistry : public IRegistry {
 
         virtual int16_t getInt16(int16_registry_index_t index) {
             if (index < int16_registry_size)
-                return int16Registry[index];
+                return _int16Registry[index];
             else
                 _status |= REGISTRY_ERROR_ARRAY_OUT_OF_BOUNDS;
 
@@ -94,7 +106,7 @@ class InternalRegistry : public IRegistry {
 
         virtual int32_t getInt32(int32_registry_index_t index) {
             if (index < int32_registry_size)
-                return int32Registry[index];
+                return _int32Registry[index];
             else
                 _status |= REGISTRY_ERROR_ARRAY_OUT_OF_BOUNDS;
 
@@ -104,7 +116,7 @@ class InternalRegistry : public IRegistry {
         // bool
         virtual bool getBool(bool_registry_index_t index) {
             if (index < bool_registry_size)
-                return boolRegistry[index];
+                return _boolRegistry[index];
             else
                 _status |= REGISTRY_ERROR_ARRAY_OUT_OF_BOUNDS;
 
@@ -116,7 +128,7 @@ class InternalRegistry : public IRegistry {
         // float
         virtual void setFloat(float_registry_index_t index, float value) {
             if (index < float_registry_size)
-                floatRegistry[index] = value;
+                _floatRegistry[index] = value;
             else
                 _status |= REGISTRY_ERROR_ARRAY_OUT_OF_BOUNDS;
         }
@@ -124,42 +136,42 @@ class InternalRegistry : public IRegistry {
         // int
         virtual void setUInt8(uint8_registry_index_t index, uint8_t value) {
             if (index < uint8_registry_size)
-                uint8Registry[index] = value;
+                _uint8Registry[index] = value;
             else
                 _status |= REGISTRY_ERROR_ARRAY_OUT_OF_BOUNDS;
         }
 
         virtual void setUInt16(uint16_registry_index_t index, uint16_t value) {
             if (index < uint16_registry_size)
-                uint16Registry[index] = value;
+                _uint16Registry[index] = value;
             else
                 _status |= REGISTRY_ERROR_ARRAY_OUT_OF_BOUNDS;
         }
 
         virtual void setUInt32(uint32_registry_index_t index, uint32_t value)  {
             if (index < uint32_registry_size)
-                uint32Registry[index] = value;
+                _uint32Registry[index] = value;
             else
                 _status |= REGISTRY_ERROR_ARRAY_OUT_OF_BOUNDS;
         }
 
         virtual void setInt8(int8_registry_index_t index, int8_t value) {
             if (index < int8_registry_size)
-                int8Registry[index] = value;
+                _int8Registry[index] = value;
             else
                 _status |= REGISTRY_ERROR_ARRAY_OUT_OF_BOUNDS;
         }
 
         virtual void setInt16(int16_registry_index_t index, int16_t value) {
             if (index < int16_registry_size)
-                int16Registry[index] = value;
+                _int16Registry[index] = value;
             else
                 _status |= REGISTRY_ERROR_ARRAY_OUT_OF_BOUNDS;
         }
 
         virtual void setInt32(int32_registry_index_t index, int32_t value) {
             if (index < int32_registry_size)
-                int32Registry[index] = value;
+                _int32Registry[index] = value;
             else
                 _status |= REGISTRY_ERROR_ARRAY_OUT_OF_BOUNDS;
         }
@@ -167,7 +179,7 @@ class InternalRegistry : public IRegistry {
         // bool
         virtual void setBool(bool_registry_index_t index, bool value) {
             if (index < bool_registry_size)
-                boolRegistry[index] = value;
+                _boolRegistry[index] = value;
             else
                 _status |= REGISTRY_ERROR_ARRAY_OUT_OF_BOUNDS;
         }
@@ -187,20 +199,21 @@ class InternalRegistry : public IRegistry {
     
     private:
         status_t _status = 0;
+        bool _ready = false;
 
         // float
-        float floatRegistry[float_registry_size];
+        float _floatRegistry[float_registry_size];
         
         // int
-        uint8_t uint8Registry[uint8_registry_size];
-        uint16_t uint16Registry[uint16_registry_size];
-        uint32_t uint32Registry[uint32_registry_size];
-        int8_t int8Registry[int8_registry_size];
-        int16_t int16Registry[int16_registry_size];
-        int32_t int32Registry[int32_registry_size];
+        uint8_t _uint8Registry[uint8_registry_size];
+        uint16_t _uint16Registry[uint16_registry_size];
+        uint32_t _uint32Registry[uint32_registry_size];
+        int8_t _int8Registry[int8_registry_size];
+        int16_t _int16Registry[int16_registry_size];
+        int32_t _int32Registry[int32_registry_size];
 
         // bool
-        bool boolRegistry[bool_registry_size];
+        bool _boolRegistry[bool_registry_size];
 };
 
 #endif // INTERNALREGISTRY_H

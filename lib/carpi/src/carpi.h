@@ -7,7 +7,7 @@
     With this, all components, services and programs are included in the actual CarSoftware.
 */
 
-#define CARPI_VERSION "V0.2.0-P4 - Alive & Report & Bugfix"
+#define CARPI_VERSION "V0.2.0-P5 - Alive & Report & Bugfix & Registry"
 
 // Prior include Platform-specific Components
 
@@ -93,7 +93,6 @@
     #include "components/interface/IMotorController.h"
     #include "components/interface/IRpmSensor.h"
     #include "components/interface/ISDCard.h"
-    #include "components/interface/ISpringTravelSensor.h"
     //   Hardware
     #include "components/hardware/HardwareAlive.h"
     #include "components/hardware/HardwareBuzzer.h"
@@ -106,14 +105,12 @@
     #include "components/hardware/HardwareMotorController.h"
     #include "components/hardware/HardwareRpmSensor.h"
     #include "components/hardware/HardwareSDCard.h"
-    #include "components/hardware/HardwareSpringTravelSensor.h"
     //   Software
     #include "components/software/SoftwareAlive.h"
     #include "components/software/SoftwareButton.h"
     #include "components/software/SoftwareLed.h"
     #include "components/software/SoftwarePedal.h"
     #include "components/software/SoftwareRpmSensor.h"
-    #include "components/software/SoftwareSpringTravelSensor.h"
 
     // Services
     #include "runable/services/IService.h"

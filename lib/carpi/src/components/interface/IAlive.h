@@ -3,9 +3,6 @@
 
 #include "communication/SelfSyncable.h"
 
-#define STD_ALIVE_SIGNAL_REFRESH_RATE 0.05 // s max allowed time between two alive signals
-#define STD_ALIVE_SIGNAL_SEND_RATE STD_ALIVE_SIGNAL_REFRESH_RATE/2 // s beetween two alive signals
-
 #define ALIVE_LOG_VALUE_COUNT 1
 enum sd_log_id_alive_t : sd_log_id_t {
     SD_LOG_ID_ALIVE = 0

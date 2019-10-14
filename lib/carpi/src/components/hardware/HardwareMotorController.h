@@ -4,33 +4,22 @@
 #include "BamocarD3.h"
 #include "../interface/IMotorController.h"
 
-#define STD_SPEED_REFRESH_TIME 240 // Hz
-#define STD_CURRENT_REFRESH_TIME 240 // Hz
-#define STD_CURRENT_DEVICE_REFRESH_TIME 240 // Hz
-#define STD_MOTOR_TEMP_REFRESH_TIME 12 // Hz
-#define STD_CONTROLLER_TEMP_REFRESH_TIME 12 // Hz
-#define STD_AIR_TEMP_REFRESH_TIME 6 // Hz
-
 class HardwareMotorController : public IMotorController {
     public:
-        HardwareMotorController(PinName canRD, PinName canTD, PinName RFE, PinName RUN)
-            : _bamocar(canRD, canTD), _rfe(RFE), _run(RUN) {
+        HardwareMotorController(PinName canRD, PinName canTD, PinName RFE, PinName RUN, id_sub_component_t componentSubId, IRegistry &registry)
+            : _bamocar(canRD, canTD), _rfe(RFE), _run(RUN), _registry(registry) {
+            setComponentSubId(componentSubId);
+
             _rfe = 0;
             _run = 0;
-
-            setComponentType(COMPONENT_MOTOR);
+            
             setObjectType(OBJECT_HARDWARE);
         }
 
-        HardwareMotorController(PinName canRD, PinName canTD, PinName RFE, PinName RUN, id_sub_component_t componentSubId)
-            : HardwareMotorController(canRD, canTD, RFE, RUN) {
-            setComponentSubId(componentSubId);
-        }
-
         void beginCommunication() {
-            _bamocar.requestSpeed(1000 / (float)STD_SPEED_REFRESH_TIME);
-            _bamocar.requestCurrent(1000 / (float)STD_CURRENT_REFRESH_TIME);
-            _bamocar.requestTemp(1000 / (float)STD_MOTOR_TEMP_REFRESH_TIME);
+            _bamocar.requestSpeed(1000.0 / _registry.getFloat(STD_MC_SPEED_REFRESH_TIME));
+            _bamocar.requestCurrent(1000.0 / _registry.getFloat(STD_MC_CURRENT_REFRESH_TIME));
+            _bamocar.requestTemp(1000.0 / _registry.getFloat(STD_MC_MOTOR_TEMP_REFRESH_TIME));
         }
 
         virtual status_t getStatus() {
@@ -134,6 +123,8 @@ class HardwareMotorController : public IMotorController {
         }
 
     protected:
+        IRegistry &_registry;
+
         BamocarD3 _bamocar;
         DigitalOut _rfe;
         DigitalOut _run;

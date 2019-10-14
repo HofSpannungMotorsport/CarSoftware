@@ -5,7 +5,8 @@
 
 class HardwareAlive : public IAlive {
     public:
-        HardwareAlive(id_sub_component_t componentSubId) {
+        HardwareAlive(id_sub_component_t componentSubId, IRegistry &registry)
+        : _registry(registry) {
             setComponentType(COMPONENT_ALIVE);
             setComponentSubId(componentSubId);
             setObjectType(OBJECT_HARDWARE);
@@ -13,8 +14,8 @@ class HardwareAlive : public IAlive {
             _alive = false;
         }
 
-        HardwareAlive(id_sub_component_t componentSubId, PinName port)
-        : HardwareAlive(componentSubId) {
+        HardwareAlive(id_sub_component_t componentSubId, PinName port, IRegistry &registry)
+        : HardwareAlive(componentSubId, registry) {
             _port = port;
             _portSet = true;
             _setOutput(false);
@@ -32,7 +33,7 @@ class HardwareAlive : public IAlive {
 
                 _updateAlive();
 
-                _aliveTicker.attach(callback(this, &HardwareAlive::_updateAlive), STD_ALIVE_SIGNAL_SEND_RATE);
+                _aliveTicker.attach(callback(this, &HardwareAlive::_updateAlive), _registry.getFloat(ALIVE_SIGNAL_SEND_RATE));
             }
         }
 
@@ -58,6 +59,8 @@ class HardwareAlive : public IAlive {
         }
 
     private:
+        IRegistry &_registry;
+
         PinName _port;
         bool _portSet;
         bool _alive;

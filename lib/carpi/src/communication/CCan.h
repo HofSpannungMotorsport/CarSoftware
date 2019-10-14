@@ -1,6 +1,8 @@
 #ifndef CCAN_H
 #define CCAN_H
 
+#include "HardConfig.h"
+
 #ifdef USE_ARDUINO
     #error "CCan does only support mbed and Teensyduino, not Arduino!"
 #endif
@@ -11,20 +13,13 @@ using namespace std;
 #include "Sync.h"
 
 #ifndef DEVICE_CAN
-    #define DEVICE_CAN // Otherwise a compiler issue (not error) -> defined by mbed before?
+    #define DEVICE_CAN
 #endif
-
-#define STD_CAN_FREQUENCY 250000
-
-#define STD_MAX_OUT_QUEUE_SIZE 128 // Elements
-#define STD_OUT_QUEUE_IMPORTANT_THRESHHOLD STD_MAX_OUT_QUEUE_SIZE/2
-
-#define STD_CAN_TIMEOUT (1.0/(float)STD_CAN_FREQUENCY) // s
 
 class CCan : public IChannel {
     public:
         CCan() = delete;
-        CCan(Sync &syncer, PinName rx, PinName tx, int frequency = STD_CAN_FREQUENCY)
+        CCan(Sync &syncer, PinName rx, PinName tx, int frequency = STD_CCAN_FREQUENCY)
         : _syncer(syncer), _can(rx, tx, frequency) {
             #ifdef USE_MBED
                 _can.attach(callback(this, &CCan::_canMessageReceive), CAN::RxIrq);
@@ -74,7 +69,7 @@ class CCan : public IChannel {
         } _dropped;
 
         struct _maxSize {
-            uint16_t outQueue = STD_MAX_OUT_QUEUE_SIZE;
+            uint16_t outQueue = STD_CCAN_MAX_OUT_QUEUE_SIZE;
         } _maxSize;
 
         void _canMessageReceive() {
@@ -161,7 +156,7 @@ class CCan : public IChannel {
                         CANMessage canMessage;
                         _getCanMessage(*carMessageIterator, 0, canMessage);
 
-                        if (_outQueue.size() >= STD_OUT_QUEUE_IMPORTANT_THRESHHOLD) {
+                        if (_outQueue.size() >= STD_CCAN_OUT_QUEUE_IMPORTANT_THRESHHOLD) {
                             // Message has to be more important to clear the _outQueue more fast
                             // By default, the first bit of the message id is 0 and so, it is more important.
                             // -> Nothing to do

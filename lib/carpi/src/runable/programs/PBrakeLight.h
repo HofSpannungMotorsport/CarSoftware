@@ -5,13 +5,10 @@
 #include "components/interface/IPedal.h"
 #include "components/interface/ILed.h"
 
-#define STD_BRAKE_LIGHT_LOWER_THRESHHOLD 0.20 // 30%
-#define STD_BRAKE_LIGHT_UPPER_THRESHHOLD 0.35
-
 class PBrakeLight : public IProgram {
     public:
-        PBrakeLight(IPedal &brakePedal, ILed &brakeLight)
-            : _brakePedal(brakePedal), _brakeLight(brakeLight) {
+        PBrakeLight(IPedal &brakePedal, ILed &brakeLight, IRegistry &registry)
+            : _brakePedal(brakePedal), _brakeLight(brakeLight), _registry(registry) {
             _brakeLight.setBlinking(BLINKING_OFF);
             _brakeLight.setBrightness(1);
         }
@@ -22,9 +19,9 @@ class PBrakeLight : public IProgram {
             // If Error or something else -> light on
             pedal_value_t brakePedalValue = _brakePedal.getValue();
             if (_brakePedal.getStatus() == 0) {
-                if (brakePedalValue >= STD_BRAKE_LIGHT_UPPER_THRESHHOLD) {
+                if (brakePedalValue >= _registry.getFloat(BRAKE_LIGHT_UPPER_THRESHHOLD)) {
                     _brakeLight.setState(LED_ON);
-                } else if (brakePedalValue < STD_BRAKE_LIGHT_LOWER_THRESHHOLD) {
+                } else if (brakePedalValue < _registry.getFloat(BRAKE_LIGHT_LOWER_THRESHHOLD)) {
                     _brakeLight.setState(LED_OFF);
                 }
             } else {
@@ -33,9 +30,10 @@ class PBrakeLight : public IProgram {
         }
 
     protected:
+        IRegistry &_registry;
+
         IPedal &_brakePedal;
         ILed &_brakeLight;
-
 };
 
 #endif // PBRAKELIGHT_H
