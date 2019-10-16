@@ -31,7 +31,9 @@ class Dashboard : public Carpi {
         // Called once at bootup
         void setup() {
             // Load Hard-Coded Registry
-            InternalRegistryHardStorage::loadIn(registry);
+            while(!registry.getReady()) {
+                InternalRegistryHardStorage::loadIn(registry);
+            }
 
             syncer.addComponent(ledRed, canIntern, DEVICE_MASTER);
             syncer.addComponent(ledYellow, canIntern, DEVICE_MASTER);

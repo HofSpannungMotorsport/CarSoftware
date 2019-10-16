@@ -30,7 +30,9 @@ class Pedal : public Carpi {
         // Called once at bootup
         void setup() {
             // Load Hard-Coded Registry
-            InternalRegistryHardStorage::loadIn(registry);
+            while(!registry.getReady()) {
+                InternalRegistryHardStorage::loadIn(registry);
+            }
 
             // Pedal Pre-Calibration
             pedal_calibration_data_t gasCalibration(registry.getUInt16(STD_PEDAL_GAS_1_MIN), registry.getUInt16(STD_PEDAL_GAS_1_MAX), registry.getUInt16(STD_PEDAL_GAS_2_MIN), registry.getUInt16(STD_PEDAL_GAS_2_MAX));

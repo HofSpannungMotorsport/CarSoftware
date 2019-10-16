@@ -135,6 +135,8 @@ class InternalRegistryHardStorage {
             _loadType<int16_t, int16_registry_index_t>(_int16RegistryStorage, (registry_index_t)(sizeof(_int16RegistryStorage) / sizeof(int16_t)), registry, &IRegistry::setInt16);
             _loadType<int32_t, int32_registry_index_t>(_int32RegistryStorage, (registry_index_t)(sizeof(_int32RegistryStorage) / sizeof(int32_t)), registry, &IRegistry::setInt32);
             _loadType<bool, bool_registry_index_t>(_boolRegistryStorage, (registry_index_t)(sizeof(_boolRegistryStorage) / sizeof(bool)), registry, &IRegistry::setBool);
+
+            registry.setReady(true);
         }
     
     private:

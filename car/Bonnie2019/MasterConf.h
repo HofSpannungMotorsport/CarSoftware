@@ -110,7 +110,9 @@ class Master : public Carpi {
         // Called once at bootup
         void setup() {
             // Load Hard-Coded Registry
-            InternalRegistryHardStorage::loadIn(registry);
+            while(!registry.getReady()) {
+                InternalRegistryHardStorage::loadIn(registry);
+            }
 
             // Add all Software Components to the Syncer
             // Dashboard
