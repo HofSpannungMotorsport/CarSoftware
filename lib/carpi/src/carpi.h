@@ -71,6 +71,7 @@
 
 //   Internal
 #include "components/internal/InternalRegistry.h"
+#include "components/internal/InternalRegistryHardStorage.h"
 
 
 // ---------------------------------------------------------------------

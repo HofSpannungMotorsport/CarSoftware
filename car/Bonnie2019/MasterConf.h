@@ -109,6 +109,9 @@ class Master : public Carpi {
     public:
         // Called once at bootup
         void setup() {
+            // Load Hard-Coded Registry
+            InternalRegistryHardStorage::loadIn(registry);
+
             // Add all Software Components to the Syncer
             // Dashboard
             syncer.addComponent(ledRed, canIntern, DEVICE_DASHBOARD);
