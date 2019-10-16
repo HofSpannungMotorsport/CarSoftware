@@ -15,7 +15,12 @@
 #define HIGH_DEMAND_SERVICE_REFRESH_RATE 120 // Hz
 #define LOW_DEMAND_SERVICE_REFRESH_RATE 3 // Hz
 
-#include "hardware/Pins_Master_PCB.h"
+#ifdef MASTER_SMALL
+    #include "hardware/Pins_Master_PCB_Adapter.h"
+#else
+    #include "hardware/Pins_Master_PCB.h"
+#endif
+
 #include "SDLog.h"
 
 // Communication

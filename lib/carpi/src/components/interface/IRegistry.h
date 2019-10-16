@@ -80,9 +80,12 @@ enum float_registry_index_t : registry_index_t {
     SSPEED_SPEED_DEVIANCE_THRESHHOLD = 0x2D,
     SSPEED_MAX_SPEED_DEVIANCE = 0x2E,
     SSPEED_DISTANCE_PER_REVOLUTION = 0x2F,
-    SSPEED_MOTOR_TO_WHEEL_RATIO = 0x30
+    SSPEED_MOTOR_TO_WHEEL_RATIO = 0x30,
+    SSPEED_THROTTLE_FROM = 0x31,
+    SSPEED_THROTTLE_TO = 0x32,
+    SSPEED_THROTTLE_END_VALUE = 0x33
 };
-const registry_index_t float_registry_size = 0x31;
+const registry_index_t float_registry_size = 0x34;
 
 enum uint8_registry_index_t : registry_index_t {
     STD_SCAR_STARTUP_ANIMATION_PLAYBACKS = 0x0

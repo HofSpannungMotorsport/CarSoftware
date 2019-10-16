@@ -201,6 +201,17 @@ class SCar : public IService {
             _led.green.setBlinking(BLINKING_FAST);
         }
 
+        float getMaxPower() {
+            return _maxPower;
+        }
+
+        void setMaxPower(float maxPower) {
+            if (maxPower > 1.0) maxPower = 1.0;
+            else if (maxPower < 0.0) maxPower = 0.0;
+
+            _maxPower = maxPower;
+        }
+
     #ifdef TESTING_MODE
     protected:
         SCar(Sync &syncer, PCockpitIndicator &ci) : _syncer(syncer), _ci(ci) {} // Only use for testing outside of the car!
@@ -211,6 +222,8 @@ class SCar : public IService {
 
         IRegistry &_registry;
         bool _initialized = false;
+
+        float _maxPower = 1.0;
 
         car_state_t _state = CAR_OFF;
 

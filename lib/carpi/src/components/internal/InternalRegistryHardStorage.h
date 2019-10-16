@@ -81,7 +81,10 @@ static const float _floatRegistryStorage[] = {
     /* SSPEED_SPEED_DEVIANCE_THRESHHOLD */ 3,
     /* SSPEED_MAX_SPEED_DEVIANCE */ 0.1,
     /* SSPEED_DISTANCE_PER_REVOLUTION */ 1.4451326206513048896928159563086,
-    /* SSPEED_MOTOR_TO_WHEEL_RATIO */ (1.0/3.6)
+    /* SSPEED_MOTOR_TO_WHEEL_RATIO */ (1.0/3.6),
+    /* SSPEED_THROTTLE_FROM */ 40,
+    /* SSPEED_THROTTLE_TO */ 105,
+    /* SSPEED_THROTTLE_END_VALUE */ 0.65
 };
 
 static const uint8_t _uint8RegistryStorage[] = {
