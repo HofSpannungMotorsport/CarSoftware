@@ -20,8 +20,14 @@
 #endif
 
 #ifdef BOARD_MASTER
-    #ifndef STM32F767xx
-        #error "Wrong Board choosen! Select Nucleo F767ZI as your desiered Board (Master Controller/LV-Box). Check platformio.ini"
+    #ifdef MASTER_SMALL
+        #ifndef STM32F446xx
+            #error "Wrong Board choosen! Select Nucleo F446RE as your desiered Board (Master-Small Controller/LV-Box). Check platformio.ini"
+        #endif
+    #else
+        #ifndef STM32F767xx
+            #error "Wrong Board choosen! Select Nucleo F767ZI as your desiered Board (Master Controller/LV-Box). Check platformio.ini"
+        #endif
     #endif
 #endif
 

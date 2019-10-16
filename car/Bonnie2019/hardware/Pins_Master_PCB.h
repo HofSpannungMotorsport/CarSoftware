@@ -21,10 +21,10 @@
 // PWMOut Pump
 #define MASTER_PIN_PUMP_PWM                 PF_9
 
-// Cooling Fans
+// Dout Cooling Fans
 #define MASTER_PIN_FAN                      PG_2
 
-// HV Enable
+// Din HV Enable
 #define MASTER_PIN_TSMS                     PG_0
 #define MASTER_PIN_AIR                      PE_4
 #define MASTER_PIN_60V_OK                   PD_4
@@ -59,8 +59,8 @@
 #define MASTER_PIN_MICROCONTROLLER_OK       PA_9
 
 // Din Error Pins
-#define MASTER_PIN_ERROR_BSPD               PD_4
-#define MASTER_PIN_ERROR_BMS                PD_5
-#define MASTER_PIN_ERROR_IMD                PD_6
+//#define MASTER_PIN_ERROR_BSPD               PD_4 // Used different!
+//#define MASTER_PIN_ERROR_BMS                PD_5
+//#define MASTER_PIN_ERROR_IMD                PD_6
 
 #endif // PINS_MASTER_H

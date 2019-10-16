@@ -63,6 +63,8 @@ class PMotorController : public IProgram {
 
             returnValue = _applyGasCurve(returnValue);
 
+            returnValue = _applyMaxPower(returnValue);
+
             _motorController.setTorque(returnValue);
 
             #if defined(MOTORCONTROLLER_OUTPUT) && defined(MESSAGE_REPORT)
@@ -327,6 +329,10 @@ class PMotorController : public IProgram {
             else if (gasValue < 0.0) gasValue = 0.0;
 
             return gasValue;
+        }
+
+        float _applyMaxPower(float pedalPosition) {
+            return pedalPosition * _carService.getMaxPower();
         }
 };
 
