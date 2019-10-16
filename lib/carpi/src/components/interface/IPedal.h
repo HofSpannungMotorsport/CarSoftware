@@ -41,6 +41,10 @@ enum pedal_calibration_t : bool {
 
 class IPedal : public SelfSyncable {
     public:
+        IPedal() {
+            setComponentType(COMPONENT_PEDAL);
+        }
+
         virtual void setProportionality(pedal_sensor_type_t proportionality, uint16_t sensorNumber = 0) = 0;
 
         virtual pedal_value_t getValue() = 0;

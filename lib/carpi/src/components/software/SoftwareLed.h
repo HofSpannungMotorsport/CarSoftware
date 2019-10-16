@@ -5,9 +5,7 @@
 
 class SoftwareLed : public ILed {
     public:
-
         SoftwareLed(id_sub_component_t componentSubId) {
-            setComponentType(COMPONENT_LED);
             setObjectType(OBJECT_SOFTWARE);
             setComponentSubId(componentSubId);
         }

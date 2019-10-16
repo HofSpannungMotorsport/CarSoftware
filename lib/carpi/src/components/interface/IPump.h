@@ -13,6 +13,10 @@ typedef int pump_enable_t;
 
 class IPump : public IComponent {
     public:
+        IPump() {
+            setComponentType(COMPONENT_COOLING);
+        }
+
         virtual void setSpeed(pump_speed_t speed) = 0;
         virtual pump_speed_t getSpeed() = 0;
 

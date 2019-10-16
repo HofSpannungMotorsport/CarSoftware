@@ -2,24 +2,18 @@
 #define HARDWARERPMSENSOR_H
 
 #include "../interface/IRpmSensor.h"
-
-#define STD_MEASUREMENT_TIMEOUT 0.5 // s -> 500ms
-#define STD_MEASUREMENT_POINTS_PER_REVOLUTION 12
-//#define USE_FALL // STD it uses the rising edge. Decomment to use falling edge as measurement point
-
-#define STD_AVERAGE_OVER_MEASUREMENT_POINTS 2 // Over how many measurement points should the real speed be calculated? HAS TO BE AT LEAST 1
+#include "HardConfig.h"
 
 class HardwareRpmSensor : public IRpmSensor {
     public:
-        HardwareRpmSensor(PinName pin, id_sub_component_t componentSubId, uint8_t measurementPointsPerRevolution = STD_MEASUREMENT_POINTS_PER_REVOLUTION)
+        HardwareRpmSensor(PinName pin, id_sub_component_t componentSubId, uint8_t measurementPointsPerRevolution = RPM_MEASUREMENT_POINTS_PER_REVOLUTION)
             : _pin(pin) {
-            #ifdef USE_FALL
+            #ifdef RPM_USE_FALL
                 _pin.fall(callback(this, &HardwareRpmSensor::_measurementEvent));
             #else
                 _pin.rise(callback(this, &HardwareRpmSensor::_measurementEvent));
             #endif
 
-            setComponentType(COMPONENT_RPM_SENSOR);
             setObjectType(OBJECT_HARDWARE);
             setComponentSubId(componentSubId);
             _measurement.pointsPerRevolution = measurementPointsPerRevolution;
@@ -50,10 +44,10 @@ class HardwareRpmSensor : public IRpmSensor {
         virtual rpm_sensor_frequency_t getFrequency() {
             rpm_sensor_frequency_t returnValue = 0;
             if (!_measurement.zero) {
-                for (uint8_t i = 0; i < STD_AVERAGE_OVER_MEASUREMENT_POINTS; i++) {
+                for (uint8_t i = 0; i < RPM_AVERAGE_OVER_MEASUREMENT_POINTS; i++) {
                     returnValue += ((rpm_sensor_frequency_t)_measurement.buffer[i]) / 1000; // -> ms between measurement points
                 }
-                returnValue /= (rpm_sensor_frequency_t)STD_AVERAGE_OVER_MEASUREMENT_POINTS; // -> ms per revolution
+                returnValue /= (rpm_sensor_frequency_t)RPM_AVERAGE_OVER_MEASUREMENT_POINTS; // -> ms per revolution
 
                 returnValue = 60000 / (returnValue * (rpm_sensor_frequency_t)_measurement.pointsPerRevolution); // 1/(ms / 60000) == 60000/ms -> rpm
             }
@@ -78,7 +72,7 @@ class HardwareRpmSensor : public IRpmSensor {
             bool started = false;
             bool zero = true;
 
-            us_timestamp_t buffer[STD_AVERAGE_OVER_MEASUREMENT_POINTS];
+            us_timestamp_t buffer[RPM_AVERAGE_OVER_MEASUREMENT_POINTS];
             uint8_t bufferSize = 0;
         } _measurement;
 
@@ -90,18 +84,18 @@ class HardwareRpmSensor : public IRpmSensor {
                 _measurement.timer.reset();
 
                 // Shift buffer
-                for (uint8_t i = (STD_AVERAGE_OVER_MEASUREMENT_POINTS-1); i > 0; i--) {
+                for (uint8_t i = (RPM_AVERAGE_OVER_MEASUREMENT_POINTS-1); i > 0; i--) {
                     _measurement.buffer[i] = _measurement.buffer[i-1];
                 }
                 // Put new time at the beginning of the buffer
                 _measurement.buffer[0] = currentTime;
 
                 if (_measurement.zero) {
-                    if (_measurement.bufferSize < STD_AVERAGE_OVER_MEASUREMENT_POINTS) {
+                    if (_measurement.bufferSize < RPM_AVERAGE_OVER_MEASUREMENT_POINTS) {
                         _measurement.bufferSize++;
                     }
 
-                    if (_measurement.bufferSize == STD_AVERAGE_OVER_MEASUREMENT_POINTS) {
+                    if (_measurement.bufferSize == RPM_AVERAGE_OVER_MEASUREMENT_POINTS) {
                         _measurement.zero = false;
                     }
                 }
@@ -111,7 +105,7 @@ class HardwareRpmSensor : public IRpmSensor {
                 _measurement.started = true;
             }
 
-            _measurement.timeOut.attach(callback(this, &HardwareRpmSensor::_measurementTimeOut), STD_MEASUREMENT_TIMEOUT);
+            _measurement.timeOut.attach(callback(this, &HardwareRpmSensor::_measurementTimeOut), RPM_MEASUREMENT_TIMEOUT);
         }
 
         void _measurementTimeOut() {

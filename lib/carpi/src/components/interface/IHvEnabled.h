@@ -5,6 +5,10 @@
 
 class IHvEnabled : public IComponent {
     public:
+        IHvEnabled() {
+            setComponentType(COMPONENT_SYSTEM);
+        }
+
         virtual bool read() = 0;
         virtual operator bool() = 0;
 };

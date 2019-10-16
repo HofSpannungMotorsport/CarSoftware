@@ -26,6 +26,10 @@ typedef float led_brightness_t;
 
 class ILed : public SelfSyncable {
     public:
+        ILed() {
+            setComponentType(COMPONENT_LED);
+        }
+
         // setters
         virtual void setState(led_state_t state) = 0;
         virtual void setBrightness(led_brightness_t brightness) = 0;

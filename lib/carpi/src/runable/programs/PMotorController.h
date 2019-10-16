@@ -9,34 +9,19 @@
 #include "components/interface/IRpmSensor.h"
 #include "components/software/SoftwareRpmSensor.h"
 
-#define STD_MAX_POWER 80 // kW
-#define STD_POWER_SET_ON_MOTOR_CONTROLLER 80 // kW
-
-#define STD_AGE_LIMIT 3.0 // s
-#define STD_BRAKE_POWER_LOCK_THRESHHOLD 0.40 // 40% -> if brake is put down only this amount, the Gas Pedal will be blocked
-
-// FSG Rules relevant
-// EV2.3 -> APPS / Brake Pedal Plausibility Check
-#define STD_GAS_PEDAL_PRIME_MIN 0.05 // 5% -> Gas Pedal has to be lower than that to be primed (if unprimed)
-#define STD_HARD_BRAKE_THRESHHOLD 0.75 // 75% (it has to be 30 bar pressure in the brake circuit, but we don't have a Sensor connected to our Microcontrollers)
-#define STD_HARD_BRAKE_PRESSURE 30 // bar [il]
-#define STD_HARD_BRAKE_CUTOFF_TIME 0.5 // 500 ms -> unprime gas pedal if braked hard for longer than this
-#define STD_HARD_BRAKE_CUTOFF_APPS_POSITION 0.25 // 25% -> If equal or higher than that while hard brake, gas pedal will be unprimed
-#define STD_HARD_BRAKE_CUTOFF_POWER 25 // kW -> If Power at Output highter than that while hard brake, gas pedal will be unprimed
-
 class PMotorController : public IProgram {
     public:
-        PMotorController(SCar &carService,
+        PMotorController(SCar &carService, IRegistry &registry,
                          IMotorController &motorController,
                          IPedal &gasPedal, IPedal &brakePedal)
-            : _carService(carService),
+            : _carService(carService), _registry(registry),
               _motorController(motorController), _gasPedal(gasPedal), _brakePedal(brakePedal) {}
 
-        PMotorController(SCar &carService,
+        PMotorController(SCar &carService, IRegistry &registry,
                          IMotorController &motorController,
                          IPedal &gasPedal, IPedal &brakePedal,
                          IRpmSensor &frontLeftWheel, IRpmSensor &frontRightWheel, IRpmSensor &rearLeftWheel, IRpmSensor &rearRightWheel)
-            : _carService(carService),
+            : _carService(carService), _registry(registry),
               _motorController(motorController), _gasPedal(gasPedal), _brakePedal(brakePedal) {
             _asrActive = true;
             _asrSave.lastRun.stop();
@@ -90,15 +75,12 @@ class PMotorController : public IProgram {
         }
 
     protected:
+        IRegistry &_registry;
+
         SCar &_carService;
         IMotorController &_motorController;
         bool _ready = false;
         bool _communicationStarted = false;
-
-        struct _power {
-            float max = STD_MAX_POWER,
-                  setOnController = STD_POWER_SET_ON_MOTOR_CONTROLLER;
-        } _power;
 
         struct _pedalStruct_t {
             _pedalStruct_t(IPedal &pedalObject) : object(pedalObject) {}
@@ -140,24 +122,26 @@ class PMotorController : public IProgram {
                 _carService.addError(Error(_motorController.getComponentId(), _motorController.getStatus(), ERROR_CRITICAL));
             }
 
+            float ageLimit = _registry.getFloat(PMC_AGE_LIMIT);
+
             if (_asrActive) {
                 if (_frontLeftWheel.object->getStatus() > 0 ||
                     _frontRightWheel.object->getStatus() > 0 ||
                     _rearLeftWheel.object->getStatus() > 0 ||
                     _rearRightWheel.object->getStatus() > 0 ||
-                    _getAge(_frontLeftWheel) > STD_AGE_LIMIT ||
-                    _getAge(_frontRightWheel) > STD_AGE_LIMIT ||
-                    _getAge(_rearLeftWheel) > STD_AGE_LIMIT ||
-                    _getAge(_rearRightWheel) > STD_AGE_LIMIT) {
+                    _getAge(_frontLeftWheel) > ageLimit ||
+                    _getAge(_frontRightWheel) > ageLimit ||
+                    _getAge(_rearLeftWheel) > ageLimit ||
+                    _getAge(_rearRightWheel) > ageLimit) {
                     _asrError();
                 }
             }
 
-            if ((_gasPedal.object.getStatus() > 0) || (_getAge(_gasPedal) > STD_AGE_LIMIT)) {
+            if ((_gasPedal.object.getStatus() > 0) || (_getAge(_gasPedal) > ageLimit)) {
                 _pedalError(_gasPedal.object);
             }
 
-            if ((_brakePedal.object.getStatus() > 0) || (_getAge(_brakePedal) > STD_AGE_LIMIT)) {
+            if ((_brakePedal.object.getStatus() > 0) || (_getAge(_brakePedal) > ageLimit)) {
                 _pedalError(_brakePedal.object);
             }
 
@@ -257,22 +241,22 @@ class PMotorController : public IProgram {
 
                 All Values are set by defines at the top of this file
             */
-            if (_brakePedal.lastValue >= STD_HARD_BRAKE_THRESHHOLD) {
+            if (_brakePedal.lastValue >= _registry.getFloat(PMC_HARD_BRAKE_THRESHHOLD)) {
                 // -> Brake Pedal Position == Hard Brakeing
                 if (_hardBrakeingStarted) {
                     // -> Hard Brakeing already before
                     if (_gasPedalPrimed) {
                         // -> APPS (gas pedal) primed -> active
                         // (otherwise no action needed)
-                        if (_hardBrakeingSince.read() >= STD_HARD_BRAKE_CUTOFF_TIME) {
+                        if (_hardBrakeingSince.read() >= _registry.getFloat(PMC_HARD_BRAKE_CUTOFF_TIME)) {
                             // -> Hard Brakeing too long -> it is interpreted as a Hard Brake
-                            if (_gasPedal.lastValue >= STD_HARD_BRAKE_CUTOFF_APPS_POSITION) {
+                            if (_gasPedal.lastValue >= _registry.getFloat(PMC_HARD_BRAKE_CUTOFF_APPS_POSITION)) {
                                 // -> Still giving Power throu the Pedal -> Pedal Position too high
                                 _gasPedalPrimed = false;
                             }
 
-                            float currentPower = _mapToPowerLimit(returnValue) * _power.setOnController;
-                            if (currentPower >= STD_HARD_BRAKE_CUTOFF_POWER) {
+                            float currentPower = _mapToPowerLimit(returnValue) * _registry.getFloat(PMC_POWER_SET_ON_MC);
+                            if (currentPower >= _registry.getFloat(PMC_HARD_BRAKE_CUTOFF_POWER)) {
                                 // Calculated Power Output too high -> also unprime the APPS/Gas Pedal
                                 _gasPedalPrimed = false;
                             }
@@ -296,7 +280,7 @@ class PMotorController : public IProgram {
 
             // Check if pedal is primed, otherwise lock it
             if (!_gasPedalPrimed) {
-                if (returnValue <= STD_GAS_PEDAL_PRIME_MIN) {
+                if (returnValue <= _registry.getFloat(PMC_GAS_PEDAL_PRIME_MIN)) {
                     _gasPedalPrimed = true;
                 } else {
                     returnValue = 0;
@@ -304,7 +288,7 @@ class PMotorController : public IProgram {
             }
 
             // If brakeing, no current should go to the Motor
-            if (_brakePedal.lastValue >= STD_BRAKE_POWER_LOCK_THRESHHOLD) {
+            if (_brakePedal.lastValue >= _registry.getFloat(PMC_BRAKE_POWER_LOCK_THRESHHOLD)) {
                 returnValue = 0;
             }
 
@@ -313,15 +297,18 @@ class PMotorController : public IProgram {
 
         float _mapToPowerLimit(float returnValue) {
             /*  We have two values:
-                _power.max:             The maximum Power to be applied on our Motor (absolut)
-                _power.setOnController: The Power Maximum set on our Motor Controller.
+                powerMax:             The maximum Power to be applied on our Motor (absolut)
+                powerSetOnController: The Power Maximum set on our Motor Controller.
 
                 If the Power set on the Motor controller is lower or equal max, it will be limited to the
                 one set on the Motor Controller (obvious). Else, we have to map our value.
             */
 
-            if (_power.max < _power.setOnController) {
-                returnValue = returnValue * _power.max / _power.setOnController;
+           float powerMax = _registry.getFloat(PMC_MAX_POWER);
+           float powerSetOnController = _registry.getFloat(PMC_POWER_SET_ON_MC);
+
+            if (powerMax < powerSetOnController) {
+                returnValue = returnValue * powerMax / powerSetOnController;
             }
 
             return returnValue;

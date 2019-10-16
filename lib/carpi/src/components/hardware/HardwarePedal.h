@@ -3,79 +3,45 @@
 
 #include "../interface/IPedal.h"
 #include "../hardware/HardwareAnalogSensor.h"
-
-// Hardcoded Calibration. Can be overwritten by recalibration if any fault
-#define STD_GAS_1_MIN 18196
-#define STD_GAS_1_MAX 45250
-
-#define STD_GAS_2_MIN 12663
-#define STD_GAS_2_MAX 42444
-
-#define STD_BRAKE_MIN 12684
-#define STD_BRAKE_MAX 20113
-
-// Deviance Settings
-#define STD_MAX_DEVIANCE 0.35 // 10%
-#define STD_MAX_DEVIANCE_TIME 200 // 100ms
-
-#define STD_MAPPED_BOUNDARY_PERCENTAGE 0.25 // 10%
-#define STD_MAX_OUT_OF_BOUNDARY_TIME 200 // 100ms
-
-#define STD_CALIBRATION_REFRESH_TIME        0.010 // 30ms
-#define STD_CALIBRATION_MIN_DEVIANCE        500 // Raw analog
-#define STD_CALIBRATION_MAX_DEVIANCE        50000 // Raw analog
-#define STD_CALIBRATION_SAMPLE_BUFFER_SIZE  20 // How many values should be combined during calibration to get the fu***** deviance away
-
-#define STD_ANALOG_LOWER_BOUNDARY   655 // uint16_t min ->     0
-#define STD_ANALOG_UPPER_BOUNDARY 64880 // uint16_t max -> 65535
-
-#define STD_PEDAL_THRESHHOLD 0.15 // 15%
+#include "HardConfig.h"
 
 struct pedal_calibration_data_t {
+    pedal_calibration_data_t();
+
+    pedal_calibration_data_t(uint16_t min0, uint16_t max0) {
+        min[0] = min0;
+        max[0] = max0;
+        secondSensor = false;
+    }
+    
+    pedal_calibration_data_t(uint16_t min0, uint16_t max0, uint16_t min1, uint16_t max1) {
+        min[0] = min0;
+        max[0] = max0;
+        min[1] = min1;
+        max[1] = max1;
+        secondSensor = true;
+    }
+
     uint16_t min[2] = {0,0}, max[2] = {0,0};
     bool secondSensor = false;
 };
 
 class HardwarePedal : public IPedal {
     public:
-        HardwarePedal(PinName inputPin)
-            : _pin1(inputPin), _pin2(inputPin){
+        HardwarePedal(PinName inputPin, id_sub_component_t componentSubId, IRegistry &registry)
+            : _pin1(inputPin, registry), _pin2(inputPin, registry), _registry(registry) {
+            setComponentSubId(componentSubId);
             _secondSensor = false;
-            _init();
         }
 
-        HardwarePedal(PinName inputPin, id_sub_component_t componentSubId)
-            : HardwarePedal(inputPin) {
+        HardwarePedal(PinName inputPin1, PinName inputPin2, id_sub_component_t componentSubId, IRegistry &registry)
+            : _pin1(inputPin1, registry), _pin2(inputPin2, registry), _registry(registry) {
             setComponentSubId(componentSubId);
-        }
-
-        HardwarePedal(PinName inputPin, id_sub_component_t componentSubId, uint16_t min, uint16_t max)
-            : HardwarePedal(inputPin, componentSubId) {
-            _pin1.setMapping(min, max, 0.0, 1.0);
-            _calibrationSet = true;
-            _ready = true;
-        }
-
-        HardwarePedal(PinName inputPin1, PinName inputPin2)
-            : _pin1(inputPin1), _pin2(inputPin2) {
             _secondSensor = true;
-            _init();
-        }
-
-        HardwarePedal(PinName inputPin1, PinName inputPin2, id_sub_component_t componentSubId)
-            : HardwarePedal(inputPin1, inputPin2) {
-            setComponentSubId(componentSubId);
-        }
-
-        HardwarePedal(PinName inputPin1, PinName inputPin2, id_sub_component_t componentSubId, uint16_t minPin1, uint16_t maxPin1, uint16_t minPin2, uint16_t maxPin2)
-            : HardwarePedal(inputPin1, inputPin2, componentSubId) {
-            _pin1.setMapping(minPin1, maxPin1, 0.0, 1.0);
-            _pin2.setMapping(minPin2, maxPin2, 0.0, 1.0);
-            _calibrationSet = true;
-            _ready = true;
         }
 
         virtual void setProportionality(pedal_sensor_type_t proportionality, uint16_t sensorNumber = 0) {
+            _init();
             if (proportionality == DIRECT_PROPORTIONAL || proportionality == INDIRECT_PROPORTIONAL) {
                 if (sensorNumber == 0) {
                     _pin1Proportionality = proportionality;
@@ -86,6 +52,7 @@ class HardwarePedal : public IPedal {
         }
 
         virtual status_t getStatus() {
+            _init();
             _status |= (_pin1.getStatus() << 4);
             _status |= (_pin2.getStatus() << 4);
 
@@ -93,6 +60,7 @@ class HardwarePedal : public IPedal {
         }
 
         virtual pedal_value_t getValue() {
+            _init();
             if (_ready) {
                 pedal_value_t returnValue = _pin1.getValue();
                 bool devianceTooHigh = false;
@@ -146,6 +114,7 @@ class HardwarePedal : public IPedal {
         }
 
         virtual void setCalibrationStatus(pedal_calibration_t calibrationStatus) {
+            _init();
             if (calibrationStatus == CURRENTLY_CALIBRATING) {
                 _beginCalibration();
             } else if (calibrationStatus == CURRENTLY_NOT_CALIBRATING) {
@@ -155,10 +124,12 @@ class HardwarePedal : public IPedal {
         }
 
         virtual pedal_calibration_t getCalibrationStatus() {
+            _init();
             return _calibrationStatus;
         }
 
         virtual bool getCalibration(pedal_calibration_data_t &pedalCalibration) {
+            _init();
             if (!_calibration.sensor1.initPointSet) return false;
 
             if (_secondSensor) {
@@ -182,11 +153,30 @@ class HardwarePedal : public IPedal {
             return true;
         }
 
+        bool setCalibration(pedal_calibration_data_t &pedalCalibration) {
+            _init();
+
+            if (pedalCalibration.secondSensor != _secondSensor)
+                return false;
+            
+            _pin1.setMapping(pedalCalibration.min[0], pedalCalibration.max[0], 0.0, 1.0);
+
+            if (_secondSensor)
+                _pin2.setMapping(pedalCalibration.min[1], pedalCalibration.max[1], 0.0, 1.0);
+
+            _calibrationSet = true;
+            _ready = true;
+
+            return true;
+        }
+
         virtual void setMaxDeviance(pedal_value_t deviance) {
+            _init();
             _deviance.max = deviance;
         }
 
         virtual void setMaxDevianceTime(uint16_t time) {
+            _init();
             _deviance.maxTime = time;
         }
 
@@ -198,6 +188,7 @@ class HardwarePedal : public IPedal {
         }
 
         virtual void receive(CarMessage &carMessage) {
+            _init();
             for (car_sub_message_t &subMessage : carMessage.subMessages) {
                 switch (subMessage.data[0]) {
                     case PEDAL_MESSAGE_COMMAND_SET_CALIBRATION_STATUS:
@@ -215,7 +206,18 @@ class HardwarePedal : public IPedal {
             }
         }
 
+        virtual void attach(Sync &syncer) {
+            IPedal::attach(syncer);
+            _init();
+
+            _pedalPositionTicker.attach(callback(this, &HardwarePedal::_updatePedalPosition), 1.0/(float)STD_PEDAL_VALUE_REFRESH_RATE);
+            _statusTicker.attach(callback(this, &HardwarePedal::_updateStatus), STD_PEDAL_STATUS_REFRESH_TIME);
+        }
+
     protected:
+        IRegistry &_registry;
+        bool _initComplete = false;
+
         Ticker _pedalPositionTicker;
         Ticker _statusTicker;
 
@@ -229,14 +231,11 @@ class HardwarePedal : public IPedal {
         pedal_value_t _last = 0;
         bool _calibrationSet = false;
 
-        float _calibrationRefreshTime = STD_CALIBRATION_REFRESH_TIME;
-        uint16_t _calibrationMinDeviance = STD_CALIBRATION_MIN_DEVIANCE;
-        uint16_t _calibrationMaxDeviance = STD_CALIBRATION_MAX_DEVIANCE;
+        float _calibrationRefreshTime;
+        uint16_t _calibrationMinDeviance;
+        uint16_t _calibrationMaxDeviance;
 
-        analog_sensor_raw_t _analogLowerBoundary = STD_ANALOG_LOWER_BOUNDARY;
-        analog_sensor_raw_t _analogUpperBoundary = STD_ANALOG_UPPER_BOUNDARY;
-
-        float _pedalThreshhold = STD_PEDAL_THRESHHOLD;
+        float _pedalThreshhold;
 
         Ticker _calibrationTicker;
         pedal_calibration_t _calibrationStatus = CURRENTLY_NOT_CALIBRATING;
@@ -245,19 +244,19 @@ class HardwarePedal : public IPedal {
             struct sensor1 {
                 analog_sensor_raw_t min = 0, max = 0;
                 bool initPointSet = false;
-                CircularBuffer<analog_sensor_raw_t, STD_CALIBRATION_SAMPLE_BUFFER_SIZE> buffer;
+                CircularBuffer<analog_sensor_raw_t, PEDAL_CALIBRATION_SAMPLE_BUFFER_SIZE> buffer;
             } sensor1;
 
             struct sensor2 {
                 analog_sensor_raw_t min = 0, max = 0;
                 bool initPointSet = false;
-                CircularBuffer<analog_sensor_raw_t, STD_CALIBRATION_SAMPLE_BUFFER_SIZE> buffer;
+                CircularBuffer<analog_sensor_raw_t, PEDAL_CALIBRATION_SAMPLE_BUFFER_SIZE> buffer;
             } sensor2;
         } _calibration;
 
         struct _deviance {
-            float max = STD_MAX_DEVIANCE;
-            uint16_t maxTime = STD_MAX_DEVIANCE_TIME;
+            float max;
+            uint16_t maxTime;
             Timer timer;
             bool timerStarted = false;
         } _deviance;
@@ -282,26 +281,41 @@ class HardwarePedal : public IPedal {
         }
 
         void _init() {
-            setComponentType(COMPONENT_PEDAL);
-            setObjectType(OBJECT_HARDWARE);
+            if (!_initComplete) {
+                // Config
+                setObjectType(OBJECT_HARDWARE);
 
-            _pin1.setRawBoundary(_analogLowerBoundary, _analogUpperBoundary);
-            _pin1.setRawBoundaryOutTime(STD_MAX_DEVIANCE_TIME);
-            _pin1.setBoundary(STD_MAPPED_BOUNDARY_PERCENTAGE);
-            _pin1.setBoundaryOutTime(STD_MAX_OUT_OF_BOUNDARY_TIME);
+                // Analog Sensor Config
+                _pin1.setRawBoundary(_registry.getUInt16(STD_PEDAL_ANALOG_LOWER_BOUNDARY), _registry.getUInt16(STD_PEDAL_ANALOG_UPPER_BOUNDARY));
+                _pin1.setRawBoundaryOutTime(_registry.getUInt16(STD_PEDAL_MAX_OUT_OF_BOUNDARY_TIME));
+                _pin1.setBoundary(_registry.getFloat(STD_PEDAL_MAPPED_BOUNDARY_PERCENTAGE));
+                _pin1.setBoundaryOutTime(_registry.getUInt16(STD_PEDAL_MAX_OUT_OF_BOUNDARY_TIME));
 
-            if (_secondSensor) {
-                _pin2.setRawBoundary(_analogLowerBoundary, _analogUpperBoundary);
-                _pin2.setRawBoundaryOutTime(STD_MAX_DEVIANCE_TIME);
-                _pin2.setBoundary(STD_MAPPED_BOUNDARY_PERCENTAGE);
-                _pin2.setBoundaryOutTime(STD_MAX_OUT_OF_BOUNDARY_TIME);
+                if (_secondSensor) {
+                    _pin2.setRawBoundary(_registry.getUInt16(STD_PEDAL_ANALOG_LOWER_BOUNDARY), _registry.getUInt16(STD_PEDAL_ANALOG_UPPER_BOUNDARY));
+                    _pin2.setRawBoundaryOutTime(_registry.getUInt16(STD_PEDAL_MAX_OUT_OF_BOUNDARY_TIME));
+                    _pin2.setBoundary(_registry.getFloat(STD_PEDAL_MAPPED_BOUNDARY_PERCENTAGE));
+                    _pin2.setBoundaryOutTime(_registry.getUInt16(STD_PEDAL_MAX_OUT_OF_BOUNDARY_TIME));
+                }
+
+                // Deviance Config
+                _deviance.max = _registry.getFloat(STD_PEDAL_MAX_DEVIANCE);
+                _deviance.maxTime = _registry.getUInt16(STD_PEDAL_MAX_DEVIANCE_TIME);
+
+                // Calibration
+                _calibrationRefreshTime = _registry.getFloat(STD_PEDAL_CALIBRATION_REFRESH_TIME);
+                _calibrationMinDeviance = _registry.getUInt16(STD_PEDAL_CALIBRATION_MIN_DEVIANCE);
+                _calibrationMaxDeviance = _registry.getUInt16(STD_PEDAL_CALIBRATION_MAX_DEVIANCE);
+
+                // Pedal
+                _pedalThreshhold = _registry.getFloat(STD_PEDAL_THRESHHOLD);
+
+                _initComplete = true;
             }
-
-            _pedalPositionTicker.attach(callback(this, &HardwarePedal::_updatePedalPosition), 1.0/(float)STD_PEDAL_VALUE_REFRESH_RATE);
-            _statusTicker.attach(callback(this, &HardwarePedal::_updateStatus), STD_PEDAL_STATUS_REFRESH_TIME);
+            
         }
 
-        analog_sensor_raw_t _getAverageValue(CircularBuffer<analog_sensor_raw_t, STD_CALIBRATION_SAMPLE_BUFFER_SIZE> &buffer) {
+        analog_sensor_raw_t _getAverageValue(CircularBuffer<analog_sensor_raw_t, PEDAL_CALIBRATION_SAMPLE_BUFFER_SIZE> &buffer) {
             uint32_t value = 0,
                      valueCount = 0;
 

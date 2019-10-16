@@ -33,6 +33,10 @@ enum motor_controller_run_enable_t : bool {
 
 class IMotorController : public IComponent {
     public:
+        IMotorController() {
+            setComponentType(COMPONENT_MOTOR);
+        }
+
         // State (-> Status got from the Motor Controller)
         virtual motor_controller_state_t getState() = 0;
         virtual void setState() = 0;

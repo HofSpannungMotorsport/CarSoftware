@@ -9,7 +9,8 @@ enum component_object_type_t : component_object_type_datatype_t {
     OBJECT_UNDEFINED = 0x0,
     OBJECT_HARDWARE = 0x1,
     OBJECT_SOFTWARE = 0x2,
-    OBJECT_RUNABLE = 0x3
+    OBJECT_INTERNAL = 0x3,
+    OBJECT_RUNABLE = 0x4
 };
 
 class IComponent : public ILogable {

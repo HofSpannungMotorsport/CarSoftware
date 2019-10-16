@@ -91,7 +91,8 @@ enum id_sub_component_t : uint8_t {
     COMPONENT_SYSTEM_COOLING =          0x6,
     COMPONENT_SYSTEM_TSMS =             0x7,
     COMPONENT_SYSTEM_60V_OK =           0x8,
-    COMPONENT_SYSTEM_SD_CARD =          0x9
+    COMPONENT_SYSTEM_REGISTRY =         0x9,
+    COMPONENT_SYSTEM_SD_CARD =          0xA
 };
 
 typedef uint8_t id_component_t;

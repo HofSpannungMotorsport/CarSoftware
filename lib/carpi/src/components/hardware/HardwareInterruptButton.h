@@ -13,18 +13,9 @@ enum button_event_t {
 
 class HardwareInterruptButton : public IButton {
     public:
-        HardwareInterruptButton(PinName pin, button_type_t buttonType = NORMALLY_OPEN) : _interruptPin(pin) {
-            _time.debounce = STD_DEBOUNCE_TIME;
-            _time.longClick = STD_LONG_CLICK_TIME;
-
-            _lastHardwareState = false;
-            _debouncing = false;
-            _debounced = false;
-
-            _status = 0;
-            _lastState = NOT_PRESSED;
-
-            setComponentType(COMPONENT_BUTTON);
+        HardwareInterruptButton(PinName pin, id_sub_component_t componentSubId, IRegistry &registry, button_type_t buttonType = NORMALLY_OPEN)
+            : _interruptPin(pin), _registry(registry) {
+            setComponentSubId(componentSubId);
             setObjectType(OBJECT_HARDWARE);
 
             // Assign the Function/Method to a state (Rising/Falling) after initializing all variables
@@ -39,19 +30,6 @@ class HardwareInterruptButton : public IButton {
                     pcSerial.printf("Cannot assign method to a button-state. Wrong button-type choosen?");
                 #endif
             }
-        }
-
-        HardwareInterruptButton(PinName pin, id_sub_component_t componentSubId, button_type_t buttonType = NORMALLY_OPEN)
-            : HardwareInterruptButton(pin, buttonType) {
-            setComponentSubId(componentSubId);
-        }
-
-        virtual void setLongClickTime(button_time_t time) {
-            _time.longClick = time;
-        }
-
-        virtual void setDebounceTime(button_debounce_time_t time) {
-            _time.debounce = time;
         }
 
         // Status...
@@ -88,17 +66,14 @@ class HardwareInterruptButton : public IButton {
         }
 
     protected:
+        IRegistry &_registry;
+
         InterruptIn _interruptPin;
         Ticker _ticker;
-        bool _lastHardwareState, _debouncing, _debounced;
-        status_t _status;
-        button_state_t _lastState;
-        CircularBuffer<button_state_t, STATE_BUFFER_SIZE> _stateBuffer;
-
-        struct _time {
-            button_time_t longClick;
-            button_debounce_time_t debounce;
-        } _time;
+        bool _lastHardwareState = false, _debouncing = false, _debounced = false;
+        status_t _status = 0;
+        button_state_t _lastState = NOT_PRESSED;
+        CircularBuffer<button_state_t, BUTTON_STATE_BUFFER_SIZE> _stateBuffer;
 
         // Called after a rising edge and the set time.debounce. To check if the first rising edge
         // was just a false mesurement or a correct press
@@ -107,7 +82,7 @@ class HardwareInterruptButton : public IButton {
             _debouncing = false;
 
             if (_lastHardwareState) {
-                _ticker.attach(callback(this, &HardwareInterruptButton::_checkLongClick), (float)(((float)_time.longClick/1000.0) - _time.debounce));
+                _ticker.attach(callback(this, &HardwareInterruptButton::_checkLongClick), (float)((_registry.getFloat(BUTTON_LONG_CLICK_TIME)/1000.0) - _registry.getFloat(BUTTON_DEBOUNCE_TIME)));
                 _debounced = true;
                 _addState(PRESSED);
             }
@@ -125,7 +100,7 @@ class HardwareInterruptButton : public IButton {
             _lastHardwareState = true;
             if (!_debouncing && !_debounced) {
                 _debouncing = true;
-                _ticker.attach(callback(this, &HardwareInterruptButton::_debounce), _time.debounce);
+                _ticker.attach(callback(this, &HardwareInterruptButton::_debounce), _registry.getFloat(BUTTON_DEBOUNCE_TIME));
             }
         }
 

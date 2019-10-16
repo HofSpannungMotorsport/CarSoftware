@@ -3,14 +3,11 @@
 
 #include "../interface/IAnalogSensor.h"
 
-#define STD_OUT_OF_BOUNDARY_TIME_LIMIT 99
-#define STD_OUT_OF_BOUNDARY_TIME_LIMIT_RAW 89
-
 
 class HardwareAnalogSensor : public IAnalogSensor {
     public:
-        HardwareAnalogSensor(PinName pin)
-            : _pin(pin) {}
+        HardwareAnalogSensor(PinName pin, IRegistry &registry)
+        : _pin(pin), _registry(registry) {}
 
         virtual bool setMapping(analog_sensor_raw_t minIn, analog_sensor_raw_t maxIn, analog_sensor_t minOut, analog_sensor_t maxOut) {
             if ((minIn == maxIn) || (minOut == maxOut)) return false;
@@ -50,18 +47,23 @@ class HardwareAnalogSensor : public IAnalogSensor {
         }
 
         virtual void setRawBoundaryOutTime(uint16_t time) {
+            _prepStdValues();
             _boundary.raw.outTimerLimit = time;
         }
 
         virtual void setBoundary(analog_sensor_boundary_t boundaryPercentage){
+            _prepStdValues();
             _boundary.percentage = boundaryPercentage;
         }
 
         virtual void setBoundaryOutTime(uint16_t time) {
+            _prepStdValues();
             _boundary.outTimerLimit = time;
         }
         
         virtual analog_sensor_raw_t getRawValue() {
+            _prepStdValues();
+
             analog_sensor_raw_t sensorValue = _pin.read_u16();
             analog_sensor_raw_t returnValue = sensorValue;
 
@@ -110,6 +112,8 @@ class HardwareAnalogSensor : public IAnalogSensor {
         }
 
         virtual analog_sensor_t getValue() {
+            _prepStdValues();
+
             if (!_map.set) return 0;
 
             analog_sensor_t mappedValue = _getMapped(getRawValue());
@@ -193,12 +197,16 @@ class HardwareAnalogSensor : public IAnalogSensor {
             return _status;
         }
 
+        // Resets only the set map and status, IT DOES NOT RETURN ALL BACK TO STD!
         void reset() {
             _map.set = false;
             _status = 0;
         }
         
     protected:
+        IRegistry &_registry;
+        bool _stdValuesLoaded = false;
+
         AnalogIn _pin;
         status_t _status = 0;
 
@@ -224,15 +232,24 @@ class HardwareAnalogSensor : public IAnalogSensor {
 
             Timer outTimer;
             bool outTimerStarted = false;
-            uint16_t outTimerLimit = STD_OUT_OF_BOUNDARY_TIME_LIMIT;
+            uint16_t outTimerLimit;
 
             struct raw {
                 analog_sensor_raw_t lowerEnd = 66, upperEnd = 65469;
                 Timer outTimer;
                 bool outTimerStarted = false;
-                uint16_t outTimerLimit = STD_OUT_OF_BOUNDARY_TIME_LIMIT_RAW;
+                uint16_t outTimerLimit;
             } raw;
         } _boundary;
+
+        void _prepStdValues() {
+            if (!_stdValuesLoaded) {
+                _boundary.outTimerLimit = _registry.getUInt16(STD_ANALOG_SENSOR_OUT_OF_BOUNDARY_TIME_LIMIT);
+                _boundary.raw.outTimerLimit = _registry.getUInt16(STD_ANALOG_SENSOR_OUT_OF_BOUNDARY_TIME_LIMIT_RAW);
+
+                _stdValuesLoaded = true;
+            }
+        }
 
         void _restartTimer(Timer &timer) {
             timer.stop();

@@ -7,14 +7,12 @@ using namespace std;
 
 #include "SDFileSystem.h"
 #include "../interface/ISDCard.h"
-
-#define SD_CARD_TRANSFER_SPEED 16000000 // -> 16 MHz
+#include "HardConfig.h"
 
 class HardwareSDCard : public ISDCard {
     public:
         HardwareSDCard(id_sub_component_t componentSubId, PinName mosi, PinName miso, PinName sck, PinName cs)
-        : sd(mosi, miso, sck, cs, SD_LOG_ROOT, SD_CARD_TRANSFER_SPEED) {
-            setComponentType(COMPONENT_SYSTEM);
+        : sd(mosi, miso, sck, cs, SD_CARD_ROOT, SD_CARD_TRANSFER_SPEED) {
             setComponentSubId(componentSubId);
             setObjectType(OBJECT_HARDWARE);
         }

@@ -23,6 +23,10 @@ typedef float rpm_sensor_frequency_t; // rpm
 
 class IRpmSensor : public SelfSyncable {
     public:
+        IRpmSensor() {
+            setComponentType(COMPONENT_RPM_SENSOR);
+        }
+
         virtual void setMeasurementPointsPerRevolution(uint8_t measurementPointsPerRevolution) = 0;
         virtual void setFrequency(rpm_sensor_frequency_t frequency) = 0;
 
