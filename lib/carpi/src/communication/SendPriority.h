@@ -9,7 +9,9 @@ enum send_priority_t : car_message_priority_t {
     SEND_PRIORITY_ALIVE = 0x3,
     SEND_PRIORITY_RPM = 0x4,
     SEND_PRIORITY_LED = 0x5,
-    SEND_PRIORITY_SUSPENSION = 0x6
+    SEND_PRIORITY_SUSPENSION = 0x6,
+
+    SEND_PRIORITY_REGISTRY = 0xC8
 };
 
 #endif // SEND_PRIORITY_H

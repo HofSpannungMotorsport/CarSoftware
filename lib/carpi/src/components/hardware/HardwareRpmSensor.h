@@ -116,16 +116,20 @@ class HardwareRpmSensor : public IRpmSensor {
             _measurement.bufferSize = 0;
         }
 
+        status_t _lastSentStatus = 0;
         virtual void _updateValues() {
-            _sendCommand(RPM_MESSAGE_COMMAND_SET_STATUS, getStatus(), SEND_PRIORITY_RPM, IS_DROPABLE);
+            status_t currentStatus = getStatus();
+            if (currentStatus != _lastSentStatus) {
+                _sendCommand(RPM_MESSAGE_COMMAND_SET_STATUS, getStatus(), SEND_PRIORITY_RPM, IS_NOT_DROPABLE);
+                _lastSentStatus = currentStatus;
+            }
 
             rpm_sensor_frequency_t frequency = this->getFrequency();
-            uint32_t frequencyBinary = *((uint32_t*)&frequency);
 
-            _sendCommand(RPM_MESSAGE_COMMAND_SET_FREQUENCY, (uint8_t)(frequencyBinary & 0xFF),
-                                                            (uint8_t)((frequencyBinary >> 8) & 0xFF),
-                                                            (uint8_t)((frequencyBinary >> 16) & 0xFF),
-                                                            (uint8_t)((frequencyBinary >> 24) & 0xFF), SEND_PRIORITY_RPM, IS_DROPABLE);
+            uint8_t disassambledFloat[4];
+            _disassambleFloat(frequency, disassambledFloat);
+
+            _sendCommand(RPM_MESSAGE_COMMAND_SET_FREQUENCY, disassambledFloat, 4, SEND_PRIORITY_RPM, IS_DROPABLE);
         }
 };
 

@@ -2,6 +2,7 @@
 #define INTERNAL_REGISTRY_HARD_STORAGE_H
 
 #include "../interface/IRegistry.h"
+#include "communication/Sync.h"
 
 // static -> only in this file needed (and visible)
 // const -> values will not be changed -> const makes them also only stored in Program-Memory, not RAM
@@ -128,25 +129,32 @@ static const bool _boolRegistryStorage[] = {};
 
 class InternalRegistryHardStorage {
     public:
-        static void loadIn(IRegistry &registry) {
-            // load Type with                           registerStorage                                  size of it                            registry  function pointer to set
-            _loadType<float, float_registry_index_t>(_floatRegistryStorage, (registry_index_t)(sizeof(_floatRegistryStorage) / sizeof(float)), registry, &IRegistry::setFloat);
-            _loadType<uint8_t, uint8_registry_index_t>(_uint8RegistryStorage, (registry_index_t)(sizeof(_uint8RegistryStorage) / sizeof(uint8_t)), registry, &IRegistry::setUInt8);
-            _loadType<uint16_t, uint16_registry_index_t>(_uint16RegistryStorage, (registry_index_t)(sizeof(_uint16RegistryStorage) / sizeof(uint16_t)), registry, &IRegistry::setUInt16);
-            _loadType<uint32_t, uint32_registry_index_t>(_uint32RegistryStorage, (registry_index_t)(sizeof(_uint32RegistryStorage) / sizeof(uint32_t)), registry, &IRegistry::setUInt32);
-            _loadType<int8_t, int8_registry_index_t>(_int8RegistryStorage, (registry_index_t)(sizeof(_int8RegistryStorage) / sizeof(int8_t)), registry, &IRegistry::setInt8);
-            _loadType<int16_t, int16_registry_index_t>(_int16RegistryStorage, (registry_index_t)(sizeof(_int16RegistryStorage) / sizeof(int16_t)), registry, &IRegistry::setInt16);
-            _loadType<int32_t, int32_registry_index_t>(_int32RegistryStorage, (registry_index_t)(sizeof(_int32RegistryStorage) / sizeof(int32_t)), registry, &IRegistry::setInt32);
-            _loadType<bool, bool_registry_index_t>(_boolRegistryStorage, (registry_index_t)(sizeof(_boolRegistryStorage) / sizeof(bool)), registry, &IRegistry::setBool);
+        // Loads in the Values stored in the InternalRegistryHardStorage. If Sync is given, it will wait till the values are sent, then continue with sending the next one.
+        static void loadIn(IRegistry &registry, Sync *sync = nullptr) {
+            // load Type with                           registerStorage                                  size of it                            registry  function pointer to set   Syncer...
+            _loadType<float, float_registry_index_t>(_floatRegistryStorage, (registry_index_t)(sizeof(_floatRegistryStorage) / sizeof(float)), registry, &IRegistry::setFloat, sync);
+            _loadType<uint8_t, uint8_registry_index_t>(_uint8RegistryStorage, (registry_index_t)(sizeof(_uint8RegistryStorage) / sizeof(uint8_t)), registry, &IRegistry::setUInt8, sync);
+            _loadType<uint16_t, uint16_registry_index_t>(_uint16RegistryStorage, (registry_index_t)(sizeof(_uint16RegistryStorage) / sizeof(uint16_t)), registry, &IRegistry::setUInt16, sync);
+            _loadType<uint32_t, uint32_registry_index_t>(_uint32RegistryStorage, (registry_index_t)(sizeof(_uint32RegistryStorage) / sizeof(uint32_t)), registry, &IRegistry::setUInt32, sync);
+            _loadType<int8_t, int8_registry_index_t>(_int8RegistryStorage, (registry_index_t)(sizeof(_int8RegistryStorage) / sizeof(int8_t)), registry, &IRegistry::setInt8, sync);
+            _loadType<int16_t, int16_registry_index_t>(_int16RegistryStorage, (registry_index_t)(sizeof(_int16RegistryStorage) / sizeof(int16_t)), registry, &IRegistry::setInt16, sync);
+            _loadType<int32_t, int32_registry_index_t>(_int32RegistryStorage, (registry_index_t)(sizeof(_int32RegistryStorage) / sizeof(int32_t)), registry, &IRegistry::setInt32, sync);
+            _loadType<bool, bool_registry_index_t>(_boolRegistryStorage, (registry_index_t)(sizeof(_boolRegistryStorage) / sizeof(bool)), registry, &IRegistry::setBool, sync);
 
             registry.setReady(true);
         }
     
     private:
         template <typename T, typename registry_index_type_t>
-        static void _loadType(const T registerStorage[], registry_index_t size, IRegistry &registry, void (IRegistry::*setPointer)(registry_index_type_t, T)) {
+        static void _loadType(const T registerStorage[], registry_index_t size, IRegistry &registry, void (IRegistry::*setPointer)(registry_index_type_t, T), Sync *sync) {
             for (registry_index_t i = 0; i < size; i++) {
                 (registry.*setPointer)((registry_index_type_t)i, registerStorage[i]);
+
+                if (sync != nullptr) {
+                    while(sync->messageInQueue()) {
+                        sync->run();
+                    }
+                }
             }
         }
 };
