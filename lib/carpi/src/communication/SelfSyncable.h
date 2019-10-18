@@ -19,52 +19,41 @@ class SelfSyncable : public ICommunication {
         Sync *_syncer;
         bool _syncerAttached = false;
 
-        virtual void _getSubMessageCommand(car_sub_message_t &subMessage, uint8_t command, uint8_t value) {
-            subMessage.length = 2;
+        virtual void _sendCommand(uint8_t command, uint8_t priority, car_message_dropable_t dropable) {
+            CarMessage carMessage;
+
+            car_sub_message_t subMessage;
+            subMessage.length = 1;
             subMessage.data[0] = command;
-            subMessage.data[1] = value;
-        }
+            carMessage.addSubMessage(subMessage);
 
-        virtual void _getSubMessageCommand(car_sub_message_t &subMessage, uint8_t command, uint8_t value, uint8_t value2) {
-            _getSubMessageCommand(subMessage, command, value);
-            subMessage.length = 3;
-            subMessage.data[2] = value2;
-        }
-
-        virtual void _getSubMessageCommand(car_sub_message_t &subMessage, uint8_t command, uint8_t value, uint8_t value2, uint8_t value3, uint8_t value4) {
-            _getSubMessageCommand(subMessage, command, value, value2);
-            subMessage.length = 5;
-            subMessage.data[3] = value3;
-            subMessage.data[4] = value4;
+            _send(carMessage, priority, dropable);
         }
 
         virtual void _sendCommand(uint8_t command, uint8_t value, uint8_t priority, car_message_dropable_t dropable) {
             CarMessage carMessage;
 
             car_sub_message_t subMessage;
-            _getSubMessageCommand(subMessage, command, value);
+            subMessage.length = 2;
+            subMessage.data[0] = command;
+            subMessage.data[1] = value;
             carMessage.addSubMessage(subMessage);
 
             _send(carMessage, priority, dropable);
         }
 
-        virtual void _sendCommand(uint8_t command, uint8_t value, uint8_t value2, uint8_t priority, car_message_dropable_t dropable) {
+        virtual void _sendCommand(uint8_t command, uint8_t values[], uint8_t valueCount, uint8_t priority, car_message_dropable_t dropable) {
+            if (valueCount > 6) return; // subMessage maximum == 7 (-1 because of the command)
+
             CarMessage carMessage;
 
             car_sub_message_t subMessage;
-            _getSubMessageCommand(subMessage, command, value, value2);
+            subMessage.length = valueCount + 1; // +1 for the command
+            subMessage.data[0] = command;
+
+            memcpy(&subMessage.data[1], values, valueCount);
+
             carMessage.addSubMessage(subMessage);
-
-            _send(carMessage, priority, dropable);
-        }
-
-        virtual void _sendCommand(uint8_t command, uint8_t value, uint8_t value2, uint8_t value3, uint8_t value4, uint8_t priority, car_message_dropable_t dropable) {
-            CarMessage carMessage;
-
-            car_sub_message_t subMessage;
-            _getSubMessageCommand(subMessage, command, value, value2, value3, value4);
-            carMessage.addSubMessage(subMessage);
-
             _send(carMessage, priority, dropable);
         }
 
@@ -75,6 +64,34 @@ class SelfSyncable : public ICommunication {
 
             if (_syncerAttached)
                 _syncer->send(carMessage);
+        }
+
+        uint32_t _convertFloat(float floatToConvert) {
+            uint32_t convertedFloat = *((uint32_t*)&floatToConvert);
+            return convertedFloat;
+        }
+
+        float _reconvertFloat(uint32_t floatToReconvert) {
+            float reconvertedFloat = *((float*)&floatToReconvert);
+            return reconvertedFloat;
+        }
+
+        void _disassambleFloat(float floatToDisassamble, uint8_t floatBinaryDisassambled[4]) {
+            uint32_t floatBinary = _convertFloat(floatToDisassamble);
+
+            for (uint8_t i = 0; i < 4; i++) {
+                floatBinaryDisassambled[i] = (floatBinary >> (8 * i)) & 0xFF;
+            }
+        }
+
+        float _reassambleFloat(uint8_t floatToReassamble[4]) {
+            uint32_t floatBinary;
+
+            for (uint8_t i = 0; i < 4; i++) {
+                floatBinary |= (((uint32_t)floatToReassamble[i] & 0xFF) << (i * 8));
+            }
+
+            return _reconvertFloat(floatBinary);
         }
 };
 

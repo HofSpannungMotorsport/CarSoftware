@@ -143,8 +143,24 @@ enum bool_registry_index_t : registry_index_t {
 const registry_index_t bool_registry_size = 0;
 
 
+enum registry_message_command_t : uint8_t {
+    REGISTRY_SET_NOT_READY = 0x0,
+    REGISTRY_SET_READY,
+    REGISTRY_TYPE_FLOAT,
+    REGISTRY_TYPE_UINT8,
+    REGISTRY_TYPE_UINT16,
+    REGISTRY_TYPE_UINT32,
+    REGISTRY_TYPE_INT8,
+    REGISTRY_TYPE_INT16,
+    REGISTRY_TYPE_INT32,
+    REGISTRY_TYPE_BOOL
+};
+
+
 enum registry_error_type_t : status_t {
-    REGISTRY_ERROR_ARRAY_OUT_OF_BOUNDS = 0x1
+    REGISTRY_ERROR_ARRAY_OUT_OF_BOUNDS = 0x1,
+    REGISTRY_ERROR_RECEIVED_TOO_LONG_MSG = 0x2,
+    REGISTRY_ERROR_UNKNOWN_MSG_RECEIVED = 0x4
 };
 
 

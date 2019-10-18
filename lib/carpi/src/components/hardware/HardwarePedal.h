@@ -264,8 +264,11 @@ class HardwarePedal : public IPedal {
         void _updatePedalPosition() {
             if (_syncerAttached) {
                 uint16_t pedalValue = ((float)getValue() * 65535);
+                uint16_t pedalValue0 = pedalValue & 0xFF;
+                uint16_t pedalValue1 = (pedalValue >> 8) & 0xFF;
+                uint8_t pedalValueData[2] = {pedalValue0, pedalValue1};
 
-                _sendCommand(PEDAL_MESSAGE_COMMAND_SET_VALUE, pedalValue & 0xFF, (pedalValue >> 8) & 0xFF, SEND_PRIORITY_PEDAL, IS_DROPABLE);
+                _sendCommand(PEDAL_MESSAGE_COMMAND_SET_VALUE, pedalValueData, 2, SEND_PRIORITY_PEDAL, IS_DROPABLE);
             }
         }
 
