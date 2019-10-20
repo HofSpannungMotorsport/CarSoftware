@@ -39,6 +39,7 @@ install:
 
 script:
     - platformio run -e Master -e Dashboard -e Pedal
+    - platformio test -e Native
 
 
 #
