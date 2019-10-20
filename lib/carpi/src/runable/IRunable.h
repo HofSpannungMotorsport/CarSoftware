@@ -11,12 +11,14 @@ class IRunable : public IComponent {
 
         virtual void run() = 0;
 
+        #if defined(USE_MBED) || defined(USE_ARDUINO) || defined(USE_TEENSYDUINO)
         virtual void run(Timer &timer) {
             timer.reset();
             timer.start();
             run();
             timer.stop();
         }
+        #endif
 
         virtual void setStatus(status_t status) {
             _status = status;

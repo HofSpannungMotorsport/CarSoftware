@@ -12,7 +12,7 @@ uint16_t uint16_t_pow(uint16_t base, uint16_t exponent) {
 }
 
 #include "PinName.h"
-#include "NonCopyable.h"
+#include "../NonCopyable.h"
 #include "AnalogIn.h"
 #include "AnalogOut.h"
 #include "DigitalIn.h"

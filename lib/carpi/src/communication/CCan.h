@@ -3,7 +3,7 @@
 
 #include "HardConfig.h"
 
-#ifdef USE_ARDUINO
+#if !defined(USE_MBED) && !defined(USE_TEENSYDUINO) && !defined(USE_NATIVE)
     #error "CCan does only support mbed and Teensyduino, not Arduino!"
 #endif
 
@@ -11,6 +11,7 @@
 using namespace std;
 
 #include "Sync.h"
+#include "CarMessage.h"
 
 #ifndef DEVICE_CAN
     #define DEVICE_CAN

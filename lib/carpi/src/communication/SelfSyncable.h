@@ -85,7 +85,7 @@ class SelfSyncable : public ICommunication {
         }
 
         float _reassambleFloat(uint8_t floatToReassamble[4]) {
-            uint32_t floatBinary;
+            uint32_t floatBinary = 0;
 
             for (uint8_t i = 0; i < 4; i++) {
                 floatBinary |= (((uint32_t)floatToReassamble[i] & 0xFF) << (i * 8));

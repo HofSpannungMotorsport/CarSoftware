@@ -1,7 +1,7 @@
 #ifndef DIGITAL_IN_H
 #define DIGITAL_IN_H
 
-#include "NonCopyable.h"
+#include "../NonCopyable.h"
 
 class DigitalIn : private NonCopyable<DigitalIn> {
     public:
