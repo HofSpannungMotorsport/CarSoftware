@@ -38,8 +38,8 @@ install:
     - platformio update
 
 script:
-    - platformio run -e Master -e Dashboard -e Pedal
-    - platformio test -e Native
+    - platformio run -e Master -e Master-Small -e Dashboard -e Pedal
+    - platformio test -e Native-Travis
 
 
 #
