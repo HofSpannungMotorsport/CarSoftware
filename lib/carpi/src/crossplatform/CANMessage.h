@@ -33,7 +33,7 @@ class CANMessage : public CAN_Message {
             memset(data, 0, 8);
         }
 
-        CANMessage(uint32_t _id, const uint8_t *_data, uint8_t _len = 8, CANType _type = CANData, CANFormat _format = CANStandard) {
+        CANMessage(uint32_t _id, const uint8_t *_data, uint8_t _len, CANType _type = CANData, CANFormat _format = CANStandard) {
             len = _len & 0xF;
             type = _type;
             format = _format;
@@ -47,7 +47,7 @@ class CANMessage : public CAN_Message {
             format = _format;
             id     = _id;
             memset(data, 0, 8);
-        }  
+        }
 };
 
 #endif // CANMESSAGE_H

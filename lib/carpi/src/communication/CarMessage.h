@@ -127,6 +127,41 @@ class CarMessage {
         car_message_dropable_t getDropable() {
             return _dropable;
         }
+
+        // returns 0 if messages are equal
+        int compareTo(CarMessage &carMessage, bool checkSendPriority = false) {
+            // Compare CarMessage-own variables
+            if (getSenderId() != carMessage.getSenderId())
+                return 1;
+            if (getReceiverId() != carMessage.getReceiverId())
+                return 2;
+            if (getComponentId() != carMessage.getComponentId())
+                return 3;
+            if (getDropable() != carMessage.getDropable())
+                return 4;
+
+            if (checkSendPriority && (getSendPriority() != carMessage.getSendPriority()))
+                return 5;
+            
+            // Compare amount of subMessages
+            if (subMessages.size() != carMessage.subMessages.size())
+                return -1;
+            
+            // Go throu the subMessages
+            for (uint16_t i = 0; i < subMessages.size(); i++) {
+                // Compare size of current subMessage
+                if (subMessages[i].length != carMessage.subMessages[i].length)
+                    return -2;
+                
+                // Compare content of subMessage
+                for (uint16_t j = 0; j < subMessages[i].length; j++) {
+                    if (subMessages[i].data[j] != carMessage.subMessages[i].data[j])
+                        return - 3 - j;
+                }
+            }
+
+            return 0;
+        }
     
     protected:
         id_device_t _senderId = DEVICE_NOT_SET; // only 5 bits are useable
