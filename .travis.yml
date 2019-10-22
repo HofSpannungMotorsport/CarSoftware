@@ -36,10 +36,19 @@ cache:
 install:
     - pip install -U platformio
     - platformio update
+    - sudo apt-get install doxygen doxygen-doc doxygen-gui graphviz
 
 script:
     - platformio run -e Master -e Dashboard -e Pedal
 
+after_success:
+  # Generate the docs only if master, the travis_build_docs is true and we can use secure variables
+  - >-
+    if [[ "$TRAVIS_BRANCH" = "development" && -n "$TRAVIS_BUILD_DOCS" && "$TRAVIS_PULL_REQUEST" = "false" ]] ; then
+      cd $PROJECT_DIR_ABS
+      source .ci/setup-ssh.sh || travis_terminate 1
+      .ci/generateDocumentation.sh || travis_terminate 1
+    fi
 
 #
 # Template #2: The project is intended to be used as a library with examples.
