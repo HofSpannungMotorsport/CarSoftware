@@ -39,7 +39,7 @@ install:
     - sudo apt-get install doxygen doxygen-doc doxygen-gui graphviz
 
 script:
-    - platformio run -e Master -e Dashboard -e Pedal
+    - platformio run -e Master -e Dashboard -e Pedal -e Master-Small
 
 after_success:
   # Generate the docs only if master, the travis_build_docs is true and we can use secure variables
