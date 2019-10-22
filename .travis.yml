@@ -45,10 +45,16 @@ after_success:
   # Generate the docs only if master, the travis_build_docs is true and we can use secure variables
   - >-
     if [[ "$TRAVIS_BRANCH" = "development" && "$TRAVIS_PULL_REQUEST" = "false" ]] ; then
-      cd $TRAVIS_BUILD_DIR
-      source .ci/setup-ssh.sh || travis_terminate 1
-      .ci/generateDocumentation.sh || travis_terminate 1
+        doxygen Doxyfile
     fi
+
+deploy:
+  provider: pages
+  skip_cleanup: true
+  local_dir: html
+  github_token: $GH_REPO_TOKEN
+  on:
+    branch: master
 
 #
 # Template #2: The project is intended to be used as a library with examples.
