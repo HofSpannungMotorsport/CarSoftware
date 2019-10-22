@@ -3,7 +3,9 @@ This is the Software for the Cars at HofSpannung Motorsport e. V.
 
 ## Build Status
 Master: [![Travis Build Status](https://travis-ci.org/HofSpannungMotorsport/CarSoftware.svg?branch=master)](https://travis-ci.org/HofSpannungMotorsport/CarSoftware)
+
 Development: [![Travis Build Status](https://travis-ci.org/HofSpannungMotorsport/CarSoftware.svg?branch=development)](https://travis-ci.org/HofSpannungMotorsport/CarSoftware)
+
 V0.1 (deprecated): [![Travis Build Status](https://travis-ci.org/HofSpannungMotorsport/CarSoftware.svg?branch=V0.1)](https://travis-ci.org/HofSpannungMotorsport/CarSoftware)
 
 ## Functionality
