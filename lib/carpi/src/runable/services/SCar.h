@@ -431,6 +431,9 @@ class SCar : public IService {
 
             processErrors();
 
+            while(_button.reset->getStateChanged()) {
+                _button.reset->getState();
+            }
 
             // If all OK, go into Almost Ready to drive
             if (_state == BOOT) {
@@ -438,6 +441,7 @@ class SCar : public IService {
             } else {
                 _resetLeds();
                 _led.red->setState(LED_ON);
+                _sendLedsOverCan();
                 wait(0.5);
                 calibrationNeeded();
                 return;
