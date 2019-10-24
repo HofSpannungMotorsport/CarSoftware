@@ -4,7 +4,7 @@
     With this, all components, services and programs are included in the actual CarSoftware.
 */
 
-#define CARPI_VERSION "V0.1.2-P1 - Reduced Power Option & Launch Control"
+#define CARPI_VERSION "V0.1.2-P2 - Reduced Power Option (Advanced+) & Launch Control"
 
 // Prior include Platform-specific Components
 

@@ -299,13 +299,13 @@ class HardwarePedal : public IPedal {
             setObjectType(OBJECT_HARDWARE);
 
             _pin1.setRawBoundary(_analogLowerBoundary, _analogUpperBoundary);
-            _pin1.setRawBoundaryOutTime(STD_MAX_DEVIANCE_TIME);
+            _pin1.setRawBoundaryOutTime(STD_MAX_OUT_OF_BOUNDARY_TIME);
             _pin1.setBoundary(STD_MAPPED_BOUNDARY_PERCENTAGE);
             _pin1.setBoundaryOutTime(STD_MAX_OUT_OF_BOUNDARY_TIME);
 
             if (_secondSensor) {
                 _pin2.setRawBoundary(_analogLowerBoundary, _analogUpperBoundary);
-                _pin2.setRawBoundaryOutTime(STD_MAX_DEVIANCE_TIME);
+                _pin2.setRawBoundaryOutTime(STD_MAX_OUT_OF_BOUNDARY_TIME);
                 _pin2.setBoundary(STD_MAPPED_BOUNDARY_PERCENTAGE);
                 _pin2.setBoundaryOutTime(STD_MAX_OUT_OF_BOUNDARY_TIME);
             }

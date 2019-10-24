@@ -12,9 +12,25 @@
 #define STD_DISTANCE_PER_REVOLUTION 1.4451326206513048896928159563086 // m -> The distance a wheel will travel over one whole rotation
 #define STD_MOTOR_TO_WHEEL_RATIO (1.0/3.6) // The gear Ratio from the Motor to the rear Wheels
 
-#define THROTTLE_FROM 30 // kM/h
-#define THROTTLE_TO 80 // kM/h
-#define THROTTLE_END_VALUE 0.55 // %
+// New Values to Calculate the Power for the Adaptive Power Control
+#define THROTTLE_ACTIVE
+#define ACCU_MIN_VOLTAGE 330 // V =~ Voltage at full power and about half full accu
+#define ACCU_MAX_VOLTAGE 400 // V = Completely full Accu (will never happen)
+#define ACCU_MAX_ALLOWED_CURRENT 200 // A
+#define MOTOR_MAX_VOLTAGE 470 // V = Max Motor Voltage (according to datasheet)
+#define MOTOR_MAX_VOLTAGE_SPEED_UNDER_LOAD 5170 // RPM
+#define INVERTER_MAX_ALLOWED_CURRENT 381.8 // A (under field I max pk)
+
+// Gets calculated at compilation
+#define ACCU_POWER_MAX_UNDER_LOAD (ACCU_MIN_VOLTAGE * ACCU_MAX_ALLOWED_CURRENT) // Max Power under Load
+#define MOTOR_LOWER_BOUNDARY_VOLTAGE (ACCU_POWER_MAX_UNDER_LOAD / INVERTER_MAX_ALLOWED_CURRENT) // Voltage where the current gets adaptively reduced
+#define MOTOR_RPM_TO_KMH (STD_DISTANCE_PER_REVOLUTION * STD_MOTOR_TO_WHEEL_RATIO * 0.06) // =~ 0.02408554367752174816154693260514
+#define MOTOR_VOLTAGE_TO_RPM_MULTIPLYER (MOTOR_MAX_VOLTAGE_SPEED_UNDER_LOAD / MOTOR_MAX_VOLTAGE)
+#define INVERTER_MAX_POSSIBLE_POWER (ACCU_MAX_VOLTAGE * INVERTER_MAX_ALLOWED_CURRENT) // only for Info
+
+
+// Calculated Values for the adaptive power control
+#define THROTTLE_FROM (MOTOR_LOWER_BOUNDARY_VOLTAGE * MOTOR_VOLTAGE_TO_RPM_MULTIPLYER * MOTOR_RPM_TO_KMH) // only for Info
 
 /*
     Speed is measured by the front Wheels -> most accurat result.
@@ -175,16 +191,20 @@ class SSpeed : public IService {
         }
 
         void _setThrottle(speed_value_t speed) {
-            if (speed > (float)THROTTLE_FROM) {
-                float powerLimit = _map(speed, THROTTLE_FROM, THROTTLE_TO, 1.0, THROTTLE_END_VALUE);
+            #ifdef THROTTLE_ACTIVE
 
-                if (powerLimit < 0.0) powerLimit = 0.0;
-                if (powerLimit > 1.0) powerLimit = 1.0;
+            float currentVoltage = ((speed / ((float)MOTOR_MAX_VOLTAGE_SPEED_UNDER_LOAD * (float)MOTOR_RPM_TO_KMH)) * MOTOR_MAX_VOLTAGE);
+            if (currentVoltage > (float)ACCU_MAX_VOLTAGE) currentVoltage = (float)ACCU_MAX_VOLTAGE;
 
-                _carService.setMaxPower(powerLimit);
-            } else {
-                _carService.setMaxPower(1.0);
-            }
+            float currentMaxPossiblePower = currentVoltage * (float)INVERTER_MAX_ALLOWED_CURRENT;
+            float currentPowerLimit = (float)ACCU_POWER_MAX_UNDER_LOAD / currentMaxPossiblePower;
+
+            if (currentPowerLimit > 1.0) currentPowerLimit = 1.0;
+            if (currentPowerLimit < 0.0) currentPowerLimit = 0.0;
+
+            _carService.setMaxPower(currentPowerLimit);
+
+            #endif
         }
 };
 
