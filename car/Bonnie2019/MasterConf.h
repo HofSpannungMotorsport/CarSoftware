@@ -10,6 +10,9 @@
 //#define SSPEED_DISABLE_CURRENT_LIMITATION // Disable current limit depending on the speed
 //#define SSPEED_REPORT_MOTOR_RPM
 //#define SCAR_PRINT_POWER_SETTING
+//#define PMOTORCONTROLLER_DISABLE_MOTOR_POWER_OUTPUT
+#define PMOTORCONTROLLER_ACTIVATE_RECUPERATION
+//#define PMOTORCONTROLLER_USE_BRAKE_FOR_RECUPERATION
 #include "carpi.h"
 
 #define HIGH_DEMAND_SERVICE_REFRESH_RATE 120 // Hz
@@ -49,7 +52,7 @@ SoftwareRpmSensor rpmFrontRight(COMPONENT_RPM_FRONT_RIGHT);
 
 //   Hardware
 HardwareLed brakeLight(MASTER_PIN_BRAKE_LIGHT, COMPONENT_LED_BRAKE);
-HardwareMotorController motorController(MASTER_PIN_MOTOR_CONTROLLER_CAN_RD, MASTER_PIN_MOTOR_CONTROLLER_CAN_TD, MASTER_PIN_RFE_ENABLE, MASTER_PIN_RUN_ENABLE, COMPONENT_MOTOR_MAIN);
+HardwareMotorController motorController(MASTER_PIN_MOTOR_CONTROLLER_CAN_RD, MASTER_PIN_MOTOR_CONTROLLER_CAN_TD, MASTER_PIN_RFE_ENABLE, MASTER_PIN_RUN_ENABLE, BAMOCAR_D3_700V, COMPONENT_MOTOR_MAIN);
 //HardwareRpmSensor rpmRearLeft(MASTER_PIN_RPM_SENSOR_HL, RPM_REAR_LEFT); // [il]
 //HardwareRpmSensor rpmRearRight(MASTER_PIN_RPM_SENSOR_HR, RPM_REAR_RIGHT); // [il]
 HardwareFan coolingFan(MASTER_PIN_FAN, COMPONENT_COOLING_FAN);
@@ -74,13 +77,14 @@ SCar carService(canService,
                 cockpitIndicatorProgram,
                 brakeLightService);
 
-PMotorController motorControllerService(carService,
-                                        (IMotorController*)&motorController,
-                                        (IPedal*)&gasPedal, (IPedal*)&brakePedal);
-
 SSpeed speedService(carService,
                     (IRpmSensor*)&rpmFrontLeft, (IRpmSensor*)&rpmFrontRight, /* (IRpmSensor*)&rpmRearLeft, (IRpmSensor*)&rpmRearRight, */ // [il]
                     (IMotorController*)&motorController);
+
+PMotorController motorControllerService(carService,
+                                        (IMotorController*)&motorController,
+                                        (IPedal*)&gasPedal, (IPedal*)&brakePedal,
+                                        speedService);
 
 PCooling coolingService(carService,
                         speedService,
@@ -118,9 +122,9 @@ class Master : public Carpi {
             // Add all high demand Services to our Service list
             highDemandServices.addRunable((IRunable*)&canService);
             highDemandServices.addRunable((IRunable*)&carService);
+            highDemandServices.addRunable((IRunable*)&speedService);
             highDemandServices.addRunable((IRunable*)&motorControllerService);
             highDemandServices.addRunable((IRunable*)&brakeLightService);
-            highDemandServices.addRunable((IRunable*)&speedService);
 
             // Add all low demand Services to our Service list
             lowDemandServices.addRunable((IRunable*)&coolingService);

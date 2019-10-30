@@ -46,6 +46,10 @@ class IMotorController : public IComponent {
         virtual int16_t getServoTemp() = 0;
         virtual int16_t getAirTemp() = 0;
 
+        // Voltage
+        virtual float getDcVoltage() = 0;
+        virtual float getDcVoltageGotCount() = 0;
+
         // Enable setter
         virtual void setRFE(motor_controller_rfe_enable_t state) = 0;
         virtual void setRUN(motor_controller_run_enable_t state) = 0;

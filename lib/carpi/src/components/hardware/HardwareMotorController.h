@@ -10,11 +10,12 @@
 #define STD_MOTOR_TEMP_REFRESH_TIME 12 // Hz
 #define STD_CONTROLLER_TEMP_REFRESH_TIME 12 // Hz
 #define STD_AIR_TEMP_REFRESH_TIME 6 // Hz
+#define STD_MOTOR_VOLTAGE_REFRESH_TIME 240 // Hz
 
 class HardwareMotorController : public IMotorController {
     public:
-        HardwareMotorController(PinName canRD, PinName canTD, PinName RFE, PinName RUN)
-            : _bamocar(canRD, canTD), _rfe(RFE), _run(RUN) {
+        HardwareMotorController(PinName canRD, PinName canTD, PinName RFE, PinName RUN, model_type_t modelType)
+            : _bamocar(canRD, canTD, modelType), _rfe(RFE), _run(RUN) {
             _rfe = 0;
             _run = 0;
 
@@ -22,15 +23,16 @@ class HardwareMotorController : public IMotorController {
             setObjectType(OBJECT_HARDWARE);
         }
 
-        HardwareMotorController(PinName canRD, PinName canTD, PinName RFE, PinName RUN, id_sub_component_t componentSubId)
-            : HardwareMotorController(canRD, canTD, RFE, RUN) {
+        HardwareMotorController(PinName canRD, PinName canTD, PinName RFE, PinName RUN, model_type_t modelType, id_sub_component_t componentSubId)
+            : HardwareMotorController(canRD, canTD, RFE, RUN, modelType) {
             setComponentSubId(componentSubId);
         }
 
         void beginCommunication() {
             _bamocar.requestSpeed(1000 / (float)STD_SPEED_REFRESH_TIME);
-            _bamocar.requestCurrent(1000 / (float)STD_CURRENT_REFRESH_TIME);
+            //_bamocar.requestCurrent(1000 / (float)STD_CURRENT_REFRESH_TIME);
             _bamocar.requestTemp(1000 / (float)STD_MOTOR_TEMP_REFRESH_TIME);
+            _bamocar.requestDcVoltage(1000 / (float)STD_MOTOR_VOLTAGE_REFRESH_TIME);
         }
 
         virtual motor_controller_status_t getStatus() {
@@ -67,14 +69,14 @@ class HardwareMotorController : public IMotorController {
                     // Else, set to boundary
                     setTorqueTo = 1.0;
                 }
-            } else if (torque < 0) {
-                // A negative Value would result in a reverse-rotating motor -> not allowed!
-                if (torque < (-0.1)) {
+            } else if (torque < -1.0) {
+                // A negative represents negative torque -> if only spinning into front direction, this will result in recuperation
+                if (torque < (-1.1)) {
                     motor_controller_error_type_t badValError = MOTOR_CONTROLLER_BAD_VAR_GIVEN;
                     _status = badValError;
                     setTorqueTo = 0;
                 } else {
-                    setTorqueTo = 0;
+                    setTorqueTo = -1.0;
                 }
             }
 
@@ -99,6 +101,14 @@ class HardwareMotorController : public IMotorController {
 
         virtual int16_t getAirTemp() {
             return _bamocar.getAirTemp();
+        }
+
+        virtual float getDcVoltage() {
+            return _bamocar.getDcVoltage();
+        }
+
+        virtual float getDcVoltageGotCount() {
+            return _bamocar.getDcVoltageGotCount();
         }
 
         virtual void setRFE(motor_controller_rfe_enable_t state) {

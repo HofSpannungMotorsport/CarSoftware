@@ -8,9 +8,7 @@
 #include "components/interface/IPedal.h"
 #include "components/interface/IRpmSensor.h"
 #include "components/software/SoftwareRpmSensor.h"
-
-#define STD_MAX_POWER 80 // kW
-#define STD_POWER_SET_ON_MOTOR_CONTROLLER 80 // kW
+#include "runable/services/SSpeed.h"
 
 #define STD_AGE_LIMIT 3.0 // s
 #define STD_BRAKE_POWER_LOCK_THRESHHOLD 0.40 // 40% -> if brake is put down only this amount, the Gas Pedal will be blocked
@@ -22,24 +20,28 @@
 #define STD_HARD_BRAKE_PRESSURE 30 // bar [il]
 #define STD_HARD_BRAKE_CUTOFF_TIME 0.5 // 500 ms -> unprime gas pedal if braked hard for longer than this
 #define STD_HARD_BRAKE_CUTOFF_APPS_POSITION 0.25 // 25% -> If equal or higher than that while hard brake, gas pedal will be unprimed
-#define STD_HARD_BRAKE_CUTOFF_POWER 25 // kW -> If Power at Output highter than that while hard brake, gas pedal will be unprimed
+
+// HAS TO BE BOUNT TO SSPEED!!! The settings there define the max Current allowed, based on that, make the choice here
+#define STD_MAX_RECUPERATION_PERCENTAGE 0.204 // % (245 A set Max at SSpeed -> ~50 A)
+#define STD_RECU_SPEED_THRESHHOLD 2 // km/h - Under this speed, Recuperation is disabled
+#define STD_RECU_SPEED_FULL 4 // km/h - From this speed up, recuperation is completely enabled
+
+// Recuperation using the Brake Pedal. Only used, if "PMOTORCONTROLLER_USE_BRAKE_FOR_RECUPERATION" is defined
+#ifdef PMOTORCONTROLLER_USE_BRAKE_FOR_RECUPERATION
+    #define STD_BRAKE_RECU_START 0.05 // % where the Brake-Pedal will activate recuperation
+    #define STD_BRAKE_RECU_MAX 0.20 // % where the Brake-Pedal reaches recuperation max
+#else
+    #define STD_GAS_RECU_THRESHHOLD 0.10 // % where the gas pedal will enter recuperation down below and power up above
+#endif
 
 class PMotorController : public IProgram {
     public:
         PMotorController(SCar &carService,
                                IMotorController* motorController,
-                               IPedal* gasPedal, IPedal* brakePedal)
-            : _carService(carService) {
-            _setBasicComponents(motorController, gasPedal, brakePedal);
-        }
-
-        PMotorController(SCar &carService,
-                               IMotorController* motorController,
                                IPedal* gasPedal, IPedal* brakePedal,
-                               IRpmSensor* frontLeftWheel, IRpmSensor* frontRightWheel, IRpmSensor* rearLeftWheel, IRpmSensor* rearRightWheel)
-            : _carService(carService) {
+                               SSpeed &speedService)
+            : _carService(carService), _speedService(speedService) {
             _setBasicComponents(motorController, gasPedal, brakePedal);
-            _setASRComponents(frontLeftWheel, frontRightWheel, rearLeftWheel, rearRightWheel);
         }
 
         virtual void run() {
@@ -51,32 +53,82 @@ class PMotorController : public IProgram {
             // and register it as error too.
             _checkErrors();
 
+
             float returnValue = 0;
+            float speed = _speedService.getSpeed();
+
             // Only if ready, set calculated Power
             if (_ready) {
                 // Get pedal status (if brake is pushed -> gas pedal will be locked -> returns 0)
                 returnValue = (float)_getPedalPower();
-
-                if (_asrActive) {
-                    returnValue = _ASR(returnValue);
-                }
-
-                // Map the Value to match the power limit/set power
-                returnValue = _mapToPowerLimit(returnValue);
             } else {
                 unprimeGas();
             }
 
-            // Send new Power to Motor -> Brum Brum (but without the Brum Brum)
-            // ...maybe a drivers scream ;)
+            #ifdef PMOTORCONTROLLER_ACTIVATE_RECUPERATION
+                #ifdef PMOTORCONTROLLER_USE_BRAKE_FOR_RECUPERATION
+                    if (returnValue <= 0.00001) { // just to correct float error
+                        float brakePosition = _pedal.brake->getValue();
+                        if (brakePosition > STD_BRAKE_RECU_START) {
+                            if (brakePosition > STD_BRAKE_RECU_MAX) {
+                                returnValue = -STD_MAX_RECUPERATION_PERCENTAGE;
+                            } else {
+                                returnValue = -STD_MAX_RECUPERATION_PERCENTAGE * _map(brakePedal, STD_BRAKE_RECU_START, STD_BRAKE_RECU_MAX, 0.0, 1.0);
+                            }
+                        } else {
+                            returnValue = 0;
+                        }
+                    }
+                #else
+                    if (returnValue < STD_GAS_RECU_THRESHHOLD) {
+                        returnValue = _map(returnValue, 0.0, STD_GAS_RECU_THRESHHOLD, -STD_MAX_RECUPERATION_PERCENTAGE, 0.0);
+                        if (returnValue < -STD_MAX_RECUPERATION_PERCENTAGE) returnValue = -STD_MAX_RECUPERATION_PERCENTAGE;
+                        if (returnValue > 0.0) returnValue = 0.0;
+                    } else {
+                        returnValue = _map(returnValue, STD_GAS_RECU_THRESHHOLD, 1.0, 0.0, 1.0);
+                        if (returnValue < 0.0) returnValue = 0.0;
+                        if (returnValue > 1.0) returnValue = 1.0;
+                    }
+                #endif
+            #endif
 
-            returnValue = _applyGasCurve(returnValue);
 
-            returnValue = _applyPowerMode(returnValue);
+            if (returnValue >= 0) {
+                returnValue = _applyGasCurve(returnValue);
+                returnValue = _setLaunchControl(returnValue);
+            }
 
-            returnValue = _setLaunchControl(returnValue);
 
-            _motorController->setTorque(returnValue);
+            #ifdef PMOTORCONTROLLER_ACTIVATE_RECUPERATION
+                // If Recuperating, apply speed settings
+                if (returnValue < 0) {
+                    if (speed < STD_RECU_SPEED_THRESHHOLD) {
+                        // Too slow for recu -> disable it
+                        returnValue = 0;
+                    } else {
+                        if (speed < STD_RECU_SPEED_FULL) {
+                            // Throttle recu according to the speed
+                            float maxRecu = _map(speed, STD_RECU_SPEED_THRESHHOLD, STD_RECU_SPEED_FULL, 0.0, 1.0);
+                            returnValue *= maxRecu;
+                        } else {
+                            // Recu full enabled -> no limit needed
+                        }
+                    }
+
+                    if (returnValue < -STD_MAX_RECUPERATION_PERCENTAGE)
+                        returnValue = -STD_MAX_RECUPERATION_PERCENTAGE;
+                }
+            #else
+                if (returnValue < 0) returnValue = 0;
+            #endif
+
+            returnValue *= _carService.getPowerSetting();
+
+            #ifndef PMOTORCONTROLLER_DISABLE_MOTOR_POWER_OUTPUT
+                _motorController->setTorque(returnValue);
+            #else
+                _motorController->setTorque(0);
+            #endif
 
             #ifdef MOTORCONTROLLER_OUTPUT
                 pcSerial.printf("%f\n", returnValue);
@@ -89,14 +141,10 @@ class PMotorController : public IProgram {
 
     protected:
         SCar &_carService;
+        SSpeed &_speedService;
         IMotorController* _motorController;
         bool _ready = false;
         bool _communicationStarted = false;
-
-        struct _power {
-            float max = STD_MAX_POWER,
-                  setOnController = STD_POWER_SET_ON_MOTOR_CONTROLLER;
-        } _power;
 
         struct _pedalStruct_t {
             IPedal* object;
@@ -124,29 +172,13 @@ class PMotorController : public IProgram {
                            _rearLeftWheel,
                            _rearRightWheel;
 
-        bool _asrActive = false;
-
-        struct _asrSave {
-            float lastTorque, lastA;
-            Timer lastRun;
-        } _asrSave;
+        float _map(float x, float in_min, float in_max, float out_min, float out_max) {
+            return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+        }
 
         void _checkErrors() {
             if (_motorController->getStatus() > 0) {
                 _carService.addError(Error(_motorController->getComponentId(), _motorController->getStatus(), ERROR_CRITICAL));
-            }
-
-            if (_asrActive) {
-                if (_frontLeftWheel.object->getStatus() > 0 ||
-                    _frontRightWheel.object->getStatus() > 0 ||
-                    _rearLeftWheel.object->getStatus() > 0 ||
-                    _rearRightWheel.object->getStatus() > 0 ||
-                    _getAge(_frontLeftWheel) > STD_AGE_LIMIT ||
-                    _getAge(_frontRightWheel) > STD_AGE_LIMIT ||
-                    _getAge(_rearLeftWheel) > STD_AGE_LIMIT ||
-                    _getAge(_rearRightWheel) > STD_AGE_LIMIT) {
-                    _asrError();
-                }
             }
 
             if ((_gasPedal.object->getStatus() > 0) || (_getAge(_gasPedal) > STD_AGE_LIMIT)) {
@@ -170,11 +202,6 @@ class PMotorController : public IProgram {
             _carService.calibrationNeeded();
         }
 
-        void _asrError() {
-            _asrActive = false;
-            _carService.addError(Error(componentId::getComponentId(COMPONENT_SYSTEM, COMPONENT_SYSTEM_MASTER), 0x0, ERROR_ISSUE));
-        }
-
         float _getAge(_rpmSensorStruct_t &sensor) {
             if (sensor.ageStarted) {
                 return sensor.age.read();
@@ -194,13 +221,6 @@ class PMotorController : public IProgram {
         void _updateValues() {
             _update(_gasPedal);
             _update(_brakePedal);
-
-            if (_asrActive) {
-                _update(_frontLeftWheel);
-                _update(_frontRightWheel);
-                _update(_rearLeftWheel);
-                _update(_rearRightWheel);
-            }
 
             if (!_communicationStarted) {
                 _motorController->beginCommunication();
@@ -246,16 +266,6 @@ class PMotorController : public IProgram {
             _brakePedal.object = brakePedal;
         }
 
-        void _setASRComponents(IRpmSensor* frontLeftWheel, IRpmSensor* frontRightWheel, IRpmSensor* rearLeftWheel, IRpmSensor* rearRightWheel) {
-            _asrActive = true;
-            _asrSave.lastRun.stop();
-            _asrSave.lastRun.reset();
-            _frontLeftWheel.object = frontLeftWheel;
-            _frontRightWheel.object = frontRightWheel;
-            _rearLeftWheel.object = rearLeftWheel;
-            _rearRightWheel.object = rearRightWheel;
-        }
-
         pedal_value_t _getPedalPower() {
             pedal_value_t returnValue = _gasPedal.lastValue;
 
@@ -280,12 +290,6 @@ class PMotorController : public IProgram {
                             // -> Hard Brakeing too long -> it is interpreted as a Hard Brake
                             if (_gasPedal.lastValue >= STD_HARD_BRAKE_CUTOFF_APPS_POSITION) {
                                 // -> Still giving Power throu the Pedal -> Pedal Position too high
-                                _gasPedalPrimed = false;
-                            }
-
-                            float currentPower = _mapToPowerLimit(returnValue) * _power.setOnController;
-                            if (currentPower >= STD_HARD_BRAKE_CUTOFF_POWER) {
-                                // Calculated Power Output too high -> also unprime the APPS/Gas Pedal
                                 _gasPedalPrimed = false;
                             }
                         }
@@ -323,28 +327,6 @@ class PMotorController : public IProgram {
             return returnValue;
         }
 
-        float _mapToPowerLimit(float returnValue) {
-            /*  We have two values:
-                _power.max:             The maximum Power to be applied on our Motor (absolut)
-                _power.setOnController: The Power Maximum set on our Motor Controller.
-
-                If the Power set on the Motor controller is lower or equal max, it will be limited to the
-                one set on the Motor Controller (obvious). Else, we have to map our value.
-            */
-
-            if (_power.max < _power.setOnController) {
-                returnValue = returnValue * _power.max / _power.setOnController;
-            }
-
-            return returnValue;
-        }
-
-        float _ASR(float returnValue) {
-            // Implementing later
-            // [il]
-            return returnValue;
-        }
-
         float _applyGasCurve(float pedalPosition) {
             float gasValue = pedalPosition;
 
@@ -364,10 +346,6 @@ class PMotorController : public IProgram {
             else if (gasValue < 0.0) gasValue = 0.0;
 
             return gasValue;
-        }
-
-        float _applyPowerMode(float pedalPosition) {
-            return pedalPosition * _carService.getPowerSetting();
         }
 
         float _setLaunchControl(float pedalPosition) {

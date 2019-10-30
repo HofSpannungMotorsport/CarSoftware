@@ -12,25 +12,18 @@
 #define STD_DISTANCE_PER_REVOLUTION 1.4451326206513048896928159563086 // m -> The distance a wheel will travel over one whole rotation
 #define STD_MOTOR_TO_WHEEL_RATIO (1.0/3.6) // The gear Ratio from the Motor to the rear Wheels
 
-// New Values to Calculate the Power for the Adaptive Power Control
-#define THROTTLE_ACTIVE
-#define ACCU_MIN_VOLTAGE 330 // V =~ Voltage at full power and about half full accu
-#define ACCU_MAX_VOLTAGE 400 // V = Completely full Accu (will never happen)
-#define ACCU_MAX_ALLOWED_CURRENT 200 // A
+// Values to Calculate the Power for the Adaptive Power Control
+#define THROTTLE_ACTIVE // Comment do deactivate the Throttle according to the speed, dc voltage and the given values down below
+#define ACCU_MIN_VOLTAGE 300 // V -> is only used, if the Voltage can't be red from the Inverter
+#define ACCU_MAX_ALLOWED_POWER 80000 // W -> 80 kW
+#define ACCU_MAX_ALLOWED_CURRENT 245 // A !!! Also change the value at PMotorController for the max allowed Recuperation % !!!
 #define MOTOR_MAX_VOLTAGE 470 // V = Max Motor Voltage (according to datasheet)
 #define MOTOR_MAX_VOLTAGE_SPEED_UNDER_LOAD 5170 // RPM
-#define INVERTER_MAX_ALLOWED_CURRENT 381.8 // A (under field I max pk)
+#define INVERTER_MAX_ALLOWED_CURRENT 424.3 // A (under field I max pk)
 
 // Gets calculated at compilation
-#define ACCU_POWER_MAX_UNDER_LOAD (ACCU_MIN_VOLTAGE * ACCU_MAX_ALLOWED_CURRENT) // Max Power under Load
-#define MOTOR_LOWER_BOUNDARY_VOLTAGE (ACCU_POWER_MAX_UNDER_LOAD / INVERTER_MAX_ALLOWED_CURRENT) // Voltage where the current gets adaptively reduced
 #define MOTOR_RPM_TO_KMH (STD_DISTANCE_PER_REVOLUTION * STD_MOTOR_TO_WHEEL_RATIO * 0.06) // =~ 0.02408554367752174816154693260514
 #define MOTOR_VOLTAGE_TO_RPM_MULTIPLYER (MOTOR_MAX_VOLTAGE_SPEED_UNDER_LOAD / MOTOR_MAX_VOLTAGE)
-#define INVERTER_MAX_POSSIBLE_POWER (ACCU_MAX_VOLTAGE * INVERTER_MAX_ALLOWED_CURRENT) // only for Info
-
-
-// Calculated Values for the adaptive power control
-#define THROTTLE_FROM (MOTOR_LOWER_BOUNDARY_VOLTAGE * MOTOR_VOLTAGE_TO_RPM_MULTIPLYER * MOTOR_RPM_TO_KMH) // only for Info
 
 /*
     Speed is measured by the front Wheels -> most accurat result.
@@ -162,7 +155,7 @@ class SSpeed : public IService {
                 pcSerial.printf("[SSpeed]@run: Current Motor RPM: %.3f RPM\n", motorControllerRpm);
             #endif
 
-            return (motorControllerRpm * STD_MOTOR_TO_WHEEL_RATIO * STD_DISTANCE_PER_REVOLUTION * 0.06);
+            return (motorControllerRpm * MOTOR_RPM_TO_KMH);
         }
 
         bool _checkPlausibility(IRpmSensor* sensor1, IRpmSensor* sensor2) {
@@ -186,23 +179,42 @@ class SSpeed : public IService {
             return true;
         }
 
-        float _map(float x, float in_min, float in_max, float out_min, float out_max) {
-            return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-        }
-
         void _setThrottle(speed_value_t speed) {
             #ifdef THROTTLE_ACTIVE
 
-            float currentVoltage = ((speed / ((float)MOTOR_MAX_VOLTAGE_SPEED_UNDER_LOAD * (float)MOTOR_RPM_TO_KMH)) * MOTOR_MAX_VOLTAGE);
-            if (currentVoltage > (float)ACCU_MAX_VOLTAGE) currentVoltage = (float)ACCU_MAX_VOLTAGE;
+            // At first, get current DC Voltage
+            float dcVoltage = _motorController->getDcVoltage();
 
-            float currentMaxPossiblePower = currentVoltage * (float)INVERTER_MAX_ALLOWED_CURRENT;
-            float currentPowerLimit = (float)ACCU_POWER_MAX_UNDER_LOAD / currentMaxPossiblePower;
+            // Only use this voltage if the Inverter already sent it
+            if (_motorController->getDcVoltageGotCount() < 1) {
+                dcVoltage = ACCU_MIN_VOLTAGE;
+            }
 
-            if (currentPowerLimit > 1.0) currentPowerLimit = 1.0;
-            if (currentPowerLimit < 0.0) currentPowerLimit = 0.0;
+            // calculate the current Motor Voltage according to the Speed
+            float motorVoltage = ((speed / ((float)MOTOR_MAX_VOLTAGE_SPEED_UNDER_LOAD * (float)MOTOR_RPM_TO_KMH)) * MOTOR_MAX_VOLTAGE);
+            // And limit it by the Accu Voltage
+            if (motorVoltage > (float)dcVoltage) motorVoltage = (float)dcVoltage;
 
-            _carService.setMaxPower(currentPowerLimit);
+            // Get the current max Power according to the Motor Voltage
+            float maxPossiblePower = motorVoltage * (float)INVERTER_MAX_ALLOWED_CURRENT;
+
+            // Now limit the power either by the allowed current OR by the allowed Power
+            float powerLimitByCurrent = (dcVoltage * (float)ACCU_MAX_ALLOWED_CURRENT) / maxPossiblePower;
+            float powerLimitByPower = (float)ACCU_MAX_ALLOWED_POWER / maxPossiblePower;
+
+            // Check the lower power setting
+            float powerLimit = 1.0;
+            if (powerLimitByCurrent >= powerLimitByPower)
+                powerLimit = powerLimitByPower;
+            else if (powerLimitByCurrent < powerLimitByPower)
+                powerLimit = powerLimitByCurrent;
+
+            // Limit to boundary
+            if (powerLimit > 1.0) powerLimit = 1.0;
+            if (powerLimit < 0.0) powerLimit = 0.0;
+
+            // And shoot it down the channel
+            _carService.setMaxPower(powerLimit);
 
             #endif
         }
