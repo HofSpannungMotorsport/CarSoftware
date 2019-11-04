@@ -39,11 +39,15 @@ public:
     CircularBuffer() : _head(0), _tail(0), _full(false)
     {
         if (!internal::is_unsigned<CounterType>::value)
+        #ifndef USE_NATIVE
             pcSerial.println("[CircualrBuffer]@CircularBuffer: Invalid CounterType must be unsigned");
+        #endif
 
         if ((sizeof(CounterType) >= sizeof(uint32_t)) ||
             (BufferSize < (((uint64_t) 1) << (sizeof(CounterType) * 8)))) {
-            pcSerial.println("[CircualrBuffer]@CircularBuffer: Invalid BufferSize for the CounterType");
+            #ifndef USE_NATIVE
+                pcSerial.println("[CircualrBuffer]@CircularBuffer: Invalid BufferSize for the CounterType");
+            #endif
         }
     }
 

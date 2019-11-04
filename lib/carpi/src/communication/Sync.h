@@ -224,9 +224,9 @@ class Sync : public IRunable {
         }
 
         void _receive(CarMessage &carMessage) {
-            #if defined(SYNC_DEBUG) && defined(MESSAGE_REPORT)
-                pcSerial.printf("[Sync]@receive: Received Message for component 0x%x\n", carMessage.getComponentId());
-            #endif
+            //#if defined(SYNC_DEBUG) && defined(MESSAGE_REPORT)
+                printf("[Sync]@receive: Received Message for component 0x%x\n", carMessage.getComponentId());
+            //#endif
 
             // Check if the message is assigned to this device
             if (carMessage.getReceiverId() == _thisId) {
@@ -235,9 +235,9 @@ class Sync : public IRunable {
                     if (route.component->getComponentId() == carMessage.getComponentId()) {
                         route.component->receive(carMessage);
 
-                        #if defined(SYNC_DEBUG) && defined(MESSAGE_REPORT)
-                            pcSerial.printf("[Sync]@receive: Pushed message to Component 0x%x\n", carMessage.getComponentId());
-                        #endif
+                        //#if defined(SYNC_DEBUG) && defined(MESSAGE_REPORT)
+                            printf("[Sync]@receive: Pushed message to Component 0x%x\n", carMessage.getComponentId());
+                        //#endif
 
                         break;
                     }
@@ -251,15 +251,15 @@ class Sync : public IRunable {
                             bool bridged = false;
                         #endif
 
-                        if (bridge.deviceId1 == carMessage.getSenderId()) {
-                            if (bridge.deviceId2 == carMessage.getReceiverId()) {
+                        if (bridge.deviceId1 == carMessage.getSenderId() || bridge.deviceId1 == DEVICE_ALL) {
+                            if (bridge.deviceId2 == carMessage.getReceiverId() || carMessage.getReceiverId() == DEVICE_ALL) {
                                 _send(carMessage, bridge.channelDevice2);
                                 #if defined(SYNC_DEBUG) && defined(MESSAGE_REPORT)
                                     bridged = true;
                                 #endif
                             }
-                        } else if (bridge.deviceId2 == carMessage.getSenderId()) {
-                            if (bridge.deviceId1 == carMessage.getReceiverId()) {
+                        } else if (bridge.deviceId2 == carMessage.getSenderId() || bridge.deviceId2 == DEVICE_ALL) {
+                            if (bridge.deviceId1 == carMessage.getReceiverId() || carMessage.getReceiverId() == DEVICE_ALL) {
                                 _send(carMessage, bridge.channelDevice1);
                                 #if defined(SYNC_DEBUG) && defined(MESSAGE_REPORT)
                                     bridged = true;
