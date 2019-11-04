@@ -1,7 +1,7 @@
 #ifndef CAN_H
 #define CAN_H
 
-#include "CANMessage.h"
+#include "../CANMessage.h"
 #include "FlexCAN.h"
 
 #define STD_CAN_BAUD 250000

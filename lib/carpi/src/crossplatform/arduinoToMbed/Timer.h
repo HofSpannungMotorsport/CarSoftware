@@ -1,7 +1,7 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-#include "NonCopyable.h"
+#include "../NonCopyable.h"
 
 class Timer : private NonCopyable<Timer> {
     public:

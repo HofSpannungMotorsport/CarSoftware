@@ -4,6 +4,10 @@
 #include <string>
 using namespace std;
 
+#ifndef USE_MBED
+    #include "crossplatform/NonCopyable.h"
+#endif
+
 typedef uint8_t status_t;
 typedef uint8_t sd_log_id_t;
 

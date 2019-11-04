@@ -3,7 +3,7 @@
 
 #include "HardConfig.h"
 
-#ifdef USE_ARDUINO
+#if !defined(USE_MBED) && !defined(USE_TEENSYDUINO) && !defined(USE_NATIVE)
     #error "CCan does only support mbed and Teensyduino, not Arduino!"
 #endif
 
@@ -11,6 +11,7 @@
 using namespace std;
 
 #include "Sync.h"
+#include "CarMessage.h"
 
 #ifndef DEVICE_CAN
     #define DEVICE_CAN
@@ -28,9 +29,9 @@ class CCan : public IChannel {
 
         virtual void send(CarMessage &carMessage) {
             // Drop oldest message if _dropQueue is full
-            while (_outQueue.size() >= _maxSize.outQueue) {
-                _dropOldestMessage(_outQueue);
-                _dropped.outQueue++;
+            if (_outQueue.size() >= _maxSize.outQueue) {
+                if (_dropOldestMessage(_outQueue))
+                    _dropped.outQueue++;
             }
 
             _outQueue.push_back(carMessage);
@@ -42,7 +43,7 @@ class CCan : public IChannel {
         }
 
         virtual void run() {
-            #ifdef USE_TEENSYDUINO
+            #if defined(USE_TEENSYDUINO) || defined(USE_NATIVE)
                 if (_can.available() > 0) {
                     _canMessageReceive();
                 }
@@ -88,13 +89,15 @@ class CCan : public IChannel {
             -> oldest Message measured on the time it was put in the container, not the duration of the timeout
             -> should be not important anymore because a newer more uptodate message is already present
         */
-        void _dropOldestMessage(vector<CarMessage> &queue) {
+        bool _dropOldestMessage(vector<CarMessage> &queue) {
             for (auto carMessageIterator = queue.begin(); carMessageIterator != queue.end(); carMessageIterator++) {
                 if (carMessageIterator->getDropable() == IS_DROPABLE) {
                     queue.erase(carMessageIterator);
-                    return;
+                    return true;
                 }
             }
+
+            return false;
         }
 
         void _getCarMessage(CANMessage &canMessage, CarMessage &carMessage) {
@@ -106,8 +109,9 @@ class CCan : public IChannel {
             #endif
 
             car_sub_message_t subMessage;
+            subMessage.length = canMessage.len - 1;
 
-            for (uint8_t i = 0; i < canMessage.len-1; i++) {
+            for (uint8_t i = 0; i < subMessage.length; i++) {
                 subMessage.data[i] = canMessage.data[i+1];
             }
 
@@ -131,7 +135,7 @@ class CCan : public IChannel {
             #endif
         }
 
-        car_message_priority_t _getHighestPriortiy(vector<CarMessage> &queue) {
+        car_message_priority_t _getHighestPriority(vector<CarMessage> &queue) {
             car_message_priority_t highestPriorityFound = CAR_MESSAGE_PRIORITY_LOWEST;
             for(CarMessage &carMessage : queue) {
                 if(carMessage.getSendPriority() < highestPriorityFound) {
@@ -147,12 +151,12 @@ class CCan : public IChannel {
             while(!_outQueue.empty()) {
                 // Search highest priority in two steps
                 // First find the highest priority (the smallest priority-number)
-                // then find the first message with this priortiy and send it
+                // then find the first message with this Priority and send it
 
-                car_message_priority_t highestPriortiy = _getHighestPriortiy(_outQueue);
+                car_message_priority_t highestPriority = _getHighestPriority(_outQueue);
 
                 for(auto carMessageIterator = _outQueue.begin(); carMessageIterator != _outQueue.end(); ) {
-                    if (carMessageIterator->getSendPriority() == highestPriortiy) {
+                    if (carMessageIterator->getSendPriority() == highestPriority) {
                         CANMessage canMessage;
                         _getCanMessage(*carMessageIterator, 0, canMessage);
 
@@ -187,7 +191,15 @@ class CCan : public IChannel {
                             #if defined(CCAN_SENDING_DEBUG) && defined(MESSAGE_REPORT)
                                 pcSerial.printf("[CCan]@_send->_outQueue: Successfully sent canMessage with component ID 0x%x and message ID 0x%x\n", canMessage.data[0], canMessage.id);
                             #endif
+                        } else {
+                            #if defined(CCAN_SENDING_DEBUG) && defined(MESSAGE_REPORT)
+                                pcSerial.printf("[CCan]@_send->_outQueue: CAN Send Buffer full for Message with component ID 0x%x and message ID 0x%x\n", canMessage.data[0], canMessage.id);
+                            #endif
+
+                            return;
                         }
+                    } else {
+                        ++carMessageIterator;
                     }
                 }
             }

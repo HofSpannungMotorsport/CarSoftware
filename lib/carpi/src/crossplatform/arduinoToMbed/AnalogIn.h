@@ -1,7 +1,7 @@
 #ifndef ANALOG_IN_H
 #define ANALOG_IN_H
 
-#include "NonCopyable.h"
+#include "../NonCopyable.h"
 
 #define ANALOG_IN_RESOLUTION 10 // bit
 
