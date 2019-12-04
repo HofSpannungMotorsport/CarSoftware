@@ -60,14 +60,16 @@ class SCar : public IService {
              IAlive& pedalAlive, IAlive& dashboardAlive, IAlive& masterAlive,
              PCockpitIndicator &ci,
              PBrakeLight &brakeLightService)
-             : _syncer(syncer), _registry(registry), _ci(ci), _brakeLightService(brakeLightService),
+             : _registry(registry),
                _button(buttonReset, buttonStart),
                _led(ledRed, ledYellow, ledGreen),
                _pedal(gasPedal, brakePedal),
+               _syncer(syncer),
                _buzzer(buzzer), _motorController(motorController),
                _hvEnabled(hvEnabled), _tsms(tsms),
                _sdCard(sdCard),
-               _pedalAlive(pedalAlive), _dashboardAlive(dashboardAlive), _masterAlive(masterAlive) {}
+               _pedalAlive(pedalAlive), _dashboardAlive(dashboardAlive), _masterAlive(masterAlive),
+               _ci(ci), _brakeLightService(brakeLightService) {}
 
         virtual void run() {
             _checkHvEnabled();
@@ -400,6 +402,7 @@ class SCar : public IService {
                 anyControllerDead = true;
             }
 
+            /*
             // Beep only for testing !!!
             if (anyControllerDead) {
                 _buzzer.setBeep(BUZZER_BEEP_FAST_HIGH_LOW);
@@ -408,6 +411,7 @@ class SCar : public IService {
                 _buzzer.setBeep(BUZZER_MONO_TONE);
                 _buzzer.setState(BUZZER_OFF);
             }
+            */
         }
 
         void _checkButtonStatus() {

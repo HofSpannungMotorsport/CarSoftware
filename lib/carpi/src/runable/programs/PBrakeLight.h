@@ -8,7 +8,7 @@
 class PBrakeLight : public IProgram {
     public:
         PBrakeLight(IPedal &brakePedal, ILed &brakeLight, IRegistry &registry)
-            : _brakePedal(brakePedal), _brakeLight(brakeLight), _registry(registry) {
+            : _registry(registry), _brakePedal(brakePedal), _brakeLight(brakeLight) {
             _brakeLight.setBlinking(BLINKING_OFF);
             _brakeLight.setBrightness(1);
         }

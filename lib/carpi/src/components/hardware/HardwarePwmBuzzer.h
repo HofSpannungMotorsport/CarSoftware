@@ -6,7 +6,7 @@
 class HardwarePwmBuzzer : public IBuzzer {
     public:
         HardwarePwmBuzzer(PinName port, id_sub_component_t componentSubId, IRegistry &registry)
-        : _port(port), _registry(registry) {
+        : _registry(registry), _port(port) {
             setComponentSubId(componentSubId);
             setObjectType(OBJECT_HARDWARE);
         }

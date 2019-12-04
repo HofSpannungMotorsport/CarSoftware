@@ -114,6 +114,8 @@ class Master : public Carpi {
     public:
         // Called once at bootup
         void setup() {
+            wait(STARTUP_WAIT_TIME_MASTER);
+
             // Only add Registry to sync Values before starting the actual program
             syncer.addComponent(registry, canIntern, DEVICE_ALL);
             registry.attach(syncer);

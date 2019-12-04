@@ -224,9 +224,9 @@ class Sync : public IRunable {
         }
 
         void _receive(CarMessage &carMessage) {
-            //#if defined(SYNC_DEBUG) && defined(MESSAGE_REPORT)
+            #if defined(SYNC_DEBUG) && defined(MESSAGE_REPORT)
                 printf("[Sync]@receive: Received Message for component 0x%x\n", carMessage.getComponentId());
-            //#endif
+            #endif
 
             // Check if the message is assigned to this device
             if (carMessage.getReceiverId() == _thisId) {
@@ -235,9 +235,9 @@ class Sync : public IRunable {
                     if (route.component->getComponentId() == carMessage.getComponentId()) {
                         route.component->receive(carMessage);
 
-                        //#if defined(SYNC_DEBUG) && defined(MESSAGE_REPORT)
+                        #if defined(SYNC_DEBUG) && defined(MESSAGE_REPORT)
                             printf("[Sync]@receive: Pushed message to Component 0x%x\n", carMessage.getComponentId());
-                        //#endif
+                        #endif
 
                         break;
                     }

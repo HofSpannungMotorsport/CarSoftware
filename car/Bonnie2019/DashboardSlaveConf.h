@@ -30,12 +30,15 @@ class Dashboard : public Carpi {
     public:
         // Called once at bootup
         void setup() {
+            wait(STARTUP_WAIT_TIME_SLAVE);
+
             // Get Registry-Data from Master
             syncer.addComponent(registry, canIntern, DEVICE_ALL);
             registry.attach(syncer);
 
             while (!registry.getReady()) {
                 syncer.run();
+                wait(LOOP_WAIT_TIME);
             }
 
 
@@ -47,8 +50,6 @@ class Dashboard : public Carpi {
             syncer.addComponent(buttonStart, canIntern, DEVICE_MASTER);
             syncer.addComponent(alive, canIntern, DEVICE_MASTER);
             syncer.finalize();
-
-            wait(STARTUP_WAIT_TIME_SLAVE);
 
             // Attach the Syncer to all components
             ledRed.attach(syncer);

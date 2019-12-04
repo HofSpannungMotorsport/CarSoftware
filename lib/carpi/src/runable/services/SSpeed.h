@@ -23,9 +23,9 @@ class SSpeed : public IService {
         SSpeed(SCar &carService,
                      /*IRpmSensor &rpmFrontLeft, IRpmSensor &rpmFrontRight, IRpmSensor &rpmRearLeft, IRpmSensor &rpmRearRight, */
                      IMotorController &motorController, IRegistry &registry)
-            : _carService(carService),
+            : _registry(registry), _carService(carService),
             /*_rpm.front.left(rpmFrontLeft), _rpm.front.right(rpmFrontRight), _rpm.rear.left(rpmRearLeft), _rpm.rear.right(rpmRearRight), */
-              _motorController(motorController), _registry(registry) {}
+              _motorController(motorController) {}
 
         virtual void run() {
             enum useSensor : uint8_t {

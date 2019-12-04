@@ -7,7 +7,7 @@
 class HardwareMotorController : public IMotorController {
     public:
         HardwareMotorController(PinName canRD, PinName canTD, PinName RFE, PinName RUN, id_sub_component_t componentSubId, IRegistry &registry)
-            : _bamocar(canRD, canTD), _rfe(RFE), _run(RUN), _registry(registry) {
+            : _registry(registry), _bamocar(canRD, canTD), _rfe(RFE), _run(RUN) {
             setComponentSubId(componentSubId);
 
             _rfe = 0;

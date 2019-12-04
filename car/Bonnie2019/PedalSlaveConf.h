@@ -29,12 +29,15 @@ class Pedal : public Carpi {
     public:
         // Called once at bootup
         void setup() {
+            wait(2);
+
             // Get Registry-Data from Master
             syncer.addComponent(registry, canIntern, DEVICE_ALL);
             registry.attach(syncer);
 
             while (!registry.getReady()) {
                 syncer.run();
+                wait(LOOP_WAIT_TIME);
             }
 
 
@@ -52,8 +55,6 @@ class Pedal : public Carpi {
             //syncer.addComponent(rpmFrontRight, canIntern, DEVICE_MASTER);
             syncer.addComponent(alive, canIntern, DEVICE_MASTER);
             syncer.finalize();
-
-            wait(STARTUP_WAIT_TIME_SLAVE);
 
             // Attach the Syncer to all components
             gasPedal.attach(syncer);
