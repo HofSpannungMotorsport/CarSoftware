@@ -76,6 +76,15 @@ void compareSyncedRegistries() {
     TEST_ASSERT_TRUE((compareRegister<int16_t, int16_registry_index_t>(int16_registry_size, &IRegistry::getInt16)));
     TEST_ASSERT_TRUE((compareRegister<int32_t, int32_registry_index_t>(int32_registry_size, &IRegistry::getInt32)));
     TEST_ASSERT_TRUE((compareRegister<bool, bool_registry_index_t>(bool_registry_size, &IRegistry::getBool)));
+
+    printf("Registry is ");
+
+    if (internalRegistry.getReady() == distantInternalRegistry.getReady()) {
+        printf("Ready\n");
+    } else {
+        printf("not Ready\n");
+        TEST_FAIL_MESSAGE("[compareSyncedRegistries]: Registry not ready");
+    }
 }
 
 void registrySyncTest() {

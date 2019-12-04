@@ -14,14 +14,14 @@ class PMotorController : public IProgram {
         PMotorController(SCar &carService, IRegistry &registry,
                          IMotorController &motorController,
                          IPedal &gasPedal, IPedal &brakePedal)
-            : _carService(carService), _registry(registry),
+            : _registry(registry), _carService(carService),
               _motorController(motorController), _gasPedal(gasPedal), _brakePedal(brakePedal) {}
 
         PMotorController(SCar &carService, IRegistry &registry,
                          IMotorController &motorController,
                          IPedal &gasPedal, IPedal &brakePedal,
                          IRpmSensor &frontLeftWheel, IRpmSensor &frontRightWheel, IRpmSensor &rearLeftWheel, IRpmSensor &rearRightWheel)
-            : _carService(carService), _registry(registry),
+            : _registry(registry), _carService(carService),
               _motorController(motorController), _gasPedal(gasPedal), _brakePedal(brakePedal) {
             _asrActive = true;
             _asrSave.lastRun.stop();

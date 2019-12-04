@@ -21,7 +21,7 @@ class CCan : public IChannel {
     public:
         CCan() = delete;
         CCan(Sync &syncer, PinName rx, PinName tx, int frequency = STD_CCAN_FREQUENCY)
-        : _syncer(syncer), _can(rx, tx, frequency) {
+        : _can(rx, tx, frequency), _syncer(syncer) {
             #ifdef USE_MBED
                 _can.attach(callback(this, &CCan::_canMessageReceive), CAN::RxIrq);
             #endif

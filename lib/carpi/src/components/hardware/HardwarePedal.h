@@ -29,13 +29,13 @@ struct pedal_calibration_data_t {
 class HardwarePedal : public IPedal {
     public:
         HardwarePedal(PinName inputPin, id_sub_component_t componentSubId, IRegistry &registry)
-            : _pin1(inputPin, registry), _pin2(inputPin, registry), _registry(registry) {
+            : _registry(registry), _pin1(inputPin, registry), _pin2(inputPin, registry) {
             setComponentSubId(componentSubId);
             _secondSensor = false;
         }
 
         HardwarePedal(PinName inputPin1, PinName inputPin2, id_sub_component_t componentSubId, IRegistry &registry)
-            : _pin1(inputPin1, registry), _pin2(inputPin2, registry), _registry(registry) {
+            : _registry(registry), _pin1(inputPin1, registry), _pin2(inputPin2, registry) {
             setComponentSubId(componentSubId);
             _secondSensor = true;
         }
@@ -266,7 +266,7 @@ class HardwarePedal : public IPedal {
                 uint16_t pedalValue = ((float)getValue() * 65535);
                 uint16_t pedalValue0 = pedalValue & 0xFF;
                 uint16_t pedalValue1 = (pedalValue >> 8) & 0xFF;
-                uint8_t pedalValueData[2] = {pedalValue0, pedalValue1};
+                uint8_t pedalValueData[2] = {(uint8_t)pedalValue0, (uint8_t)pedalValue1};
 
                 _sendCommand(PEDAL_MESSAGE_COMMAND_SET_VALUE, pedalValueData, 2, SEND_PRIORITY_PEDAL, IS_DROPABLE);
             }

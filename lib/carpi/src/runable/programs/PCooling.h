@@ -23,9 +23,9 @@ class PCooling : public IProgram {
                  IMotorController &motorController,
                  IHvEnabled &hvEnabled,
                  IRegistry &registry)
-            : _carService(carService), _speedService(speedService),
-              _fan(fan), _pump(pump), _motorController(motorController), _hvEnabled(hvEnabled),
-              _registry(registry) {
+            : _registry(registry),
+              _carService(carService), _speedService(speedService),
+              _fan(fan), _pump(pump), _motorController(motorController), _hvEnabled(hvEnabled) {
 
             _pump.setSpeed(0);
             _pump.setEnable(1);

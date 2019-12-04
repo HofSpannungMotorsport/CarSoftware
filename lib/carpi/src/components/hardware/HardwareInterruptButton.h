@@ -14,7 +14,7 @@ enum button_event_t {
 class HardwareInterruptButton : public IButton {
     public:
         HardwareInterruptButton(PinName pin, id_sub_component_t componentSubId, IRegistry &registry, button_type_t buttonType = NORMALLY_OPEN)
-            : _interruptPin(pin), _registry(registry) {
+            : _registry(registry), _interruptPin(pin) {
             setComponentSubId(componentSubId);
             setObjectType(OBJECT_HARDWARE);
 

@@ -7,7 +7,7 @@
 class HardwareAnalogSensor : public IAnalogSensor {
     public:
         HardwareAnalogSensor(PinName pin, IRegistry &registry)
-        : _pin(pin), _registry(registry) {}
+        : _registry(registry), _pin(pin) {}
 
         virtual bool setMapping(analog_sensor_raw_t minIn, analog_sensor_raw_t maxIn, analog_sensor_t minOut, analog_sensor_t maxOut) {
             if ((minIn == maxIn) || (minOut == maxOut)) return false;
