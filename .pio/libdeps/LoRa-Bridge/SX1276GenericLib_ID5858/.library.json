@@ -1,0 +1,52 @@
+{
+    "authors": [
+        {
+            "email": null, 
+            "url": "https://os.mbed.com/users/Helmut64/", 
+            "maintainer": false, 
+            "name": "Helmut Tschemernjak"
+        }
+    ], 
+    "build": {
+        "flags": [
+            "-Itypedefs", 
+            "-Idebug", 
+            "-Isx1276", 
+            "-Iregisters", 
+            "-Iradio", 
+            "-Ienums"
+        ]
+    }, 
+    "description": "Driver for the SX1276 RF Transceiver", 
+    "examples": [], 
+    "frameworks": [
+        "mbed"
+    ], 
+    "keywords": [
+        "lora", 
+        "semtech", 
+        "sx1276", 
+        "sx1276lib", 
+        "sx1276mb1xas", 
+        "sx1276genericlib"
+    ], 
+    "name": "SX1276GenericLib", 
+    "platforms": [
+        "atmelsam", 
+        "freescalekinetis", 
+        "maxim32", 
+        "nordicnrf51", 
+        "nordicnrf52", 
+        "nxplpc", 
+        "siliconlabsefm32", 
+        "ststm32", 
+        "teensy", 
+        "wiznet7500"
+    ], 
+    "repository": {
+        "type": "hg", 
+        "url": "https://os.mbed.com/users/Helmut64/code/SX1276GenericLib/"
+    }, 
+    "version": "f2826a8fbf", 
+    "id": 5858
+}

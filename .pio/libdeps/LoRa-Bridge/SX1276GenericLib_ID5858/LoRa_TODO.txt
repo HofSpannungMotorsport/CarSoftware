@@ -1,0 +1,59 @@
+Move finished tasks to Done section:
+
+TODOs:
+- Check Errata Note about 500 KHz Bandwidth (test 500 Khz)
+- Cherck if RegDetectOptimize DetectionOptimize must be set for SF6?
+- Fix SetRfTxPower to support -4 - +15 dBm for RFO HF/LF, +2 - +15 dBm
+  See RegPaConfig reg, PaSelect page 83
+- Add support to provide the send/receive packet buffer,
+  no need to allocate packet data in the sx1276 driver. Can be provided
+  Rx/Tx parameters, this avoids double memory usage
+- Add support for larger Lora packets (can be up to 2048 bytes)
+  this feature is not so important, however the current implementation
+  is very basic.
+- It is a little bit strange that RX/TX/Cad Timeout Timer calling the
+  some handler OnTimeoutIrq. Maybe we just need a single timer, or 
+  it is a good idea to split the OnTimeoutIrq function into separate
+  callbacks for RX/TX/Cad timeouts
+- Test if the SX1276 timeouts. Does rx/tx/sync really uses three different
+  timers or just one at a time.
+- Add API to set the LNA gain
+ 
+
+
+Done:
+- Started a Generic SX1276 driver to support all SX1276 modules (May-2017 Helmut)
+- Migrated typedefs code into sx1276.h (7-May-2017 Helmut)
+- Migrated enum code into sx1276.h/radio.h (7-May-2017 Helmut)
+- Verify the Murata ANT Switch code
+- MURATA PA_BOOST case,is _antSwitchTXBoost right? (Same as STM sample code)
+- Check of the MURATA TCXO config is correct (implemented, check JP9 on STM L0 board)
+- Make the timers more generic and move the OS code into the HAL layer. (May 2017 Helmut)
+- Removed pull down on dio=-dio5 for L151 &LPC11U6X which make no sense to me. May 2017 Helmut
+- Added radio API support to receive the MaxMTUSize (May 2017 Helmut)
+- Added Send optional Send() parameter to include a header,
+  this saves additional buffers. (May 2017 Helmut)
+- Added proper void * type from sending data, uint8_t * is not appropriate (May 2017 Helmut)
+- Use also void pointer for FiFo Write/Read and regular SPI Read/Write
+- Added return value to Init, we check for a radio availability (May 2017 Helmut)
+- Added a RxSignalPending which verifies if we have a signal pending in receive state. (May 2017 Helmut)
+- Added LoRa bandwidth mapping table, now the SetRx/Tx frequency is in Hz. (May 2017 Helmut)
+- Enabled MURATA_SX1276 for the MURATA_SX1276 chip (May 2017 Helmut)
+- Made SetRfTxPower public to allow easily power TX changes (May 2017 Helmut)
+- Added userData and userThisPtr into the radio events, this allows to call C++ 
+  functions and in can include a context via the userData
+- Add support for Cad detection before sending a packet, already done in higher 
+  level protocols
+- Added initial Arduino support, needs more testing/completion.
+- Support for Arduino completed, initial version works.
+- Added GetFrequency support
+  The Murata’s Frequency shift using an TCXO us about 58 Hz
+  The RFM95 against Murata is about 3300 Hz
+  RFM95 against RFM95 testing will follow.
+- Fixed calculation of the frequency error with negative numbers
+- Enhanced CadDone support to use DIO0 interrupt when DIO3 is NC.
+  This means for RadioShuttle LoRa we just need DIO0
+- Enhanced it to use mbed LowPowerTimer which goes into deeplseep while
+  waiting for received packets
+- Added support for an external Power On/Off of the Heltec L4 SX1276 antenna switch
+  Sleep and suspend turn off the power
