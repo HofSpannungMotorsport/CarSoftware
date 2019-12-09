@@ -77,7 +77,7 @@ void OnRxError(void *radio, void *userThisPtr, void *userData);
 
 class LoRa: public IChannel {
 private:
-    Syncer &_syncer;
+    Sync &_syncer;
 
     uint8_t Message[]; //TODO: fill with carMessage
 
@@ -85,7 +85,7 @@ private:
     uint8_t *Buffer;
 
 public:
-    LoRa(Syncer &syncer) : _syncer(syncer) {}
+    LoRa(Sync &syncer) : _syncer(syncer) {}
 
     void send(CarMessage &carMessage)()
     {

@@ -23,7 +23,7 @@
 void printCarMessage(CarMessage &carMessage) {
     // Print Constant Stuff
     #ifdef ENABLE_ADVANCED_PRINT
-    printf("Sender ID: 0x%x | Receiver ID: 0x%x | Component ID: 0x%x | Send Priority: %i | Dropable (Yes/No): %c\n", carMessage.getSenderId(), carMessage.getReceiverId(), carMessage.getComponentId(), carMessage.getSendPriority(), carMessage.getDropable() == IS_DROPABLE ? 'Y' : 'N');
+    printf("Sender ID: 0x%x | Receiver ID: 0x%x | Component ID: 0x%x | Dropable (Yes/No): %c\n", carMessage.getSenderId(), carMessage.getReceiverId(), carMessage.getComponentId(), carMessage.getDropable() == IS_DROPABLE ? 'Y' : 'N');
 
     // Print SubMessages
     uint16_t subMessageCount = 0;
@@ -302,6 +302,7 @@ void testSendingIfFull() {
     }
 }
 
+/*
 uint8_t getHighestSendPriority(vector<CarMessage> &messageList) {
     uint8_t highestPriority = CAR_MESSAGE_PRIORITY_LOWEST;
     for (CarMessage &carMessage : messageList) {
@@ -367,6 +368,7 @@ void testSendingWithPriority() {
         }
     }
 }
+*/
 
 void testCCan() {
     UNITY_BEGIN();
@@ -375,7 +377,6 @@ void testCCan() {
         carMessage[i].setComponentId(i % 0x10);
         carMessage[i].setSenderId((id_device_t)(i % 0x20));
         carMessage[i].setReceiverId((id_device_t)(0x1F - (i % 0x20)));
-        carMessage[i].setSendPriority(i % (CAR_MESSAGE_PRIORITY_LOWEST + 1));
         carMessage[i].setDropable(IS_NOT_DROPABLE);
 
         car_sub_message_t subMessage;
@@ -400,10 +401,13 @@ void testCCan() {
 
     RUN_TEST(testSendingIfFull);
 
+    /*
     syncer.clear();
     ((CAN*)canInstance)->clear();
 
     RUN_TEST(testSendingWithPriority);
+    */
+
     UNITY_END();
 }
 
