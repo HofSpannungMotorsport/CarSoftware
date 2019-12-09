@@ -135,72 +135,51 @@ class CCan : public IChannel {
             #endif
         }
 
-        car_message_priority_t _getHighestPriority(vector<CarMessage> &queue) {
-            car_message_priority_t highestPriorityFound = CAR_MESSAGE_PRIORITY_LOWEST;
-            for(CarMessage &carMessage : queue) {
-                if(carMessage.getSendPriority() < highestPriorityFound) {
-                    highestPriorityFound = carMessage.getSendPriority();
-                }
-            }
-
-            return highestPriorityFound;
-        }
-
         void _send() {
             // Check if there are Messages to send and try to send them if possible
             while(!_outQueue.empty()) {
-                // Search highest priority in two steps
-                // First find the highest priority (the smallest priority-number)
-                // then find the first message with this Priority and send it
+                auto carMessageIterator = _outQueue.begin();
 
-                car_message_priority_t highestPriority = _getHighestPriority(_outQueue);
+                CANMessage canMessage;
+                _getCanMessage(*carMessageIterator, 0, canMessage);
 
-                for(auto carMessageIterator = _outQueue.begin(); carMessageIterator != _outQueue.end(); ) {
-                    if (carMessageIterator->getSendPriority() == highestPriority) {
-                        CANMessage canMessage;
-                        _getCanMessage(*carMessageIterator, 0, canMessage);
+                if (_outQueue.size() >= STD_CCAN_OUT_QUEUE_IMPORTANT_THRESHHOLD) {
+                    // Message has to be more important to clear the _outQueue more fast
+                    // By default, the first bit of the message id is 0 and so, it is more important.
+                    // -> Nothing to do
+                } else {
+                    // But if the _outQueue is small, the message is made less important by setting the first
+                    // id bit to 1
+                    canMessage.id |= 0x400; // -> Binary 10000000000
+                }
 
-                        if (_outQueue.size() >= STD_CCAN_OUT_QUEUE_IMPORTANT_THRESHHOLD) {
-                            // Message has to be more important to clear the _outQueue more fast
-                            // By default, the first bit of the message id is 0 and so, it is more important.
-                            // -> Nothing to do
-                        } else {
-                            // But if the _outQueue is small, the message is made less important by setting the first
-                            // id bit to 1
-                            canMessage.id |= 0x400; // -> Binary 10000000000
-                        }
-                        
 
-                        #if defined(CCAN_SENDING_DEBUG) && defined(MESSAGE_REPORT)
-                            pcSerial.printf("[CCan]@_send->_outQueue: Try to send canMessage with component ID 0x%x and message ID 0x%x\n", canMessage.data[0], canMessage.id);
-                        #endif
+                #if defined(CCAN_SENDING_DEBUG) && defined(MESSAGE_REPORT)
+                    pcSerial.printf("[CCan]@_send->_outQueue: Try to send canMessage with component ID 0x%x and message ID 0x%x\n", canMessage.data[0], canMessage.id);
+                #endif
 
-                        // Now try to send the Message over CAN
-                        int canWriteResult = _can.write(canMessage);
-                        if (canWriteResult == 1) {
-                            // If sent successfully the first subMessage, remove it and look if there are more
-                            carMessageIterator->removeFirstSubMessage();
-                            if(carMessageIterator->subMessages.empty()) {
-                                // If it was the last/only one, remove the whole Message
-                                carMessageIterator = _outQueue.erase(carMessageIterator);
-                            } else {
-                                // If a message already got sent partly, make it not dropable
-                                carMessageIterator->setDropable(IS_NOT_DROPABLE);
-                            }
-
-                            #if defined(CCAN_SENDING_DEBUG) && defined(MESSAGE_REPORT)
-                                pcSerial.printf("[CCan]@_send->_outQueue: Successfully sent canMessage with component ID 0x%x and message ID 0x%x\n", canMessage.data[0], canMessage.id);
-                            #endif
-                        } else {
-                            #if defined(CCAN_SENDING_DEBUG) && defined(MESSAGE_REPORT)
-                                pcSerial.printf("[CCan]@_send->_outQueue: CAN Send Buffer full for Message with component ID 0x%x and message ID 0x%x\n", canMessage.data[0], canMessage.id);
-                            #endif
-
-                            return;
-                        }
+                // Now try to send the Message over CAN
+                int canWriteResult = _can.write(canMessage);
+                if (canWriteResult == 1) {
+                    // If sent successfully the first subMessage, remove it and look if there are more
+                    carMessageIterator->removeFirstSubMessage();
+                    if(carMessageIterator->subMessages.empty()) {
+                        // If it was the last/only one, remove the whole Message
+                        carMessageIterator = _outQueue.erase(carMessageIterator);
                     } else {
-                        ++carMessageIterator;
+                        // If a message already got sent partly, make it not dropable
+                        carMessageIterator->setDropable(IS_NOT_DROPABLE);
                     }
+
+                    #if defined(CCAN_SENDING_DEBUG) && defined(MESSAGE_REPORT)
+                        pcSerial.printf("[CCan]@_send->_outQueue: Successfully sent canMessage with component ID 0x%x and message ID 0x%x\n", canMessage.data[0], canMessage.id);
+                    #endif
+                } else {
+                    #if defined(CCAN_SENDING_DEBUG) && defined(MESSAGE_REPORT)
+                        pcSerial.printf("[CCan]@_send->_outQueue: CAN Send Buffer full for Message with component ID 0x%x and message ID 0x%x\n", canMessage.data[0], canMessage.id);
+                    #endif
+
+                    return;
                 }
             }
         }

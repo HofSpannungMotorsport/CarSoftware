@@ -19,21 +19,28 @@ enum car_message_dropable_t : bool {
     IS_DROPABLE = true
 };
 
-typedef uint8_t car_message_priority_t;
-
-#include "SendPriority.h"
-
-#define CAR_MESSAGE_PRIORITY_LOWEST 255
-#define CAR_MESSAGE_PRIORITY_HIGHEST 0
-
 class CarMessage {
     public:
         CarMessage() {}
 
         /*
+            Construct a CarMessage and reserve storage for the given amount of subMessages
+        */
+        CarMessage(uint16_t reserveSubMessages) {
+            subMessages.reserve(reserveSubMessages);
+        }
+
+        /*
             Only use for reading the Messages, for Writing use addSubMessage()
         */
         vector<car_sub_message_t> subMessages;
+
+        /*
+            Reserve storage for the given amount of subMessages
+        */
+        void reserve(uint16_t reserveSubMessages) {
+            subMessages.reserve(reserveSubMessages);
+        }
 
         /*
             Set the senderId for the device which sends the message
@@ -106,20 +113,6 @@ class CarMessage {
             return _componentId;
         }
 
-        /*
-            Set the send Priority. Should be a Value between 1 and 255
-        */
-        void setSendPriority(car_message_priority_t sendPriority) {
-            _sendPriority = sendPriority;
-        }
-
-        /*
-            Get the send Priority. Should be a Value between 0 and 255
-        */
-        car_message_priority_t getSendPriority() {
-            return _sendPriority;
-        }
-
         void setDropable(car_message_dropable_t dropable) {
             _dropable = dropable;
         }
@@ -129,7 +122,7 @@ class CarMessage {
         }
 
         // returns 0 if messages are equal
-        int compareTo(CarMessage &carMessage, bool checkSendPriority = false) {
+        int compareTo(CarMessage &carMessage) {
             // Compare CarMessage-own variables
             if (getSenderId() != carMessage.getSenderId())
                 return 1;
@@ -139,9 +132,6 @@ class CarMessage {
                 return 3;
             if (getDropable() != carMessage.getDropable())
                 return 4;
-
-            if (checkSendPriority && (getSendPriority() != carMessage.getSendPriority()))
-                return 5;
             
             // Compare amount of subMessages
             if (subMessages.size() != carMessage.subMessages.size())
@@ -168,8 +158,6 @@ class CarMessage {
         id_device_t _receiverId = DEVICE_NOT_SET; // only 5 bits are usable
 
         id_component_t _componentId = 0;
-
-        car_message_priority_t _sendPriority = CAR_MESSAGE_PRIORITY_LOWEST;
 
         /*
             If a message is send often and repeadly, it could let overflow the outgoing bessage queue.

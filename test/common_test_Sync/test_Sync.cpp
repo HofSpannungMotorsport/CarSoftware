@@ -61,15 +61,15 @@ class TestComponent : public SelfSyncable {
         }
 
         void synteticSendCommand(uint8_t command) {
-            _sendCommand(command, CAR_MESSAGE_PRIORITY_HIGHEST, IS_NOT_DROPABLE);
+            _sendCommand(command, IS_NOT_DROPABLE);
         }
 
         void synteticSendCommand(uint8_t command, uint8_t value) {
-            _sendCommand(command, value, CAR_MESSAGE_PRIORITY_HIGHEST, IS_NOT_DROPABLE);
+            _sendCommand(command, value, IS_NOT_DROPABLE);
         }
 
         void synteticSendCommand(uint8_t command, uint8_t values[], uint8_t valueAmount) {
-            _sendCommand(command, values, valueAmount, CAR_MESSAGE_PRIORITY_HIGHEST, IS_NOT_DROPABLE);
+            _sendCommand(command, values, valueAmount, IS_NOT_DROPABLE);
         }
 
         vector<CarMessage> _receivedMessages;

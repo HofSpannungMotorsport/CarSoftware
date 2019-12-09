@@ -54,7 +54,6 @@
 #include "communication/deviceIds.h"
 #include "communication/IChannel.h"
 #include "communication/SelfSyncable.h"
-#include "communication/SendPriority.h"
 
 // Components
 //   Interface
