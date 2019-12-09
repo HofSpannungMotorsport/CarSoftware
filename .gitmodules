@@ -1,3 +1,6 @@
 [submodule "lib/carpi/lib/BamocarD3"]
 	path = lib/carpi/lib/BamocarD3
 	url = https://github.com/HofSpannungMotorsport/BamocarD3.git
+[submodule "lib/carpi/src/steroido"]
+	path = lib/carpi/src/steroido
+	url = https://github.com/timoxd7/Steroido.git
