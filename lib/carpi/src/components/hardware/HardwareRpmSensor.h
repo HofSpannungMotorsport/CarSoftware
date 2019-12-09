@@ -120,7 +120,7 @@ class HardwareRpmSensor : public IRpmSensor {
         virtual void _updateValues() {
             status_t currentStatus = getStatus();
             if (currentStatus != _lastSentStatus) {
-                _sendCommand(RPM_MESSAGE_COMMAND_SET_STATUS, getStatus(), SEND_PRIORITY_RPM, IS_NOT_DROPABLE);
+                _sendCommand(RPM_MESSAGE_COMMAND_SET_STATUS, getStatus(), IS_NOT_DROPABLE);
                 _lastSentStatus = currentStatus;
             }
 
@@ -129,7 +129,7 @@ class HardwareRpmSensor : public IRpmSensor {
             uint8_t disassambledFloat[4];
             _disassambleFloat(frequency, disassambledFloat);
 
-            _sendCommand(RPM_MESSAGE_COMMAND_SET_FREQUENCY, disassambledFloat, 4, SEND_PRIORITY_RPM, IS_DROPABLE);
+            _sendCommand(RPM_MESSAGE_COMMAND_SET_FREQUENCY, disassambledFloat, 4, IS_DROPABLE);
         }
 };
 

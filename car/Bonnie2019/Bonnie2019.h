@@ -23,4 +23,8 @@
 #include "DisplaySlaveConf.h"
 #endif
 
+#ifdef BOARD_LORA
+#include "LoRaConf.h"
+#endif
+
 #endif

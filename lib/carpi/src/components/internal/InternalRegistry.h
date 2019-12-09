@@ -58,9 +58,9 @@ class InternalRegistry : public IRegistry {
             _ready = ready;
 
             if (_ready)
-                _sendCommand(REGISTRY_SET_READY, SEND_PRIORITY_REGISTRY, IS_NOT_DROPABLE);
+                _sendCommand(REGISTRY_SET_READY, IS_NOT_DROPABLE);
             else
-                _sendCommand(REGISTRY_SET_NOT_READY, SEND_PRIORITY_REGISTRY, IS_NOT_DROPABLE);
+                _sendCommand(REGISTRY_SET_NOT_READY, IS_NOT_DROPABLE);
         }
 
         // Getter
@@ -299,7 +299,7 @@ class InternalRegistry : public IRegistry {
             // Copy float
             memcpy(&data[2], disassambledFloat, 4);
 
-            _sendCommand(REGISTRY_TYPE_FLOAT, data, 6, SEND_PRIORITY_REGISTRY, IS_NOT_DROPABLE);
+            _sendCommand(REGISTRY_TYPE_FLOAT, data, 6, IS_NOT_DROPABLE);
         }
 
         void _receiveFloat(car_sub_message_t &subMessage) {
@@ -335,7 +335,7 @@ class InternalRegistry : public IRegistry {
                 data[2 + i] = (uint8_t)valueCut;
             }
 
-            _sendCommand(messageType, data, dataSize, SEND_PRIORITY_REGISTRY, IS_NOT_DROPABLE);
+            _sendCommand(messageType, data, dataSize, IS_NOT_DROPABLE);
         }
 
         template<typename T, typename registry_index_type_t>

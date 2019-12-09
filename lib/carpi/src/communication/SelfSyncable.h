@@ -19,7 +19,7 @@ class SelfSyncable : public ICommunication {
         Sync *_syncer;
         bool _syncerAttached = false;
 
-        virtual void _sendCommand(uint8_t command, uint8_t priority, car_message_dropable_t dropable) {
+        virtual void _sendCommand(uint8_t command, car_message_dropable_t dropable) {
             CarMessage carMessage;
 
             car_sub_message_t subMessage;
@@ -27,10 +27,10 @@ class SelfSyncable : public ICommunication {
             subMessage.data[0] = command;
             carMessage.addSubMessage(subMessage);
 
-            _send(carMessage, priority, dropable);
+            _send(carMessage, dropable);
         }
 
-        virtual void _sendCommand(uint8_t command, uint8_t value, uint8_t priority, car_message_dropable_t dropable) {
+        virtual void _sendCommand(uint8_t command, uint8_t value, car_message_dropable_t dropable) {
             CarMessage carMessage;
 
             car_sub_message_t subMessage;
@@ -39,10 +39,10 @@ class SelfSyncable : public ICommunication {
             subMessage.data[1] = value;
             carMessage.addSubMessage(subMessage);
 
-            _send(carMessage, priority, dropable);
+            _send(carMessage, dropable);
         }
 
-        virtual void _sendCommand(uint8_t command, uint8_t values[], uint8_t valueCount, uint8_t priority, car_message_dropable_t dropable) {
+        virtual void _sendCommand(uint8_t command, uint8_t values[], uint8_t valueCount, car_message_dropable_t dropable) {
             if (valueCount > 6) return; // subMessage maximum == 7 (-1 because of the command)
 
             CarMessage carMessage;
@@ -54,11 +54,10 @@ class SelfSyncable : public ICommunication {
             memcpy(&subMessage.data[1], values, valueCount);
 
             carMessage.addSubMessage(subMessage);
-            _send(carMessage, priority, dropable);
+            _send(carMessage, dropable);
         }
 
-        virtual void _send(CarMessage &carMessage, uint8_t priority, car_message_dropable_t dropable) {
-            carMessage.setSendPriority(priority);
+        virtual void _send(CarMessage &carMessage, car_message_dropable_t dropable) {
             carMessage.setComponentId(getComponentId());
             carMessage.setDropable(dropable);
 

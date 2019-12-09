@@ -21,7 +21,8 @@ enum id_device_t : uint8_t {
     DEVICE_BMS =       0x3,
     DEVICE_DASHBOARD = 0x4,
     DEVICE_MASTER =    0x5,
-    DEVICE_DISPLAY =   0x6
+    DEVICE_DISPLAY =   0x6,
+    DEVICE_LORA =      0x7
 };
 
 typedef uint16_t id_message_header_t;
