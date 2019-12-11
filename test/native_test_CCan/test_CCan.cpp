@@ -1,14 +1,12 @@
 #include <unity.h>
 #include <cstring>
 
-#ifdef USE_NATIVE
-    #include "crossplatform/memset.h"
-    #include "crossplatform/CANMessage.h"
-#endif
+#define STEROIDO_DISABLE_LOOP
+#include "Steroido.h"
 
-#ifdef TRAVIS
-    #include "crossplatform/memcpy.h"
-#endif
+
+// Explicitly include CANMessage even it there is no CAN
+#include "steroido/src/Communication/CANMessage.h"
 
 #define SYNC_H // Uninclude Sync
 #include "runable/IRunable.h"
@@ -412,7 +410,6 @@ void testCCan() {
 }
 
 
-int main() {
+void setup() {
     testCCan();
-    return 0;
 }

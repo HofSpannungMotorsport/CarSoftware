@@ -26,7 +26,7 @@ class Sync : public IRunable {
             // If component has already been added, deny adding it again
             if (_checkComponentExist(component)) {
                 #if defined(SYNC_DEBUG) && defined(MESSAGE_REPORT)
-                    pcSerial.printf("[Sync]@addComponent: Component with ID 0x%x already added!\n", component.getComponentId());
+                    printf("[Sync]@addComponent: Component with ID 0x%x already added!\n", component.getComponentId());
                 #endif
 
                 return false;
@@ -41,7 +41,7 @@ class Sync : public IRunable {
             #endif // USE_MBED
 
             #if defined(SYNC_DEBUG) && defined(MESSAGE_REPORT)
-                pcSerial.printf("[Sync]@addComponent: Component with ID 0x%x successfully added\n", component.getComponentId());
+                printf("[Sync]@addComponent: Component with ID 0x%x successfully added\n", component.getComponentId());
             #endif
 
             _addChannel(channel);
@@ -53,7 +53,7 @@ class Sync : public IRunable {
                                                    id_device_t deviceId1,    id_device_t deviceId2) {
             if (_checkBridgeExist(componentId)) {
                 #if defined(SYNC_DEBUG) && defined(MESSAGE_REPORT)
-                    pcSerial.printf("[Sync]@addBridge: Component with ID %i already added to Bridge!\n", componentId);
+                    printf("[Sync]@addBridge: Component with ID %i already added to Bridge!\n", componentId);
                 #endif
 
                 return false;
@@ -67,7 +67,7 @@ class Sync : public IRunable {
             #endif // USE_MBED
 
             #if defined(SYNC_DEBUG) && defined(MESSAGE_REPORT)
-                pcSerial.printf("[Sync]@addBridge: Component with ID 0x%x successfully added to Bridge\n", componentId);
+                printf("[Sync]@addBridge: Component with ID 0x%x successfully added to Bridge\n", componentId);
             #endif
 
             _addChannel(channelDevice1);
@@ -82,7 +82,7 @@ class Sync : public IRunable {
 
         virtual void send(CarMessage &carMessage) {
             #if defined(SYNC_SENDING_DEBUG) && defined(MESSAGE_REPORT)
-                pcSerial.printf("[Sync]@send: Try to send Message for component 0x%x\n", carMessage.getComponentId());
+                printf("[Sync]@send: Try to send Message for component 0x%x\n", carMessage.getComponentId());
             #endif
 
             for (Route &route : router) {
@@ -92,7 +92,7 @@ class Sync : public IRunable {
                     _send(carMessage, route.channel);
 
                     #if defined(SYNC_SENDING_DEBUG) && defined(MESSAGE_REPORT)
-                        pcSerial.printf("[Sync]@send: Sent Message for component 0x%x to channel\n", carMessage.getComponentId());
+                        printf("[Sync]@send: Sent Message for component 0x%x to channel\n", carMessage.getComponentId());
                     #endif
 
                     break;
@@ -269,9 +269,9 @@ class Sync : public IRunable {
 
                         #if defined(SYNC_DEBUG) && defined(MESSAGE_REPORT)
                             if(bridged) {
-                                pcSerial.printf("[Sync]@receive: Succesfully bridged message for component 0x%x\n", carMessage.getComponentId());
+                                printf("[Sync]@receive: Succesfully bridged message for component 0x%x\n", carMessage.getComponentId());
                             } else {
-                                pcSerial.printf("[Sync]@receive: Error bridging message for component 0x%x\n", carMessage.getComponentId());
+                                printf("[Sync]@receive: Error bridging message for component 0x%x\n", carMessage.getComponentId());
                             }
                         #endif
 

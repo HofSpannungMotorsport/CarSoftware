@@ -68,7 +68,7 @@ class PMotorController : public IProgram {
             _motorController.setTorque(returnValue);
 
             #if defined(MOTORCONTROLLER_OUTPUT) && defined(MESSAGE_REPORT)
-                pcSerial.printf("%f\n", returnValue);
+                printf("%f\n", returnValue);
             #endif
         }
 

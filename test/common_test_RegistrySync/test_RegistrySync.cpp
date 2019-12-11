@@ -1,7 +1,15 @@
 #include <unity.h>
-#ifdef TRAVIS
-    #include "crossplatform/memcpy.h"
+
+#if defined(USE_ARDUINO) || defined(USE_TEENSYDUINO)
+    #include <Arduino.h>
 #endif
+
+#ifdef USE_MBED
+    #include "mbed.h"
+#endif
+
+#define STEROIDO_DISABLE_LOOP
+#include "Steroido.h"
 
 #define SYNC_H // Uninclude Sync
 #include "runable/IRunable.h"
@@ -99,30 +107,15 @@ void registrySyncTest() {
     UNITY_END();
 }
 
-#if defined(USE_ARDUINO) || defined(USE_TEENSYDUINO)
-#include <Arduino.h>
-
-void setup() {
-    // NOTE!!! Wait for >2 secs
-    // if board doesn't support software reset via Serial.DTR/RTS
-    delay(2000);
-
-    registrySyncTest();
-}
-
+#ifdef Arduino_h
 void loop() {
     digitalWrite(13, HIGH);
     delay(100);
     digitalWrite(13, LOW);
     delay(500);
 }
-
-#else
-
-int main() {
-    registrySyncTest();
-
-    return 0;
-}
-
 #endif
+
+void setup() {
+    registrySyncTest();
+}

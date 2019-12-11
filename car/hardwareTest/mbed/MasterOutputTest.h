@@ -51,12 +51,12 @@ void waitForClick() {
 
 void testPin(string deviceName, DigitalOut &device) {
     string message = "Click button to turn On:  " + deviceName + "\n";
-    pcSerial.printf("%s", message.c_str());
+    printf("%s", message.c_str());
     waitForClick();
     device = 1;
 
     message = "Click button to turn Off: " + deviceName + "\n";
-    pcSerial.printf("%s", message.c_str());
+    printf("%s", message.c_str());
     waitForClick();
     device = 0;
 }
@@ -88,24 +88,24 @@ void MasterOutputTest() {
     // At first, release all
     releaseAll();
 
-    pcSerial.printf("\nHi! I'm Bert. I am your pin test bot. Let's Start! Just press the Blue Button on the Master Board\n\n");
+    printf("\nHi! I'm Bert. I am your pin test bot. Let's Start! Just press the Blue Button on the Master Board\n\n");
     waitForClick();
 
-    pcSerial.printf("Current input Values:\n\tSpringTravelSensor HL: %i\n\tSpringTravelSensor HR: %i\n\tHV Enable: %i\n\n",
+    printf("Current input Values:\n\tSpringTravelSensor HL: %i\n\tSpringTravelSensor HR: %i\n\tHV Enable: %i\n\n",
         springTravelSensorHL.read_u16(), springTravelSensorHR.read_u16(), enabledHV.read()/*, rpmHL.read(), rpmHR.read()*/);
 
 
     testPin("Buzzer", buzzer);
 
     string message = "Click button to turn On:  RFE and than RUN\n";
-    pcSerial.printf("%s", message.c_str());
+    printf("%s", message.c_str());
     waitForClick();
     enableRFE = 1;
     wait(0.5);
     enableRUN = 1;
 
     message = "Click button to turn Off: RFE and RUN\n";
-    pcSerial.printf("%s", message.c_str());
+    printf("%s", message.c_str());
     waitForClick();
     enableRFE = 0;
     enableRUN = 0;
@@ -114,11 +114,11 @@ void MasterOutputTest() {
     testPin("Brake Light", brakeLight);
     testPin("Pump Enable", pumpEnable);
 
-    pcSerial.printf("Click button to turn On:  Pump PWM\n");
+    printf("Click button to turn On:  Pump PWM\n");
     waitForClick();
     pumpPWM = 1;
 
-    pcSerial.printf("Click button to turn Off: Pump PWM\n");
+    printf("Click button to turn Off: Pump PWM\n");
     waitForClick();
     pumpPWM = 0;
 
@@ -127,5 +127,5 @@ void MasterOutputTest() {
     testPin("LED Error", ledError);
     testPin("LED Extra", ledExtra);
 
-    pcSerial.printf("Finish! Hope everything was right. If not, look in the Pins_Master.h\n\nStarting all over again :D\n\n");
+    printf("Finish! Hope everything was right. If not, look in the Pins_Master.h\n\nStarting all over again :D\n\n");
 }

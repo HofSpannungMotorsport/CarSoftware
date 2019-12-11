@@ -12,7 +12,7 @@ DigitalOut bmsLed(LED2); // blue
 DigitalOut imdLed(LED1); // green
 
 void MasterPCBErrorStorageTest() {
-    pcSerial.printf("MasterPCBErrorStorageTest\n");
+    printf("MasterPCBErrorStorageTest\n");
     microcontrollerOk = 1;
     while(true) {
         bspdLed = bspdError;

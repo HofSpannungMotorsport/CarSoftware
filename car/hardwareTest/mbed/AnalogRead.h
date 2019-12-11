@@ -24,11 +24,11 @@ uint16_t currentAnalogValue,
          currentAnalogValue3;
 
 void analogReadToSerial() {
-    pcSerial.printf("%i\t%i\t%i\n", currentAnalogValue, currentAnalogValue2, currentAnalogValue3);
+    printf("%i\t%i\t%i\n", currentAnalogValue, currentAnalogValue2, currentAnalogValue3);
 }
 
 void AnalogRead() {
-    pcSerial.printf("AnalogRead Test\n\n");
+    printf("AnalogRead Test\n\n");
     analogRead.attach(analogReadToSerial, REFRESH_TIME);
 
     while(true) {

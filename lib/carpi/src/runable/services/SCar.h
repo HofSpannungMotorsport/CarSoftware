@@ -91,7 +91,7 @@ class SCar : public IService {
             while(_errorRegister.pop(error)) {
                 // Send error over Serial to PC
                 #ifdef MESSAGE_REPORT
-                    pcSerial.printf("[SCar]@processErrors: Got Error at 0x%x with error code 0x%x and error type 0x%x !\n", error.componentId, error.code, error.type);
+                    printf("[SCar]@processErrors: Got Error at 0x%x with error code 0x%x and error type 0x%x !\n", error.componentId, error.code, error.type);
                 #endif
 
                 // Document raw error to SD

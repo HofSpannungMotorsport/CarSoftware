@@ -1,16 +1,15 @@
 #include <unity.h>
-#ifdef TRAVIS
-    #include "crossplatform/memcpy.h"
+
+#if defined(USE_ARDUINO) || defined(USE_TEENSYDUINO)
+    #include <Arduino.h>
 #endif
 
 #ifdef USE_MBED
     #include "mbed.h"
-#else
-    #if defined(USE_ARDUINO) || defined(USE_TEENSYDUINO)
-        #define pcSerial Serial
-    #endif
-    #include "crossplatform/CircularBuffer.h"
 #endif
+
+#define STEROIDO_DISABLE_LOOP
+#include "Steroido.h"
 
 #include "communication/Sync.h"
 #include "communication/IChannel.h"
@@ -218,8 +217,15 @@ void testSync() {
     UNITY_END();
 }
 
+#ifdef Arduino_h
+void loop() {
+    digitalWrite(13, HIGH);
+    delay(100);
+    digitalWrite(13, LOW);
+    delay(500);
+}
+#endif
 
-int main() {
+void setup() {
     testSync();
-    return 0;
 }
