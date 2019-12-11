@@ -1,7 +1,5 @@
 #include <unity.h>
-#ifdef TRAVIS
-    #include "crossplatform/memcpy.h"
-#endif
+#include "Steroido.h"
 
 #define SYNC_H // Uninclude Sync
 #include "runable/IRunable.h"

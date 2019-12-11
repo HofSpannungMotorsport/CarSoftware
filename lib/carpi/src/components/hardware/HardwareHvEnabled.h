@@ -36,7 +36,7 @@ class HardwareHvEnabled : public IHvEnabled {
                 }
             } else {
                 #ifdef MESSAGE_REPORT
-                    pcSerial.printf("Cannot assign method to a hv-enabled-state. Wrong hv-enabled-type choosen?");
+                    printf("Cannot assign method to a hv-enabled-state. Wrong hv-enabled-type choosen?");
                 #endif
             }
         }

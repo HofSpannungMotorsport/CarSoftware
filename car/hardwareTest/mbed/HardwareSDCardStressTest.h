@@ -28,49 +28,49 @@ bool HardwareSDCardStressTest() {
     if (_begin) {
         _begin = false;
 
-        pcSerial.printf("HardwareSDCardTest\n\nBegin SD: ");
+        printf("HardwareSDCardTest\n\nBegin SD: ");
         if (hardwareSD.begin()) {
-            pcSerial.printf("Success!\n");
+            printf("Success!\n");
         } else {
-            pcSerial.printf("SD Card can't be initialized!\n");
+            printf("SD Card can't be initialized!\n");
             return false;
         }
     } else {
-        pcSerial.printf("SD Card Status: ");
+        printf("SD Card Status: ");
             if (hardwareSD.getStatus() == 0) {
-            pcSerial.printf("Success!\n");
+            printf("Success!\n");
         } else {
-            pcSerial.printf("Error! sdCard Status Code: 0x%x\n", hardwareSD.getStatus());
+            printf("Error! sdCard Status Code: 0x%x\n", hardwareSD.getStatus());
             return false;
         }
     }
 
-    pcSerial.printf("Open File: ");
+    printf("Open File: ");
     if (hardwareSD.open()) {
-        pcSerial.printf("Success!\n");
+        printf("Success!\n");
     } else {
-        pcSerial.printf("File can't be opened!\n");
+        printf("File can't be opened!\n");
     }
 
-    pcSerial.printf("Check SD Status: ");
+    printf("Check SD Status: ");
     if (hardwareSD.getStatus() == 0) {
-        pcSerial.printf("OK\n");
+        printf("OK\n");
     } else {
-        pcSerial.printf("Error! sdCard Status Code: 0x%x\n", hardwareSD.getStatus());
+        printf("Error! sdCard Status Code: 0x%x\n", hardwareSD.getStatus());
         return false;
     }
 
     static bool _added = false;
     if (!_added) {
-        pcSerial.printf("Adding alive as LoggableValue with %i refreshrate to logger and begin: ", TEST_LOGGER_REFRESH_RATE);
+        printf("Adding alive as LoggableValue with %i refreshrate to logger and begin: ", TEST_LOGGER_REFRESH_RATE);
         logger.addLogableValue(alive, SD_LOG_ID_ALIVE, TEST_LOGGER_REFRESH_RATE);
         logger.finalize();
         _added = true;
 
         if (logger.begin()) {
-            pcSerial.printf("Success!\n");
+            printf("Success!\n");
         } else {
-            pcSerial.printf("Error!\n");
+            printf("Error!\n");
             return false;
         }
     }
@@ -78,7 +78,7 @@ bool HardwareSDCardStressTest() {
     dummySCar.setState(READY_TO_DRIVE); // That the logger really logs
 
 
-    pcSerial.printf("Now let the logger run for %i seconds\n", TEST_LOGGER_TIME);
+    printf("Now let the logger run for %i seconds\n", TEST_LOGGER_TIME);
     Timer timer;
     timer.reset();
     timer.start();
@@ -89,7 +89,7 @@ bool HardwareSDCardStressTest() {
     }
 
     hardwareSD.close();
-    pcSerial.printf("\nFinish! Check SD Card for content\n\n");
+    printf("\nFinish! Check SD Card for content\n\n");
     wait(30);
 
     return true;

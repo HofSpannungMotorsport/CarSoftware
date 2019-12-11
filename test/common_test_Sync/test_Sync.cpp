@@ -1,7 +1,5 @@
 #include <unity.h>
-#ifdef TRAVIS
-    #include "crossplatform/memcpy.h"
-#endif
+#include "Steroido.h"
 
 #ifdef USE_MBED
     #include "mbed.h"
@@ -9,7 +7,6 @@
     #if defined(USE_ARDUINO) || defined(USE_TEENSYDUINO)
         #define pcSerial Serial
     #endif
-    #include "crossplatform/CircularBuffer.h"
 #endif
 
 #include "communication/Sync.h"

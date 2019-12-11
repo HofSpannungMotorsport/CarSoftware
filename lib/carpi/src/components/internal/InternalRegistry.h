@@ -297,7 +297,7 @@ class InternalRegistry : public IRegistry {
             uint16_t index1 = (index >> 8) & 0xFF;
             uint8_t data[6] = {(uint8_t)index0, (uint8_t)index1};
             // Copy float
-            memcpy(&data[2], disassambledFloat, 4);
+            memCpy<uint8_t>(&data[2], disassambledFloat, 4);
 
             _sendCommand(REGISTRY_TYPE_FLOAT, data, 6, IS_NOT_DROPABLE);
         }
@@ -311,7 +311,7 @@ class InternalRegistry : public IRegistry {
             registry_index_t index = _getIndex(subMessage);
 
             uint8_t disassambledFloat[4];
-            memcpy(disassambledFloat, &subMessage.data[3], 4);
+            memCpy<uint8_t>(disassambledFloat, &subMessage.data[3], 4);
 
             float value = _reassambleFloat(disassambledFloat);
 

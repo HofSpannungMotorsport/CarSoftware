@@ -11,7 +11,7 @@ SoftwareAlive softwareAlive(COMPONENT_SUB_ID_2);
 bool AliveComponentTest() {
     wait(1);
 
-    pcSerial.printf("AliveComponentTest\n\n");
+    printf("AliveComponentTest\n\n");
 
     syncer.addComponent1(hardwareAlive);
     syncer.addComponent2(softwareAlive);
@@ -29,16 +29,16 @@ bool AliveComponentTest() {
     }
 
     if (softwareAlive.getAlive()) {
-        pcSerial.printf("Alive\n");
+        printf("Alive\n");
     } else {
-        pcSerial.printf("Not Alive -> Error\n");
+        printf("Not Alive -> Error\n");
         return false;
     }
 
     if (softwareAlive.getStatus() == 0) {
-        pcSerial.printf("Alive\n");
+        printf("Alive\n");
     } else {
-        pcSerial.printf("Not Alive -> Error\n");
+        printf("Not Alive -> Error\n");
         return false;
     }
 
@@ -51,17 +51,17 @@ bool AliveComponentTest() {
     }
 
     if (softwareAlive.getAlive()){
-        pcSerial.printf("Still Alive -> Error\n");
+        printf("Still Alive -> Error\n");
         return false;
     } else {
-        pcSerial.printf("Not Alive anymore!\n");
+        printf("Not Alive anymore!\n");
     }
 
     if (softwareAlive.getStatus() == 0){
-        pcSerial.printf("Still Alive -> Error\n");
+        printf("Still Alive -> Error\n");
         return false;
     } else {
-        pcSerial.printf("Not Alive anymore!\n");
+        printf("Not Alive anymore!\n");
     }
 
     hardwareAlive.attach(syncer);
@@ -73,16 +73,16 @@ bool AliveComponentTest() {
     }
 
     if (softwareAlive.getAlive()) {
-        pcSerial.printf("Alive again\n");
+        printf("Alive again\n");
     } else {
-        pcSerial.printf("Not Alive now -> Error\n");
+        printf("Not Alive now -> Error\n");
         return false;
     }
 
     if (softwareAlive.getStatus() == 0) {
-        pcSerial.printf("Alive again\n");
+        printf("Alive again\n");
     } else {
-        pcSerial.printf("Not Alive now -> Error\n");
+        printf("Not Alive now -> Error\n");
         return false;
     }
 
@@ -95,17 +95,17 @@ bool AliveComponentTest() {
     }
 
     if (softwareAlive.getAlive()){
-        pcSerial.printf("Still Alive after set -> Error\n");
+        printf("Still Alive after set -> Error\n");
         return false;
     } else {
-        pcSerial.printf("Not Alive after set!\n");
+        printf("Not Alive after set!\n");
     }
 
     if (softwareAlive.getStatus() == 0){
-        pcSerial.printf("Still Alive after set -> Error\n");
+        printf("Still Alive after set -> Error\n");
         return false;
     } else {
-        pcSerial.printf("Not Alive after set!\n");
+        printf("Not Alive after set!\n");
     }
 
     return true;

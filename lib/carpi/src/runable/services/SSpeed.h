@@ -89,11 +89,11 @@ class SSpeed : public IService {
             }
 
             #ifdef SSPEED_REPORT_SPEED
-                pcSerial.printf("[SSpeed]@run: Current Speed: %.3f kM/h\n", _speed);
+                printf("[SSpeed]@run: Current Speed: %.3f kM/h\n", _speed);
             #endif
 
             #ifdef SSPEED_REPORT_SPEED_RAW
-                pcSerial.printf("%.3f\n", _speed);
+                printf("%.3f\n", _speed);
             #endif
 
             #ifndef SSPEED_DISABLE_CURRENT_LIMITATION
@@ -139,7 +139,7 @@ class SSpeed : public IService {
             float motorControllerRpm = sensor.getSpeed();
 
             #ifdef SSPEED_REPORT_MOTOR_RPM
-                pcSerial.printf("[SSpeed]@run: Current Motor RPM: %.3f RPM\n", motorControllerRpm);
+                printf("[SSpeed]@run: Current Motor RPM: %.3f RPM\n", motorControllerRpm);
             #endif
 
             return (motorControllerRpm * _registry.getFloat(SSPEED_MOTOR_TO_WHEEL_RATIO) * _registry.getFloat(SSPEED_DISTANCE_PER_REVOLUTION) * 0.06);

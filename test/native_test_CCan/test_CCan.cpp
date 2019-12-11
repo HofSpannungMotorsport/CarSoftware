@@ -1,14 +1,7 @@
 #include <unity.h>
 #include <cstring>
+#include "Steroido.h"
 
-#ifdef USE_NATIVE
-    #include "crossplatform/memset.h"
-    #include "crossplatform/CANMessage.h"
-#endif
-
-#ifdef TRAVIS
-    #include "crossplatform/memcpy.h"
-#endif
 
 #define SYNC_H // Uninclude Sync
 #include "runable/IRunable.h"

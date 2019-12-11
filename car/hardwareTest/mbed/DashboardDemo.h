@@ -25,7 +25,7 @@ class Dashboard {
     public:
         // Called once at bootup
         void setup() {
-            pcSerial.printf("Dashboard Demo 2");
+            printf("Dashboard Demo 2");
             ledRed.setState(LED_ON);
             ledYellow.setState(LED_ON);
             ledGreen.setState(LED_ON);
@@ -102,7 +102,7 @@ class Dashboard {
                 ledYellow.setBrightness((float)_last.yellow / 255.0 * YELLOW_MAX);
                 ledGreen.setBrightness((float)_last.green / 255.0 * GREEN_MAX);
 
-                //pcSerial.printf("%i\t%i\t%i\n", _last.red, _last.yellow, _last.green);
+                //printf("%i\t%i\t%i\n", _last.red, _last.yellow, _last.green);
             }
 
             wait((1.0 / (float)REFRESH_RATE / 255.0));

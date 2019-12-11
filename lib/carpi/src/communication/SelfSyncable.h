@@ -51,7 +51,7 @@ class SelfSyncable : public ICommunication {
             subMessage.length = valueCount + 1; // +1 for the command
             subMessage.data[0] = command;
 
-            memcpy(&subMessage.data[1], values, valueCount);
+            memCpy<uint8_t>(&subMessage.data[1], values, valueCount);
 
             carMessage.addSubMessage(subMessage);
             _send(carMessage, dropable);

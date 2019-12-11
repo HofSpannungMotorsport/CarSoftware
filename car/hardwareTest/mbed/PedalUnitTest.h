@@ -13,34 +13,34 @@ HardwarePedal hardwarePedal(PEDAL_PIN1, /*PEDAL_PIN2,*/ COMPONENT_PEDAL_BRAKE);
 void PedalUnitTest() {
     // Pedal Unit Test
     // Calibrate and test a Pedal
-    pcSerial.printf("Pedal Unit Test\n");
+    printf("Pedal Unit Test\n");
 
     while (calibrationButton.getState() != PRESSED);
 
-    pcSerial.printf("Calibration begin\n");
+    printf("Calibration begin\n");
     hardwarePedal.setCalibrationStatus(CURRENTLY_CALIBRATING);
 
     while (calibrationButton.getState() != NOT_PRESSED);
     while (calibrationButton.getState() != PRESSED);
 
-    pcSerial.printf("Calibration end\n");
+    printf("Calibration end\n");
     hardwarePedal.setCalibrationStatus(CURRENTLY_NOT_CALIBRATING);
 
     if (hardwarePedal.getStatus() > 0) {
-        pcSerial.printf("Error after Pedal Calibration: 0x%x", hardwarePedal.getStatus());
+        printf("Error after Pedal Calibration: 0x%x", hardwarePedal.getStatus());
     } else {
         Timer refreshTimer;
         refreshTimer.start();
         while(hardwarePedal.getStatus() == 0) {
             refreshTimer.reset();
 
-            pcSerial.printf("%.4f\n", hardwarePedal.getValue());
+            printf("%.4f\n", hardwarePedal.getValue());
             while(refreshTimer.read_ms() < REFRESH_TIME);
         }
 
-        pcSerial.printf("Pedal Error: 0x%x\n", hardwarePedal.getStatus());
+        printf("Pedal Error: 0x%x\n", hardwarePedal.getStatus());
     }
 
-    pcSerial.printf("\n\n-----\nEnd of Program");
+    printf("\n\n-----\nEnd of Program");
     while(1);
 }

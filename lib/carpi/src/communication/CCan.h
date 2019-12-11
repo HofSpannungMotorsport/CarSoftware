@@ -53,7 +53,7 @@ class CCan : public IChannel {
 
             #if defined(MESSAGE_REPORT) && defined(USE_MBED)
                 if (_can.tderror() > 0 || _can.rderror() > 0) {
-                    pcSerial.printf("[CCan]@run: Detected CAN Error: td: %i\t rd: %i\n", _can.tderror(), _can.rderror());
+                    printf("[CCan]@run: Detected CAN Error: td: %i\t rd: %i\n", _can.tderror(), _can.rderror());
                     _can.reset();
                 }
             #endif
@@ -105,7 +105,7 @@ class CCan : public IChannel {
             carMessage.setComponentId((id_component_t)canMessage.data[0]);
 
             #if defined(CCAN_DEBUG) && defined(MESSAGE_REPORT)
-                pcSerial.printf("[CCAN]@_getCarMessage: Made Car Message for component with ID 0x%x (carMessageId: 0x%x)\n", canMessage.data[0], carMessage.getComponentId());
+                printf("[CCAN]@_getCarMessage: Made Car Message for component with ID 0x%x (carMessageId: 0x%x)\n", canMessage.data[0], carMessage.getComponentId());
             #endif
 
             car_sub_message_t subMessage;
@@ -131,7 +131,7 @@ class CCan : public IChannel {
             }
 
             #if defined(CCAN_SENDING_DEBUG) && defined(MESSAGE_REPORT)
-                pcSerial.printf("[CCAN]@_getCanMessage: Made CAN Message with component ID 0x%x and message ID 0x%x\n", canMessage.data[0], canMessage.id);
+                printf("[CCAN]@_getCanMessage: Made CAN Message with component ID 0x%x and message ID 0x%x\n", canMessage.data[0], canMessage.id);
             #endif
         }
 
@@ -155,7 +155,7 @@ class CCan : public IChannel {
 
 
                 #if defined(CCAN_SENDING_DEBUG) && defined(MESSAGE_REPORT)
-                    pcSerial.printf("[CCan]@_send->_outQueue: Try to send canMessage with component ID 0x%x and message ID 0x%x\n", canMessage.data[0], canMessage.id);
+                    printf("[CCan]@_send->_outQueue: Try to send canMessage with component ID 0x%x and message ID 0x%x\n", canMessage.data[0], canMessage.id);
                 #endif
 
                 // Now try to send the Message over CAN
@@ -172,11 +172,11 @@ class CCan : public IChannel {
                     }
 
                     #if defined(CCAN_SENDING_DEBUG) && defined(MESSAGE_REPORT)
-                        pcSerial.printf("[CCan]@_send->_outQueue: Successfully sent canMessage with component ID 0x%x and message ID 0x%x\n", canMessage.data[0], canMessage.id);
+                        printf("[CCan]@_send->_outQueue: Successfully sent canMessage with component ID 0x%x and message ID 0x%x\n", canMessage.data[0], canMessage.id);
                     #endif
                 } else {
                     #if defined(CCAN_SENDING_DEBUG) && defined(MESSAGE_REPORT)
-                        pcSerial.printf("[CCan]@_send->_outQueue: CAN Send Buffer full for Message with component ID 0x%x and message ID 0x%x\n", canMessage.data[0], canMessage.id);
+                        printf("[CCan]@_send->_outQueue: CAN Send Buffer full for Message with component ID 0x%x and message ID 0x%x\n", canMessage.data[0], canMessage.id);
                     #endif
 
                     return;

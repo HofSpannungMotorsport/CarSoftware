@@ -4,22 +4,14 @@
     #include "Car.h"
 #endif // TESTING_MODE
 
-#ifdef USE_MBED
-    int main() {
-        runtime.setup();
+void setup() {
+    runtime.setup();
+}
 
-        while(1) {
-            runtime.loop();
-        }
-    }
-#endif // USE_MBED
+void loop() {
+    #ifdef STEROIDO_SCHEDULER_RUN_NEEDED
+        scheduler.run();
+    #endif
 
-#if defined(USE_ARDUINO) || defined(USE_TEENSYDUINO)
-    void setup() {
-        runtime.setup();
-    }
-
-    void loop() {
-        runtime.loop();
-    }
-#endif // USE_ARDUINO || USE_TEENSYDUINO
+    runtime.loop();
+}
