@@ -1,0 +1,4 @@
+<map id="mbed::MemFileSystem" name="mbed::MemFileSystem">
+<area shape="rect" id="node2" href="$class_f_a_t_file_system.html" title="{FATFileSystem\n|+ _fsid\l|+ FATFileSystem()\l+ ~FATFileSystem()\l+ open()\l+ open()\l+ remove()\l+ rename()\l+ format()\l+ opendir()\l+ open()\l+ mkdir()\land 8 more...\l}" alt="" coords="57,292,205,516"/>
+<area shape="rect" id="node4" href="$struct_f_a_t_f_s.html" title="{FATFS\n|+ fs_type\l+ drv\l+ csize\l+ n_fats\l+ wflag\l+ fsi_flag\l+ id\l+ n_rootdir\l+ last_clust\l+ free_clust\land 8 more...\l|}" alt="" coords="145,5,253,229"/>
+</map>

@@ -1,0 +1,6 @@
+<map id="HardwareAnalogSensor::_boundary" name="HardwareAnalogSensor::_boundary">
+<area shape="rect" id="node2" href="$struct_hardware_analog_sensor_1_1__boundary_1_1raw.html" title="{HardwareAnalogSensor\l::_boundary::raw\n|+ lowerEnd\l+ upperEnd\l+ outTimerStarted\l+ outTimerLimit\l|}" alt="" coords="170,501,342,637"/>
+<area shape="rect" id="node3" href="$class_timer.html" title="{Timer\n||}" alt="" coords="64,361,123,439"/>
+<area shape="rect" id="node4" href="$class_i_timer.html" title="{ITimer\n||+ ITimer()\l+ start()\l+ stop()\l+ reset()\l+ read()\l+ read_ms()\l+ operator float()\l# getMillis()\l}" alt="" coords="26,132,161,312"/>
+<area shape="rect" id="node5" href="$class_non_copyable.html" title="{NonCopyable\&lt; ITimer \&gt;\n||+ NonCopyable()\l}" alt="" coords="5,5,181,83"/>
+</map>

@@ -1,0 +1,8 @@
+<map id="RunableList" name="RunableList">
+<area shape="rect" id="node2" href="$class_i_runable.html" title="{IRunable\n||+ IRunable()\l+ run()\l+ setStatus()\l+ getStatus()\l}" alt="" coords="56,598,167,719"/>
+<area shape="rect" id="node3" href="$class_i_component.html" title="{IComponent\n||+ IComponent()\l+ IComponent()\l+ setComponentSubId()\l+ getComponentType()\l+ getComponentSubId()\l+ getComponentId()\l+ getObjectType()\l# setComponentType()\l# setObjectType()\l}" alt="" coords="11,303,190,497"/>
+<area shape="rect" id="node4" href="$class_i_logable.html" title="{ILogable\n||+ setStatus()\l+ getStatus()\l+ getLogValueCount()\l+ getLogValue()\l}" alt="" coords="19,132,183,253"/>
+<area shape="rect" id="node5" href="$class_non_copyable.html" title="{NonCopyable\&lt; ILogable \&gt;\n||+ NonCopyable()\l}" alt="" coords="5,5,196,83"/>
+<area shape="rect" id="node6" href="$classstd_1_1vector.html" title="{std::vector\&lt; IRunable * \&gt;\n||+ ~vector()\l+ at()\l+ operator[]()\l+ front()\l+ back()\l+ data()\l+ begin()\l+ end()\l+ empty()\l+ size()\land 7 more...\l}" alt="" coords="203,547,387,771"/>
+<area shape="rect" id="node7" href="$class_non_copyable.html" title="{NonCopyable\&lt; vector\l\&lt; IRunable *, unsigned\l int \&gt; \&gt;\n||+ NonCopyable()\l}" alt="" coords="215,347,381,453"/>
+</map>

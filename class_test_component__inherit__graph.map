@@ -1,0 +1,7 @@
+<map id="TestComponent" name="TestComponent">
+<area shape="rect" id="node2" href="$class_self_syncable.html" title="{SelfSyncable\n|# _syncer\l# _syncerAttached\l|+ attach()\l+ detach()\l# _sendCommand()\l# _sendCommand()\l# _sendCommand()\l# _send()\l# _convertFloat()\l# _reconvertFloat()\l# _disassambleFloat()\l# _reassambleFloat()\l}" alt="" coords="21,668,187,892"/>
+<area shape="rect" id="node3" href="$class_i_communication.html" title="{ICommunication\n||+ receive()\l}" alt="" coords="41,543,167,620"/>
+<area shape="rect" id="node4" href="$class_i_component.html" title="{IComponent\n||+ IComponent()\l+ IComponent()\l+ setComponentSubId()\l+ getComponentType()\l+ getComponentSubId()\l+ getComponentId()\l+ getObjectType()\l# setComponentType()\l# setObjectType()\l}" alt="" coords="15,300,193,495"/>
+<area shape="rect" id="node5" href="$class_i_logable.html" title="{ILogable\n||+ setStatus()\l+ getStatus()\l+ getLogValueCount()\l+ getLogValue()\l}" alt="" coords="22,131,186,252"/>
+<area shape="rect" id="node6" href="$class_non_copyable.html" title="{NonCopyable\&lt; ILogable \&gt;\n||+ NonCopyable()\l}" alt="" coords="9,5,199,83"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="HardwarePedal::_calibration" name="HardwarePedal::_calibration">
+<area shape="rect" id="node2" href="$struct_hardware_pedal_1_1__calibration_1_1sensor1.html" title="{HardwarePedal::_calibration\l::sensor1\n|+ min\l+ max\l+ initPointSet\l|}" alt="" coords="5,292,204,413"/>
+<area shape="rect" id="node3" href="$class_circular_buffer.html" title="{CircularBuffer\&lt; analog\l_sensor_raw_t, PEDAL_CALIBRATION\l_SAMPLE_BUFFER_SIZE \&gt;\n||+ CircularBuffer()\l+ ~CircularBuffer()\l+ push()\l+ pop()\l+ empty()\l+ full()\l+ reset()\l+ size()\l+ peek()\l}" alt="" coords="107,5,359,229"/>
+<area shape="rect" id="node4" href="$struct_hardware_pedal_1_1__calibration_1_1sensor2.html" title="{HardwarePedal::_calibration\l::sensor2\n|+ min\l+ max\l+ initPointSet\l|}" alt="" coords="228,292,427,413"/>
+</map>

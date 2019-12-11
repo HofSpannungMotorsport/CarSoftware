@@ -1,0 +1,5 @@
+<map id="HardwarePedal::_deviance" name="HardwarePedal::_deviance">
+<area shape="rect" id="node2" href="$class_timer.html" title="{Timer\n||}" alt="" coords="71,361,130,439"/>
+<area shape="rect" id="node3" href="$class_i_timer.html" title="{ITimer\n||+ ITimer()\l+ start()\l+ stop()\l+ reset()\l+ read()\l+ read_ms()\l+ operator float()\l# getMillis()\l}" alt="" coords="33,132,168,312"/>
+<area shape="rect" id="node4" href="$class_non_copyable.html" title="{NonCopyable\&lt; ITimer \&gt;\n||+ NonCopyable()\l}" alt="" coords="13,5,189,83"/>
+</map>

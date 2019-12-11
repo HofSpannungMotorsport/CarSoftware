@@ -1,0 +1,11 @@
+<map id="IRegistry" name="IRegistry">
+<area shape="rect" id="node2" href="$class_self_syncable.html" title="{SelfSyncable\n|# _syncerAttached\l|+ attach()\l+ detach()\l# _sendCommand()\l# _sendCommand()\l# _sendCommand()\l# _send()\l# _convertFloat()\l# _reconvertFloat()\l# _disassambleFloat()\l# _reassambleFloat()\l}" alt="" coords="271,1183,437,1392"/>
+<area shape="rect" id="node3" href="$class_i_communication.html" title="{ICommunication\n||+ receive()\l}" alt="" coords="336,795,463,872"/>
+<area shape="rect" id="node4" href="$class_i_component.html" title="{IComponent\n||+ IComponent()\l+ IComponent()\l+ setComponentSubId()\l+ getComponentType()\l+ getComponentSubId()\l+ getComponentId()\l+ getObjectType()\l# setComponentType()\l# setObjectType()\l}" alt="" coords="261,303,439,497"/>
+<area shape="rect" id="node8" href="$class_i_runable.html" title="{IRunable\n||+ IRunable()\l+ run()\l+ setStatus()\l+ getStatus()\l}" alt="" coords="237,598,348,719"/>
+<area shape="rect" id="node5" href="$class_i_logable.html" title="{ILogable\n||+ setStatus()\l+ getStatus()\l+ getLogValueCount()\l+ getLogValue()\l}" alt="" coords="268,132,432,253"/>
+<area shape="rect" id="node6" href="$class_non_copyable.html" title="{NonCopyable\&lt; ILogable \&gt;\n||+ NonCopyable()\l}" alt="" coords="255,5,445,83"/>
+<area shape="rect" id="node7" href="$class_sync.html" title="{Sync\n||+ Sync()\l+ addComponent()\l+ addBridge()\l+ receive()\l+ send()\l+ run()\l+ messageInQueue()\l+ finalize()\l+ Sync()\l+ receive()\land 7 more...\l}" alt="" coords="208,896,367,1120"/>
+<area shape="rect" id="node9" href="$classstd_1_1vector.html" title="{std::vector\&lt; CarMessage \&gt;\n||+ ~vector()\l+ at()\l+ operator[]()\l+ front()\l+ back()\l+ data()\l+ begin()\l+ end()\l+ empty()\l+ size()\land 7 more...\l}" alt="" coords="5,547,204,771"/>
+<area shape="rect" id="node10" href="$class_non_copyable.html" title="{NonCopyable\&lt; vector\l\&lt; CarMessage, unsigned\l int \&gt; \&gt;\n||+ NonCopyable()\l}" alt="" coords="13,347,196,453"/>
+</map>

@@ -1,0 +1,21 @@
+<map id="HardwareBuzzer" name="HardwareBuzzer">
+<area shape="rect" id="node2" href="$class_i_buzzer.html" title="{IBuzzer\n||+ IBuzzer()\l+ setState()\l+ getState()\l+ setBeep()\l+ getBeep()\l+ setHz()\l+ getHz()\l}" alt="" coords="6,795,109,960"/>
+<area shape="rect" id="node3" href="$class_i_component.html" title="{IComponent\n||+ IComponent()\l+ IComponent()\l+ setComponentSubId()\l+ getComponentType()\l+ getComponentSubId()\l+ getComponentId()\l+ getObjectType()\l# setComponentType()\l# setObjectType()\l}" alt="" coords="436,303,615,497"/>
+<area shape="rect" id="node16" href="$class_i_communication.html" title="{ICommunication\n||+ receive()\l}" alt="" coords="462,839,589,916"/>
+<area shape="rect" id="node18" href="$class_i_runable.html" title="{IRunable\n||+ IRunable()\l+ run()\l+ setStatus()\l+ getStatus()\l}" alt="" coords="570,598,681,719"/>
+<area shape="rect" id="node4" href="$class_i_logable.html" title="{ILogable\n||+ setStatus()\l+ getStatus()\l+ getLogValueCount()\l+ getLogValue()\l}" alt="" coords="443,132,607,253"/>
+<area shape="rect" id="node5" href="$class_non_copyable.html" title="{NonCopyable\&lt; ILogable \&gt;\n||+ NonCopyable()\l}" alt="" coords="430,5,621,83"/>
+<area shape="rect" id="node6" href="$struct_hardware_buzzer_1_1__current.html" title="{HardwareBuzzer::_current\n|+ state\l|}" alt="" coords="45,1616,233,1693"/>
+<area shape="rect" id="node7" href="$struct_hardware_buzzer_1_1__current_1_1beep.html" title="{HardwareBuzzer::_current\l::beep\n|+ switchTime\l+ type\l|}" alt="" coords="45,1322,233,1429"/>
+<area shape="rect" id="node8" href="$class_ticker.html" title="{Ticker\n||+ Ticker()\l+ ~Ticker()\l+ attach()\l+ detach()\l+ call()\l}" alt="" coords="257,1587,351,1723"/>
+<area shape="rect" id="node9" href="$class_scheduled_callable.html" title="{ScheduledCallable\n||+ ScheduledCallable()\l+ ScheduledCallable()\l+ getSleepingSince()\l+ setSleeptime()\l+ getSleepTime()\l+ resetSleepTimer()\l}" alt="" coords="257,1300,421,1451"/>
+<area shape="rect" id="node10" href="$class_i_callable.html" title="{ICallable\n||+ call()\l}" alt="" coords="301,1057,376,1135"/>
+<area shape="rect" id="node11" href="$class_non_copyable.html" title="{NonCopyable\&lt; ICallable \&gt;\n||+ NonCopyable()\l}" alt="" coords="243,620,434,697"/>
+<area shape="rect" id="node12" href="$class_digital_out.html" title="{DigitalOut\n||+ DigitalOut()\l+ DigitalOut()\l+ write()\l+ read()\l+ operator=()\l+ operator uint8_t()\l}" alt="" coords="375,1579,526,1730"/>
+<area shape="rect" id="node13" href="$struct_hardware_buzzer_1_1__time.html" title="{HardwareBuzzer::_time\n|+ onOff\l+ fastHighToLow\l|}" alt="" coords="551,1609,721,1701"/>
+<area shape="rect" id="node14" href="$class_i_registry.html" title="{IRegistry\n||+ IRegistry()\l+ getReady()\l+ setReady()\l+ getFloat()\l+ getUInt8()\l+ getUInt16()\l+ getUInt32()\l+ getInt8()\l+ getInt16()\l+ getInt32()\land 9 more...\l}" alt="" coords="746,1543,857,1767"/>
+<area shape="rect" id="node15" href="$class_self_syncable.html" title="{SelfSyncable\n|# _syncerAttached\l|+ attach()\l+ detach()\l# _sendCommand()\l# _sendCommand()\l# _sendCommand()\l# _send()\l# _convertFloat()\l# _reconvertFloat()\l# _disassambleFloat()\l# _reassambleFloat()\l}" alt="" coords="560,1271,725,1480"/>
+<area shape="rect" id="node17" href="$class_sync.html" title="{Sync\n||+ Sync()\l+ addComponent()\l+ addBridge()\l+ receive()\l+ send()\l+ run()\l+ messageInQueue()\l+ finalize()\l+ Sync()\l+ receive()\land 7 more...\l}" alt="" coords="563,984,722,1208"/>
+<area shape="rect" id="node19" href="$classstd_1_1vector.html" title="{std::vector\&lt; CarMessage \&gt;\n||+ ~vector()\l+ at()\l+ operator[]()\l+ front()\l+ back()\l+ data()\l+ begin()\l+ end()\l+ empty()\l+ size()\land 7 more...\l}" alt="" coords="705,547,903,771"/>
+<area shape="rect" id="node20" href="$class_non_copyable.html" title="{NonCopyable\&lt; vector\l\&lt; CarMessage, unsigned\l int \&gt; \&gt;\n||+ NonCopyable()\l}" alt="" coords="713,347,895,453"/>
+</map>

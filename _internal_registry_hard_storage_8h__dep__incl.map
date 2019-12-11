@@ -1,0 +1,27 @@
+<map id="lib/carpi/src/components/internal/InternalRegistryHardStorage.h" name="lib/carpi/src/components/internal/InternalRegistryHardStorage.h">
+<area shape="rect" id="node2" href="$carpi_8h.html" title="lib/carpi/src/carpi.h" alt="" coords="1931,117,2073,143"/>
+<area shape="rect" id="node26" href="$test___registry_sync_8cpp.html" title="test/common_test_Registry\lSync/test_RegistrySync.cpp" alt="" coords="2097,109,2294,151"/>
+<area shape="rect" id="node3" href="$_dashboard_slave_conf_8h.html" title="car/Bonnie2019/Dashboard\lSlaveConf.h" alt="" coords="5,199,201,240"/>
+<area shape="rect" id="node4" href="$_display_slave_conf_8h.html" title="car/Bonnie2019/DisplaySlave\lConf.h" alt="" coords="225,199,432,240"/>
+<area shape="rect" id="node5" href="$_lo_ra_conf_8h.html" title="car/Bonnie2019/LoRaConf.h" alt="" coords="457,206,654,233"/>
+<area shape="rect" id="node6" href="$_master_conf_8h.html" title="car/Bonnie2019/MasterConf.h" alt="" coords="678,206,889,233"/>
+<area shape="rect" id="node7" href="$_pedal_slave_conf_8h.html" title="car/Bonnie2019/PedalSlave\lConf.h" alt="" coords="913,199,1109,240"/>
+<area shape="rect" id="node8" href="$_syntetic_sync_8h.html" title="car/hardwareTest/mbed\l/helper/SynteticSync.h" alt="" coords="1379,199,1550,240"/>
+<area shape="rect" id="node10" href="$_hardware_s_d_card_stress_test_8h.html" title="car/hardwareTest/mbed\l/HardwareSDCardStressTest.h" alt="" coords="1139,288,1353,329"/>
+<area shape="rect" id="node11" href="$_hardware_s_d_card_test_8h.html" title="car/hardwareTest/mbed\l/HardwareSDCardTest.h" alt="" coords="1378,288,1551,329"/>
+<area shape="rect" id="node12" href="$_button_unit_test_8h.html" title="car/hardwareTest/mbed\l/ButtonUnitTest.h" alt="" coords="1625,199,1795,240"/>
+<area shape="rect" id="node13" href="$_c_a_n_service_unit_test_8h.html" title="car/hardwareTest/mbed\l/CANServiceUnitTest.h" alt="" coords="1819,199,1990,240"/>
+<area shape="rect" id="node14" href="$_dashboard_demo_8h.html" title="car/hardwareTest/mbed\l/DashboardDemo.h" alt="" coords="2014,199,2185,240"/>
+<area shape="rect" id="node15" href="$_hardware_buzzer_unit_test_8h.html" title="car/hardwareTest/mbed\l/HardwareBuzzerUnitTest.h" alt="" coords="2209,199,2403,240"/>
+<area shape="rect" id="node16" href="$_hardware_pedal_unit_test_8h.html" title="car/hardwareTest/mbed\l/HardwarePedalUnitTest.h" alt="" coords="2428,199,2613,240"/>
+<area shape="rect" id="node17" href="$_hardware_pwm_buzzer_unit_test_8h.html" title="car/hardwareTest/mbed\l/HardwarePwmBuzzerUnitTest.h" alt="" coords="2638,199,2862,240"/>
+<area shape="rect" id="node18" href="$_dummy_s_car_8h.html" title="car/hardwareTest/mbed\l/helper/DummySCar.h" alt="" coords="1185,199,1355,240"/>
+<area shape="rect" id="node19" href="$_l_e_d_p_w_m_unit_test_8h.html" title="car/hardwareTest/mbed\l/LEDPWMUnitTest.h" alt="" coords="2886,199,3057,240"/>
+<area shape="rect" id="node20" href="$_l_e_d_unit_test_8h.html" title="car/hardwareTest/mbed\l/LEDUnitTest.h" alt="" coords="3081,199,3251,240"/>
+<area shape="rect" id="node21" href="$_master_output_test_8h.html" title="car/hardwareTest/mbed\l/MasterOutputTest.h" alt="" coords="3275,199,3446,240"/>
+<area shape="rect" id="node22" href="$_pedal_unit_test_8h.html" title="car/hardwareTest/mbed\l/PedalUnitTest.h" alt="" coords="3470,199,3641,240"/>
+<area shape="rect" id="node23" href="$_pump_refill_8h.html" title="car/hardwareTest/mbed\l/PumpRefill.h" alt="" coords="3665,199,3835,240"/>
+<area shape="rect" id="node24" href="$_r_f_eand_r_u_ntest_8h.html" title="car/hardwareTest/mbed\l/RFEandRUNtest.h" alt="" coords="3859,199,4030,240"/>
+<area shape="rect" id="node25" href="$_r_p_m_sensor_unit_test_8h.html" title="car/hardwareTest/mbed\l/RPMSensorUnitTest.h" alt="" coords="4054,199,4225,240"/>
+<area shape="rect" id="node9" href="$_alive_component_test_8h.html" title="car/hardwareTest/mbed\l/AliveComponentTest.h" alt="" coords="1575,288,1746,329"/>
+</map>

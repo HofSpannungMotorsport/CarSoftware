@@ -1,0 +1,9 @@
+<map id="IService" name="IService">
+<area shape="rect" id="node6" href="$class_s_car.html" title="{SCar\n||+ SCar()\l+ run()\l+ addError()\l+ processErrors()\l+ getState()\l+ setState()\l+ calibrationNeeded()\l+ startUp()\l+ getMaxPower()\l+ setMaxPower()\l}" alt="" coords="5,852,168,1061"/>
+<area shape="rect" id="node8" href="$class_s_speed.html" title="{SSpeed\n|# _registry\l# _carService\l# _motorController\l# _speed\l|+ SSpeed()\l+ run()\l+ getSpeed()\l# _getSpeed()\l# _getSpeed()\l# _getSpeed()\l# _checkPlausibility()\l# _setThrottle()\l# _map()\l}" alt="" coords="192,837,349,1076"/>
+<area shape="rect" id="node2" href="$class_i_runable.html" title="{IRunable\n||+ IRunable()\l+ run()\l+ setStatus()\l+ getStatus()\l}" alt="" coords="123,543,234,664"/>
+<area shape="rect" id="node3" href="$class_i_component.html" title="{IComponent\n||+ IComponent()\l+ IComponent()\l+ setComponentSubId()\l+ getComponentType()\l+ getComponentSubId()\l+ getComponentId()\l+ getObjectType()\l# setComponentType()\l# setObjectType()\l}" alt="" coords="89,300,268,495"/>
+<area shape="rect" id="node4" href="$class_i_logable.html" title="{ILogable\n||+ setStatus()\l+ getStatus()\l+ getLogValueCount()\l+ getLogValue()\l}" alt="" coords="97,131,261,252"/>
+<area shape="rect" id="node5" href="$class_non_copyable.html" title="{NonCopyable\&lt; ILogable \&gt;\n||+ NonCopyable()\l}" alt="" coords="83,5,274,83"/>
+<area shape="rect" id="node7" href="$class_dummy_s_car.html" title="{DummySCar\n||+ DummySCar()\l+ setState()\l}" alt="" coords="22,1124,151,1216"/>
+</map>

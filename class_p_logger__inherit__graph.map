@@ -1,0 +1,7 @@
+<map id="PLogger" name="PLogger">
+<area shape="rect" id="node2" href="$class_i_program.html" title="{IProgram\n||}" alt="" coords="63,712,143,789"/>
+<area shape="rect" id="node3" href="$class_i_runable.html" title="{IRunable\n||+ IRunable()\l+ run()\l+ setStatus()\l+ getStatus()\l}" alt="" coords="48,543,159,664"/>
+<area shape="rect" id="node4" href="$class_i_component.html" title="{IComponent\n||+ IComponent()\l+ IComponent()\l+ setComponentSubId()\l+ getComponentType()\l+ getComponentSubId()\l+ getComponentId()\l+ getObjectType()\l# setComponentType()\l# setObjectType()\l}" alt="" coords="14,300,193,495"/>
+<area shape="rect" id="node5" href="$class_i_logable.html" title="{ILogable\n||+ setStatus()\l+ getStatus()\l+ getLogValueCount()\l+ getLogValue()\l}" alt="" coords="21,131,185,252"/>
+<area shape="rect" id="node6" href="$class_non_copyable.html" title="{NonCopyable\&lt; ILogable \&gt;\n||+ NonCopyable()\l}" alt="" coords="8,5,199,83"/>
+</map>

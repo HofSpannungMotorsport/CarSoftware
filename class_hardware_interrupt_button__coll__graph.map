@@ -1,0 +1,18 @@
+<map id="HardwareInterruptButton" name="HardwareInterruptButton">
+<area shape="rect" id="node2" href="$class_i_button.html" title="{IButton\n||+ IButton()\l+ setState()\l+ getState()\l+ getStateChanged()\l}" alt="" coords="385,1493,545,1614"/>
+<area shape="rect" id="node3" href="$class_self_syncable.html" title="{SelfSyncable\n|# _syncerAttached\l|+ attach()\l+ detach()\l# _sendCommand()\l# _sendCommand()\l# _sendCommand()\l# _send()\l# _convertFloat()\l# _reconvertFloat()\l# _disassambleFloat()\l# _reassambleFloat()\l}" alt="" coords="271,1183,437,1392"/>
+<area shape="rect" id="node17" href="$class_i_registry.html" title="{IRegistry\n||+ IRegistry()\l+ getReady()\l+ setReady()\l+ getFloat()\l+ getUInt8()\l+ getUInt16()\l+ getUInt32()\l+ getInt8()\l+ getInt16()\l+ getInt32()\land 9 more...\l}" alt="" coords="249,1441,360,1665"/>
+<area shape="rect" id="node4" href="$class_i_communication.html" title="{ICommunication\n||+ receive()\l}" alt="" coords="336,795,463,872"/>
+<area shape="rect" id="node5" href="$class_i_component.html" title="{IComponent\n||+ IComponent()\l+ IComponent()\l+ setComponentSubId()\l+ getComponentType()\l+ getComponentSubId()\l+ getComponentId()\l+ getObjectType()\l# setComponentType()\l# setObjectType()\l}" alt="" coords="262,303,441,497"/>
+<area shape="rect" id="node9" href="$class_i_runable.html" title="{IRunable\n||+ IRunable()\l+ run()\l+ setStatus()\l+ getStatus()\l}" alt="" coords="237,598,348,719"/>
+<area shape="rect" id="node6" href="$class_i_logable.html" title="{ILogable\n||+ setStatus()\l+ getStatus()\l+ getLogValueCount()\l+ getLogValue()\l}" alt="" coords="269,132,433,253"/>
+<area shape="rect" id="node7" href="$class_non_copyable.html" title="{NonCopyable\&lt; ILogable \&gt;\n||+ NonCopyable()\l}" alt="" coords="256,5,447,83"/>
+<area shape="rect" id="node8" href="$class_sync.html" title="{Sync\n||+ Sync()\l+ addComponent()\l+ addBridge()\l+ receive()\l+ send()\l+ run()\l+ messageInQueue()\l+ finalize()\l+ Sync()\l+ receive()\land 7 more...\l}" alt="" coords="208,896,367,1120"/>
+<area shape="rect" id="node10" href="$classstd_1_1vector.html" title="{std::vector\&lt; CarMessage \&gt;\n||+ ~vector()\l+ at()\l+ operator[]()\l+ front()\l+ back()\l+ data()\l+ begin()\l+ end()\l+ empty()\l+ size()\land 7 more...\l}" alt="" coords="5,547,204,771"/>
+<area shape="rect" id="node11" href="$class_non_copyable.html" title="{NonCopyable\&lt; vector\l\&lt; CarMessage, unsigned\l int \&gt; \&gt;\n||+ NonCopyable()\l}" alt="" coords="13,347,196,453"/>
+<area shape="rect" id="node12" href="$class_circular_buffer.html" title="{CircularBuffer\&lt; button\l_state_t, BUTTON_STATE\l_BUFFER_SIZE \&gt;\n||+ CircularBuffer()\l+ ~CircularBuffer()\l+ push()\l+ pop()\l+ empty()\l+ full()\l+ reset()\l+ size()\l+ peek()\l}" alt="" coords="569,1441,749,1665"/>
+<area shape="rect" id="node13" href="$class_ticker.html" title="{Ticker\n||+ Ticker()\l+ ~Ticker()\l+ attach()\l+ detach()\l+ call()\l}" alt="" coords="773,1485,868,1621"/>
+<area shape="rect" id="node14" href="$class_scheduled_callable.html" title="{ScheduledCallable\n||+ ScheduledCallable()\l+ ScheduledCallable()\l+ getSleepingSince()\l+ setSleeptime()\l+ getSleepTime()\l+ resetSleepTimer()\l}" alt="" coords="739,1212,903,1363"/>
+<area shape="rect" id="node15" href="$class_i_callable.html" title="{ICallable\n||+ call()\l}" alt="" coords="783,969,858,1047"/>
+<area shape="rect" id="node16" href="$class_non_copyable.html" title="{NonCopyable\&lt; ICallable \&gt;\n||+ NonCopyable()\l}" alt="" coords="725,620,916,697"/>
+</map>

@@ -1,0 +1,4 @@
+<map id="HardwareAnalogSensor" name="HardwareAnalogSensor">
+<area shape="rect" id="node2" href="$class_i_analog_sensor.html" title="{IAnalogSensor\n||+ setMapping()\l+ setRawBoundary()\l+ setRawBoundaryOutTime()\l+ setBoundary()\l+ setBoundaryOutTime()\l+ getRawValue()\l+ getValue()\l}" alt="" coords="17,131,223,296"/>
+<area shape="rect" id="node3" href="$class_non_copyable.html" title="{NonCopyable\&lt; IAnalogSensor \&gt;\n||+ NonCopyable()\l}" alt="" coords="5,5,235,83"/>
+</map>

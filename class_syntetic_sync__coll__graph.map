@@ -1,0 +1,11 @@
+<map id="SynteticSync" name="SynteticSync">
+<area shape="rect" id="node2" href="$class_sync.html" title="{Sync\n||+ Sync()\l+ addComponent()\l+ addBridge()\l+ receive()\l+ send()\l+ run()\l+ messageInQueue()\l+ finalize()\l+ Sync()\l+ receive()\land 7 more...\l}" alt="" coords="144,896,303,1120"/>
+<area shape="rect" id="node3" href="$class_i_runable.html" title="{IRunable\n||+ IRunable()\l+ run()\l+ setStatus()\l+ getStatus()\l}" alt="" coords="127,598,237,719"/>
+<area shape="rect" id="node4" href="$class_i_component.html" title="{IComponent\n||+ IComponent()\l+ IComponent()\l+ setComponentSubId()\l+ getComponentType()\l+ getComponentSubId()\l+ getComponentId()\l+ getObjectType()\l# setComponentType()\l# setObjectType()\l}" alt="" coords="30,303,209,497"/>
+<area shape="rect" id="node9" href="$class_i_communication.html" title="{ICommunication\n||+ receive()\l}" alt="" coords="5,795,132,872"/>
+<area shape="rect" id="node5" href="$class_i_logable.html" title="{ILogable\n||+ setStatus()\l+ getStatus()\l+ getLogValueCount()\l+ getLogValue()\l}" alt="" coords="37,132,201,253"/>
+<area shape="rect" id="node6" href="$class_non_copyable.html" title="{NonCopyable\&lt; ILogable \&gt;\n||+ NonCopyable()\l}" alt="" coords="24,5,215,83"/>
+<area shape="rect" id="node7" href="$classstd_1_1vector.html" title="{std::vector\&lt; CarMessage \&gt;\n||+ ~vector()\l+ at()\l+ operator[]()\l+ front()\l+ back()\l+ data()\l+ begin()\l+ end()\l+ empty()\l+ size()\land 7 more...\l}" alt="" coords="261,547,460,771"/>
+<area shape="rect" id="node8" href="$class_non_copyable.html" title="{NonCopyable\&lt; vector\l\&lt; CarMessage, unsigned\l int \&gt; \&gt;\n||+ NonCopyable()\l}" alt="" coords="269,347,452,453"/>
+<area shape="rect" id="node10" href="$class_circular_buffer.html" title="{CircularBuffer\&lt; CarMessage,\l SYNC_INCOMING_MESSAGES\l_BUFFER_SIZE, uint8_t \&gt;\n||+ CircularBuffer()\l+ ~CircularBuffer()\l+ push()\l+ pop()\l+ empty()\l+ full()\l+ reset()\l+ size()\l+ peek()\l}" alt="" coords="327,896,541,1120"/>
+</map>

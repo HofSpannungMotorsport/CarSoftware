@@ -1,0 +1,4 @@
+<map id="ITimer" name="ITimer">
+<area shape="rect" id="node3" href="$class_timer.html" title="{Timer\n||}" alt="" coords="64,359,123,436"/>
+<area shape="rect" id="node2" href="$class_non_copyable.html" title="{NonCopyable\&lt; ITimer \&gt;\n||+ NonCopyable()\l}" alt="" coords="5,5,181,83"/>
+</map>

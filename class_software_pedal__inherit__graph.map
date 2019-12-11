@@ -1,0 +1,8 @@
+<map id="SoftwarePedal" name="SoftwarePedal">
+<area shape="rect" id="node2" href="$class_i_pedal.html" title="{IPedal\n||+ IPedal()\l+ setProportionality()\l+ getValue()\l+ setCalibrationStatus()\l+ getCalibrationStatus()\l+ setMaxDeviance()\l+ setMaxDevianceTime()\l+ setValue()\l+ getLogValueCount()\l+ getLogValue()\l}" alt="" coords="9,940,192,1149"/>
+<area shape="rect" id="node3" href="$class_self_syncable.html" title="{SelfSyncable\n|# _syncer\l# _syncerAttached\l|+ attach()\l+ detach()\l# _sendCommand()\l# _sendCommand()\l# _sendCommand()\l# _send()\l# _convertFloat()\l# _reconvertFloat()\l# _disassambleFloat()\l# _reassambleFloat()\l}" alt="" coords="18,668,183,892"/>
+<area shape="rect" id="node4" href="$class_i_communication.html" title="{ICommunication\n||+ receive()\l}" alt="" coords="37,543,164,620"/>
+<area shape="rect" id="node5" href="$class_i_component.html" title="{IComponent\n||+ IComponent()\l+ IComponent()\l+ setComponentSubId()\l+ getComponentType()\l+ getComponentSubId()\l+ getComponentId()\l+ getObjectType()\l# setComponentType()\l# setObjectType()\l}" alt="" coords="11,300,190,495"/>
+<area shape="rect" id="node6" href="$class_i_logable.html" title="{ILogable\n||+ setStatus()\l+ getStatus()\l+ getLogValueCount()\l+ getLogValue()\l}" alt="" coords="19,131,183,252"/>
+<area shape="rect" id="node7" href="$class_non_copyable.html" title="{NonCopyable\&lt; ILogable \&gt;\n||+ NonCopyable()\l}" alt="" coords="5,5,196,83"/>
+</map>

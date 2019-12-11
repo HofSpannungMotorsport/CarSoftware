@@ -1,0 +1,16 @@
+<map id="lib/carpi/src/runable/programs/PCockpitIndicator.h" name="lib/carpi/src/runable/programs/PCockpitIndicator.h">
+<area shape="rect" id="node2" href="$_i_program_8h.html" title="IProgram.h" alt="" coords="700,184,792,211"/>
+<area shape="rect" id="node9" href="$_i_hv_enabled_8h.html" title="components/interface\l/IHvEnabled.h" alt="" coords="783,259,946,300"/>
+<area shape="rect" id="node10" href="$_i_led_8h.html" title="components/interface\l/ILed.h" alt="" coords="427,95,590,136"/>
+<area shape="rect" id="node3" href="$_i_runable_8h.html" title="../IRunable.h" alt="" coords="682,437,781,464"/>
+<area shape="rect" id="node4" href="$_i_component_8h.html" title="components/interface\l/IComponent.h" alt="" coords="631,512,794,553"/>
+<area shape="rect" id="node5" href="$component_ids_8h.html" title="communication/componentIds.h" alt="" coords="377,601,605,628"/>
+<area shape="rect" id="node7" href="$_i_logable_8h.html" title="ILogable.h" alt="" coords="669,601,756,628"/>
+<area shape="rect" id="node11" href="$_self_syncable_8h.html" title="communication/SelfSyncable.h" alt="" coords="281,184,499,211"/>
+<area shape="rect" id="node12" href="$_sync_8h.html" title="Sync.h" alt="" coords="357,266,423,293"/>
+<area shape="rect" id="node18" href="$_i_communication_8h.html" title="components/interface\l/ICommunication.h" alt="" coords="99,348,262,389"/>
+<area shape="rect" id="node14" href="$device_ids_8h.html" title="deviceIds.h" alt="" coords="143,519,237,546"/>
+<area shape="rect" id="node15" href="$_car_message_8h.html" title="CarMessage.h" alt="" coords="243,437,356,464"/>
+<area shape="rect" id="node17" href="$_i_channel_8h.html" title="IChannel.h" alt="" coords="467,355,556,382"/>
+<area shape="rect" id="node19" href="$_hard_config_8h.html" title="HardConfig.h" alt="" coords="337,355,443,382"/>
+</map>

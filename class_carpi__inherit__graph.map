@@ -1,0 +1,7 @@
+<map id="Carpi" name="Carpi">
+<area shape="rect" id="node2" href="$class_dashboard.html" title="{Dashboard\n||+ setup()\l+ loop()\l+ setup()\l+ loop()\l}" alt="" coords="5,182,97,303"/>
+<area shape="rect" id="node3" href="$class_display.html" title="{Display\n||+ setup()\l+ loop()\l}" alt="" coords="122,197,205,289"/>
+<area shape="rect" id="node4" href="$class_lo_ra.html" title="{LoRa\n||+ setup()\l+ loop()\l}" alt="" coords="229,197,311,289"/>
+<area shape="rect" id="node5" href="$class_master.html" title="{Master\n|# highDemandServices\l# lowDemandServices\l# serviceScheduler\l# services\l|+ setup()\l+ loop()\l}" alt="" coords="335,175,509,311"/>
+<area shape="rect" id="node6" href="$class_pedal.html" title="{Pedal\n||+ setup()\l+ loop()\l}" alt="" coords="533,197,615,289"/>
+</map>

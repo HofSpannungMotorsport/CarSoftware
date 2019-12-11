@@ -1,0 +1,14 @@
+<map id="PCockpitIndicator" name="PCockpitIndicator">
+<area shape="rect" id="node2" href="$class_i_program.html" title="{IProgram\n||}" alt="" coords="311,1144,391,1221"/>
+<area shape="rect" id="node3" href="$class_i_runable.html" title="{IRunable\n||+ IRunable()\l+ run()\l+ setStatus()\l+ getStatus()\l}" alt="" coords="255,598,365,719"/>
+<area shape="rect" id="node10" href="$class_sync.html" title="{Sync\n||+ Sync()\l+ addComponent()\l+ addBridge()\l+ receive()\l+ send()\l+ run()\l+ messageInQueue()\l+ finalize()\l+ Sync()\l+ receive()\land 7 more...\l}" alt="" coords="141,896,300,1120"/>
+<area shape="rect" id="node4" href="$class_i_component.html" title="{IComponent\n||+ IComponent()\l+ IComponent()\l+ setComponentSubId()\l+ getComponentType()\l+ getComponentSubId()\l+ getComponentId()\l+ getObjectType()\l# setComponentType()\l# setObjectType()\l}" alt="" coords="333,303,511,497"/>
+<area shape="rect" id="node9" href="$class_i_communication.html" title="{ICommunication\n||+ receive()\l}" alt="" coords="359,795,485,872"/>
+<area shape="rect" id="node13" href="$class_i_hv_enabled.html" title="{IHvEnabled\n||+ IHvEnabled()\l+ read()\l+ operator bool()\l}" alt="" coords="422,1479,555,1585"/>
+<area shape="rect" id="node5" href="$class_i_logable.html" title="{ILogable\n||+ setStatus()\l+ getStatus()\l+ getLogValueCount()\l+ getLogValue()\l}" alt="" coords="340,132,504,253"/>
+<area shape="rect" id="node6" href="$class_non_copyable.html" title="{NonCopyable\&lt; ILogable \&gt;\n||+ NonCopyable()\l}" alt="" coords="327,5,517,83"/>
+<area shape="rect" id="node7" href="$class_i_led.html" title="{ILed\n||+ ILed()\l+ setState()\l+ setBrightness()\l+ setBlinking()\l+ getState()\l+ getBrightness()\l+ getBlinking()\l}" alt="" coords="191,1609,327,1775"/>
+<area shape="rect" id="node8" href="$class_self_syncable.html" title="{SelfSyncable\n|# _syncerAttached\l|+ attach()\l+ detach()\l# _sendCommand()\l# _sendCommand()\l# _sendCommand()\l# _send()\l# _convertFloat()\l# _reconvertFloat()\l# _disassambleFloat()\l# _reassambleFloat()\l}" alt="" coords="166,1245,331,1455"/>
+<area shape="rect" id="node11" href="$classstd_1_1vector.html" title="{std::vector\&lt; CarMessage \&gt;\n||+ ~vector()\l+ at()\l+ operator[]()\l+ front()\l+ back()\l+ data()\l+ begin()\l+ end()\l+ empty()\l+ size()\land 7 more...\l}" alt="" coords="5,547,204,771"/>
+<area shape="rect" id="node12" href="$class_non_copyable.html" title="{NonCopyable\&lt; vector\l\&lt; CarMessage, unsigned\l int \&gt; \&gt;\n||+ NonCopyable()\l}" alt="" coords="13,347,196,453"/>
+</map>

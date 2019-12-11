@@ -1,0 +1,6 @@
+<map id="RadioSettings_t" name="RadioSettings_t">
+<area shape="rect" id="node2" href="$struct_radio_fsk_packet_handler__t.html" title="{RadioFskPacketHandler_t\n|+ PreambleDetected\l+ SyncWordDetected\l+ RssiValue\l+ AfcValue\l+ RxGain\l+ Size\l+ NbBytes\l+ FifoThresh\l+ ChunkSize\l|}" alt="" coords="5,49,188,244"/>
+<area shape="rect" id="node3" href="$struct_radio_lo_ra_packet_handler__t.html" title="{RadioLoRaPacketHandler_t\n|+ SnrValue\l+ RssiValue\l+ Size\l|}" alt="" coords="213,93,405,200"/>
+<area shape="rect" id="node4" href="$struct_radio_lo_ra_settings__t.html" title="{RadioLoRaSettings_t\n|+ Power\l+ Bandwidth\l+ Datarate\l+ LowDatarateOptimize\l+ Coderate\l+ PreambleLen\l+ FixLen\l+ PayloadLen\l+ CrcOn\l+ FreqHopOn\l+ HopPeriod\l+ IqInverted\l+ RxContinuous\l+ TxTimeout\l+ PublicNetwork\l|}" alt="" coords="429,5,604,288"/>
+<area shape="rect" id="node5" href="$struct_radio_fsk_settings__t.html" title="{RadioFskSettings_t\n|+ Power\l+ Fdev\l+ Bandwidth\l+ BandwidthAfc\l+ Datarate\l+ PreambleLen\l+ FixLen\l+ PayloadLen\l+ CrcOn\l+ IqInverted\l+ RxContinuous\l+ TxTimeout\l+ RxSingleTimeout\l|}" alt="" coords="628,20,771,273"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="ICallable" name="ICallable">
+<area shape="rect" id="node3" href="$class_scheduled_callable.html" title="{ScheduledCallable\n||+ ScheduledCallable()\l+ ScheduledCallable()\l+ getSleepingSince()\l+ setSleeptime()\l+ getSleepTime()\l+ resetSleepTimer()\l}" alt="" coords="19,256,183,407"/>
+<area shape="rect" id="node2" href="$class_non_copyable.html" title="{NonCopyable\&lt; ICallable \&gt;\n||+ NonCopyable()\l}" alt="" coords="5,5,196,83"/>
+<area shape="rect" id="node4" href="$class_ticker.html" title="{Ticker\n||+ Ticker()\l+ ~Ticker()\l+ attach()\l+ detach()\l+ call()\l}" alt="" coords="53,455,148,591"/>
+</map>

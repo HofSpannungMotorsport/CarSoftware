@@ -1,0 +1,3 @@
+<map id="HardwarePedal::_calibration::sensor1" name="HardwarePedal::_calibration::sensor1">
+<area shape="rect" id="node2" href="$class_circular_buffer.html" title="{CircularBuffer\&lt; analog\l_sensor_raw_t, PEDAL_CALIBRATION\l_SAMPLE_BUFFER_SIZE \&gt;\n||+ CircularBuffer()\l+ ~CircularBuffer()\l+ push()\l+ pop()\l+ empty()\l+ full()\l+ reset()\l+ size()\l+ peek()\l}" alt="" coords="5,5,257,229"/>
+</map>

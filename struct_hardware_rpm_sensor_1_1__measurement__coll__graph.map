@@ -1,0 +1,9 @@
+<map id="HardwareRpmSensor::_measurement" name="HardwareRpmSensor::_measurement">
+<area shape="rect" id="node2" href="$class_ticker.html" title="{Ticker\n||+ Ticker()\l+ ~Ticker()\l+ attach()\l+ detach()\l+ call()\l}" alt="" coords="108,488,203,624"/>
+<area shape="rect" id="node3" href="$class_scheduled_callable.html" title="{ScheduledCallable\n||+ ScheduledCallable()\l+ ScheduledCallable()\l+ getSleepingSince()\l+ setSleeptime()\l+ getSleepTime()\l+ resetSleepTimer()\l}" alt="" coords="19,273,183,424"/>
+<area shape="rect" id="node4" href="$class_i_callable.html" title="{ICallable\n||+ call()\l}" alt="" coords="63,132,138,209"/>
+<area shape="rect" id="node5" href="$class_non_copyable.html" title="{NonCopyable\&lt; ICallable \&gt;\n||+ NonCopyable()\l}" alt="" coords="5,5,196,83"/>
+<area shape="rect" id="node6" href="$class_timer.html" title="{Timer\n||}" alt="" coords="245,517,303,595"/>
+<area shape="rect" id="node7" href="$class_i_timer.html" title="{ITimer\n||+ ITimer()\l+ start()\l+ stop()\l+ reset()\l+ read()\l+ read_ms()\l+ operator float()\l# getMillis()\l}" alt="" coords="207,259,341,439"/>
+<area shape="rect" id="node8" href="$class_non_copyable.html" title="{NonCopyable\&lt; ITimer \&gt;\n||+ NonCopyable()\l}" alt="" coords="186,132,362,209"/>
+</map>

@@ -1,0 +1,4 @@
+<map id="ScheduledCallable" name="ScheduledCallable">
+<area shape="rect" id="node2" href="$class_i_callable.html" title="{ICallable\n||+ call()\l}" alt="" coords="63,131,138,208"/>
+<area shape="rect" id="node3" href="$class_non_copyable.html" title="{NonCopyable\&lt; ICallable \&gt;\n||+ NonCopyable()\l}" alt="" coords="5,5,196,83"/>
+</map>

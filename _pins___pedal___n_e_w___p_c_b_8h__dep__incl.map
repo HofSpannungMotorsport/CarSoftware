@@ -1,0 +1,4 @@
+<map id="car/Bonnie2019/hardware/Pins_Pedal_NEW_PCB.h" name="car/Bonnie2019/hardware/Pins_Pedal_NEW_PCB.h">
+<area shape="rect" id="node2" href="$_pedal_slave_conf_8h.html" title="car/Bonnie2019/PedalSlave\lConf.h" alt="" coords="5,95,201,136"/>
+<area shape="rect" id="node3" href="$_pedal_magnet_calibration_8h.html" title="car/hardwareTest/mbed\l/PedalMagnetCalibration.h" alt="" coords="226,95,415,136"/>
+</map>

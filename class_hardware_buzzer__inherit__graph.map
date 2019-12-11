@@ -1,0 +1,6 @@
+<map id="HardwareBuzzer" name="HardwareBuzzer">
+<area shape="rect" id="node2" href="$class_i_buzzer.html" title="{IBuzzer\n||+ IBuzzer()\l+ setState()\l+ getState()\l+ setBeep()\l+ getBeep()\l+ setHz()\l+ getHz()\l}" alt="" coords="49,543,152,708"/>
+<area shape="rect" id="node3" href="$class_i_component.html" title="{IComponent\n||+ IComponent()\l+ IComponent()\l+ setComponentSubId()\l+ getComponentType()\l+ getComponentSubId()\l+ getComponentId()\l+ getObjectType()\l# setComponentType()\l# setObjectType()\l}" alt="" coords="11,300,190,495"/>
+<area shape="rect" id="node4" href="$class_i_logable.html" title="{ILogable\n||+ setStatus()\l+ getStatus()\l+ getLogValueCount()\l+ getLogValue()\l}" alt="" coords="19,131,183,252"/>
+<area shape="rect" id="node5" href="$class_non_copyable.html" title="{NonCopyable\&lt; ILogable \&gt;\n||+ NonCopyable()\l}" alt="" coords="5,5,196,83"/>
+</map>

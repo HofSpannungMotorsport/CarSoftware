@@ -1,0 +1,9 @@
+<map id="lib/carpi/src/components/hardware/HardwareMotorController.h" name="lib/carpi/src/components/hardware/HardwareMotorController.h">
+<area shape="rect" id="node2" href="$_bamocar_d3_8h.html" title="BamocarD3.h" alt="" coords="153,95,264,121"/>
+<area shape="rect" id="node6" href="$_i_motor_controller_8h.html" title="../interface/IMotorController.h" alt="" coords="340,95,547,121"/>
+<area shape="rect" id="node3" href="$_registers_8h.html" title="Registers.h" alt="" coords="5,169,97,196"/>
+<area shape="rect" id="node5" href="$_temperatur_graph_8h.html" title="TemperaturGraph.h" alt="" coords="217,169,363,196"/>
+<area shape="rect" id="node7" href="$_i_component_8h.html" title="IComponent.h" alt="" coords="387,169,499,196"/>
+<area shape="rect" id="node10" href="$_i_logable_8h.html" title="ILogable.h" alt="" coords="493,244,580,271"/>
+<area shape="rect" id="node8" href="$component_ids_8h.html" title="communication/componentIds.h" alt="" coords="241,244,469,271"/>
+</map>

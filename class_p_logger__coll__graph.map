@@ -1,0 +1,14 @@
+<map id="PLogger" name="PLogger">
+<area shape="rect" id="node2" href="$class_i_program.html" title="{IProgram\n||}" alt="" coords="5,997,85,1075"/>
+<area shape="rect" id="node3" href="$class_i_runable.html" title="{IRunable\n||+ IRunable()\l+ run()\l+ setStatus()\l+ getStatus()\l}" alt="" coords="97,547,207,668"/>
+<area shape="rect" id="node8" href="$class_i_service.html" title="{IService\n||}" alt="" coords="116,881,188,959"/>
+<area shape="rect" id="node4" href="$class_i_component.html" title="{IComponent\n||+ IComponent()\l+ IComponent()\l+ setComponentSubId()\l+ getComponentType()\l+ getComponentSubId()\l+ getComponentId()\l+ getObjectType()\l# setComponentType()\l# setObjectType()\l}" alt="" coords="129,303,308,497"/>
+<area shape="rect" id="node9" href="$class_i_s_d_card.html" title="{ISDCard\n||+ ISDCard()\l+ begin()\l+ open()\l+ close()\l+ reset()\l+ write()\l}" alt="" coords="215,692,313,843"/>
+<area shape="rect" id="node5" href="$class_i_logable.html" title="{ILogable\n||+ setStatus()\l+ getStatus()\l+ getLogValueCount()\l+ getLogValue()\l}" alt="" coords="137,132,301,253"/>
+<area shape="rect" id="node6" href="$class_non_copyable.html" title="{NonCopyable\&lt; ILogable \&gt;\n||+ NonCopyable()\l}" alt="" coords="123,5,314,83"/>
+<area shape="rect" id="node7" href="$class_s_car.html" title="{SCar\n||+ SCar()\l+ run()\l+ addError()\l+ processErrors()\l+ getState()\l+ setState()\l+ calibrationNeeded()\l+ startUp()\l+ getMaxPower()\l+ setMaxPower()\l}" alt="" coords="71,1113,233,1323"/>
+<area shape="rect" id="node10" href="$classstd_1_1vector.html" title="{std::vector\&lt; PLogger\l::LoggingValue \&gt;\n||+ ~vector()\l+ at()\l+ operator[]()\l+ front()\l+ back()\l+ data()\l+ begin()\l+ end()\l+ empty()\l+ size()\land 7 more...\l}" alt="" coords="316,1099,473,1337"/>
+<area shape="rect" id="node11" href="$class_non_copyable.html" title="{NonCopyable\&lt; vector\l\&lt; PLogger::LoggingValue,\l unsigned int \&gt; \&gt;\n||+ NonCopyable()\l}" alt="" coords="308,867,495,973"/>
+<area shape="rect" id="node12" href="$classstd_1_1vector.html" title="{std::vector\&lt; PLogger\l::LoggingComponent \&gt;\n||+ ~vector()\l+ at()\l+ operator[]()\l+ front()\l+ back()\l+ data()\l+ begin()\l+ end()\l+ empty()\l+ size()\land 7 more...\l}" alt="" coords="523,1099,693,1337"/>
+<area shape="rect" id="node13" href="$class_non_copyable.html" title="{NonCopyable\&lt; vector\l\&lt; PLogger::LoggingComponent,\l unsigned int \&gt; \&gt;\n||+ NonCopyable()\l}" alt="" coords="519,867,745,973"/>
+</map>

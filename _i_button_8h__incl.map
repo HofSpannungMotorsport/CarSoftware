@@ -1,0 +1,13 @@
+<map id="lib/carpi/src/components/interface/IButton.h" name="lib/carpi/src/components/interface/IButton.h">
+<area shape="rect" id="node2" href="$_self_syncable_8h.html" title="communication/SelfSyncable.h" alt="" coords="349,95,568,121"/>
+<area shape="rect" id="node16" href="$_hard_config_8h.html" title="HardConfig.h" alt="" coords="615,251,721,278"/>
+<area shape="rect" id="node3" href="$_sync_8h.html" title="Sync.h" alt="" coords="266,169,331,196"/>
+<area shape="rect" id="node15" href="$_i_communication_8h.html" title="components/interface\l/ICommunication.h" alt="" coords="377,244,540,285"/>
+<area shape="rect" id="node5" href="$component_ids_8h.html" title="componentIds.h" alt="" coords="127,483,252,509"/>
+<area shape="rect" id="node7" href="$device_ids_8h.html" title="deviceIds.h" alt="" coords="108,408,201,435"/>
+<area shape="rect" id="node8" href="$_car_message_8h.html" title="CarMessage.h" alt="" coords="170,333,283,360"/>
+<area shape="rect" id="node10" href="$_i_component_8h.html" title="IComponent.h" alt="" coords="428,408,540,435"/>
+<area shape="rect" id="node13" href="$_i_channel_8h.html" title="IChannel.h" alt="" coords="213,251,302,278"/>
+<area shape="rect" id="node14" href="$_i_runable_8h.html" title="runable/IRunable.h" alt="" coords="308,333,447,360"/>
+<area shape="rect" id="node11" href="$_i_logable_8h.html" title="ILogable.h" alt="" coords="441,483,527,509"/>
+</map>

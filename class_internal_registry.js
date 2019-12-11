@@ -1,0 +1,25 @@
+var class_internal_registry =
+[
+    [ "InternalRegistry", "class_internal_registry.html#ae93ac0f804c158e93c3ef64d5b4243fe", null ],
+    [ "getBool", "class_internal_registry.html#ade64d68e9aef89a282390d3ad4aea2f2", null ],
+    [ "getFloat", "class_internal_registry.html#ae525ade51a7d9291746fa049f719e84e", null ],
+    [ "getInt16", "class_internal_registry.html#a97a2b90fcc76e043f8852d4049d80758", null ],
+    [ "getInt32", "class_internal_registry.html#a89adf184324b71932e97082b56352d05", null ],
+    [ "getInt8", "class_internal_registry.html#a01178904320e32986e397133b59e7ddf", null ],
+    [ "getReady", "class_internal_registry.html#accabc84c846dd2639e22ee02ff112332", null ],
+    [ "getStatus", "class_internal_registry.html#afecad25c0533e2e03ae96172b6f37941", null ],
+    [ "getUInt16", "class_internal_registry.html#a0175e163a6d04d9e5110e43cd95c622b", null ],
+    [ "getUInt32", "class_internal_registry.html#a03573603ac0c388f662a505376138290", null ],
+    [ "getUInt8", "class_internal_registry.html#ac09b2ea2ce168a60e1ebb696447fca1e", null ],
+    [ "receive", "class_internal_registry.html#aebc94d029f99b45065abf66a932488f2", null ],
+    [ "setBool", "class_internal_registry.html#a97a4f377f7376582542e6225e50dc5fb", null ],
+    [ "setFloat", "class_internal_registry.html#a39314c69b4cccfc08c7f5ff0f8e2da80", null ],
+    [ "setInt16", "class_internal_registry.html#a8055270e8cbc068c0189c6d0d8202703", null ],
+    [ "setInt32", "class_internal_registry.html#acedada88757b2435a0282e82afbf06ba", null ],
+    [ "setInt8", "class_internal_registry.html#af71817611b29d69c6dc27e664b2181a0", null ],
+    [ "setReady", "class_internal_registry.html#ab1dfd2032d1e882bf7784d0b1f3e9085", null ],
+    [ "setStatus", "class_internal_registry.html#acb3bc64eda3a68ec90d43aae346ee0cf", null ],
+    [ "setUInt16", "class_internal_registry.html#adf0c4364075d160d56e760998719c366", null ],
+    [ "setUInt32", "class_internal_registry.html#a66f7f41bff2388ff9737baf7987ac89a", null ],
+    [ "setUInt8", "class_internal_registry.html#aff9c101a8e392730583805ca7c1df5b1", null ]
+];

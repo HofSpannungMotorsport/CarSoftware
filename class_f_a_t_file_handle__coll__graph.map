@@ -1,0 +1,4 @@
+<map id="FATFileHandle" name="FATFileHandle">
+<area shape="rect" id="node3" href="$struct_f_i_l.html" title="{FIL\n|+ id\l+ flag\l+ err\l+ fptr\l+ fsize\l+ sclust\l+ clust\l+ dsect\l+ dir_sect\l+ dir_ptr\l+ buf\l|}" alt="" coords="116,292,203,516"/>
+<area shape="rect" id="node4" href="$struct_f_a_t_f_s.html" title="{FATFS\n|+ fs_type\l+ drv\l+ csize\l+ n_fats\l+ wflag\l+ fsi_flag\l+ id\l+ n_rootdir\l+ last_clust\l+ free_clust\land 8 more...\l|}" alt="" coords="105,5,213,229"/>
+</map>

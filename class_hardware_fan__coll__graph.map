@@ -1,0 +1,7 @@
+<map id="HardwareFan" name="HardwareFan">
+<area shape="rect" id="node2" href="$class_i_fan.html" title="{IFan\n||+ setState()\l+ getState()\l}" alt="" coords="49,576,152,668"/>
+<area shape="rect" id="node3" href="$class_i_component.html" title="{IComponent\n||+ IComponent()\l+ IComponent()\l+ setComponentSubId()\l+ getComponentType()\l+ getComponentSubId()\l+ getComponentId()\l+ getObjectType()\l# setComponentType()\l# setObjectType()\l}" alt="" coords="11,303,190,497"/>
+<area shape="rect" id="node4" href="$class_i_logable.html" title="{ILogable\n||+ setStatus()\l+ getStatus()\l+ getLogValueCount()\l+ getLogValue()\l}" alt="" coords="19,132,183,253"/>
+<area shape="rect" id="node5" href="$class_non_copyable.html" title="{NonCopyable\&lt; ILogable \&gt;\n||+ NonCopyable()\l}" alt="" coords="5,5,196,83"/>
+<area shape="rect" id="node6" href="$class_digital_out.html" title="{DigitalOut\n||+ DigitalOut()\l+ DigitalOut()\l+ write()\l+ read()\l+ operator=()\l+ operator uint8_t()\l}" alt="" coords="176,547,327,697"/>
+</map>

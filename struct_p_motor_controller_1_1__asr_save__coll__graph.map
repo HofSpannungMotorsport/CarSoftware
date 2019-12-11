@@ -1,0 +1,5 @@
+<map id="PMotorController::_asrSave" name="PMotorController::_asrSave">
+<area shape="rect" id="node2" href="$class_timer.html" title="{Timer\n||}" alt="" coords="64,361,123,439"/>
+<area shape="rect" id="node3" href="$class_i_timer.html" title="{ITimer\n||+ ITimer()\l+ start()\l+ stop()\l+ reset()\l+ read()\l+ read_ms()\l+ operator float()\l# getMillis()\l}" alt="" coords="26,132,161,312"/>
+<area shape="rect" id="node4" href="$class_non_copyable.html" title="{NonCopyable\&lt; ITimer \&gt;\n||+ NonCopyable()\l}" alt="" coords="5,5,181,83"/>
+</map>

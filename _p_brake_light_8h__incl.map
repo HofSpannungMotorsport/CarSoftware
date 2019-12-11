@@ -1,0 +1,16 @@
+<map id="lib/carpi/src/runable/programs/PBrakeLight.h" name="lib/carpi/src/runable/programs/PBrakeLight.h">
+<area shape="rect" id="node2" href="$_i_program_8h.html" title="IProgram.h" alt="" coords="695,184,787,211"/>
+<area shape="rect" id="node9" href="$_i_pedal_8h.html" title="components/interface\l/IPedal.h" alt="" coords="541,95,704,136"/>
+<area shape="rect" id="node19" href="$_i_led_8h.html" title="components/interface\l/ILed.h" alt="" coords="354,95,517,136"/>
+<area shape="rect" id="node3" href="$_i_runable_8h.html" title="../IRunable.h" alt="" coords="458,423,557,449"/>
+<area shape="rect" id="node4" href="$_i_component_8h.html" title="components/interface\l/IComponent.h" alt="" coords="432,497,594,539"/>
+<area shape="rect" id="node5" href="$component_ids_8h.html" title="communication/componentIds.h" alt="" coords="128,587,356,613"/>
+<area shape="rect" id="node7" href="$_i_logable_8h.html" title="ILogable.h" alt="" coords="470,587,556,613"/>
+<area shape="rect" id="node10" href="$_self_syncable_8h.html" title="communication/SelfSyncable.h" alt="" coords="373,184,592,211"/>
+<area shape="rect" id="node11" href="$_sync_8h.html" title="Sync.h" alt="" coords="260,259,326,285"/>
+<area shape="rect" id="node17" href="$_i_communication_8h.html" title="components/interface\l/ICommunication.h" alt="" coords="541,333,704,375"/>
+<area shape="rect" id="node13" href="$device_ids_8h.html" title="deviceIds.h" alt="" coords="112,505,205,531"/>
+<area shape="rect" id="node14" href="$_car_message_8h.html" title="CarMessage.h" alt="" coords="186,423,299,449"/>
+<area shape="rect" id="node16" href="$_i_channel_8h.html" title="IChannel.h" alt="" coords="376,341,466,367"/>
+<area shape="rect" id="node18" href="$_hard_config_8h.html" title="HardConfig.h" alt="" coords="195,341,300,367"/>
+</map>

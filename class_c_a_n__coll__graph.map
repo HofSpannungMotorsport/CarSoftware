@@ -1,0 +1,6 @@
+<map id="CAN" name="CAN">
+<area shape="rect" id="node2" href="$class_non_copyable.html" title="{NonCopyable\&lt; CAN \&gt;\n||+ NonCopyable()\l}" alt="" coords="5,235,171,312"/>
+<area shape="rect" id="node3" href="$classstd_1_1vector.html" title="{std::vector\&lt; CANMessage \&gt;\n||+ ~vector()\l+ at()\l+ operator[]()\l+ front()\l+ back()\l+ data()\l+ begin()\l+ end()\l+ empty()\l+ size()\land 7 more...\l}" alt="" coords="195,161,400,385"/>
+<area shape="rect" id="node4" href="$class_non_copyable.html" title="{NonCopyable\&lt; vector\l\&lt; CANMessage, unsigned\l int \&gt; \&gt;\n||+ NonCopyable()\l}" alt="" coords="203,5,391,112"/>
+<area shape="rect" id="node5" href="$class_flex_c_a_n.html" title="{FlexCAN\n||+ FlexCAN()\l+ begin()\l+ begin()\l+ setFilter()\l+ end()\l+ available()\l+ write()\l+ read()\l}" alt="" coords="425,183,527,363"/>
+</map>

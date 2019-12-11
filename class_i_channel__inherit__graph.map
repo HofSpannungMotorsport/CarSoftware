@@ -1,0 +1,10 @@
+<map id="IChannel" name="IChannel">
+<area shape="rect" id="node6" href="$class_c_can.html" title="{CCan\n||+ CCan()\l+ CCan()\l+ send()\l+ messageInQueue()\l+ run()\l}" alt="" coords="5,867,164,1003"/>
+<area shape="rect" id="node7" href="$class_test_channel.html" title="{TestChannel\n|+ _syncer\l+ _messageInQueue\l|+ TestChannel()\l+ send()\l+ messageInQueue()\l+ giveToSyncer()\l+ run()\l}" alt="" coords="188,859,347,1010"/>
+<area shape="rect" id="node8" href="$class_test_destination_channel.html" title="{TestDestinationChannel\n|+ _sync\l+ _receivedMessages\l|+ TestDestinationChannel()\l+ send()\l+ run()\l+ messageInQueue()\l+ setStatus()\l+ getStatus()\l}" alt="" coords="371,852,569,1017"/>
+<area shape="rect" id="node9" href="$class_test_source_channel.html" title="{TestSourceChannel\n|+ _sync\l|+ TestSourceChannel()\l+ synteticSend()\l+ send()\l+ run()\l+ messageInQueue()\l+ setStatus()\l+ getStatus()\l}" alt="" coords="593,852,763,1017"/>
+<area shape="rect" id="node2" href="$class_i_runable.html" title="{IRunable\n||+ IRunable()\l+ run()\l+ setStatus()\l+ getStatus()\l}" alt="" coords="313,543,424,664"/>
+<area shape="rect" id="node3" href="$class_i_component.html" title="{IComponent\n||+ IComponent()\l+ IComponent()\l+ setComponentSubId()\l+ getComponentType()\l+ getComponentSubId()\l+ getComponentId()\l+ getObjectType()\l# setComponentType()\l# setObjectType()\l}" alt="" coords="279,300,458,495"/>
+<area shape="rect" id="node4" href="$class_i_logable.html" title="{ILogable\n||+ setStatus()\l+ getStatus()\l+ getLogValueCount()\l+ getLogValue()\l}" alt="" coords="287,131,451,252"/>
+<area shape="rect" id="node5" href="$class_non_copyable.html" title="{NonCopyable\&lt; ILogable \&gt;\n||+ NonCopyable()\l}" alt="" coords="273,5,464,83"/>
+</map>

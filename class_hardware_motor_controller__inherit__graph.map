@@ -1,0 +1,6 @@
+<map id="HardwareMotorController" name="HardwareMotorController">
+<area shape="rect" id="node2" href="$class_i_motor_controller.html" title="{IMotorController\n||+ IMotorController()\l+ getState()\l+ setState()\l+ setTorque()\l+ getSpeed()\l+ getCurrent()\l+ getMotorTemp()\l+ getServoTemp()\l+ getAirTemp()\l+ setRFE()\land 6 more...\l}" alt="" coords="34,543,183,767"/>
+<area shape="rect" id="node3" href="$class_i_component.html" title="{IComponent\n||+ IComponent()\l+ IComponent()\l+ setComponentSubId()\l+ getComponentType()\l+ getComponentSubId()\l+ getComponentId()\l+ getObjectType()\l# setComponentType()\l# setObjectType()\l}" alt="" coords="19,300,198,495"/>
+<area shape="rect" id="node4" href="$class_i_logable.html" title="{ILogable\n||+ setStatus()\l+ getStatus()\l+ getLogValueCount()\l+ getLogValue()\l}" alt="" coords="27,131,191,252"/>
+<area shape="rect" id="node5" href="$class_non_copyable.html" title="{NonCopyable\&lt; ILogable \&gt;\n||+ NonCopyable()\l}" alt="" coords="13,5,204,83"/>
+</map>

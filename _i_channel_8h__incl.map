@@ -1,0 +1,8 @@
+<map id="lib/carpi/src/communication/IChannel.h" name="lib/carpi/src/communication/IChannel.h">
+<area shape="rect" id="node2" href="$_car_message_8h.html" title="communication/CarMessage.h" alt="" coords="99,177,315,203"/>
+<area shape="rect" id="node8" href="$_i_runable_8h.html" title="runable/IRunable.h" alt="" coords="327,95,466,121"/>
+<area shape="rect" id="node6" href="$device_ids_8h.html" title="deviceIds.h" alt="" coords="243,259,337,285"/>
+<area shape="rect" id="node7" href="$component_ids_8h.html" title="componentIds.h" alt="" coords="361,259,486,285"/>
+<area shape="rect" id="node9" href="$_i_component_8h.html" title="components/interface\l/IComponent.h" alt="" coords="342,169,505,211"/>
+<area shape="rect" id="node10" href="$_i_logable_8h.html" title="ILogable.h" alt="" coords="511,259,597,285"/>
+</map>

@@ -1,0 +1,26 @@
+var class_hardware_buzzer =
+[
+    [ "_current", "struct_hardware_buzzer_1_1__current.html", "struct_hardware_buzzer_1_1__current" ],
+    [ "_time", "struct_hardware_buzzer_1_1__time.html", "struct_hardware_buzzer_1_1__time" ],
+    [ "HardwareBuzzer", "class_hardware_buzzer.html#a280e54e7f3d95c3e03cd8e4bb966b41f", null ],
+    [ "_beep", "class_hardware_buzzer.html#a922c2cbf2d597d6a98526a80872d585c", null ],
+    [ "_loadStdValues", "class_hardware_buzzer.html#a508073653808db8148526d1cf41686f0", null ],
+    [ "_startBeep", "class_hardware_buzzer.html#abaf3b6c00e86140ec448e72435f753a8", null ],
+    [ "_update", "class_hardware_buzzer.html#a669eb2f06d7558cf5f7e25d2942a13b2", null ],
+    [ "getBeep", "class_hardware_buzzer.html#a49f244087ba59061216be517ad07ffa2", null ],
+    [ "getHz", "class_hardware_buzzer.html#a8e0cd3fa5a3e405c3bce3546037e9178", null ],
+    [ "getState", "class_hardware_buzzer.html#a7c4043191676be450715d403f273199c", null ],
+    [ "getStatus", "class_hardware_buzzer.html#a9beff86f9619c5ba564ea30b22d9fc49", null ],
+    [ "setBeep", "class_hardware_buzzer.html#a9a2b42d2674341bb60759ffbb470d8a0", null ],
+    [ "setHz", "class_hardware_buzzer.html#aa7c34f3f708d5bad87803d13e6ecc749", null ],
+    [ "setState", "class_hardware_buzzer.html#ac38cce3c61ee4f2fda331fac61a28fe6", null ],
+    [ "setStatus", "class_hardware_buzzer.html#af1f25a570846c8a4470d20b2647d0c63", null ],
+    [ "_current", "class_hardware_buzzer.html#a722410afffd69c4d74ab94abfefbfa17", null ],
+    [ "_lastBeepState", "class_hardware_buzzer.html#a6110e05987a688d08a8643aaf53a4dfb", null ],
+    [ "_port", "class_hardware_buzzer.html#add6b44bff931b8162662ad4ffbe9de17", null ],
+    [ "_registry", "class_hardware_buzzer.html#a648b938b9552051e0d9248e9ee91bc55", null ],
+    [ "_status", "class_hardware_buzzer.html#a23ac2fda721b2e97b0fd7ec9568d8c5b", null ],
+    [ "_stdValuesLoaded", "class_hardware_buzzer.html#a54045db6159474f1eca39371d7fa39d9", null ],
+    [ "_ticker", "class_hardware_buzzer.html#a7582f4ef000d43f6d16e258af9e12a7d", null ],
+    [ "_time", "class_hardware_buzzer.html#a7e5995296f815e52bf2445c0925e00cf", null ]
+];

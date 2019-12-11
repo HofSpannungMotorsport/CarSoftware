@@ -1,0 +1,6 @@
+<map id="PLogger::LoggingValue" name="PLogger::LoggingValue">
+<area shape="rect" id="node2" href="$class_p_logger_1_1_logging_component.html" title="{PLogger::LoggingComponent\n|+ refreshRate\l+ logged\l+ lastRun\l|+ LoggingComponent()\l+ send()\l}" alt="" coords="5,560,212,681"/>
+<area shape="rect" id="node3" href="$class_i_component.html" title="{IComponent\n||+ IComponent()\l+ IComponent()\l+ setComponentSubId()\l+ getComponentType()\l+ getComponentSubId()\l+ getComponentId()\l+ getObjectType()\l# setComponentType()\l# setObjectType()\l}" alt="" coords="19,303,198,497"/>
+<area shape="rect" id="node4" href="$class_i_logable.html" title="{ILogable\n||+ setStatus()\l+ getStatus()\l+ getLogValueCount()\l+ getLogValue()\l}" alt="" coords="27,132,191,253"/>
+<area shape="rect" id="node5" href="$class_non_copyable.html" title="{NonCopyable\&lt; ILogable \&gt;\n||+ NonCopyable()\l}" alt="" coords="13,5,204,83"/>
+</map>

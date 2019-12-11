@@ -1,0 +1,9 @@
+<map id="IButton" name="IButton">
+<area shape="rect" id="node7" href="$class_hardware_interrupt_button.html" title="{HardwareInterruptButton\n|# _registry\l# _interruptPin\l# _ticker\l# _lastHardwareState\l# _debouncing\l# _debounced\l# _status\l# _lastState\l# _stateBuffer\l|+ HardwareInterruptButton()\l+ setStatus()\l+ getStatus()\l+ setState()\l+ getState()\l+ getStateChanged()\l+ receive()\l# _debounce()\l# _checkLongClick()\l# _pressed()\l# _released()\l# _addState()\l# _readState()\l# _stateBufferFull()\l}" alt="" coords="5,1109,212,1495"/>
+<area shape="rect" id="node8" href="$class_software_button.html" title="{SoftwareButton\n||+ SoftwareButton()\l+ setStatus()\l+ getStatus()\l+ setState()\l+ getState()\l+ getStateChanged()\l+ receive()\l}" alt="" coords="237,1219,397,1385"/>
+<area shape="rect" id="node2" href="$class_self_syncable.html" title="{SelfSyncable\n|# _syncer\l# _syncerAttached\l|+ attach()\l+ detach()\l# _sendCommand()\l# _sendCommand()\l# _sendCommand()\l# _send()\l# _convertFloat()\l# _reconvertFloat()\l# _disassambleFloat()\l# _reassambleFloat()\l}" alt="" coords="130,668,295,892"/>
+<area shape="rect" id="node3" href="$class_i_communication.html" title="{ICommunication\n||+ receive()\l}" alt="" coords="149,543,276,620"/>
+<area shape="rect" id="node4" href="$class_i_component.html" title="{IComponent\n||+ IComponent()\l+ IComponent()\l+ setComponentSubId()\l+ getComponentType()\l+ getComponentSubId()\l+ getComponentId()\l+ getObjectType()\l# setComponentType()\l# setObjectType()\l}" alt="" coords="123,300,302,495"/>
+<area shape="rect" id="node5" href="$class_i_logable.html" title="{ILogable\n||+ setStatus()\l+ getStatus()\l+ getLogValueCount()\l+ getLogValue()\l}" alt="" coords="131,131,295,252"/>
+<area shape="rect" id="node6" href="$class_non_copyable.html" title="{NonCopyable\&lt; ILogable \&gt;\n||+ NonCopyable()\l}" alt="" coords="117,5,308,83"/>
+</map>

@@ -1,0 +1,4 @@
+<map id="IAnalogSensor" name="IAnalogSensor">
+<area shape="rect" id="node3" href="$class_hardware_analog_sensor.html" title="{HardwareAnalogSensor\n|# _registry\l# _stdValuesLoaded\l# _pin\l# _status\l# _last\l# _map\l# _boundary\l|+ HardwareAnalogSensor()\l+ setMapping()\l+ getMapping()\l+ setRawBoundary()\l+ setRawBoundaryOutTime()\l+ setBoundary()\l+ setBoundaryOutTime()\l+ getRawValue()\l+ getValue()\l+ setStatus()\l+ getStatus()\l+ reset()\l# _prepStdValues()\l# _restartTimer()\l# _getMapped()\l}" alt="" coords="17,344,223,715"/>
+<area shape="rect" id="node2" href="$class_non_copyable.html" title="{NonCopyable\&lt; IAnalogSensor \&gt;\n||+ NonCopyable()\l}" alt="" coords="5,5,235,83"/>
+</map>
