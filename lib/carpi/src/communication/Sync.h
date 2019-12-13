@@ -32,7 +32,7 @@ class Sync : public IRunable {
                 return false;
             }
 
-            #ifdef USE_MBED
+            #ifdef VECTOR_EMPLACE_BACK_ENABLED
                 // Construct new element at the end
                 router.emplace_back(component, channel, receiverId);
             #else
@@ -59,7 +59,7 @@ class Sync : public IRunable {
                 return false;
             }
 
-            #ifdef USE_MBED
+            #ifdef VECTOR_EMPLACE_BACK_ENABLED
                 bridger.emplace_back(componentId, channelDevice1, channelDevice2, deviceId1, deviceId2);
             #else
                 Bridge bridge(componentId, channelDevice1, channelDevice2, deviceId1, deviceId2);
@@ -228,8 +228,12 @@ class Sync : public IRunable {
                 printf("[Sync]@receive: Received Message for component 0x%x\n", carMessage.getComponentId());
             #endif
 
+            bool checkBridge = false;
+
             // Check if the message is assigned to this device
-            if (carMessage.getReceiverId() == _thisId) {
+            id_device_t messageReceiverId = carMessage.getReceiverId();
+            bool broadcastedMessage = messageReceiverId == DEVICE_ALL;
+            if (messageReceiverId == _thisId || broadcastedMessage) {
                 // -> The Message is for this device
                 for(Route &route : router) {
                     if (route.component->getComponentId() == carMessage.getComponentId()) {
@@ -243,6 +247,10 @@ class Sync : public IRunable {
                     }
                 }
             } else {
+                checkBridge = true;
+            }
+
+            if (checkBridge || broadcastedMessage) {
                 // -> The Message is for a different device
                 // -> Maybe it could be bridged over this device?
                 for(Bridge &bridge : bridger) {
