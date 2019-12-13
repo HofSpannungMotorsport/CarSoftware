@@ -9,7 +9,7 @@
 #endif
 
 #define STEROIDO_DISABLE_LOOP
-#include "Steroido.h"
+#include "steroido/src/Steroido.h"
 
 #include "communication/Sync.h"
 #include "communication/IChannel.h"

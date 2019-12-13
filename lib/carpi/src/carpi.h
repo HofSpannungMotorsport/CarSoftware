@@ -15,7 +15,7 @@
 #ifdef USE_MBED
     // Include Framework
     #include "mbed.h"
-    #include "Steroido.h"
+    #include "steroido/src/Steroido.h"
 #endif
 
 #if defined(USE_ARDUINO) || defined(USE_TEENSYDUINO)
@@ -26,7 +26,7 @@
         #define TEENSY
     #endif
 
-    #include "Steroido.h"
+    #include "steroido/src/Steroido.h"
 #endif
 
 // ---------------------------------------------------------------------

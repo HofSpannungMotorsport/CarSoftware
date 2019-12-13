@@ -9,7 +9,7 @@
 #endif
 
 #define STEROIDO_DISABLE_LOOP
-#include "Steroido.h"
+#include "steroido/src/Steroido.h"
 
 #define SYNC_H // Uninclude Sync
 #include "runable/IRunable.h"

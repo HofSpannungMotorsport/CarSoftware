@@ -2,7 +2,7 @@
 #include <cstring>
 
 #define STEROIDO_DISABLE_LOOP
-#include "Steroido.h"
+#include "steroido/src/Steroido.h"
 
 
 // Explicitly include CANMessage even it there is no CAN
