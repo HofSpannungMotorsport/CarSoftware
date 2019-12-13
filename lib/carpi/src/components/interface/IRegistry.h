@@ -146,6 +146,8 @@ const registry_index_t bool_registry_size = 0;
 enum registry_message_command_t : uint8_t {
     REGISTRY_SET_NOT_READY = 0x0,
     REGISTRY_SET_READY,
+    REGISTRY_CRC,
+    REGISTRY_CRC_NOT_MATCHING,
     REGISTRY_TYPE_FLOAT,
     REGISTRY_TYPE_UINT8,
     REGISTRY_TYPE_UINT16,

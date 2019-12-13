@@ -221,6 +221,17 @@ class InternalRegistry : public IRegistry {
                         _ready = true;
                         break;
                     
+                    case REGISTRY_CRC: {
+                            uint16_t thatCrc = 0 || ((subMessage.data[1] >> 8) && 0xFF) || (subMessage.data[2] && 0xFF);
+                            if (getCrc() != thatCrc)
+                                _sendCommand(REGISTRY_CRC_NOT_MATCHING, IS_NOT_DROPABLE);
+                        }
+                        break;
+                    
+                    case REGISTRY_CRC_NOT_MATCHING:
+                        _reSync();
+                        break;
+                    
                     case REGISTRY_TYPE_FLOAT:
                         _receiveFloat(subMessage);
                         break;
@@ -319,11 +330,43 @@ class InternalRegistry : public IRegistry {
             return crc;
         }
 
+        void _reSync() {
+            // Resync special case float
+            _reSyncFloat();
+
+            // Resync everything else
+            _reSyncType<uint8_t, uint8_registry_index_t>(_uint8Registry, uint8_registry_size, REGISTRY_TYPE_UINT8);
+            _reSyncType<uint16_t, uint16_registry_index_t>(_uint16Registry, uint16_registry_size, REGISTRY_TYPE_UINT16);
+            _reSyncType<uint32_t, uint32_registry_index_t>(_uint32Registry, uint32_registry_size, REGISTRY_TYPE_UINT32);
+
+            _reSyncType<int8_t, int8_registry_index_t>(_int8Registry, int8_registry_size, REGISTRY_TYPE_INT8);
+            _reSyncType<int16_t, int16_registry_index_t>(_int16Registry, int16_registry_size, REGISTRY_TYPE_INT16);
+            _reSyncType<int32_t, int32_registry_index_t>(_int32Registry, int32_registry_size, REGISTRY_TYPE_INT32);
+
+            _reSyncType<bool, bool_registry_index_t>(_boolRegistry, bool_registry_size, REGISTRY_TYPE_BOOL);
+        }
+
+        void _reSyncFloat() {
+            for (registry_index_t i = 0; i < float_registry_size; i++) {
+                _sendFloat((float_registry_index_t)i, _floatRegistry[i]);
+            }
+        }
+
+        template<typename T, typename registry_index_type_t>
+        void _reSyncType(T *registry, registry_index_t elementCount, registry_message_command_t messageType) {
+            for (registry_index_t i = 0; i < elementCount; i++) {
+                _sendData<T, registry_index_type_t>((registry_index_type_t)i, registry[i], messageType);
+            }
+        }
+
 
         // Private Setter
         template<typename T, typename registry_index_type_t>
         bool _setData(registry_index_type_t index, T value, T typeRegistry[], registry_index_t indexSize) {
             if (index < indexSize) {
+                if (typeRegistry[index] == value) 
+                    return false;
+
                 typeRegistry[index] = value;
                 return true;
             } // else

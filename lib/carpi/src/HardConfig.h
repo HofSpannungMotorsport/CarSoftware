@@ -23,6 +23,9 @@
 //   HV Enable
 #define STD_HV_ENABLED_DEBOUNCE_TIME 0.1 // s
 
+//   Registry
+#define STD_REGISTRY_INTEGRITY_CHECK_INTERVALL 2 // s
+
 
 // Programs
 //   PLogger
