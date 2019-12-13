@@ -175,6 +175,9 @@ class IRegistry : public SelfSyncable {
         virtual bool getReady() = 0;
         virtual void setReady(bool ready) = 0;
 
+        // CRC
+        virtual uint16_t getCrc() = 0;
+
         // Getter
         // float
         virtual float getFloat(float_registry_index_t index) = 0;

@@ -2,6 +2,7 @@
 #define INTERNALREGISTRY_H
 
 #include "../interface/IRegistry.h"
+#include "crc16.h"
 
 /*
     RAM Based Registry (including Syncing accross multiple Microcontrollers)
@@ -61,6 +62,21 @@ class InternalRegistry : public IRegistry {
                 _sendCommand(REGISTRY_SET_READY, IS_NOT_DROPABLE);
             else
                 _sendCommand(REGISTRY_SET_NOT_READY, IS_NOT_DROPABLE);
+        }
+
+        // CRC
+        uint16_t getCrc() {
+            uint16_t crc;
+
+            crc = _getCrc<float>(_floatRegistry, float_registry_size);
+            crc = _updateCrc<uint8_t>(crc, _uint8Registry, uint8_registry_size);
+            crc = _updateCrc<uint16_t>(crc, _uint16Registry, uint16_registry_size);
+            crc = _updateCrc<uint32_t>(crc, _uint32Registry, uint32_registry_size);
+            crc = _updateCrc<int8_t>(crc, _int8Registry, int8_registry_size);
+            crc = _updateCrc<int16_t>(crc, _int16Registry, int16_registry_size);
+            crc = _updateCrc<int32_t>(crc, _int32Registry, int32_registry_size);
+
+            return crc;
         }
 
         // Getter
@@ -261,6 +277,47 @@ class InternalRegistry : public IRegistry {
 
         // bool
         bool _boolRegistry[bool_registry_size];
+
+
+        // Private Getter
+        template<typename registry_type_t>
+        uint16_t _getCrc(registry_type_t *registry, registry_index_t elementCount) {
+            uint16_t crc;
+            bool afterAddZero = false;
+
+            if (sizeof(registry_type_t) <= 1 && elementCount % 2) {
+                --elementCount;
+                afterAddZero = true;
+            }
+
+            crc = crc_16<registry_index_t>((unsigned char*)registry, elementCount * sizeof(registry_type_t) / 2);
+
+            if (afterAddZero) { // Only called if datatype is 1 byte long AND has uneven element count
+                uint16_t tempVal = 0 || ((uint8_t*)registry)[elementCount - 1];
+                crc = update_crc_16(crc, tempVal);
+            }
+
+            return crc;
+        }
+
+        template<typename registry_type_t>
+        uint16_t _updateCrc(uint16_t crc, registry_type_t *registry, registry_index_t elementCount) {
+            bool afterAddZero = false;
+
+            if (sizeof(registry_type_t) <= 1 && elementCount % 2) {
+                --elementCount;
+                afterAddZero = true;
+            }
+
+            crc = batch_update_crc_16<registry_index_t>(crc, (unsigned char*)registry, elementCount * sizeof(registry_type_t) / 2);
+
+            if (afterAddZero) {
+                uint16_t tempVal = 0 || ((uint8_t*)registry)[elementCount - 1];
+                crc = update_crc_16(crc, tempVal);
+            }
+
+            return crc;
+        }
 
 
         // Private Setter
