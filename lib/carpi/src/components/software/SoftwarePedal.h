@@ -51,18 +51,16 @@ class SoftwarePedal : public IPedal {
         }
 
         virtual void receive(CarMessage &carMessage) {
-            for (car_sub_message_t &subMessage : carMessage.subMessages) {
-                switch (subMessage.data[0]) {
-                    case PEDAL_MESSAGE_COMMAND_SET_STATUS:
-                        setStatus(subMessage.data[1]);
-                        break;
-                    
-                    case PEDAL_MESSAGE_COMMAND_SET_VALUE:
-                        uint16_t newValue16 = subMessage.data[1] | (subMessage.data[2] << 8);
-                        float newValue = (float)newValue16 / 65535.0;
-                        setValue(newValue);
-                        break;
-                }
+            switch (carMessage[0]) {
+                case PEDAL_MESSAGE_COMMAND_SET_STATUS:
+                    setStatus(carMessage[1]);
+                    break;
+
+                case PEDAL_MESSAGE_COMMAND_SET_VALUE:
+                    uint16_t newValue16 = carMessage[1] | (carMessage[2] << 8);
+                    float newValue = (float)newValue16 / 65535.0;
+                    setValue(newValue);
+                    break;
             }
         }
 

@@ -1,18 +1,10 @@
 #ifndef CARMESSAGE_H
 #define CARMESSAGE_H
 
-#include <memory>
-#include <vector>
-#include <stdint.h>
 #include "deviceIds.h"
 #include "componentIds.h"
 
-using namespace std;
-
-struct car_sub_message_t {
-    uint8_t length;
-    uint8_t data[7];
-};
+#define STD_CARMESSAGE_DATA_SIZE 7
 
 enum car_message_dropable_t : bool {
     IS_NOT_DROPABLE = false,
@@ -23,24 +15,65 @@ class CarMessage {
     public:
         CarMessage() {}
 
+        // ----------------- Data-related stuff -----------------
+
         /*
-            Construct a CarMessage and reserve storage for the given amount of subMessages
+            Get the data at a given position
+
+            @param index The index for the wanted data
+            @return Returns the Value at the given index
         */
-        CarMessage(uint16_t reserveSubMessages) {
-            subMessages.reserve(reserveSubMessages);
+        uint8_t get(uint8_t index) {
+            if (index >= STD_CARMESSAGE_DATA_SIZE)
+                return 0;
+
+            return _data[index];
         }
 
         /*
-            Only use for reading the Messages, for Writing use addSubMessage()
+            Set the data at a given position
+
+            @param value The value which should be written into the data field
+            @param index The index for the data to be written to
         */
-        vector<car_sub_message_t> subMessages;
+        void set(uint8_t value, uint8_t index) {
+            if (index >= STD_CARMESSAGE_DATA_SIZE)
+                return;
+            
+            _data[index] = value;
+        }
 
         /*
-            Reserve storage for the given amount of subMessages
+            Directly access the underlying Data-Array of the Message
+
+            @param index The index for the data which should be accessed
+            @return Returns a reference to the data at the given index
         */
-        void reserve(uint16_t reserveSubMessages) {
-            subMessages.reserve(reserveSubMessages);
+        uint8_t &operator[](uint8_t index) {
+            return _data[index];
         }
+
+        /*
+            @return Returns the current set Length of the Message
+        */
+        uint8_t getLength() {
+            return _length;
+        }
+
+        /*
+            Set the length of the CarMessage data
+
+            @param length The new Length for the Data of the Message
+        */
+        void setLength(uint8_t length) {
+            if (length > STD_CARMESSAGE_DATA_SIZE)
+                return;
+
+            _length = length;
+        }
+
+
+        // ------------------- Message header -------------------
 
         /*
             Set the senderId for the device which sends the message
@@ -86,20 +119,6 @@ class CarMessage {
         }
 
         /*
-            Add a new subMessage to the whole Message.
-        */
-        void addSubMessage(car_sub_message_t &subMessage) {
-            subMessages.push_back(subMessage);
-        }
-
-        /*
-            Remove first subMessage
-        */
-        void removeFirstSubMessage() {
-            subMessages.erase(subMessages.begin());
-        }
-
-        /*
             Set the Component ID the message is dedicated to
         */
         void setComponentId(id_component_t componentId) {
@@ -123,31 +142,23 @@ class CarMessage {
 
         // returns 0 if messages are equal
         int compareTo(CarMessage &carMessage) {
-            // Compare CarMessage-own variables
-            if (getSenderId() != carMessage.getSenderId())
+            // Compare CarMessage Header
+            if (_senderId != carMessage.getSenderId())
                 return 1;
-            if (getReceiverId() != carMessage.getReceiverId())
+            if (_receiverId != carMessage.getReceiverId())
                 return 2;
-            if (getComponentId() != carMessage.getComponentId())
+            if (_componentId != carMessage.getComponentId())
                 return 3;
-            if (getDropable() != carMessage.getDropable())
+            if (_dropable != carMessage.getDropable())
                 return 4;
             
-            // Compare amount of subMessages
-            if (subMessages.size() != carMessage.subMessages.size())
+            // Compare CarMessage Data
+            if (_length != carMessage.getLength())
                 return -1;
-            
-            // Go throu the subMessages
-            for (uint16_t i = 0; i < subMessages.size(); i++) {
-                // Compare size of current subMessage
-                if (subMessages[i].length != carMessage.subMessages[i].length)
-                    return -2;
-                
-                // Compare content of subMessage
-                for (uint16_t j = 0; j < subMessages[i].length; j++) {
-                    if (subMessages[i].data[j] != carMessage.subMessages[i].data[j])
-                        return - 3 - j;
-                }
+
+            for (uint16_t i = 0; i < _length; i++) {
+                if (_data[i] != carMessage.get(i))
+                    return -2 -i;
             }
 
             return 0;
@@ -159,8 +170,11 @@ class CarMessage {
 
         id_component_t _componentId = 0;
 
+        uint8_t _length = 0;
+        uint8_t _data[STD_CARMESSAGE_DATA_SIZE];
+
         /*
-            If a message is send often and repeadly, it could let overflow the outgoing bessage queue.
+            If a message is send often and repeadly, it could let overflow the outgoing message queue.
             These messages are not so importent and can be dropped because a new message will come really soon,
             being more uptodate and making the last message useless.
 

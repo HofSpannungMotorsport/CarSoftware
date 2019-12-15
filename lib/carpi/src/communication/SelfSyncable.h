@@ -22,10 +22,8 @@ class SelfSyncable : public ICommunication {
         virtual void _sendCommand(uint8_t command, car_message_dropable_t dropable) {
             CarMessage carMessage;
 
-            car_sub_message_t subMessage;
-            subMessage.length = 1;
-            subMessage.data[0] = command;
-            carMessage.addSubMessage(subMessage);
+            carMessage.setLength(1);
+            carMessage[0] = command;
 
             _send(carMessage, dropable);
         }
@@ -33,27 +31,23 @@ class SelfSyncable : public ICommunication {
         virtual void _sendCommand(uint8_t command, uint8_t value, car_message_dropable_t dropable) {
             CarMessage carMessage;
 
-            car_sub_message_t subMessage;
-            subMessage.length = 2;
-            subMessage.data[0] = command;
-            subMessage.data[1] = value;
-            carMessage.addSubMessage(subMessage);
+            carMessage.setLength(2);
+            carMessage[0] = command;
+            carMessage[1] = value;
 
             _send(carMessage, dropable);
         }
 
         virtual void _sendCommand(uint8_t command, uint8_t values[], uint8_t valueCount, car_message_dropable_t dropable) {
-            if (valueCount > 6) return; // subMessage maximum == 7 (-1 because of the command)
+            if (valueCount > 6) return; // carMessage maximum == 7 (-1 because of the command)
 
             CarMessage carMessage;
 
-            car_sub_message_t subMessage;
-            subMessage.length = valueCount + 1; // +1 for the command
-            subMessage.data[0] = command;
+            carMessage.setLength(valueCount + 1); // +1 for the command
+            carMessage[0] = command;
 
-            memCpy<uint8_t>(&subMessage.data[1], values, valueCount);
+            memCpy<uint8_t>(&carMessage[1], values, valueCount);
 
-            carMessage.addSubMessage(subMessage);
             _send(carMessage, dropable);
         }
 

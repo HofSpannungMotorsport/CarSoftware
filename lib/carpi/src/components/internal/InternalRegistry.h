@@ -9,7 +9,7 @@
 */
 
 /*
-    CarMessage Layout (only subMessage)
+    CarMessage Layout
 
     data: 0           1   2   3     4     5     6     7
           Data Type   Index   Data (LSB) ... Data (MSB)
@@ -211,63 +211,61 @@ class InternalRegistry : public IRegistry {
 
         // Receive a CarMessage and save the got value in the right register
         void receive(CarMessage &carMessage) {
-            for (car_sub_message_t &subMessage : carMessage.subMessages) {
-                switch(subMessage.data[0]) {
-                    case REGISTRY_SET_NOT_READY:
-                        _ready = false;
-                        break;
-                    
-                    case REGISTRY_SET_READY:
-                        _ready = true;
-                        break;
-                    
-                    case REGISTRY_CRC: {
-                            uint16_t thatCrc = 0 || ((subMessage.data[1] >> 8) && 0xFF) || (subMessage.data[2] && 0xFF);
-                            if (getCrc() != thatCrc)
-                                _sendCommand(REGISTRY_CRC_NOT_MATCHING, IS_NOT_DROPABLE);
-                        }
-                        break;
-                    
-                    case REGISTRY_CRC_NOT_MATCHING:
-                        _reSync();
-                        break;
-                    
-                    case REGISTRY_TYPE_FLOAT:
-                        _receiveFloat(subMessage);
-                        break;
-                    
-                    case REGISTRY_TYPE_UINT8:
-                        _receiveData<uint8_t, uint8_registry_index_t>(subMessage, _uint8Registry, uint8_registry_size);
-                        break;
-                    
-                    case REGISTRY_TYPE_UINT16:
-                        _receiveData<uint16_t, uint16_registry_index_t>(subMessage, _uint16Registry, uint16_registry_size);
-                        break;
-                    
-                    case REGISTRY_TYPE_UINT32:
-                        _receiveData<uint32_t, uint32_registry_index_t>(subMessage, _uint32Registry, uint32_registry_size);
-                        break;
-                    
-                    case REGISTRY_TYPE_INT8:
-                        _receiveData<int8_t, int8_registry_index_t>(subMessage, _int8Registry, int8_registry_size);
-                        break;
-                    
-                    case REGISTRY_TYPE_INT16:
-                        _receiveData<int16_t, int16_registry_index_t>(subMessage, _int16Registry, int16_registry_size);
-                        break;
-                    
-                    case REGISTRY_TYPE_INT32:
-                        _receiveData<int32_t, int32_registry_index_t>(subMessage, _int32Registry, int32_registry_size);
-                        break;
-                    
-                    case REGISTRY_TYPE_BOOL:
-                        _receiveData<bool, bool_registry_index_t>(subMessage, _boolRegistry, bool_registry_size);
-                        break;
+            switch(carMessage[0]) {
+                case REGISTRY_SET_NOT_READY:
+                    _ready = false;
+                    break;
 
-                    default:
-                        _status |= REGISTRY_ERROR_UNKNOWN_MSG_RECEIVED;
-                        break;
-                }
+                case REGISTRY_SET_READY:
+                    _ready = true;
+                    break;
+
+                case REGISTRY_CRC: {
+                        uint16_t thatCrc = 0 || ((carMessage[1] >> 8) && 0xFF) || (carMessage[2] && 0xFF);
+                        if (getCrc() != thatCrc)
+                            _sendCommand(REGISTRY_CRC_NOT_MATCHING, IS_NOT_DROPABLE);
+                    }
+                    break;
+
+                case REGISTRY_CRC_NOT_MATCHING:
+                    _reSync();
+                    break;
+
+                case REGISTRY_TYPE_FLOAT:
+                    _receiveFloat(carMessage);
+                    break;
+
+                case REGISTRY_TYPE_UINT8:
+                    _receiveData<uint8_t, uint8_registry_index_t>(carMessage, _uint8Registry, uint8_registry_size);
+                    break;
+
+                case REGISTRY_TYPE_UINT16:
+                    _receiveData<uint16_t, uint16_registry_index_t>(carMessage, _uint16Registry, uint16_registry_size);
+                    break;
+
+                case REGISTRY_TYPE_UINT32:
+                    _receiveData<uint32_t, uint32_registry_index_t>(carMessage, _uint32Registry, uint32_registry_size);
+                    break;
+
+                case REGISTRY_TYPE_INT8:
+                    _receiveData<int8_t, int8_registry_index_t>(carMessage, _int8Registry, int8_registry_size);
+                    break;
+
+                case REGISTRY_TYPE_INT16:
+                    _receiveData<int16_t, int16_registry_index_t>(carMessage, _int16Registry, int16_registry_size);
+                    break;
+
+                case REGISTRY_TYPE_INT32:
+                    _receiveData<int32_t, int32_registry_index_t>(carMessage, _int32Registry, int32_registry_size);
+                    break;
+
+                case REGISTRY_TYPE_BOOL:
+                    _receiveData<bool, bool_registry_index_t>(carMessage, _boolRegistry, bool_registry_size);
+                    break;
+
+                default:
+                    _status |= REGISTRY_ERROR_UNKNOWN_MSG_RECEIVED;
+                    break;
             }
         }
     
@@ -376,10 +374,10 @@ class InternalRegistry : public IRegistry {
 
 
         // Helper
-        registry_index_t _getIndex(car_sub_message_t &subMessage) {
+        registry_index_t _getIndex(CarMessage &carMessage) {
             uint16_t index = 0;
-            index |= subMessage.data[1] & 0xFF;
-            index |= (subMessage.data[2] << 8) & 0xFF00;
+            index |= carMessage[1] & 0xFF;
+            index |= (carMessage[2] << 8) & 0xFF00;
 
             return index;
         }
@@ -402,16 +400,16 @@ class InternalRegistry : public IRegistry {
             _sendCommand(REGISTRY_TYPE_FLOAT, data, 6, IS_NOT_DROPABLE);
         }
 
-        void _receiveFloat(car_sub_message_t &subMessage) {
-            if (subMessage.length != 7) {
+        void _receiveFloat(CarMessage &carMessage) {
+            if (carMessage.getLength() != 7) {
                 _status |= REGISTRY_ERROR_RECEIVED_TOO_LONG_MSG;
                 return;
             }
             
-            registry_index_t index = _getIndex(subMessage);
+            registry_index_t index = _getIndex(carMessage);
 
             uint8_t disassambledFloat[4];
-            memCpy<uint8_t>(disassambledFloat, &subMessage.data[3], 4);
+            memCpy<uint8_t>(disassambledFloat, &carMessage[3], 4);
 
             float value = _reassambleFloat(disassambledFloat);
 
@@ -439,19 +437,19 @@ class InternalRegistry : public IRegistry {
         }
 
         template<typename T, typename registry_index_type_t>
-        void _receiveData(car_sub_message_t &subMessage, T typeRegistry[], registry_index_t indexSize) {
+        void _receiveData(CarMessage &carMessage, T typeRegistry[], registry_index_t indexSize) {
             uint8_t typeSize = sizeof(T);
 
-            if (subMessage.length != typeSize + 3) {
+            if (carMessage.getLength() != typeSize + 3) {
                 _status |= REGISTRY_ERROR_RECEIVED_TOO_LONG_MSG;
                 return;
             }
 
-            registry_index_t index = _getIndex(subMessage);
+            registry_index_t index = _getIndex(carMessage);
             uint32_t value32 = 0;
 
             for (uint8_t i = 0; i < typeSize; i++) {
-                value32 |= ((uint32_t)subMessage.data[3 + i] & 0xFF) << (8 * i);
+                value32 |= ((uint32_t)carMessage[3 + i] & 0xFF) << (8 * i);
             }
 
             T value = value32;

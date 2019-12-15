@@ -108,26 +108,21 @@ class CCan : public IChannel {
                 printf("[CCAN]@_getCarMessage: Made Car Message for component with ID 0x%x (carMessageId: 0x%x)\n", canMessage.data[0], carMessage.getComponentId());
             #endif
 
-            car_sub_message_t subMessage;
-            subMessage.length = canMessage.len - 1;
+            carMessage.setLength(canMessage.len - 1);
 
-            for (uint8_t i = 0; i < subMessage.length; i++) {
-                subMessage.data[i] = canMessage.data[i+1];
+            for (uint8_t i = 0; i < carMessage.getLength(); i++) {
+                carMessage[i] = canMessage.data[i+1];
             }
-
-            carMessage.addSubMessage(subMessage);
         }
 
-        void _getCanMessage(CarMessage &carMessage, uint16_t subMessageNumber, CANMessage &canMessage) {
-            car_sub_message_t &subMessage = carMessage.subMessages[subMessageNumber];
-
+        void _getCanMessage(CarMessage &carMessage, CANMessage &canMessage) {
             canMessage.format = CANStandard;
             canMessage.id = carMessage.getMessageHeader();
-            canMessage.len = subMessage.length + 1;
+            canMessage.len = carMessage.getLength() + 1;
             canMessage.data[0] = carMessage.getComponentId();
 
-            for (uint8_t i = 0; i < subMessage.length; i++) {
-                canMessage.data[i+1] = subMessage.data[i];
+            for (uint8_t i = 0; i < carMessage.getLength(); i++) {
+                canMessage.data[i+1] = carMessage[i];
             }
 
             #if defined(CCAN_SENDING_DEBUG) && defined(MESSAGE_REPORT)
@@ -141,7 +136,7 @@ class CCan : public IChannel {
                 auto carMessageIterator = _outQueue.begin();
 
                 CANMessage canMessage;
-                _getCanMessage(*carMessageIterator, 0, canMessage);
+                _getCanMessage(*carMessageIterator, canMessage);
 
                 if (_outQueue.size() >= STD_CCAN_OUT_QUEUE_IMPORTANT_THRESHHOLD) {
                     // Message has to be more important to clear the _outQueue more fast
@@ -161,15 +156,8 @@ class CCan : public IChannel {
                 // Now try to send the Message over CAN
                 int canWriteResult = _can.write(canMessage);
                 if (canWriteResult == 1) {
-                    // If sent successfully the first subMessage, remove it and look if there are more
-                    carMessageIterator->removeFirstSubMessage();
-                    if(carMessageIterator->subMessages.empty()) {
-                        // If it was the last/only one, remove the whole Message
-                        carMessageIterator = _outQueue.erase(carMessageIterator);
-                    } else {
-                        // If a message already got sent partly, make it not dropable
-                        carMessageIterator->setDropable(IS_NOT_DROPABLE);
-                    }
+                    // If sent successfully, remove the message
+                    carMessageIterator = _outQueue.erase(carMessageIterator);
 
                     #if defined(CCAN_SENDING_DEBUG) && defined(MESSAGE_REPORT)
                         printf("[CCan]@_send->_outQueue: Successfully sent canMessage with component ID 0x%x and message ID 0x%x\n", canMessage.data[0], canMessage.id);

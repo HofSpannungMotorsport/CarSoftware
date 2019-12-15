@@ -65,7 +65,7 @@ bool compareRegister(registry_index_t size, T (IRegistry::*getPointer)(registry_
         T valueReg2 = (distantInternalRegistry.*getPointer)((registry_index_type_t)i);
         printf("Reg Nr. %i Value Nr. %i == Internal: %.5f Distant: %.5f", regNr, i, (float)valueReg1, (float)valueReg2);
         if (valueReg1 != valueReg2) {
-            printf("Wrong Values!");
+            printf("Wrong Values!\n");
             return false;
         } else {
             printf("\n");

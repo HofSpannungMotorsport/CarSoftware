@@ -39,20 +39,18 @@ class HardwareLed : public ILed {
         }
 
         virtual void receive(CarMessage &carMessage) {
-            for (car_sub_message_t &subMessage : carMessage.subMessages) {
-                switch (subMessage.data[0]) {
-                    case LED_MESSAGE_COMMAND_SET_STATE:
-                        setState((led_state_t)subMessage.data[1]);
-                        break;
-                    
-                    case LED_MESSAGE_COMMAND_SET_BLINKING:
-                        setBlinking((led_blinking_t)subMessage.data[1]);
-                        break;
-                    
-                    case LED_MESSAGE_COMMAND_SET_BRIGHTNESS:
-                        setBrightness((led_brightness_t)subMessage.data[1] / 255.0);
-                        break;
-                }
+            switch (carMessage[0]) {
+                case LED_MESSAGE_COMMAND_SET_STATE:
+                    setState((led_state_t)carMessage[1]);
+                    break;
+
+                case LED_MESSAGE_COMMAND_SET_BLINKING:
+                    setBlinking((led_blinking_t)carMessage[1]);
+                    break;
+
+                case LED_MESSAGE_COMMAND_SET_BRIGHTNESS:
+                    setBrightness((led_brightness_t)carMessage[1] / 255.0);
+                    break;
             }
         }
 

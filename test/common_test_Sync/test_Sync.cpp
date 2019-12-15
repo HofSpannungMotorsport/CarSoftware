@@ -97,29 +97,25 @@ void testComponentSync() {
         TEST_FAIL_MESSAGE("[testComponentSync]: Not Received enough messages!");
     }
 
-    // Get submessage, then check data
-    car_sub_message_t currentSubMessage;
+    // Check data
     CarMessage &firstMessage = testComponent._receivedMessages[0];
-    currentSubMessage = firstMessage.subMessages[0];
-    if (currentSubMessage.data[0] != 69) {
+    if (firstMessage[0] != 69) {
         TEST_FAIL_MESSAGE("[testComponentSync]: First Message not received correctly");
     }
 
     CarMessage &secondMessage = testComponent._receivedMessages[1];
-    currentSubMessage = secondMessage.subMessages[0];
-    if (currentSubMessage.data[0] != 66 ||
-        currentSubMessage.data[1] != 99) {
+    if (secondMessage[0] != 66 ||
+        secondMessage[1] != 99) {
         TEST_FAIL_MESSAGE("[testComponentSync]: Second Message not received correctly");
     }
 
     CarMessage &thirdMessage = testComponent._receivedMessages[2];
-    currentSubMessage = thirdMessage.subMessages[0];
-    if (currentSubMessage.data[0] != 33 ||
-        currentSubMessage.data[1] != 8 ||
-        currentSubMessage.data[2] != 9 ||
-        currentSubMessage.data[3] != 10 ||
-        currentSubMessage.data[4] != 11 ||
-        currentSubMessage.data[5] != 12) {
+    if (thirdMessage[0] != 33 ||
+        thirdMessage[1] != 8 ||
+        thirdMessage[2] != 9 ||
+        thirdMessage[3] != 10 ||
+        thirdMessage[4] != 11 ||
+        thirdMessage[5] != 12) {
         TEST_FAIL_MESSAGE("[testComponentSync]: Third Message not received correctly");
     }
 }
@@ -179,11 +175,9 @@ void testBridge() {
 
     CarMessage carMessage;
 
-    car_sub_message_t subMessage;
-    subMessage.length = 1;
-    subMessage.data[0] = 69;
+    carMessage.setLength(1);
+    carMessage[0] = 69;
 
-    carMessage.addSubMessage(subMessage);
     carMessage.setSenderId(DEVICE_PEDAL);
     carMessage.setReceiverId(DEVICE_DASHBOARD);
     carMessage.setComponentId(0x12);
@@ -196,16 +190,11 @@ void testBridge() {
     }
 
     CarMessage &carMessageReceived = destChannel._receivedMessages[0];
-    if (carMessageReceived.subMessages.size() != 1) {
-        TEST_FAIL_MESSAGE("[testBridge]: No subMessage attached");
-    }
-
-    car_sub_message_t &subMessageReceived = carMessageReceived.subMessages[0];
-    if (subMessageReceived.length != 1) {
+    if (carMessageReceived.getLength() != 1) {
         TEST_FAIL_MESSAGE("[testBridge]: Wrong subMessage Length");
     }
 
-    if (subMessageReceived.data[0] != 69) {
+    if (carMessageReceived[0] != 69) {
         TEST_FAIL_MESSAGE("[testBrdige]: Wrong subMessage content");
     }
 }

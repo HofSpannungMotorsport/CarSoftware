@@ -57,12 +57,10 @@ class SoftwareButton : public IButton {
         }
 
         virtual void receive(CarMessage &carMessage) {
-            for(car_sub_message_t &subMessage : carMessage.subMessages) {
-                switch(subMessage.data[0]) {
-                    case BUTTON_MESSAGE_COMMAND_ADD_STATE:
-                        setState((button_state_t)subMessage.data[1]);
-                        break;
-                }
+            switch(carMessage[0]) {
+                case BUTTON_MESSAGE_COMMAND_ADD_STATE:
+                    setState((button_state_t)carMessage[1]);
+                    break;
             }
         }
 

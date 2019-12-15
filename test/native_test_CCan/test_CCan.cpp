@@ -23,13 +23,10 @@ void printCarMessage(CarMessage &carMessage) {
     #ifdef ENABLE_ADVANCED_PRINT
     printf("Sender ID: 0x%x | Receiver ID: 0x%x | Component ID: 0x%x | Dropable (Yes/No): %c\n", carMessage.getSenderId(), carMessage.getReceiverId(), carMessage.getComponentId(), carMessage.getDropable() == IS_DROPABLE ? 'Y' : 'N');
 
-    // Print SubMessages
-    uint16_t subMessageCount = 0;
-    for (car_sub_message_t &subMessage : carMessage.subMessages) {
-        printf("\tSubMessage Nr. %i with length %i", ++subMessageCount, subMessage.length);
-        for(uint8_t i = 0; i < subMessage.length; i++) {
-            printf(" | data[%i]: 0x%x", i, subMessage.data[i]);
-        }
+    // Print Data
+    printf("\tCarMessage with length %i", carMessage.getLength());
+    for(uint8_t i = 0; i < carMessage.getLength(); i++) {
+        printf(" | data[%i]: 0x%x", i, carMessage[i]);
     }
 
     printf("\n");
@@ -164,26 +161,21 @@ void getCarMessage(CANMessage &canMessage, CarMessage &carMessage) {
     carMessage.setIdsFromMessageHeader(canMessage.id);
     carMessage.setComponentId((id_component_t)canMessage.data[0]);
 
-    car_sub_message_t subMessage;
-    subMessage.length = canMessage.len - 1;
+    carMessage.setLength(canMessage.len - 1);
 
-    for (uint8_t i = 0; i < subMessage.length; i++) {
-        subMessage.data[i] = canMessage.data[i+1];
+    for (uint8_t i = 0; i < carMessage.getLength(); i++) {
+        carMessage[i] = canMessage.data[i+1];
     }
-
-    carMessage.addSubMessage(subMessage);
 }
 
-void getCANMessage(CarMessage &carMessage, uint16_t subMessageNumber, CANMessage &canMessage) {
-    car_sub_message_t &subMessage = carMessage.subMessages[subMessageNumber];
-
+void getCANMessage(CarMessage &carMessage, CANMessage &canMessage) {
     canMessage.format = CANStandard;
     canMessage.id = carMessage.getMessageHeader();
-    canMessage.len = subMessage.length + 1;
+    canMessage.len = carMessage.getLength() + 1;
     canMessage.data[0] = carMessage.getComponentId();
 
-    for (uint8_t i = 0; i < subMessage.length; i++) {
-        canMessage.data[i+1] = subMessage.data[i];
+    for (uint8_t i = 0; i < carMessage.getLength(); i++) {
+        canMessage.data[i+1] = carMessage[i];
     }
 }
 
@@ -232,7 +224,7 @@ void testReceiving() {
     for (uint16_t i = 0; i < TEST_MESSAGE_COUNT; i++) {
         canChannel.send(carMessage[i]);
         CANMessage canMessage;
-        getCANMessage(carMessage[i], 0, canMessage);
+        getCANMessage(carMessage[i], canMessage);
         ((CAN*)canInstance)->addCustomIn(canMessage);
     }
 
@@ -377,14 +369,11 @@ void testCCan() {
         carMessage[i].setReceiverId((id_device_t)(0x1F - (i % 0x20)));
         carMessage[i].setDropable(IS_NOT_DROPABLE);
 
-        car_sub_message_t subMessage;
-        subMessage.length = i % 8;
+        carMessage[i].setLength(i % 8);
 
-        for (uint8_t j = 0; j < subMessage.length; j++) {
-            subMessage.data[j] = j + (i % 43); // because 42
+        for (uint8_t j = 0; j < carMessage[i].getLength(); j++) {
+            carMessage[i][j] = j + (i % 43); // because 42
         }
-
-        carMessage[i].addSubMessage(subMessage);
     }
 
     RUN_TEST(testSending);
