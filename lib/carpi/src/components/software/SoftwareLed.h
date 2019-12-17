@@ -12,7 +12,7 @@ class SoftwareLed : public ILed {
 
         virtual void setState(led_state_t state) {
             if (_syncerAttached)
-                _sendCommand(LED_MESSAGE_COMMAND_SET_STATE, state, IS_NOT_DROPABLE);
+                _sendCommand(LED_MESSAGE_COMMAND_SET_STATE, state);
             
             _state = state;
         }
@@ -22,14 +22,14 @@ class SoftwareLed : public ILed {
             else if (brightness < 0.0) brightness = 0.0;
 
             if (_syncerAttached)
-                _sendCommand(LED_MESSAGE_COMMAND_SET_BRIGHTNESS, ((led_brightness_t)brightness * 255.0), IS_NOT_DROPABLE);
+                _sendCommand(LED_MESSAGE_COMMAND_SET_BRIGHTNESS, ((led_brightness_t)brightness * 255.0));
             
             _brightness = brightness;
         }
 
         virtual void setBlinking(led_blinking_t blinking) {
             if (_syncerAttached)
-                _sendCommand(LED_MESSAGE_COMMAND_SET_BLINKING, blinking, IS_NOT_DROPABLE);
+                _sendCommand(LED_MESSAGE_COMMAND_SET_BLINKING, blinking);
             
             _blinking = blinking;
         }

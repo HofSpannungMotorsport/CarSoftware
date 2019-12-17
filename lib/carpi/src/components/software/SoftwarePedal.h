@@ -11,8 +11,8 @@ class SoftwarePedal : public IPedal {
         }
 
         virtual void setProportionality(pedal_sensor_type_t proportionality, uint16_t sensorNumber = 0) {
-            if (sensorNumber == 0) _sendCommand(PEDAL_MESSAGE_COMMAND_SET_PROPORTIONALITY_SENSOR_1, proportionality, IS_NOT_DROPABLE);
-            else if (sensorNumber == 1) _sendCommand(PEDAL_MESSAGE_COMMAND_SET_PROPORTIONALITY_SENSOR_2, proportionality, IS_NOT_DROPABLE);
+            if (sensorNumber == 0) _sendCommand(PEDAL_MESSAGE_COMMAND_SET_PROPORTIONALITY_SENSOR_1, proportionality);
+            else if (sensorNumber == 1) _sendCommand(PEDAL_MESSAGE_COMMAND_SET_PROPORTIONALITY_SENSOR_2, proportionality);
         }
 
         virtual status_t getStatus() {
@@ -24,7 +24,7 @@ class SoftwarePedal : public IPedal {
         }
 
         virtual void setCalibrationStatus(pedal_calibration_t calibrationStatus) {
-            _sendCommand(PEDAL_MESSAGE_COMMAND_SET_CALIBRATION_STATUS, calibrationStatus, IS_NOT_DROPABLE);
+            _sendCommand(PEDAL_MESSAGE_COMMAND_SET_CALIBRATION_STATUS, calibrationStatus);
             _calibrationStatus = calibrationStatus;
         }
 

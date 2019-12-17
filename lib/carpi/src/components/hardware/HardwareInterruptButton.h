@@ -118,7 +118,7 @@ class HardwareInterruptButton : public IButton {
 
         void _addState(button_state_t state) {
             if (_syncerAttached) {
-                _sendCommand(BUTTON_MESSAGE_COMMAND_ADD_STATE, state, IS_NOT_DROPABLE);
+                _sendCommand(BUTTON_MESSAGE_COMMAND_ADD_STATE, state);
             } else {
                 if (_stateBuffer.full())
                     _stateBufferFull();

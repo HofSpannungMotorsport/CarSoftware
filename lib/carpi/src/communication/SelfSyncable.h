@@ -19,26 +19,26 @@ class SelfSyncable : public ICommunication {
         Sync *_syncer;
         bool _syncerAttached = false;
 
-        virtual void _sendCommand(uint8_t command, car_message_dropable_t dropable) {
+        virtual void _sendCommand(uint8_t command) {
             CarMessage carMessage;
 
             carMessage.setLength(1);
             carMessage[0] = command;
 
-            _send(carMessage, dropable);
+            _send(carMessage);
         }
 
-        virtual void _sendCommand(uint8_t command, uint8_t value, car_message_dropable_t dropable) {
+        virtual void _sendCommand(uint8_t command, uint8_t value) {
             CarMessage carMessage;
 
             carMessage.setLength(2);
             carMessage[0] = command;
             carMessage[1] = value;
 
-            _send(carMessage, dropable);
+            _send(carMessage);
         }
 
-        virtual void _sendCommand(uint8_t command, uint8_t values[], uint8_t valueCount, car_message_dropable_t dropable) {
+        virtual void _sendCommand(uint8_t command, uint8_t values[], uint8_t valueCount) {
             if (valueCount > 6) return; // carMessage maximum == 7 (-1 because of the command)
 
             CarMessage carMessage;
@@ -48,12 +48,11 @@ class SelfSyncable : public ICommunication {
 
             memCpy<uint8_t>(&carMessage[1], values, valueCount);
 
-            _send(carMessage, dropable);
+            _send(carMessage);
         }
 
-        virtual void _send(CarMessage &carMessage, car_message_dropable_t dropable) {
+        virtual void _send(CarMessage &carMessage) {
             carMessage.setComponentId(getComponentId());
-            carMessage.setDropable(dropable);
 
             if (_syncerAttached)
                 _syncer->send(carMessage);

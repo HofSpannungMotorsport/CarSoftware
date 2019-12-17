@@ -266,7 +266,7 @@ class HardwarePedal : public IPedal {
                 uint16_t pedalValue1 = (pedalValue >> 8) & 0xFF;
                 uint8_t pedalValueData[2] = {(uint8_t)pedalValue0, (uint8_t)pedalValue1};
 
-                _sendCommand(PEDAL_MESSAGE_COMMAND_SET_VALUE, pedalValueData, 2, IS_DROPABLE);
+                _sendCommand(PEDAL_MESSAGE_COMMAND_SET_VALUE, pedalValueData, 2);
             }
         }
 
@@ -276,7 +276,7 @@ class HardwarePedal : public IPedal {
                 status_t currentStatus = getStatus();
                 if(_lastSentStatus != currentStatus) {
                     _lastSentStatus = currentStatus;
-                    _sendCommand(PEDAL_MESSAGE_COMMAND_SET_STATUS, currentStatus, IS_NOT_DROPABLE);
+                    _sendCommand(PEDAL_MESSAGE_COMMAND_SET_STATUS, currentStatus);
                 }
             }
         }

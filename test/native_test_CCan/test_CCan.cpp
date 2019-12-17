@@ -21,7 +21,7 @@
 void printCarMessage(CarMessage &carMessage) {
     // Print Constant Stuff
     #ifdef ENABLE_ADVANCED_PRINT
-    printf("Sender ID: 0x%x | Receiver ID: 0x%x | Component ID: 0x%x | Dropable (Yes/No): %c\n", carMessage.getSenderId(), carMessage.getReceiverId(), carMessage.getComponentId(), carMessage.getDropable() == IS_DROPABLE ? 'Y' : 'N');
+    printf("Sender ID: 0x%x | Receiver ID: 0x%x | Component ID: 0x%x\n", carMessage.getSenderId(), carMessage.getReceiverId(), carMessage.getComponentId());
 
     // Print Data
     printf("\tCarMessage with length %i", carMessage.getLength());
@@ -367,7 +367,6 @@ void testCCan() {
         carMessage[i].setComponentId(i % 0x10);
         carMessage[i].setSenderId((id_device_t)(i % 0x20));
         carMessage[i].setReceiverId((id_device_t)(0x1F - (i % 0x20)));
-        carMessage[i].setDropable(IS_NOT_DROPABLE);
 
         carMessage[i].setLength(i % 8);
 

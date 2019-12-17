@@ -28,12 +28,6 @@ class CCan : public IChannel {
         }
 
         virtual void send(CarMessage &carMessage) {
-            // Drop oldest message if _dropQueue is full
-            if (_outQueue.size() >= _maxSize.outQueue) {
-                if (_dropOldestMessage(_outQueue))
-                    _dropped.outQueue++;
-            }
-
             _outQueue.push_back(carMessage);
             _send();
         }
@@ -65,10 +59,6 @@ class CCan : public IChannel {
 
         vector<CarMessage> _outQueue;
 
-        struct _dropped {
-            uint32_t outQueue = 0;
-        } _dropped;
-
         struct _maxSize {
             uint16_t outQueue = STD_CCAN_MAX_OUT_QUEUE_SIZE;
         } _maxSize;
@@ -81,23 +71,6 @@ class CCan : public IChannel {
                 _getCarMessage(canMessage, carMessage);
                 _syncer.receive(carMessage);
             }
-        }
-
-        /*
-            Drops the oldest dropable message.
-            Oldest means the last message in the vector containing it.
-            -> oldest Message measured on the time it was put in the container, not the duration of the timeout
-            -> should be not important anymore because a newer more uptodate message is already present
-        */
-        bool _dropOldestMessage(vector<CarMessage> &queue) {
-            for (auto carMessageIterator = queue.begin(); carMessageIterator != queue.end(); carMessageIterator++) {
-                if (carMessageIterator->getDropable() == IS_DROPABLE) {
-                    queue.erase(carMessageIterator);
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         void _getCarMessage(CANMessage &canMessage, CarMessage &carMessage) {

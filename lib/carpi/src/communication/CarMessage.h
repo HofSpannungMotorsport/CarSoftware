@@ -6,11 +6,6 @@
 
 #define STD_CARMESSAGE_DATA_SIZE 7
 
-enum car_message_dropable_t : bool {
-    IS_NOT_DROPABLE = false,
-    IS_DROPABLE = true
-};
-
 class CarMessage {
     public:
         CarMessage() {}
@@ -132,12 +127,12 @@ class CarMessage {
             return _componentId;
         }
 
-        void setDropable(car_message_dropable_t dropable) {
-            _dropable = dropable;
+        void setPrioritise(bool prioritise) {
+            _prioritise = prioritise;
         }
 
-        car_message_dropable_t getDropable() {
-            return _dropable;
+        bool getPrioritise() {
+            bool _prioritise;
         }
 
         // returns 0 if messages are equal
@@ -149,8 +144,6 @@ class CarMessage {
                 return 2;
             if (_componentId != carMessage.getComponentId())
                 return 3;
-            if (_dropable != carMessage.getDropable())
-                return 4;
             
             // Compare CarMessage Data
             if (_length != carMessage.getLength())
@@ -170,17 +163,10 @@ class CarMessage {
 
         id_component_t _componentId = 0;
 
+        bool _prioritise = false;
+
         uint8_t _length = 0;
         uint8_t _data[STD_CARMESSAGE_DATA_SIZE];
-
-        /*
-            If a message is send often and repeadly, it could let overflow the outgoing message queue.
-            These messages are not so importent and can be dropped because a new message will come really soon,
-            being more uptodate and making the last message useless.
-
-            A Configuration-Message is sent mostly only once and should not be dropped at all!
-        */
-        car_message_dropable_t _dropable = IS_NOT_DROPABLE;
 };
 
 #endif
