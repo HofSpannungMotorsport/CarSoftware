@@ -4,7 +4,7 @@
     With this, all components, services and programs are included in the actual CarSoftware.
 */
 
-#define CARPI_VERSION "V0.1.4-P2 - Add Recuperation & Add voltage reading for adaptive power limit"
+#define CARPI_VERSION "V0.1.4"
 
 // Prior include Platform-specific Components
 
