@@ -3,11 +3,17 @@
 
 #include "../interface/IPump.h"
 
+#ifdef DISABLE_PUMP
+    #warning "Pump Disabled!"
+#endif
+
+#define PUMP_MAX_SPEED 0.6 // %
+
 class HardwarePump : public IPump {
     public:
         HardwarePump(PinName pwmPort, PinName enablePort) : _pwmPort(pwmPort), _enablePort(enablePort) {
             _enablePort = 0;
-            _pwmPort = 1;
+            _pwmPort = 1; // -> pump pwm off
 
             setComponentType(COMPONENT_COOLING);
             setObjectType(OBJECT_HARDWARE);
@@ -18,8 +24,14 @@ class HardwarePump : public IPump {
         }
 
         virtual void setSpeed(pump_speed_t speed) {
-            if (speed > 1) speed = 1;
-            if (speed < 0) speed = 0;
+            #ifdef DISABLE_PUMP
+                speed = 0;
+            #else
+                if (speed > 1) speed = 1;
+                if (speed < 0) speed = 0;
+
+                speed *= PUMP_MAX_SPEED;
+            #endif
 
             _pwmPort.write(1 - speed);
         }
@@ -29,7 +41,9 @@ class HardwarePump : public IPump {
         }
 
         virtual void setEnable(pump_enable_t enable) {
-            _enablePort.write(enable);
+            #ifndef DISABLE_PUMP
+                _enablePort.write(enable);
+            #endif
         }
 
         virtual pump_enable_t getEnable() {

@@ -22,14 +22,14 @@
 #define STD_HARD_BRAKE_CUTOFF_APPS_POSITION 0.25 // 25% -> If equal or higher than that while hard brake, gas pedal will be unprimed
 
 // HAS TO BE BOUNT TO SSPEED!!! The settings there define the max Current allowed, based on that, make the choice here
-#define STD_MAX_RECUPERATION_PERCENTAGE 0.204 // % (245 A set Max at SSpeed -> ~50 A)
+#define STD_MAX_RECUPERATION_PERCENTAGE 0.2 // % (250A set Max at SSpeed -> 50 A)
 #define STD_RECU_SPEED_THRESHHOLD 2 // km/h - Under this speed, Recuperation is disabled
 #define STD_RECU_SPEED_FULL 4 // km/h - From this speed up, recuperation is completely enabled
 
 // Recuperation using the Brake Pedal. Only used, if "PMOTORCONTROLLER_USE_BRAKE_FOR_RECUPERATION" is defined
 #ifdef PMOTORCONTROLLER_USE_BRAKE_FOR_RECUPERATION
-    #define STD_BRAKE_RECU_START 0.05 // % where the Brake-Pedal will activate recuperation
-    #define STD_BRAKE_RECU_MAX 0.20 // % where the Brake-Pedal reaches recuperation max
+    #define STD_BRAKE_RECU_START 0.15 // % where the Brake-Pedal will activate recuperation
+    #define STD_BRAKE_RECU_MAX 0.25 // % where the Brake-Pedal reaches recuperation max
 #else
     #define STD_GAS_RECU_THRESHHOLD 0.10 // % where the gas pedal will enter recuperation down below and power up above
 #endif
@@ -68,12 +68,12 @@ class PMotorController : public IProgram {
             #ifdef PMOTORCONTROLLER_ACTIVATE_RECUPERATION
                 #ifdef PMOTORCONTROLLER_USE_BRAKE_FOR_RECUPERATION
                     if (returnValue <= 0.00001) { // just to correct float error
-                        float brakePosition = _pedal.brake->getValue();
+                        float brakePosition = _brakePedal.object->getValue();
                         if (brakePosition > STD_BRAKE_RECU_START) {
                             if (brakePosition > STD_BRAKE_RECU_MAX) {
                                 returnValue = -STD_MAX_RECUPERATION_PERCENTAGE;
                             } else {
-                                returnValue = -STD_MAX_RECUPERATION_PERCENTAGE * _map(brakePedal, STD_BRAKE_RECU_START, STD_BRAKE_RECU_MAX, 0.0, 1.0);
+                                returnValue = -STD_MAX_RECUPERATION_PERCENTAGE * _map(brakePosition, STD_BRAKE_RECU_START, STD_BRAKE_RECU_MAX, 0.0, 1.0);
                             }
                         } else {
                             returnValue = 0;

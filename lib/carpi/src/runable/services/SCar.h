@@ -151,6 +151,11 @@ class SCar : public IService {
         }
 
         void calibrationNeeded() {
+            if (_state = READY_TO_DRIVE) {
+                _motorController->setRUN(MOTOR_CONTROLLER_RUN_DISABLE);
+                _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
+            }
+
             _state = CALIBRATION_NEEDED;
             _resetLeds();
             _led.yellow->setState(LED_ON);
