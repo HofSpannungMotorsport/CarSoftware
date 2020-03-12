@@ -47,17 +47,17 @@ class HardwareLedPwm : public ILed {
         }
 
         virtual void receive(CarMessage &carMessage) {
-            switch (carMessage[0]) {
+            switch (carMessage.get(0)) {
                 case LED_MESSAGE_COMMAND_SET_STATE:
-                    setState((led_state_t)carMessage[1]);
+                    setState((led_state_t)carMessage.get(1));
                     break;
 
                 case LED_MESSAGE_COMMAND_SET_BLINKING:
-                    setBlinking((led_blinking_t)carMessage[1]);
+                    setBlinking((led_blinking_t)carMessage.get(1));
                     break;
 
                 case LED_MESSAGE_COMMAND_SET_BRIGHTNESS:
-                    setBrightness((led_brightness_t)carMessage[1] / 255.0);
+                    setBrightness((led_brightness_t)carMessage.get(1) / 255.0);
                     break;
             }
         }

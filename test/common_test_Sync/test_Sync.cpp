@@ -176,7 +176,7 @@ void testBridge() {
     CarMessage carMessage;
 
     carMessage.setLength(1);
-    carMessage[0] = 69;
+    carMessage.set(69, 0);
 
     carMessage.setSenderId(DEVICE_PEDAL);
     carMessage.setReceiverId(DEVICE_DASHBOARD);
@@ -194,7 +194,7 @@ void testBridge() {
         TEST_FAIL_MESSAGE("[testBridge]: Wrong subMessage Length");
     }
 
-    if (carMessageReceived[0] != 69) {
+    if (carMessageReceived.get(0) != 69) {
         TEST_FAIL_MESSAGE("[testBrdige]: Wrong subMessage content");
     }
 }

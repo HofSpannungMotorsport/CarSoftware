@@ -40,7 +40,7 @@ class IRpmSensor : public SelfSyncable {
         virtual void getLogValue(string &logValue, sd_log_id_t logId) {
             if (logId != 0) return;
 
-            char buffer[12];
+            char buffer[13];
             sprintf(buffer, "%.5f", getFrequency());
             logValue = buffer;
         }

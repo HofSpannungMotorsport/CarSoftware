@@ -1,6 +1,11 @@
 #ifndef DASHBOARDSLAVECONF_H
 #define DASHBOARDSLAVECONF_H
 
+#define SYNC_USE_STACK_VECTOR
+#define SYNC_MAX_DEVICES_COUNT 2
+#define SYNC_MAX_CHANNELS_COUNT 1
+#define SYNC_MAX_COMPONENTS_COUNT 8
+
 #include "carpi.h"
 
 #include "hardware/Pins_Dashboard_NEW_PCB.h"
@@ -32,8 +37,11 @@ class Dashboard : public Carpi {
         void setup() {
             wait(STARTUP_WAIT_TIME_SLAVE);
 
+            syncer.addDevice(canIntern, DEVICE_MASTER);
+            syncer.addDevice(canIntern, DEVICE_PEDAL);
+
             // Get Registry-Data from Master
-            syncer.addComponent(registry, canIntern, DEVICE_ALL);
+            syncer.addComponent(registry, DEVICE_ALL);
             registry.attach(syncer);
 
             while (!registry.getReady()) {
@@ -42,14 +50,17 @@ class Dashboard : public Carpi {
             }
 
 
-            syncer.addComponent(ledRed, canIntern, DEVICE_MASTER);
-            syncer.addComponent(ledYellow, canIntern, DEVICE_MASTER);
-            syncer.addComponent(ledGreen, canIntern, DEVICE_MASTER);
-            syncer.addComponent(ledCI, canIntern, DEVICE_MASTER);
-            syncer.addComponent(buttonReset, canIntern, DEVICE_MASTER);
-            syncer.addComponent(buttonStart, canIntern, DEVICE_MASTER);
-            syncer.addComponent(alive, canIntern, DEVICE_MASTER);
+            syncer.addComponent(ledRed, DEVICE_MASTER);
+            syncer.addComponent(ledYellow, DEVICE_MASTER);
+            syncer.addComponent(ledGreen, DEVICE_MASTER);
+            syncer.addComponent(ledCI, DEVICE_MASTER);
+            syncer.addComponent(buttonReset, DEVICE_MASTER);
+            syncer.addComponent(buttonStart, DEVICE_MASTER);
+            syncer.addComponent(alive, DEVICE_MASTER);
+
+            #ifndef SYNC_USE_STACK_VECTOR
             syncer.finalize();
+            #endif
 
             // Attach the Syncer to all components
             ledRed.attach(syncer);

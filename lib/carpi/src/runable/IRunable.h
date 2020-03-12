@@ -29,7 +29,7 @@ class IRunable : public IComponent {
         }
 
     private:
-        status_t _status;
+        status_t _status = 0;
 };
 
 #endif // IRUNABLE_H

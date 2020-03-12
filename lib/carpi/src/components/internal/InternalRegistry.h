@@ -211,7 +211,7 @@ class InternalRegistry : public IRegistry {
 
         // Receive a CarMessage and save the got value in the right register
         void receive(CarMessage &carMessage) {
-            switch(carMessage[0]) {
+            switch(carMessage.get(0)) {
                 case REGISTRY_SET_NOT_READY:
                     _ready = false;
                     break;
@@ -221,7 +221,7 @@ class InternalRegistry : public IRegistry {
                     break;
 
                 case REGISTRY_CRC: {
-                        uint16_t thatCrc = 0 || ((carMessage[1] >> 8) && 0xFF) || (carMessage[2] && 0xFF);
+                        uint16_t thatCrc = 0 || ((carMessage.get(1) >> 8) && 0xFF) || (carMessage.get(2) && 0xFF);
                         if (getCrc() != thatCrc)
                             _sendCommand(REGISTRY_CRC_NOT_MATCHING);
                     }
@@ -376,8 +376,8 @@ class InternalRegistry : public IRegistry {
         // Helper
         registry_index_t _getIndex(CarMessage &carMessage) {
             uint16_t index = 0;
-            index |= carMessage[1] & 0xFF;
-            index |= (carMessage[2] << 8) & 0xFF00;
+            index |= carMessage.get(1) & 0xFF;
+            index |= (carMessage.get(2) << 8) & 0xFF00;
 
             return index;
         }
@@ -409,7 +409,9 @@ class InternalRegistry : public IRegistry {
             registry_index_t index = _getIndex(carMessage);
 
             uint8_t disassambledFloat[4];
-            memCpy<uint8_t>(disassambledFloat, &carMessage[3], 4);
+            for (uint8_t i = 0; i < 4; i++) {
+                disassambledFloat[i] = carMessage.get(i+3);
+            }
 
             float value = _reassambleFloat(disassambledFloat);
 
@@ -449,7 +451,7 @@ class InternalRegistry : public IRegistry {
             uint32_t value32 = 0;
 
             for (uint8_t i = 0; i < typeSize; i++) {
-                value32 |= ((uint32_t)carMessage[3 + i] & 0xFF) << (8 * i);
+                value32 |= ((uint32_t)carMessage.get(3 + i) & 0xFF) << (8 * i);
             }
 
             T value = value32;

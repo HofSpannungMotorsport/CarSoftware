@@ -30,7 +30,7 @@ class IPump : public IComponent {
         virtual void getLogValue(string &logValue, sd_log_id_t logId) {
             if (logId != 0) return;
 
-            char buffer[7];
+            char buffer[8];
             sprintf(buffer, "%1.5f", getSpeed());
             logValue = buffer;
         }

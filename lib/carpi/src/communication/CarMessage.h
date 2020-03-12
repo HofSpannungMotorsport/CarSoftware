@@ -4,7 +4,15 @@
 #include "deviceIds.h"
 #include "componentIds.h"
 
-#define STD_CARMESSAGE_DATA_SIZE 7
+#define STD_CARMESSAGE_DATA_SIZE 7 // Max is 8, currently only 7 is needed
+
+/*
+    The CarMessage is as it is. No Changes should be made in the future for
+    compatibility reasons with all Channels.
+
+    Please keep in mind, that the Prioritise-Bit may be sacrificed for a
+    larger ComponentID in the future!
+*/
 
 class CarMessage {
     public:
@@ -36,16 +44,6 @@ class CarMessage {
                 return;
             
             _data[index] = value;
-        }
-
-        /**
-         * @brief Directly access the underlying Data-Array of the Message
-         * 
-         * @param index The index for the data which should be accessed
-         * @return uint8_t& Returns a reference to the data at the given index
-         */
-        uint8_t &operator[](uint8_t index) {
-            return _data[index];
         }
 
         /**
@@ -127,25 +125,6 @@ class CarMessage {
         }
 
         /**
-         * @brief Set the Sender and Receiver Id from a message header
-         * 
-         * @param messageHeader The message header including SenderID and ReceiverID
-         */
-        void setIdsFromMessageHeader(id_message_header_t messageHeader) {
-            setSenderId(deviceId::getDeviceIdFromMessageHeader(messageHeader, DEVICE_TYPE_SENDER));
-            setReceiverId(deviceId::getDeviceIdFromMessageHeader(messageHeader, DEVICE_TYPE_RECEIVER));
-        }
-
-        /**
-         * @brief Get the whole Message ID Header including Sender ID and Reveiver ID
-         * 
-         * @return id_message_header_t Returns the message header with senderId and receiverId
-         */
-        id_message_header_t getMessageHeader() {
-            return deviceId::getMessageHeader(_senderId, _receiverId);
-        }
-
-        /**
          * @brief Set the Component ID the message is dedicated to
          * 
          * @param componentId The Component ID this message is dedicated to
@@ -182,6 +161,9 @@ class CarMessage {
         bool getPrioritise() {
             bool _prioritise;
         }
+
+
+        // ---------------------- Compare -----------------------
 
         /**
          * @brief Compare a CarMessage against this CarMessage

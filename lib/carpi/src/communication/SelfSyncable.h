@@ -23,7 +23,7 @@ class SelfSyncable : public ICommunication {
             CarMessage carMessage;
 
             carMessage.setLength(1);
-            carMessage[0] = command;
+            carMessage.set(command, 0);
 
             _send(carMessage);
         }
@@ -32,8 +32,8 @@ class SelfSyncable : public ICommunication {
             CarMessage carMessage;
 
             carMessage.setLength(2);
-            carMessage[0] = command;
-            carMessage[1] = value;
+            carMessage.set(command, 0);
+            carMessage.set(value, 1);
 
             _send(carMessage);
         }
@@ -44,9 +44,11 @@ class SelfSyncable : public ICommunication {
             CarMessage carMessage;
 
             carMessage.setLength(valueCount + 1); // +1 for the command
-            carMessage[0] = command;
+            carMessage.set(command, 0);
 
-            memCpy<uint8_t>(&carMessage[1], values, valueCount);
+            for (uint8_t i = 0; i < valueCount; i++) {
+                carMessage.set(values[i], i);
+            }
 
             _send(carMessage);
         }

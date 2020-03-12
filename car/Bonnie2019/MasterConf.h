@@ -10,6 +10,12 @@
 //#define DISABLE_PUMP // Disables the Pump entirly, usefull if the cooling system is not filled with water !!! DISCONNECT PUMP ON UPLOAD IF NOT FILLED WITH WATER, OTHERWISE IT WILL START !!!
 //#define DISABLE_SERIAL // Disables the serial report funktion
 //#define PRINT_SPEED
+
+#define SYNC_USE_STACK_VECTOR
+#define SYNC_MAX_DEVICES_COUNT 2
+#define SYNC_MAX_CHANNELS_COUNT 1
+#define SYNC_MAX_COMPONENTS_COUNT 25
+
 #include "carpi.h"
 
 #define HIGH_DEMAND_SERVICE_REFRESH_RATE 120 // Hz
@@ -116,8 +122,11 @@ class Master : public Carpi {
         void setup() {
             wait(STARTUP_WAIT_TIME_MASTER);
 
+            syncer.addDevice(canIntern, DEVICE_PEDAL);
+            syncer.addDevice(canIntern, DEVICE_DASHBOARD);
+
             // Only add Registry to sync Values before starting the actual program
-            syncer.addComponent(registry, canIntern, DEVICE_ALL);
+            syncer.addComponent(registry, DEVICE_ALL);
             registry.attach(syncer);
 
             // Load Hard-Coded Registry and Sync while sending to avoid buffer overflow
@@ -125,22 +134,24 @@ class Master : public Carpi {
 
             // Add all Software Components to the Syncer
             // Dashboard
-            syncer.addComponent(ledRed, canIntern, DEVICE_DASHBOARD);
-            syncer.addComponent(ledYellow, canIntern, DEVICE_DASHBOARD);
-            syncer.addComponent(ledGreen, canIntern, DEVICE_DASHBOARD);
-            syncer.addComponent(ledCI, canIntern, DEVICE_DASHBOARD);
-            syncer.addComponent(buttonReset, canIntern, DEVICE_DASHBOARD);
-            syncer.addComponent(buttonStart, canIntern, DEVICE_DASHBOARD);
-            syncer.addComponent(dashboardAlive, canIntern, DEVICE_DASHBOARD);
+            syncer.addComponent(ledRed, DEVICE_DASHBOARD);
+            syncer.addComponent(ledYellow, DEVICE_DASHBOARD);
+            syncer.addComponent(ledGreen, DEVICE_DASHBOARD);
+            syncer.addComponent(ledCI, DEVICE_DASHBOARD);
+            syncer.addComponent(buttonReset, DEVICE_DASHBOARD);
+            syncer.addComponent(buttonStart, DEVICE_DASHBOARD);
+            syncer.addComponent(dashboardAlive, DEVICE_DASHBOARD);
 
             // Pedal
-            syncer.addComponent(gasPedal, canIntern, DEVICE_PEDAL);
-            syncer.addComponent(brakePedal, canIntern, DEVICE_PEDAL);
-            //syncer.addComponent(rpmFrontLeft, canIntern, DEVICE_PEDAL);
-            //syncer.addComponent(rpmFrontRight, canIntern, DEVICE_PEDAL);
-            syncer.addComponent(pedalAlive, canIntern, DEVICE_PEDAL);
+            syncer.addComponent(gasPedal, DEVICE_PEDAL);
+            syncer.addComponent(brakePedal, DEVICE_PEDAL);
+            //syncer.addComponent(rpmFrontLeft, DEVICE_PEDAL);
+            //syncer.addComponent(rpmFrontRight, DEVICE_PEDAL);
+            syncer.addComponent(pedalAlive, DEVICE_PEDAL);
 
+            #ifndef SYNC_USE_STACK_VECTOR
             syncer.finalize();
+            #endif
 
 
             // Add all high demand Services to our Service list

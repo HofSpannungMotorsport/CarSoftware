@@ -151,7 +151,7 @@ class InternalRegistryHardStorage {
                 (registry.*setPointer)((registry_index_type_t)i, registerStorage[i]);
 
                 if (sync != nullptr) {
-                    while(sync->messageInQueue()) {
+                    while(sync->messagesInOutBuffer()) {
                         sync->run();
                     }
                 }

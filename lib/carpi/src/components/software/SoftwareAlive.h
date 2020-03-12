@@ -35,10 +35,10 @@ class SoftwareAlive : public IAlive {
 
         virtual void receive(CarMessage &carMessage) {
             if (carMessage.getLength() == 2) {
-                switch (carMessage[0]) {
+                switch (carMessage.get(0)) {
                     case ALIVE_MESSAGE_SEND_ALIVE:
                         _aliveTicker.detach();
-                        if (carMessage[1] == 0x1) {
+                        if (carMessage.get(1) == 0x1) {
                             _alive = true;
                             _aliveTicker.attach(callback(this, &SoftwareAlive::_noMessageReceived), _registry.getFloat(ALIVE_SIGNAL_REFRESH_RATE));
                         } else _alive = false;

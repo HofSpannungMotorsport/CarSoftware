@@ -4,9 +4,13 @@
 /*
     All IDs for the Devices in the whole System.
     
-    Because of the focus on CAN for effizient messageing systems,
-    the ID is limited to 5 bit. a Max of 32 Devices can be in
+    Because of the focus on CAN for efficient messageing systems,
+    the ID is limited to 5 bit. a Max of 30 Devices can be in
     the System.
+
+    If the need is there, the ID will be set to 6 bit using extended
+    CAN Messages. This just has to be changed for CAN, please keep
+    in mind for other Channels at building time!
 */
 
 enum id_device_type_t : uint8_t {
@@ -15,14 +19,15 @@ enum id_device_type_t : uint8_t {
 };
 
 enum id_device_t : uint8_t {
-    DEVICE_NOT_SET =   0x0,
-    DEVICE_ALL =       0x1,
-    DEVICE_PEDAL =     0x2,
-    DEVICE_BMS =       0x3,
-    DEVICE_DASHBOARD = 0x4,
-    DEVICE_MASTER =    0x5,
-    DEVICE_DISPLAY =   0x6,
-    DEVICE_LORA =      0x7
+    DEVICE_NOT_SET =     0x0,
+    DEVICE_ALL =         0x1,
+    DEVICE_PEDAL =       0x2,
+    DEVICE_BMS =         0x3,
+    DEVICE_DASHBOARD =   0x4,
+    DEVICE_MASTER =      0x5,
+    DEVICE_DISPLAY =     0x6,
+    DEVICE_LORA_CAR =    0x7,
+    DEVICE_LORA_GROUND = 0x8
 };
 
 typedef uint16_t id_message_header_t;

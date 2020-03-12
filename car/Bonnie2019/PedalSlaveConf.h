@@ -3,6 +3,12 @@
 
 //#define SYNC_DEBUG
 //#define CCAN_DEBUG
+
+#define SYNC_USE_STACK_VECTOR
+#define SYNC_MAX_DEVICES_COUNT 2
+#define SYNC_MAX_CHANNELS_COUNT 1
+#define SYNC_MAX_COMPONENTS_COUNT 6
+
 #include "carpi.h"
 
 #include "hardware/Pins_Pedal_NEW_PCB.h"
@@ -31,8 +37,11 @@ class Pedal : public Carpi {
         void setup() {
             wait(2);
 
+            syncer.addDevice(canIntern, DEVICE_MASTER);
+            syncer.addDevice(canIntern, DEVICE_DASHBOARD);
+
             // Get Registry-Data from Master
-            syncer.addComponent(registry, canIntern, DEVICE_ALL);
+            syncer.addComponent(registry, DEVICE_ALL);
             registry.attach(syncer);
 
             while (!registry.getReady()) {
@@ -49,12 +58,15 @@ class Pedal : public Carpi {
             brakePedal.setCalibration(brakeCalibration);
 
 
-            syncer.addComponent(gasPedal, canIntern, DEVICE_MASTER);
-            syncer.addComponent(brakePedal, canIntern, DEVICE_MASTER);
-            //syncer.addComponent(rpmFrontLeft, canIntern, DEVICE_MASTER);
-            //syncer.addComponent(rpmFrontRight, canIntern, DEVICE_MASTER);
-            syncer.addComponent(alive, canIntern, DEVICE_MASTER);
+            syncer.addComponent(gasPedal, DEVICE_MASTER);
+            syncer.addComponent(brakePedal, DEVICE_MASTER);
+            //syncer.addComponent(rpmFrontLeft, DEVICE_MASTER);
+            //syncer.addComponent(rpmFrontRight, DEVICE_MASTER);
+            syncer.addComponent(alive, DEVICE_MASTER);
+
+            #ifndef SYNC_USE_STACK_VECTOR
             syncer.finalize();
+            #endif
 
             // Attach the Syncer to all components
             gasPedal.attach(syncer);

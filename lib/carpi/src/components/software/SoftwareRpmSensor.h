@@ -38,15 +38,15 @@ class SoftwareRpmSensor : public IRpmSensor {
         }
 
         virtual void receive(CarMessage &carMessage) {
-            switch (carMessage[0]) {
+            switch (carMessage.get(0)) {
                 case RPM_MESSAGE_COMMAND_SET_STATUS:
-                    setStatus(carMessage[1]);
+                    setStatus(carMessage.get(1));
                     break;
 
                 case RPM_MESSAGE_COMMAND_SET_FREQUENCY:
                     uint32_t frequencyBinary = 0;
                     for (uint8_t i = 1; i < 5; i++) {
-                        frequencyBinary |= (((uint32_t)carMessage[i]) << ((i - 1) * 8));
+                        frequencyBinary |= (((uint32_t)carMessage.get(i)) << ((i - 1) * 8));
                     }
                     rpm_sensor_frequency_t frequency = *((rpm_sensor_frequency_t*)&frequencyBinary);
                     setFrequency(frequency);

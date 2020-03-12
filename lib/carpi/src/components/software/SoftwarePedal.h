@@ -51,13 +51,13 @@ class SoftwarePedal : public IPedal {
         }
 
         virtual void receive(CarMessage &carMessage) {
-            switch (carMessage[0]) {
+            switch (carMessage.get(0)) {
                 case PEDAL_MESSAGE_COMMAND_SET_STATUS:
-                    setStatus(carMessage[1]);
+                    setStatus(carMessage.get(1));
                     break;
 
                 case PEDAL_MESSAGE_COMMAND_SET_VALUE:
-                    uint16_t newValue16 = carMessage[1] | (carMessage[2] << 8);
+                    uint16_t newValue16 = carMessage.get(1) | (carMessage.get(2) << 8);
                     float newValue = (float)newValue16 / 65535.0;
                     setValue(newValue);
                     break;

@@ -189,17 +189,17 @@ class HardwarePedal : public IPedal {
 
         virtual void receive(CarMessage &carMessage) {
             _init();
-            switch (carMessage[0]) {
+            switch (carMessage.get(0)) {
                 case PEDAL_MESSAGE_COMMAND_SET_CALIBRATION_STATUS:
-                    setCalibrationStatus((pedal_calibration_t)carMessage[1]);
+                    setCalibrationStatus((pedal_calibration_t)carMessage.get(1));
                     break;
 
                 case PEDAL_MESSAGE_COMMAND_SET_PROPORTIONALITY_SENSOR_1:
-                    setProportionality((pedal_sensor_type_t)carMessage[1], 0);
+                    setProportionality((pedal_sensor_type_t)carMessage.get(1), 0);
                     break;
 
                 case PEDAL_MESSAGE_COMMAND_SET_PROPORTIONALITY_SENSOR_2:
-                    setProportionality((pedal_sensor_type_t)carMessage[1], 1);
+                    setProportionality((pedal_sensor_type_t)carMessage.get(1), 1);
                     break;
             }
         }

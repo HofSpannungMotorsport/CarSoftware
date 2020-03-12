@@ -95,7 +95,7 @@ class SCar : public IService {
                 #endif
 
                 // Document raw error to SD
-                char buffer[32];
+                char buffer[33];
                 sprintf(buffer, "0x%x;0x%x;0x%x", error.componentId, error.code, error.type);
                 string errorSDLog = buffer;
                 _sdCard.write(_sdCard, SD_LOG_ID_SCAR_ERROR, errorSDLog);
@@ -271,7 +271,7 @@ class SCar : public IService {
         }
 
         void _waitForSent() {
-            while(_syncer.messageInQueue()) {
+            while(_syncer.messagesInOutBuffer()) {
                 _syncer.run();
             }
         }

@@ -74,7 +74,7 @@ class IMotorController : public IComponent {
         virtual void getLogValue(string &logValue, sd_log_id_t logId) {
             if (logId >= MOTOR_CONTROLLER_SD_LOG_COUNT) return;
 
-            char buffer[7];
+            char buffer[8];
             switch (logId) {
                 case SD_LOG_ID_MOTOR_CONTROLLER_SPEED:
                     sprintf(buffer, "%1.5f", getSpeed());
