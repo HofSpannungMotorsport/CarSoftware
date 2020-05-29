@@ -1,7 +1,7 @@
 #ifndef IRUNABLE_H
 #define IRUNABLE_H
 
-#include "components/interface/IComponent.h"
+#include "../components/interface/IComponent.h"
 
 class IRunable : public IComponent {
     public:

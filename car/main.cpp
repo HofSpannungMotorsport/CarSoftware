@@ -1,3 +1,19 @@
+#define USE_NATIVE
+#define DESKTOP_NATIVE
+#define NATIVE
+
+
+#ifdef DESKTOP_NATIVE
+
+
+#define DISABLE_UNITY
+#define MESSAGE_REPORT
+#include "../lib/carpi/src/test/test_Sync.h"
+
+
+#else // DESKTOP_NATIVE
+
+
 #ifdef TESTING_MODE
     #include "hardwareTest/UnitTest.h"
 #else
@@ -15,3 +31,6 @@ void loop() {
 
     runtime.loop();
 }
+
+
+#endif // DESKTOP_NATIVE

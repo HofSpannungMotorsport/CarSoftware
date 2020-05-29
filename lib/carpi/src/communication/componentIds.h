@@ -4,8 +4,6 @@
 #define COMPONENT_TYPE_LENGTH 4
 #define COMPONENT_SUB_ID_LENGTH 4
 
-#include <stdint.h>
-
 /*
     Component IDs
 
@@ -16,6 +14,11 @@
     5. - 8. Bit: Component subId (Break Pedal, Gas Pedal...)
 */
 
+
+/**
+ * @brief The Type of the given component
+ * 
+ */
 enum id_component_type_t : uint8_t {
     // More important Values have to be smaller
     COMPONENT_MOTOR =             0x1,
@@ -33,6 +36,10 @@ enum id_component_type_t : uint8_t {
     COMPONENT_SYSTEM =            0xF
 };
 
+/**
+ * @brief The type-specific component/subcomponent which directly identifyes the component
+ * 
+ */
 enum id_sub_component_t : uint8_t {
     // Motor
     COMPONENT_MOTOR_MAIN = 0x0,
@@ -96,13 +103,21 @@ enum id_sub_component_t : uint8_t {
     COMPONENT_SYSTEM_SYNC_OK =          0xB
 };
 
+/**
+ * @brief The complete component id, including component type and component sub id
+ * 
+ */
 typedef uint8_t id_component_t;
 
 namespace componentId {
 
-    /*
-        Get the whole ID for a Component by giving the componentType and componentSubId of the wanted Component
-    */
+    /**
+     * @brief Get the whole ID for a Component by giving the componentType and componentSubId of the wanted Component
+     * 
+     * @param componentType 
+     * @param componentSubId 
+     * @return id_component_t 
+     */
     id_component_t getComponentId(id_component_type_t componentType, id_sub_component_t componentSubId) {
         id_component_t componentId;
 

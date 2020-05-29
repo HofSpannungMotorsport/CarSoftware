@@ -2,7 +2,7 @@
 #define SELF_SYNCABLE_H
 
 #include "Sync.h"
-#include "components/interface/ICommunication.h"
+#include "../components/interface/ICommunication.h"
 
 class SelfSyncable : public ICommunication {
     public:
@@ -19,27 +19,27 @@ class SelfSyncable : public ICommunication {
         Sync *_syncer;
         bool _syncerAttached = false;
 
-        virtual void _sendCommand(uint8_t command) {
+        virtual bool _sendCommand(uint8_t command) {
             CarMessage carMessage;
 
             carMessage.setLength(1);
             carMessage.set(command, 0);
 
-            _send(carMessage);
+            return _send(carMessage);
         }
 
-        virtual void _sendCommand(uint8_t command, uint8_t value) {
+        virtual bool _sendCommand(uint8_t command, uint8_t value) {
             CarMessage carMessage;
 
             carMessage.setLength(2);
             carMessage.set(command, 0);
             carMessage.set(value, 1);
 
-            _send(carMessage);
+            return _send(carMessage);
         }
 
-        virtual void _sendCommand(uint8_t command, uint8_t values[], uint8_t valueCount) {
-            if (valueCount > 6) return; // carMessage maximum == 7 (-1 because of the command)
+        virtual bool _sendCommand(uint8_t command, uint8_t values[], uint8_t valueCount) {
+            if (valueCount > STD_CARMESSAGE_DATA_SIZE -1 ) return false; // carMessage maximum (-1 because of the command)
 
             CarMessage carMessage;
 
@@ -50,14 +50,16 @@ class SelfSyncable : public ICommunication {
                 carMessage.set(values[i], i);
             }
 
-            _send(carMessage);
+            return _send(carMessage);
         }
 
-        virtual void _send(CarMessage &carMessage) {
+        virtual bool _send(CarMessage &carMessage) {
             carMessage.setComponentId(getComponentId());
 
             if (_syncerAttached)
-                _syncer->send(carMessage);
+                return _syncer->send(carMessage);
+
+            return false;
         }
 
         uint32_t _convertFloat(float floatToConvert) {

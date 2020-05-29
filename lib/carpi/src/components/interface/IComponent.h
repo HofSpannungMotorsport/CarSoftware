@@ -1,7 +1,7 @@
 #ifndef ICOMPONENT_H
 #define ICOMPONENT_H
 
-#include "communication/componentIds.h"
+#include "../../communication/componentIds.h"
 #include "ILogable.h"
 
 typedef uint8_t component_object_type_datatype_t;

@@ -1,14 +1,26 @@
 #ifndef SYNC_H
 #define SYNC_H
 
+// Include Debug-Info. Each define can be used on its own, or all by
+//#define SYNC_DEBUG_ALL
+
+// Errors should always be shown
+#define SYNC_DEBUG_ERRORS
+
+#ifdef SYNC_DEBUG_ALL
+    #define SYNC_DEBUG_ERRORS
+#endif //SYNC_DEBUG_ALL
+
+
 #include "componentIds.h"
 #include "deviceIds.h"
 #include "CarMessage.h"
-#include "IComponent.h"
+#include "../components/interface/IComponent.h"
 #include "IChannel.h"
-#include "components/interface/ICommunication.h"
-#include "runable/IRunable.h"
-#include "HardConfig.h"
+#include "../components/interface/ICommunication.h"
+#include "../runable/IRunable.h"
+#include "../HardConfig.h"
+#include "../helper/SharedTimer.h"
 
 // To use the Stack-Vector, copy and uncomment the following lines to your ...Conf.h and set to the right values
 //#define SYNC_USE_STACK_VECTOR
@@ -30,15 +42,13 @@ enum sync_message_command_t : uint8_t {
     SYNC_MESSAGE_COMMAND_LOST_PLACEHOLDER
 };
 
-//#define SYNC_DEBUG // for debugging
-
 typedef uint8_t messages_counter_t;
 
 /**
  * @brief Essentially a Ring-Buffer with some extra stuff for the syncing
  * 
  */
-class SyncedBuffer : private NonCopyable<SyncedBuffer> {
+class SyncedBuffer {
     public:
         /**
          * @brief Check if the Message Buffer is Empty
@@ -47,7 +57,7 @@ class SyncedBuffer : private NonCopyable<SyncedBuffer> {
          * @return false 
          */
         inline bool empty() {
-            return head == tail;
+            return head == tail && !_full;
         }
 
         /**
@@ -63,6 +73,8 @@ class SyncedBuffer : private NonCopyable<SyncedBuffer> {
                 messageCount += (head + 1);
                 
                 return messageCount;
+            } else if (_full) {
+                return STD_SYNC_MESSAGES_BUFFER_SIZE;
             }
 
             return 0;
@@ -75,10 +87,7 @@ class SyncedBuffer : private NonCopyable<SyncedBuffer> {
          * @return false 
          */
         bool full() {
-            if (getMessageCount() == STD_SYNC_MESSAGES_BUFFER_SIZE)
-                return true;
-
-            return false;
+            return _full;
         }
 
         /**
@@ -117,8 +126,25 @@ class SyncedBuffer : private NonCopyable<SyncedBuffer> {
         CarMessage messageBuffer[STD_SYNC_MESSAGES_BUFFER_SIZE];
         messages_counter_t head = 0;
         messages_counter_t tail = 0;
+        bool _full = false;
 
         messages_counter_t headMessageId = 0;
+
+        bool push(CarMessage carMessage) {
+            if (full()) return false;
+
+            // Add CarMessage
+            messageBuffer[head] = carMessage;
+
+            // Increment counters
+            addToCounter(head, 1);
+            headMessageId++;
+
+            if (head == tail)
+                _full = true;
+
+            return true;
+        }
 
         /**
          * @brief Get the Count between nr and the head
@@ -249,21 +275,15 @@ class SyncedOutBuffer : public SyncedBuffer {
         /**
          * @brief Add a new Message to the Out Buffer
          * 
-         * @param carMessage CarMessage wich should be added
+         * @param carMessage CarMessage which should be added
          * @return true if the Message was added to the buffer
          * @return false if the buffer is full
          */
         bool add(CarMessage &carMessage) {
             if (full()) return false;
 
-            carMessage.setMessageId(headMessageId++);
-
-            messageBuffer[head] = carMessage;
-
-            if (head == STD_SYNC_MESSAGES_BUFFER_SIZE - 1)
-                head = 0;
-            else
-                ++head;
+            carMessage.setMessageId(headMessageId);
+            push(carMessage);
 
             return true;
         }
@@ -294,7 +314,8 @@ class SyncedOutBuffer : public SyncedBuffer {
             // If no _lostMessages are there anymore, continue with the regular messages
             while(!empty()) {
                 if (channel.send(messageBuffer[tail])) {
-                    tail++;
+                    addToCounter(tail, 1);
+                    _full = false;
                     sentAMessage = true;
                 } else {
                     break;
@@ -339,6 +360,7 @@ class SyncedOutBuffer : public SyncedBuffer {
             if (checkInBuffer(messageId)) {
                 tail = messageIdToNr(messageId);
                 addToCounter(tail, 1);
+                _full = false;
 
                 messages_counter_t nextToSendDistance = distanceFromHead(_nextNrToSend);
                 messages_counter_t tailDistance = distanceFromHead(tail);
@@ -388,11 +410,9 @@ class SyncedInBuffer : public SyncedBuffer {
                         placeholderMessage.set(SYNC_MESSAGE_COMMAND_LOST_PLACEHOLDER, 0);
 
                         // Add placeholder
-                        messageBuffer[head] = placeholderMessage;
+                        push(placeholderMessage);
 
                         // Increment counters
-                        addToCounter(head, 1);
-                        headMessageId++;
                         lostCounter++;
                     }
 
@@ -435,9 +455,7 @@ class SyncedInBuffer : public SyncedBuffer {
                     printf("[SyncedInBuffer]@received: Try to add message in full buffer (WTF?)\n");
                 #endif
             } else {
-                messageBuffer[head] = carMessage;
-                addToCounter(head, 1);
-                headMessageId++;
+                push(carMessage);
             }
 
             // At the end, check if the buffer is full and a forced OK is needed
@@ -529,6 +547,7 @@ class SyncedInBuffer : public SyncedBuffer {
             carMessage = messageBuffer[tail];
 
             addToCounter(tail, 1);
+            _full = false;
             return true;
         }
 
@@ -563,11 +582,9 @@ class SyncedInBuffer : public SyncedBuffer {
 
 class Sync : public IRunable {
     public:
-        Sync(id_device_t thisId) : _thisId(thisId) {
+        Sync(id_device_t thisId) : _thisId(thisId), _broadcastDummyChannel(*this) {
             _lastSentBroadcastOk.reset();
             _lastSentBroadcastOk.start();
-
-            _broadcastDummyChannel.attachSyncer(this);
         }
 
         #ifndef SYNC_USE_STACK_VECTOR
@@ -668,14 +685,14 @@ class Sync : public IRunable {
                                 }
 
                                 default: {
-                                    #if defined(SYNC_DEBUG) && defined(MESSAGE_REPORT)
+                                    #if defined(SYNC_DEBUG_ERRORS) && defined(MESSAGE_REPORT)
                                         printf("[Sync]@receive: Got COMPONENT_SYSTEM_SYNC_OK with implausible data at index 0 (?)\n");
                                     #endif
                                     break;
                                 }
                             }
                         } else {
-                            #if defined(SYNC_DEBUG) && defined(MESSAGE_REPORT)
+                            #if defined(SYNC_DEBUG_ERRORS) && defined(MESSAGE_REPORT)
                                 printf("[Sync]@receive: Got COMPONENT_SYSTEM_SYNC_OK addressed to DEVICE_ALL (?)\n");
                             #endif
                         }
@@ -817,12 +834,12 @@ class Sync : public IRunable {
                 resetSentIntervalTimer();
             }
 
-            id_device_t deviceId;
             IChannel *channel;
+            id_device_t deviceId;
 
             // Data for Sending
-            Timer lastGotOk; // The time since the last got OK
-            Timer lastSentOk;
+            SharedTimer lastGotOk; // The time since the last got OK
+            SharedTimer lastSentOk;
             messages_counter_t lastConfirmedBroadcastId = 0; // Number of the last confirmed Broadcast Message
 
             SyncedOutBuffer outBuffer;
@@ -898,22 +915,10 @@ class Sync : public IRunable {
 
         class BroadcastDummyChannel : public IChannel {
             public:
-                void attachSyncer(Sync *syncer) {
-                    if (syncer != nullptr) {
-                        _syncer = syncer;
-                        syncerAttached = true;
-                    } else {
-                        #if defined(SYNC_DEBUG) && defined(MESSAGE_REPORT)
-                            printf("[Sync::BroadcastDummyChannel]@attachSyncer: nullptr-exception at channel callback assignment!\n");
-                        #endif
-                    }
-                }
+                BroadcastDummyChannel(Sync& syncer) : _syncer(syncer) {}
 
                 bool send(CarMessage &carMessage) {
-                    if (syncerAttached)
-                        return _syncer->_broadcastSendCallback(carMessage);
-                    
-                    return false;
+                    return _syncer._broadcastSendCallback(carMessage);
                 }
 
                 void run() {
@@ -921,8 +926,7 @@ class Sync : public IRunable {
                 }
             
             private:
-                bool syncerAttached = false;
-                Sync *_syncer;
+                Sync &_syncer;
         };
         
         /**

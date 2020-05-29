@@ -1,8 +1,8 @@
 #ifndef ICOMMUNICATION_H
 #define ICOMMUNICATION_H
 
-#include "components/interface/IComponent.h"
-#include "communication/CarMessage.h"
+#include "IComponent.h"
+#include "../../communication/CarMessage.h"
 
 class ICommunication : public IComponent {
     public:

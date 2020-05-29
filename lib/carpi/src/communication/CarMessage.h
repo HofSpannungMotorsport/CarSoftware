@@ -159,7 +159,7 @@ class CarMessage {
          * @return Returns the current Prioritise status
          */
         bool getPrioritise() {
-            bool _prioritise;
+            return _prioritise;
         }
 
 
