@@ -36,8 +36,10 @@ class IPedal : public ICommunication {
         virtual void setMaxDeviance(pedal_value_t deviance) = 0;
         virtual void setMaxDevianceTime(uint16_t time) = 0;
 
-        virtual void setStatus(pedal_status_t status) = 0;
-        virtual void setValue(pedal_value_t value) = 0;
+        //virtual void setStatus(pedal_status_t status) = 0;
+        //virtual void setValue(pedal_value_t value) = 0;
+
+        virtual float getValueAge() = 0;
 };
 
 #endif

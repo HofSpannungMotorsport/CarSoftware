@@ -8,6 +8,7 @@ class SoftwarePedal : public IPedal {
         SoftwarePedal() {
             setComponentType(COMPONENT_PEDAL);
             setObjectType(OBJECT_SOFTWARE);
+            _valueAge.start();
         }
 
         SoftwarePedal(id_sub_component_t componentSubId)
@@ -49,14 +50,6 @@ class SoftwarePedal : public IPedal {
             // [il]
         }
 
-        virtual void setStatus(pedal_status_t status) {
-            _status = status;
-        }
-        
-        virtual void setValue(pedal_value_t value) {
-            _value = value;
-        }
-
         virtual message_build_result_t buildMessage(CarMessage &carMessage) {
             car_sub_message_t subMessage;
 
@@ -95,6 +88,8 @@ class SoftwarePedal : public IPedal {
                 float newValue = (float)newValue16 / 65535.0;
 
                 this->setValue(newValue);
+                _valueAge.reset();
+                _valueAge.start();
 
                 #ifdef PEDAL_MESSAGE_HANDLER_DEBUG
                     pcSerial.printf("[SoftwarePedal]@parseMessage: HardwareObject (float)pedalValue: %.3f\t(uint16_t)pedalValue: %i\tmsg.data[1]: 0x%x\tmsg.data[2]: 0x%x\n", newValue, newValue16, subMessage.data[1], subMessage.data[2]);
@@ -105,12 +100,26 @@ class SoftwarePedal : public IPedal {
             return result;
         }
 
+        float getValueAge() {
+            return _valueAge.read();
+        }
+
     private:
         pedal_status_t _status;
         pedal_value_t _value;
+        Timer _valueAge;
 
         pedal_calibration_t _calibrationStatus = CURRENTLY_NOT_CALIBRATING;
         bool _calibrationStatusChanged = false;
+        
+
+        virtual void setStatus(pedal_status_t status) {
+            _status = status;
+        }
+        
+        virtual void setValue(pedal_value_t value) {
+            _value = value;
+        }
 };
 
 #endif

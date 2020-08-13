@@ -10,7 +10,7 @@
 #include "components/software/SoftwareRpmSensor.h"
 #include "runable/services/SSpeed.h"
 
-#define STD_AGE_LIMIT 3.0 // s
+#define STD_AGE_LIMIT 0.3 // s
 #define STD_BRAKE_POWER_LOCK_THRESHHOLD 0.40 // 40% -> if brake is put down only this amount, the Gas Pedal will be blocked
 
 // FSG Rules relevant
@@ -68,7 +68,7 @@ class PMotorController : public IProgram {
             #ifdef PMOTORCONTROLLER_ACTIVATE_RECUPERATION
                 #ifdef PMOTORCONTROLLER_USE_BRAKE_FOR_RECUPERATION
                     if (returnValue <= 0.00001) { // just to correct float error
-                        float brakePosition = _brakePedal.object->getValue();
+                        pedal_value_t brakePosition = _brakePedal->getValue();
                         if (brakePosition > STD_BRAKE_RECU_START) {
                             if (brakePosition > STD_BRAKE_RECU_MAX) {
                                 returnValue = -STD_MAX_RECUPERATION_PERCENTAGE;
@@ -146,15 +146,8 @@ class PMotorController : public IProgram {
         bool _ready = false;
         bool _communicationStarted = false;
 
-        struct _pedalStruct_t {
-            IPedal* object;
-            pedal_value_t lastValue;
-            Timer age;
-            bool ageStarted;
-        };
-
-        _pedalStruct_t _gasPedal,
-                       _brakePedal;
+        IPedal* _gasPedal;
+        IPedal* _brakePedal;
 
         bool _gasPedalPrimed = false;
         Timer _hardBrakeingSince;
@@ -181,12 +174,12 @@ class PMotorController : public IProgram {
                 _carService.addError(Error(_motorController->getComponentId(), _motorController->getStatus(), ERROR_CRITICAL));
             }
 
-            if ((_gasPedal.object->getStatus() > 0) || (_getAge(_gasPedal) > STD_AGE_LIMIT)) {
-                _pedalError(_gasPedal.object);
+            if ((_gasPedal->getStatus() > 0) || (_gasPedal->getValueAge() > STD_AGE_LIMIT)) {
+                _pedalError(_gasPedal);
             }
 
-            if ((_brakePedal.object->getStatus() > 0) || (_getAge(_brakePedal) > STD_AGE_LIMIT)) {
-                _pedalError(_brakePedal.object);
+            if ((_brakePedal->getStatus() > 0) || (_brakePedal->getValueAge() > STD_AGE_LIMIT)) {
+                _pedalError(_brakePedal);
             }
 
             _carService.run();
@@ -210,37 +203,10 @@ class PMotorController : public IProgram {
             }
         }
 
-        float _getAge(_pedalStruct_t &sensor) {
-            if (sensor.ageStarted) {
-                return sensor.age.read();
-            } else {
-                return 0;
-            }
-        }
-
         void _updateValues() {
-            _update(_gasPedal);
-            _update(_brakePedal);
-
             if (!_communicationStarted) {
                 _motorController->beginCommunication();
                 _communicationStarted = true;
-            }
-        }
-
-        void _update(_pedalStruct_t &pedal) {
-            // Update value and age of Pedal
-            pedal_value_t newPedalValue = pedal.object->getValue();
-            if ((newPedalValue != pedal.lastValue) || newPedalValue == 0) {
-                if (pedal.ageStarted) {
-                    pedal.age.reset();
-                } else {
-                    pedal.ageStarted = true;
-                    pedal.age.reset();
-                    pedal.age.start();
-                }
-
-                pedal.lastValue = newPedalValue;
             }
         }
 
@@ -262,12 +228,14 @@ class PMotorController : public IProgram {
 
         void _setBasicComponents(IMotorController* motorController, IPedal* gasPedal, IPedal* brakePedal) {
             _motorController = motorController;
-            _gasPedal.object = gasPedal;
-            _brakePedal.object = brakePedal;
+            _gasPedal = gasPedal;
+            _brakePedal = brakePedal;
         }
 
         pedal_value_t _getPedalPower() {
-            pedal_value_t returnValue = _gasPedal.lastValue;
+            pedal_value_t gasValue = _gasPedal->getValue();
+            pedal_value_t returnValue = gasValue;
+            pedal_value_t brakeValue = _brakePedal->getValue();
 
             /*
                 Because of FSG Rules, the APPS (gas pedal) has to be locked if
@@ -279,7 +247,7 @@ class PMotorController : public IProgram {
 
                 All Values are set by defines at the top of this file
             */
-            if (_brakePedal.lastValue >= STD_HARD_BRAKE_THRESHHOLD) {
+            if (brakeValue >= STD_HARD_BRAKE_THRESHHOLD) {
                 // -> Brake Pedal Position == Hard Brakeing
                 if (_hardBrakeingStarted) {
                     // -> Hard Brakeing already before
@@ -288,7 +256,7 @@ class PMotorController : public IProgram {
                         // (otherwise no action needed)
                         if (_hardBrakeingSince.read() >= STD_HARD_BRAKE_CUTOFF_TIME) {
                             // -> Hard Brakeing too long -> it is interpreted as a Hard Brake
-                            if (_gasPedal.lastValue >= STD_HARD_BRAKE_CUTOFF_APPS_POSITION) {
+                            if (gasValue >= STD_HARD_BRAKE_CUTOFF_APPS_POSITION) {
                                 // -> Still giving Power throu the Pedal -> Pedal Position too high
                                 _gasPedalPrimed = false;
                             }
@@ -320,7 +288,7 @@ class PMotorController : public IProgram {
             }
 
             // If brakeing, no current should go to the Motor
-            if (_brakePedal.lastValue >= STD_BRAKE_POWER_LOCK_THRESHHOLD) {
+            if (brakeValue >= STD_BRAKE_POWER_LOCK_THRESHHOLD) {
                 returnValue = 0;
             }
 

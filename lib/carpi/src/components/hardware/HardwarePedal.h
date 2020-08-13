@@ -191,13 +191,6 @@ class HardwarePedal : public IPedal {
             _deviance.maxTime = time;
         }
 
-        virtual void setStatus(pedal_status_t status) {
-            // No implementation needed
-        }
-        virtual void setValue(pedal_value_t value) {
-            // No impemantation needed
-        }
-
         virtual message_build_result_t buildMessage(CarMessage &carMessage) {
             car_sub_message_t subMessage;
 
@@ -248,6 +241,10 @@ class HardwarePedal : public IPedal {
             }
             
             return result;
+        }
+
+        float getValueAge() {
+            return 0;
         }
 
     protected:

@@ -151,7 +151,7 @@ class SCar : public IService {
         }
 
         void calibrationNeeded() {
-            if (_state = READY_TO_DRIVE) {
+            if (_state == READY_TO_DRIVE) {
                 _motorController->setRUN(MOTOR_CONTROLLER_RUN_DISABLE);
                 _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
             }
@@ -190,6 +190,7 @@ class SCar : public IService {
                 _brakeLightService.run();
 
                 while(_button.start->getStateChanged()) _button.start->getState();
+                wait(0.1);
             }
 
            	_resetLeds();
