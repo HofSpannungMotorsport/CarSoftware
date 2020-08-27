@@ -33,6 +33,8 @@ class HardwareMotorController : public IMotorController {
             //_bamocar.requestCurrent(1000 / (float)STD_CURRENT_REFRESH_TIME);
             _bamocar.requestTemp(1000 / (float)STD_MOTOR_TEMP_REFRESH_TIME);
             _bamocar.requestDcVoltage(1000 / (float)STD_MOTOR_VOLTAGE_REFRESH_TIME);
+
+            _bamocar.begin(true);
         }
 
         virtual motor_controller_status_t getStatus() {
@@ -58,7 +60,7 @@ class HardwareMotorController : public IMotorController {
         virtual void setTorque(float torque) {
             float setTorqueTo = torque;
 
-            // Check if out of bounds (0.0 - 1.0)
+            // Check if out of bounds (-1.0 - 1.0)
             if (torque > 1.0) {
                 if (torque > 1.1) {
                     // Given Value too far outside of our bounds (so not only float error)

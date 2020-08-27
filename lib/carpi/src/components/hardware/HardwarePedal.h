@@ -20,14 +20,14 @@
 #define STD_MAX_DEVIANCE_TIME 200 // 100ms
 
 #define STD_MAPPED_BOUNDARY_PERCENTAGE 0.25 // 10%
-#define STD_MAX_OUT_OF_BOUNDARY_TIME 200 // 100ms [ahh... should be implementet, huh?][il]
+#define STD_MAX_OUT_OF_BOUNDARY_TIME 200 // 100ms [ahh... should be implemented, huh?][il]
 
-#define STD_CALIBRATION_REFRESH_TIME        0.010 // 30ms
-#define STD_CALIBRATION_MIN_DEVIANCE        500 // Raw analog
-#define STD_CALIBRATION_MAX_DEVIANCE        50000 // Raw analog
+#define STD_CALIBRATION_REFRESH_TIME        0.010 // 10ms
+#define STD_CALIBRATION_MIN_DEVIANCE        200 // Raw analog
+#define STD_CALIBRATION_MAX_DEVIANCE        64480 // Raw analog
 #define STD_CALIBRATION_SAMPLE_BUFFER_SIZE  20 // How many values should be combined during calibration to get the fu***** deviance away
 
-#define STD_ANALOG_LOWER_BOUNDARY   655 // uint16_t min ->     0
+#define STD_ANALOG_LOWER_BOUNDARY   300 // uint16_t min ->     0
 #define STD_ANALOG_UPPER_BOUNDARY 64880 // uint16_t max -> 65535
 
 #define STD_PEDAL_THRESHHOLD 0.15 // 15%
@@ -246,6 +246,8 @@ class HardwarePedal : public IPedal {
         float getValueAge() {
             return 0;
         }
+
+        void resetAge() {}
 
     protected:
         HardwareAnalogSensor _pin1;

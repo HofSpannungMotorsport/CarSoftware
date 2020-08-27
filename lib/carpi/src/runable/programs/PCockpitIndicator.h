@@ -6,10 +6,15 @@
 #include "components/interface/IHvEnabled.h"
 #include "components/interface/ILed.h"
 
+#define CI_RESEND_TIME 3 // s
+
 class PCockpitIndicator : public IProgram {
     public:
         PCockpitIndicator(CANService &canService, IHvEnabled &hvEnabled, ILed &ciLed)
-        : _canService(canService), _hvEnabled(hvEnabled), _ciLed(ciLed) {}
+        : _canService(canService), _hvEnabled(hvEnabled), _ciLed(ciLed) {
+            _resendTimer.reset();
+            _resendTimer.start();
+        }
 
         virtual void run() {
             bool confChanged = false;
@@ -31,7 +36,9 @@ class PCockpitIndicator : public IProgram {
                 }
             }
 
-            if (confChanged) {
+            if (confChanged || _resendTimer.read() > CI_RESEND_TIME) {
+                _resendTimer.reset();
+                _resendTimer.start();
                 _canService.sendMessage((ICommunication*)&_ciLed, DEVICE_DASHBOARD);
             }
         }
@@ -40,6 +47,7 @@ class PCockpitIndicator : public IProgram {
         CANService &_canService;
         IHvEnabled &_hvEnabled;
         ILed &_ciLed;
+        Timer _resendTimer;
 
         bool greenActive = false;
 };

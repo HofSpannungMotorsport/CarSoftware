@@ -174,6 +174,11 @@ class PMotorController : public IProgram {
                 _carService.addError(Error(_motorController->getComponentId(), _motorController->getStatus(), ERROR_CRITICAL));
             }
 
+            if (_carService.getState() == LAUNCH_CONTROL) {
+                _gasPedal->resetAge();
+                _brakePedal->resetAge();
+            }
+
             if ((_gasPedal->getStatus() > 0) || (_gasPedal->getValueAge() > STD_AGE_LIMIT)) {
                 _pedalError(_gasPedal);
             }

@@ -8,6 +8,8 @@
 #endif
 
 #define PUMP_MAX_SPEED 0.6 // %
+#define PUMP_MAX_RUN_UP_TIME 20 // s
+#define PUMP_RUN_UP_UPDATE_INTERVAL 0.1 // s
 
 class HardwarePump : public IPump {
     public:
@@ -30,29 +32,61 @@ class HardwarePump : public IPump {
                 if (speed > 1) speed = 1;
                 if (speed < 0) speed = 0;
 
-                speed *= PUMP_MAX_SPEED;
+                _lastSetSpeed = speed;
             #endif
 
-            _pwmPort.write(1 - speed);
+            if (_enabled) {
+                _runUpTicker.attach(callback(this, &HardwarePump::_updateSpeed), PUMP_RUN_UP_UPDATE_INTERVAL);
+            } else {
+                _pwmPort.write(1);
+                _currentSpeed = 0;
+            }
         }
 
         virtual pump_speed_t getSpeed() {
-            return 1 - _pwmPort.read();
+            return _currentSpeed;
         }
 
-        virtual void setEnable(pump_enable_t enable) {
+        virtual void setEnable(bool enable) {
             #ifndef DISABLE_PUMP
+                if (!enable) {
+                    _pwmPort.write(1);
+                    _currentSpeed = 0;
+                }
+
                 _enablePort.write(enable);
+                _enabled = enable;
+
+                if (enable) {
+                    setSpeed(_lastSetSpeed);
+                }
             #endif
         }
 
-        virtual pump_enable_t getEnable() {
-            return _enablePort.read();
+        virtual bool getEnable() {
+            return _enabled;
         }
 
     protected:
         PwmOut _pwmPort;
         DigitalOut _enablePort;
+
+        bool _enabled = false;
+        pump_speed_t _currentSpeed = 0; // Important for the startup ramp
+        pump_speed_t _lastSetSpeed = 0; // Last set Speed with setSpeed()
+
+        Ticker _runUpTicker;
+
+        void _updateSpeed() {
+            _currentSpeed += PUMP_RUN_UP_UPDATE_INTERVAL / PUMP_MAX_RUN_UP_TIME;
+
+            if (_currentSpeed > _lastSetSpeed) {
+                _runUpTicker.detach();
+                _currentSpeed = _lastSetSpeed;
+            }
+            
+            _pwmPort.write(1 - (_currentSpeed * PUMP_MAX_SPEED));
+        }
 };
 
 #endif // HARDWAREPUMP_H

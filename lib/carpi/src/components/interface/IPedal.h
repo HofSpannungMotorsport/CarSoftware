@@ -40,6 +40,7 @@ class IPedal : public ICommunication {
         //virtual void setValue(pedal_value_t value) = 0;
 
         virtual float getValueAge() = 0;
+        virtual void resetAge() = 0;
 };
 
 #endif

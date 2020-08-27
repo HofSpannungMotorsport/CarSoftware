@@ -104,6 +104,11 @@ class SoftwarePedal : public IPedal {
             return _valueAge.read();
         }
 
+        void resetAge() {
+            _valueAge.reset();
+            _valueAge.start();
+        }
+
     private:
         pedal_status_t _status;
         pedal_value_t _value;
