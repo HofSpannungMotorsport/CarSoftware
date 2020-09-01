@@ -3,7 +3,7 @@
 
 #include "../interface/IFan.h"
 
-#define FAN_TURN_ON_DELAY 3 // s
+#define FAN_TURN_ON_DELAY 2 // s (minimum)
 
 class HardwareFan : public IFan {
     public:
@@ -19,15 +19,17 @@ class HardwareFan : public IFan {
         }
 
         virtual void setState(fan_state_t state) {
-            _port = (bool)state;
-
             if (state == FAN_ON) {
                 if (_fanSetpoint != FAN_ON) {
                     _fanSetpoint = FAN_ON;
                     _turnOnTicker.attach(callback(this, &HardwareFan::_updateOnState), FAN_TURN_ON_DELAY);
                 }
             } else if (state == FAN_OFF) {
-                _port.write(0);
+                if (_fanSetpoint != FAN_OFF) {
+                    _fanSetpoint = FAN_OFF;
+                    _turnOnTicker.detach();
+                    _port.write(0);
+                }
             }
         }
 
