@@ -7,7 +7,6 @@
 //#define PRINT_SPEED // Speed red in PCooling
 //#define SSPEED_REPORT_SPEED
 #define SSPEED_FORCED_USE_MOTOR
-//#define SSPEED_DISABLE_CURRENT_LIMITATION // Disable current limit depending on the speed
 //#define SSPEED_REPORT_MOTOR_RPM
 //#define SCAR_PRINT_POWER_SETTING
 //#define PMOTORCONTROLLER_DISABLE_MOTOR_POWER_OUTPUT
@@ -54,8 +53,6 @@ SoftwareRpmSensor rpmFrontRight(COMPONENT_RPM_FRONT_RIGHT);
 //   Hardware
 HardwareLed brakeLight(MASTER_PIN_BRAKE_LIGHT, COMPONENT_LED_BRAKE);
 HardwareMotorController motorController(MASTER_PIN_MOTOR_CONTROLLER_CAN_RD, MASTER_PIN_MOTOR_CONTROLLER_CAN_TD, MASTER_PIN_RFE_ENABLE, MASTER_PIN_RUN_ENABLE, BAMOCAR_D3_700V, COMPONENT_MOTOR_MAIN);
-//HardwareRpmSensor rpmRearLeft(MASTER_PIN_RPM_SENSOR_HL, RPM_REAR_LEFT); // [il]
-//HardwareRpmSensor rpmRearRight(MASTER_PIN_RPM_SENSOR_HR, RPM_REAR_RIGHT); // [il]
 HardwareFan coolingFan(MASTER_PIN_FAN, COMPONENT_COOLING_FAN);
 HardwarePump coolingPump(MASTER_PIN_PUMP_PWM, MASTER_PIN_PUMP_ENABLE, COMPONENT_COOLING_PUMP);
 HardwareBuzzer buzzer(MASTER_PIN_BUZZER, COMPONENT_BUZZER_STARTUP);
@@ -85,6 +82,7 @@ SSpeed speedService(carService,
 PMotorController motorControllerService(carService,
                                         (IMotorController*)&motorController,
                                         (IPedal*)&gasPedal, (IPedal*)&brakePedal,
+                                        (IRpmSensor*)&rpmFrontLeft, (IRpmSensor*)&rpmFrontRight,
                                         speedService);
 
 PCooling coolingService(carService,
@@ -115,6 +113,8 @@ class Master : public Carpi {
             // Pedal
             canService.addComponent((ICommunication*)&gasPedal);
             canService.addComponent((ICommunication*)&brakePedal);
+
+            // RPM
             canService.addComponent((ICommunication*)&rpmFrontLeft);
             canService.addComponent((ICommunication*)&rpmFrontRight);
 

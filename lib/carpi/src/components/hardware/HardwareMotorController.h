@@ -37,15 +37,11 @@ class HardwareMotorController : public IMotorController {
             _bamocar.begin(true);
         }
 
-        virtual motor_controller_status_t getStatus() {
+        motor_controller_status_t getStatus() {
             return _status;
         }
 
-        virtual void setStatus() {
-            // No implementation needed
-        }
-
-        virtual motor_controller_state_t getState() {
+        motor_controller_state_t getState() {
             // The Status of the Motor Controller
             // (not naming it Status because otherwise it conflicts with the Status naming of the other components,
             // so to have a consistant naming and to save errors in "Status", we use the naming State here)
@@ -53,11 +49,7 @@ class HardwareMotorController : public IMotorController {
             return 0;
         }
 
-        virtual void setState() {
-            // No implementation needed
-        }
-
-        virtual void setTorque(float torque) {
+        void setTorque(float torque) {
             float setTorqueTo = torque;
 
             // Check if out of bounds (-1.0 - 1.0)
@@ -85,35 +77,51 @@ class HardwareMotorController : public IMotorController {
             _bamocar.setTorque(setTorqueTo);
         }
 
-        virtual float getSpeed() {
+        float getSpeed() {
             return _bamocar.getSpeed();
         }
 
-        virtual float getCurrent() {
+        float getSpeedAge() {
+            return _bamocar.getSpeedAge();
+        }
+
+        float getCurrent() {
             return _bamocar.getCurrent();
         }
 
-        virtual int16_t getMotorTemp() {
+        int16_t getMotorTemp() {
             return _bamocar.getMotorTemp();
         }
 
-        virtual int16_t getServoTemp() {
+        float getMotorTempAge() {
+            return _bamocar.getMotorTempAge();
+        }
+
+        int16_t getServoTemp() {
             return _bamocar.getServoTemp();
         }
 
-        virtual int16_t getAirTemp() {
+        float getServoTempAge() {
+            return _bamocar.getServoTempAge();
+        }
+
+        int16_t getAirTemp() {
             return _bamocar.getAirTemp();
         }
 
-        virtual float getDcVoltage() {
+        float getAirTempAge() {
+            return _bamocar.getAirTempAge();
+        }
+
+        float getDcVoltage() {
             return _bamocar.getDcVoltage();
         }
 
-        virtual float getDcVoltageGotCount() {
-            return _bamocar.getDcVoltageGotCount();
+        float getDcVoltageAge() {
+            return _bamocar.getDcVoltageAge();
         }
 
-        virtual void setRFE(motor_controller_rfe_enable_t state) {
+        void setRFE(motor_controller_rfe_enable_t state) {
             if (state == MOTOR_CONTROLLER_RFE_ENABLE) {
                 _rfe = 1;
             } else {
@@ -121,7 +129,7 @@ class HardwareMotorController : public IMotorController {
             }
         }
 
-        virtual void setRUN(motor_controller_run_enable_t state) {
+        void setRUN(motor_controller_run_enable_t state) {
             if (state == MOTOR_CONTROLLER_RUN_ENABLE) {
                 _run = 1;
             } else {

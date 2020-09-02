@@ -247,20 +247,6 @@ class SCar : public IService {
             return _gasCurve;
         }
 
-        void setMaxPower(float power) {
-            if (power < 0.0) power = 0;
-            if (power > 1.0) power = 1.0;
-            _currentPower = power;
-
-            #ifdef SCAR_PRINT_POWER_SETTING
-                pcSerial.printf("[SCar]@setMaxPower: Powersetting set to: %.3f\n", _currentPower);
-            #endif
-        }
-
-        float getPowerSetting() {
-            return _currentPower;
-        }
-
     private:
         CANService &_canService;
 

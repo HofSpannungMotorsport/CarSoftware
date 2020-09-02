@@ -7,10 +7,9 @@
 #include "components/interface/IMotorController.h"
 #include "components/interface/IPedal.h"
 #include "components/interface/IRpmSensor.h"
-#include "components/software/SoftwareRpmSensor.h"
-#include "runable/services/SSpeed.h"
+#include "runable/services/SSpeed.h" // Only for Value-Constants
 
-#define STD_AGE_LIMIT 0.3 // s
+#define STD_PEDAL_VALUE_AGE_LIMIT 0.3 // s
 #define STD_BRAKE_POWER_LOCK_THRESHHOLD 0.40 // 40% -> if brake is put down only this amount, the Gas Pedal will be blocked
 
 // FSG Rules relevant
@@ -21,8 +20,6 @@
 #define STD_HARD_BRAKE_CUTOFF_TIME 0.5 // 500 ms -> unprime gas pedal if braked hard for longer than this
 #define STD_HARD_BRAKE_CUTOFF_APPS_POSITION 0.25 // 25% -> If equal or higher than that while hard brake, gas pedal will be unprimed
 
-// HAS TO BE BOUNT TO SSPEED!!! The settings there define the max Current allowed, based on that, make the choice here
-#define STD_MAX_RECUPERATION_PERCENTAGE 0.2 // % (250A set Max at SSpeed -> 50 A)
 #define STD_RECU_SPEED_THRESHHOLD 2 // km/h - Under this speed, Recuperation is disabled
 #define STD_RECU_SPEED_FULL 4 // km/h - From this speed up, recuperation is completely enabled
 
@@ -34,14 +31,40 @@
     #define STD_GAS_RECU_THRESHHOLD 0.10 // % where the gas pedal will enter recuperation down below and power up above
 #endif
 
+// Age Values
+#define INVERTER_MAX_VOLTAGE_AGE 0.1 // s
+#define INVERTER_MAX_SPEED_AGE 0.1 // s
+
+// Values to Calculate the Power for the Adaptive Power Control
+#define ACCU_MIN_VOLTAGE 290 // V -> is only used, if the Voltage got from Inverter is too old
+#define MOTOR_MAX_RPM 6600 // rpm -> i only used, if the RPM got from Inverter is too old
+#define ACCU_MAX_ALLOWED_POWER 80000 // W -> 80 kW
+#define ACCU_MAX_ALLOWED_CURRENT 250 // A !!! Also change the value at PMotorController for the max allowed Recuperation % !!!
+#define INVERTER_MAX_ALLOWED_PHASE_CURRENT 300.0 // A
+#define MOTOR_KN 0.0478 // Vrms/RPM
+
+// Recuperation
+#define STD_MAX_RECUPERATION_PERCENTAGE 0.2 // % of current maximum Ampere (whether Max Power or Max Ampere is lower)
+
+// Gets calculated at compilation
+#define MOTOR_VOLTAGE_TO_RPM_MULTIPLYER (MOTOR_MAX_VOLTAGE_SPEED_UNDER_LOAD / MOTOR_MAX_VOLTAGE)
+#define ROOT_3 1.73205080757 // Needed for the chain factor
+#define ROOT_2 1.41421356237 // Needed for AC to DC conversion
+
+
 class PMotorController : public IProgram {
     public:
         PMotorController(SCar &carService,
                                IMotorController* motorController,
                                IPedal* gasPedal, IPedal* brakePedal,
+                               IRpmSensor* _rpmFrontLeft, IRpmSensor* _rpmFrontRight,
                                SSpeed &speedService)
             : _carService(carService), _speedService(speedService) {
-            _setBasicComponents(motorController, gasPedal, brakePedal);
+            _motorController = motorController;
+            _gasPedal = gasPedal;
+            _brakePedal = brakePedal;
+            _rpm.frontLeft = _rpmFrontLeft;
+            _rpm.frontRight = _rpmFrontRight;
         }
 
         virtual void run() {
@@ -122,7 +145,7 @@ class PMotorController : public IProgram {
                 if (returnValue < 0) returnValue = 0;
             #endif
 
-            returnValue *= _carService.getPowerSetting();
+            returnValue *= _getMaxAmpere();
 
             #ifndef PMOTORCONTROLLER_DISABLE_MOTOR_POWER_OUTPUT
                 _motorController->setTorque(returnValue);
@@ -153,17 +176,10 @@ class PMotorController : public IProgram {
         Timer _hardBrakeingSince;
         bool _hardBrakeingStarted = false;
 
-        struct _rpmSensorStruct_t {
-            IRpmSensor* object;
-            rpm_sensor_frequency_t lastValue;
-            Timer age;
-            bool ageStarted;
-        };
-
-        _rpmSensorStruct_t _frontLeftWheel,
-                           _frontRightWheel,
-                           _rearLeftWheel,
-                           _rearRightWheel;
+        struct {
+            IRpmSensor* frontLeft;
+            IRpmSensor* frontRight;
+        } _rpm;
 
         float _map(float x, float in_min, float in_max, float out_min, float out_max) {
             return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
@@ -179,11 +195,11 @@ class PMotorController : public IProgram {
                 _brakePedal->resetAge();
             }
 
-            if ((_gasPedal->getStatus() > 0) || (_gasPedal->getValueAge() > STD_AGE_LIMIT)) {
+            if ((_gasPedal->getStatus() > 0) || (_gasPedal->getValueAge() > STD_PEDAL_VALUE_AGE_LIMIT)) {
                 _pedalError(_gasPedal);
             }
 
-            if ((_brakePedal->getStatus() > 0) || (_brakePedal->getValueAge() > STD_AGE_LIMIT)) {
+            if ((_brakePedal->getStatus() > 0) || (_brakePedal->getValueAge() > STD_PEDAL_VALUE_AGE_LIMIT)) {
                 _pedalError(_brakePedal);
             }
 
@@ -200,41 +216,11 @@ class PMotorController : public IProgram {
             _carService.calibrationNeeded();
         }
 
-        float _getAge(_rpmSensorStruct_t &sensor) {
-            if (sensor.ageStarted) {
-                return sensor.age.read();
-            } else {
-                return 0;
-            }
-        }
-
         void _updateValues() {
             if (!_communicationStarted) {
                 _motorController->beginCommunication();
                 _communicationStarted = true;
             }
-        }
-
-        void _update(_rpmSensorStruct_t &rpmSensor) {
-            // Update value and age of RPM Sensor
-            pedal_value_t newRpmSensorValue = rpmSensor.object->getFrequency();
-            if ((newRpmSensorValue != rpmSensor.lastValue) || newRpmSensorValue == 0) {
-                if (rpmSensor.ageStarted) {
-                    rpmSensor.age.reset();
-                } else {
-                    rpmSensor.ageStarted = true;
-                    rpmSensor.age.reset();
-                    rpmSensor.age.start();
-                }
-
-                rpmSensor.lastValue = newRpmSensorValue;
-            }
-        }
-
-        void _setBasicComponents(IMotorController* motorController, IPedal* gasPedal, IPedal* brakePedal) {
-            _motorController = motorController;
-            _gasPedal = gasPedal;
-            _brakePedal = brakePedal;
         }
 
         pedal_value_t _getPedalPower() {
@@ -327,6 +313,48 @@ class PMotorController : public IProgram {
             }
 
             return pedalPosition;
+        }
+
+        float _getMaxAmpere() {
+            float rpmSpeed = _motorController->getSpeed();
+            float dcVoltage = _motorController->getDcVoltage();
+
+            // Only use RPM if it is new
+            if (_motorController->getSpeedAge() > INVERTER_MAX_SPEED_AGE) {
+                rpmSpeed = (float)MOTOR_MAX_RPM;
+            }
+
+            // Only use this voltage if it is new
+            if (_motorController->getDcVoltageAge() > INVERTER_MAX_VOLTAGE_AGE) {
+                dcVoltage = (float)ACCU_MIN_VOLTAGE;
+            }
+
+            float motorVoltage = rpmSpeed * (float)MOTOR_KN;
+            float maxAcVoltage = dcVoltage / (float)ROOT_2;
+            if (motorVoltage > maxAcVoltage) {
+                motorVoltage = maxAcVoltage;
+            }
+
+            float maxPossiblePower = motorVoltage * (float)INVERTER_MAX_ALLOWED_PHASE_CURRENT * (float)ROOT_3;
+
+            float powerLimit = 1.0;
+            if (maxPossiblePower > 0) {
+                // Now limit the power either by the allowed current OR by the allowed Power
+                float powerLimitByCurrent = (dcVoltage * (float)ACCU_MAX_ALLOWED_CURRENT) / maxPossiblePower;
+                float powerLimitByPower = (float)ACCU_MAX_ALLOWED_POWER / maxPossiblePower;
+
+                // Check the lower power setting
+                if (powerLimitByCurrent > powerLimitByPower)
+                    powerLimit = powerLimitByPower;
+                else
+                    powerLimit = powerLimitByCurrent;
+
+                // Limit to boundary
+                if (powerLimit > 1.0) powerLimit = 1.0;
+                else if (powerLimit < 0.0) powerLimit = 0.0;
+            }
+
+            return powerLimit;
         }
 };
 
