@@ -70,28 +70,15 @@ class HardwareInterruptButton : public IButton {
         }
 
         virtual button_state_t getState() {
-            if (getStateChanged()) {
-                _lastState = _readState();
-            }
-
             return _lastState;
         }
 
-        virtual bool getStateChanged() {
-            if (_stateBuffer.empty())
-                return false;
-            else
-                return true;
-        }
-
         virtual message_build_result_t buildMessage(CarMessage &carMessage) {
-            while(getStateChanged()) {
-                car_sub_message_t subMessage;
-                subMessage.length = 2;
-                subMessage.data[0] = getState();
-                subMessage.data[1] = getStatus();
-                carMessage.addSubMessage(subMessage);
-            }
+            car_sub_message_t subMessage;
+            subMessage.length = 2;
+            subMessage.data[0] = getState();
+            subMessage.data[1] = getStatus();
+            carMessage.addSubMessage(subMessage);
 
             return MESSAGE_BUILD_OK;
         }
@@ -101,13 +88,16 @@ class HardwareInterruptButton : public IButton {
             return MESSAGE_PARSE_ERROR;
         }
 
+        float getStateAge() {
+            return 0;
+        }
+
     protected:
         InterruptIn _interruptPin;
         Ticker _ticker;
         bool _lastHardwareState, _debouncing, _debounced;
         button_status_t _status;
         button_state_t _lastState;
-        CircularBuffer<button_state_t, STATE_BUFFER_SIZE> _stateBuffer;
 
         struct _time {
             button_time_t longClick;
@@ -123,7 +113,7 @@ class HardwareInterruptButton : public IButton {
             if (_lastHardwareState) {
                 _ticker.attach(callback(this, &HardwareInterruptButton::_checkLongClick), (float)(((float)_time.longClick/1000.0) - _time.debounce));
                 _debounced = true;
-                _addState(PRESSED);
+                _setState(PRESSED);
             }
         }
 
@@ -131,7 +121,7 @@ class HardwareInterruptButton : public IButton {
         // the set time.longClick to check if a longClick has started.
         void _checkLongClick() {
             _ticker.detach();
-            _addState(LONG_CLICKED);
+            _setState(LONG_CLICKED);
         }
 
         // Called every time a rising edge occurs
@@ -151,33 +141,12 @@ class HardwareInterruptButton : public IButton {
 
                 _debounced = false;
                 
-                _addState(NOT_PRESSED);
+                _setState(NOT_PRESSED);
             }
         }
 
-        void _addState(button_state_t state) {
-            if (_stateBuffer.full())
-                _stateBufferFull();
-
-            _stateBuffer.push(state);
-        }
-
-        button_state_t _readState() {
-            if (_stateBuffer.empty())
-                return _lastState;
-
-            button_state_t state = WRONG;
-            _stateBuffer.pop(state);
-
-            if (state == WRONG) {
-                _status |= WRONG_STATE;
-            }
-
-            return state;
-        }
-
-        void _stateBufferFull() {
-            _status |= STATE_BUFFER_FULL;
+        void _setState(button_state_t state) {
+            _lastState = state;
         }
 };
 

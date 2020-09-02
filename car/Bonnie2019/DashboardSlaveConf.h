@@ -9,6 +9,7 @@
     #include "hardware/Pins_Dashboard_PCB.h"
 #endif
 
+#define BUTTON_RESEND_INTERVAL 3 // hz
 
 CANService canService(DASHBOARD_CAN);
 
@@ -35,20 +36,44 @@ class Dashboard : public Carpi {
             canService.addComponent((ICommunication*)&ledCI);
             canService.addComponent((ICommunication*)&buttonReset);
             canService.addComponent((ICommunication*)&buttonStart);
+
+            _resendTimer.reset();
+            _resendTimer.start();
         }
 
         // Called repeately after bootup
         void loop() {
             canService.run();
 
-            if (buttonReset.getStateChanged()) {
-                canService.sendMessage((ICommunication*)&buttonReset, DEVICE_MASTER);
-            }
+            canService.sendMessage((ICommunication*)&buttonReset, DEVICE_MASTER);
+            canService.sendMessage((ICommunication*)&buttonStart, DEVICE_MASTER);
 
-            if (buttonStart.getStateChanged()) {
-                canService.sendMessage((ICommunication*)&buttonStart, DEVICE_MASTER);
+            _resendTimer.reset();
+            _resendTimer.start();
+            while (_resendTimer.read() < BUTTON_RESEND_INTERVAL) {
+                canService.run();
+
+                button_state_t startState = buttonStart.getState();
+                if (startState != _lastSentStart) {
+                    _lastSentStart = startState;
+                    canService.sendMessage((ICommunication*)&buttonStart, DEVICE_MASTER);
+                }
+
+                button_state_t resetState = buttonReset.getState();
+                if (resetState != _lastSentReset) {
+                    _lastSentReset = resetState;
+                    canService.sendMessage((ICommunication*)&buttonReset, DEVICE_MASTER);
+                }
+
+                wait(0.01);
             }
         }
+    
+    private:
+        Timer _resendTimer;
+
+        button_state_t _lastSentStart = NOT_PRESSED;
+        button_state_t _lastSentReset = NOT_PRESSED;
 };
 
 Dashboard runtime;

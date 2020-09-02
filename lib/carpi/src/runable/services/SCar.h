@@ -21,12 +21,16 @@
 #define STARTUP_ANIMATION_WAIT_AFTER 0.3 // s wait after animation
 #define BRAKE_START_THRESHHOLD 0.60 // %
 
+#define MAX_BUTTON_STATE_AGE 0.5 // s
+
 #define LAUNCH_CONTROL_RELEASE_VALUE 0.95 // % where the gas is activated again
 
 #define HV_ENABLED_BEEP_TIME 2.2 // s (has to be at least 0.5)
 
 #define BEEP_MULTI_BEEP_TIME 0.1 // s
 #define BEEP_MULTI_SILENT_TIME 0.08 // s
+
+#define LED_RESEND_INTERVAL_IN_RUN 0.33 // s;
 
 enum gas_curve_t : uint8_t {
     GAS_CURVE_LINEAR = 0x0,
@@ -93,6 +97,9 @@ class SCar : public IService {
 
             _hvEnabled = hvEnabled;
             _tsms = tsms;
+
+            _ledRunResentTimer.reset();
+            _ledRunResentTimer.start();
         }
 
         virtual void run() {
@@ -110,6 +117,12 @@ class SCar : public IService {
 
             if (!(_errorRegister.empty())) {
                 processErrors();
+            }
+
+            if (_ledRunResentTimer >= LED_RESEND_INTERVAL_IN_RUN) {
+                _ledRunResentTimer.reset();
+                _ledRunResentTimer.start();
+                _sendLedsOverCan();
             }
         }
 
@@ -182,15 +195,22 @@ class SCar : public IService {
             _sendLedsOverCan();
 
             // [QF]
-            while(_button.start->getStateChanged()) _button.start->getState();
-            while((!(_hvEnabled->read()) || !(_tsms->read())) && !(_button.start->getState() == LONG_CLICKED)) {
+            Timer _ledResendWaitTimer;
+            _ledResendWaitTimer.reset();
+            _ledResendWaitTimer.start();
+            while((!(_hvEnabled->read()) || !(_tsms->read())) && !(_button.start->getState() == LONG_CLICKED && _button.start->getStateAge() < MAX_BUTTON_STATE_AGE)) {
                 _canService.processInbound();
                 processErrors();
-                _ci.run();
                 _brakeLightService.run();
 
-                while(_button.start->getStateChanged()) _button.start->getState();
-                wait(0.1);
+                if (_ledResendWaitTimer.read() >= 0.3) {
+                    _ledResendWaitTimer.reset();
+                    _ledResendWaitTimer.start();
+                    _sendLedsOverCan();
+                    _ci.run();
+                }
+
+                wait(0.001);
             }
 
            	_resetLeds();
@@ -213,15 +233,14 @@ class SCar : public IService {
                 while(1) {
                     _ci.run();
                     _brakeLightService.run();
-                    wait(0.1);
+                    _sendLedsOverCan();
+                    wait(0.3);
                 }
             }
 
             _led.green->setState(LED_ON);
             _led.green->setBlinking(BLINKING_FAST);
             _sendLedsOverCan();
-
-            while (_button.reset->getStateChanged()) _button.reset->getState();
         }
 
         gas_curve_t getGasCurve() {
@@ -251,6 +270,8 @@ class SCar : public IService {
 
         gas_curve_t _gasCurve = GAS_CURVE_X_POW_2;
         float _currentPower = 1.0;
+
+        Timer _ledRunResentTimer;
 
         struct _button {
             IButton* reset;
@@ -397,9 +418,20 @@ class SCar : public IService {
 
 
             // Calibrate pedal until pressed Start once for long time
-            while(_button.start->getState() != LONG_CLICKED) {
+            Timer ledSendTimer;
+            ledSendTimer.reset();
+            ledSendTimer.start();
+            while(!(_button.start->getState() == LONG_CLICKED && _button.start->getStateAge() < MAX_BUTTON_STATE_AGE)) {
                 _canService.processInbound();
-                _ci.run();
+
+                if (ledSendTimer.read() >= 0.3) {
+                    ledSendTimer.reset();
+                    ledSendTimer.start();
+                    _sendLedsOverCan();
+                    _ci.run();
+                }
+
+                wait(0.001);
             }
 
 
@@ -419,7 +451,15 @@ class SCar : public IService {
             // Yellow -> Off
             while(_button.start->getState() != NOT_PRESSED) {
                 _canService.processInbound();
-                _ci.run();
+
+                if (ledSendTimer.read() >= 0.3) {
+                    ledSendTimer.reset();
+                    ledSendTimer.start();
+                    _sendLedsOverCan();
+                    _ci.run();
+                }
+                
+                wait(0.001);
             }
 
             wait(0.1);
@@ -436,10 +476,6 @@ class SCar : public IService {
             }
 
             processErrors();
-
-            while(_button.reset->getStateChanged()) {
-                _button.reset->getState();
-            }
 
             // If all OK, go into Almost Ready to drive
             if (_state == BOOT) {
@@ -464,20 +500,11 @@ class SCar : public IService {
             wait(0.1);
         }
 
-        struct _resetButton {
-            bool pressed = false,
-                 longPressed = false,
-                 released = false;
-        } _resetButton;
-
         void _checkInput() {
             // [QF]
             if (_state == ALMOST_READY_TO_DRIVE) {
 
-                // Clear start button at first
-                while (_button.start->getStateChanged()) _button.start->getState();
-
-                if ((_button.start->getState() == LONG_CLICKED) && (_pedal.brake->getValue() >= BRAKE_START_THRESHHOLD) && (_hvEnabled->read()) && (_tsms->read())) {
+                if ((_button.start->getState() == LONG_CLICKED && _button.start->getStateAge() < MAX_BUTTON_STATE_AGE) && (_pedal.brake->getValue() >= BRAKE_START_THRESHHOLD) && (_hvEnabled->read()) && (_tsms->read())) {
                     // Optimize later!!
                     // [il]
                     // Set RFE enable
@@ -492,12 +519,24 @@ class SCar : public IService {
                     Timer waitTimer;
                     waitTimer.reset();
                     waitTimer.start();
+
+                    Timer ledSendTimer;
+                    ledSendTimer.reset();
+                    ledSendTimer.start();
+
                     do {
                         _canService.processInbound();
                         _checkHvEnabled();
-                        _ci.run();
                         _brakeLightService.run();
                         processErrors();
+
+                        if (ledSendTimer.read() >= 0.3) {
+                            ledSendTimer.reset();
+                            ledSendTimer.start();
+                            _sendLedsOverCan();
+                            _ci.run();
+                        }
+
                         if (_state != ALMOST_READY_TO_DRIVE) {
                             _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
                             // If an Error occured, stop continuing and glow Red
@@ -511,11 +550,12 @@ class SCar : public IService {
                             // Stop beeping!
                             _buzzer->setState(BUZZER_OFF);
 
-                            while(1) {
-                                _ci.run();
-                                _brakeLightService.run();
-                                wait(0.1);
-                            }
+                            _ci.run();
+                            _brakeLightService.run();
+                            wait(1);
+
+                            calibrationNeeded();
+                            return;
                         }
                     } while (waitTimer.read() < (float)HV_ENABLED_BEEP_TIME);
 
@@ -538,11 +578,13 @@ class SCar : public IService {
                         _led.red->setState(LED_ON);
                         _led.red->setBlinking(BLINKING_NORMAL);
                         _sendLedsOverCan();
-                        while(1) {
-                            _ci.run();
-                            _brakeLightService.run();
-                            wait(0.1);
-                        }
+                        
+                        _ci.run();
+                        _brakeLightService.run();
+                        wait(1);
+
+                        calibrationNeeded();
+                        return;
                     }
 
                     // Set car ready to drive (-> pressing the gas-pedal will move the car -> fun)
@@ -552,60 +594,24 @@ class SCar : public IService {
                     _resetLeds();
                     _led.green->setState(LED_ON);
                     _sendLedsOverCan();
-                    wait(0.1);
-
-                    while (_button.reset->getStateChanged()) _button.reset->getState();
+                    wait(0.01);
                 }
 
-                if (_button.reset->getStateChanged()) {
-                    button_state_t state = _button.reset->getState();
-
-                    if (state == PRESSED) {
-                        _resetButton.pressed = true;
-                    }
-
-                    if (state == LONG_CLICKED && _resetButton.pressed) {
-                        _resetButton.longPressed = true;
-                    }
-
-                    if (state == NOT_PRESSED && _resetButton.pressed) {
-                        _resetButton.released = true;
-                    }
-                }
-
-                if (_resetButton.pressed && _resetButton.longPressed) {
+                if (_button.reset->getState() == LONG_CLICKED && _button.reset->getStateAge() < MAX_BUTTON_STATE_AGE) {
                     _calibratePedals();
-                    _resetButton.pressed = false;
-                    _resetButton.longPressed = false;
-                    _resetButton.released = false;
-                }
-
-                if (_resetButton.pressed && _resetButton.released) {
-                    _resetButton.pressed = false;
-                    _resetButton.longPressed = false;
-                    _resetButton.released = false;
                 }
 
                 return;
             }
 
             if (_state == CALIBRATION_NEEDED) {
-                // Clear Reset Button
-                while (_button.reset->getStateChanged()) _button.reset->getState();
-                _resetButton.pressed = false;
-                _resetButton.longPressed = false;
-                _resetButton.released = false;
-
                 // Start Calibration after Calibration failure, clearing the error at beginning on pedals
-                if (_button.reset->getState() == LONG_CLICKED) {
+                if (_button.reset->getState() == LONG_CLICKED && _button.reset->getStateAge() < MAX_BUTTON_STATE_AGE) {
                     _calibratePedals();
                 }
             }
 
             if (_state == READY_TO_DRIVE) {
-                while (_button.reset->getStateChanged()) _button.reset->getState();
-                while (_button.start->getStateChanged()) _button.start->getState();
-
                 if (_button.reset->getState() == PRESSED) {
                     // Disable RFE and RUN
                     _motorController->setRUN(MOTOR_CONTROLLER_RUN_DISABLE);
@@ -619,7 +625,7 @@ class SCar : public IService {
                     return;
                 }
 
-                if ((_button.start->getState() == PRESSED) && (_pedal.brake->getValue() >= BRAKE_START_THRESHHOLD)) {
+                if ((_button.start->getState() == PRESSED && _button.start->getStateAge() < MAX_BUTTON_STATE_AGE) && (_pedal.brake->getValue() >= BRAKE_START_THRESHHOLD)) {
                     _beepTimes(10, 0.02, 0.02);
                     _state = LAUNCH_CONTROL;
                 }
@@ -628,8 +634,6 @@ class SCar : public IService {
             }
 
             if (_state == LAUNCH_CONTROL) {
-                while (_button.reset->getStateChanged()) _button.reset->getState();
-                
                 if (_pedal.gas->getValue() >= LAUNCH_CONTROL_RELEASE_VALUE) {
                     _state = READY_TO_DRIVE;
                 }

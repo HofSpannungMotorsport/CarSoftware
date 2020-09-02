@@ -50,8 +50,8 @@ class IButton : public ICommunication {
         virtual void setState(button_state_t state) = 0;
         virtual button_state_t getState() = 0;
 
-        // See if the State has Changed since the last call of getState();
-        virtual bool getStateChanged() = 0;
+        // Get the Age of the current State
+        virtual float getStateAge() = 0;
 };
 
 #endif // IINTERRUPTBUTTON_H
