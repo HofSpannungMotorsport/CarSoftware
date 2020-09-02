@@ -49,9 +49,13 @@
 
 // Basic ASR
 #define ASR_MAX_SPEED_AGE 0.1 // s -> If any speed Value is older than this, ASR is deactivated
-#define ASR_MIN_SPEED 3 // km/h -> Before ASR is Off
+#define ASR_MIN_SPEED_ENTER 2 // km/h -> Before ASR is Off
+#define ASR_MIN_SPEED_EXIT  3 // km/h -> After ASR gets activated
+#define ASR_MIN_SPEED_LOWER_BOUNDARY 5 // km/h -> the Speed the Transfer Function gets applied if front Wheels under min speed
+#define ASR_MIN_SPEED_UPPER_BOUNDARY 10 // km/h -> The Speed the Output is 0 if the front Wheels under min speed
 #define ASR_LOWER_BOUNDARY 1.10 // % -> if rear axel is this amount faster then front, ASR begins throttleing
 #define ASR_UPPER_BOUNDARY 1.18 // % -> if rear axel is this amount faster then front, Motor Output is 0
+#define ASR_MAX_TORQUE_REDUCTION 0.9 // % -> The maximum reduction of torque if ASR is throttleing completely
 #define ASR_TRANSFER_FUNCTION(x) (x*x)
 
 // Gets calculated at compilation
@@ -197,6 +201,10 @@ class PMotorController : public IProgram {
         bool _gasPedalPrimed = false;
         Timer _hardBrakeingSince;
         bool _hardBrakeingStarted = false;
+
+        #ifdef EXPERIMENTELL_ASR_ACTIVE
+            bool _asrMinSpeedMode = true;
+        #endif
 
         #ifdef PMOTORCONTROLLER_PRINT_CURRENTLY_MAX_CURRENT
             Timer _regulatorReportTimer;
@@ -413,30 +421,50 @@ class PMotorController : public IProgram {
         }
 
         float _getMaxTorqueByASR() {
-            if (_getFrontSpeedAge() > ASR_MAX_SPEED_AGE || _motorController->getSpeedAge() > ASR_MAX_SPEED_AGE)
+            if (_getFrontSpeedAge() > (float)ASR_MAX_SPEED_AGE || _motorController->getSpeedAge() > (float)ASR_MAX_SPEED_AGE)
                 return 1.0f;
             
             float frontSpeed = _getFrontSpeed();
-            
-            if (frontSpeed < ASR_MIN_SPEED)
-                return 1.0f;
-
             float rearSpeed = _getRearSpeed();
-            float speedRatio = rearSpeed / frontSpeed;
 
-            float torqueReduction = 0;
-            if (speedRatio >= ASR_LOWER_BOUNDARY &&
-                speedRatio <= ASR_UPPER_BOUNDARY) {
-                torqueReduction = _map(speedRatio, ASR_LOWER_BOUNDARY, ASR_UPPER_BOUNDARY, 0.0f, 1.0f);
-                torqueReduction = ASR_TRANSFER_FUNCTION(torqueReduction);
+            if (_asrMinSpeedMode) {
+                if (frontSpeed >= (float)ASR_MIN_SPEED_EXIT) {
+                    _asrMinSpeedMode = false;
+                }
+            } else {
+                if (frontSpeed <= (float)ASR_MIN_SPEED_ENTER) {
+                    _asrMinSpeedMode = true;
+                }
             }
+            
+            float torqueReduction = 0.0f;
+            if (_asrMinSpeedMode) {
+                if (rearSpeed >= (float)ASR_MIN_SPEED_LOWER_BOUNDARY &&
+                    rearSpeed <= (float)ASR_MIN_SPEED_UPPER_BOUNDARY) {
+                    torqueReduction = _map(rearSpeed, ASR_MIN_SPEED_LOWER_BOUNDARY, ASR_MIN_SPEED_UPPER_BOUNDARY, 0.0f, 1.0f);
+                    torqueReduction = ASR_TRANSFER_FUNCTION(torqueReduction);
+                } else if (rearSpeed > (float)ASR_MIN_SPEED_UPPER_BOUNDARY) {
+                    torqueReduction = 1.0f;
+                }
+            } else {
+                float speedRatio = rearSpeed / frontSpeed;
+
+                if (speedRatio >= (float)ASR_LOWER_BOUNDARY &&
+                    speedRatio <= (float)ASR_UPPER_BOUNDARY) {
+                    torqueReduction = _map(speedRatio, (float)ASR_LOWER_BOUNDARY, (float)ASR_UPPER_BOUNDARY, 0.0f, 1.0f);
+                    torqueReduction = ASR_TRANSFER_FUNCTION(torqueReduction);
+                } else if (speedRatio > (float)ASR_UPPER_BOUNDARY) {
+                    torqueReduction = 1.0f;
+                }
+            }
+
 
             if (torqueReduction > 1.0f)
                 torqueReduction = 1.0f;
             else if (torqueReduction < 0.0f)
                 torqueReduction = 0.0f;
 
-            return 1.0f - torqueReduction;
+            return 1.0f - (torqueReduction * ASR_MAX_TORQUE_REDUCTION);
         }
 
         #endif
