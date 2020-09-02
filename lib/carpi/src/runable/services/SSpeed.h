@@ -14,6 +14,7 @@
 
 // Gets calculated at compiletime
 #define MOTOR_RPM_TO_KMH (STD_DISTANCE_PER_REVOLUTION * STD_MOTOR_TO_WHEEL_RATIO * 0.06) // =~ 0.02408554367752174816154693260514
+#define WHEEL_RPM_TO_KMH (STD_DISTANCE_PER_REVOLUTION * 0.06)
 
 /*
     Speed is measured by the front Wheels -> most accurat result.
@@ -92,11 +93,11 @@ class SSpeed : public IService {
         } _rpm;
 
         speed_value_t _getSpeed(IRpmSensor* sensor) {
-            return (sensor->getFrequency() * (speed_value_t)STD_DISTANCE_PER_REVOLUTION * (speed_value_t)0.06);
+            return sensor->getFrequency() * (speed_value_t)WHEEL_RPM_TO_KMH;
         }
 
         speed_value_t _getSpeed(IRpmSensor* sensor1, IRpmSensor* sensor2) {
-            return ((sensor1->getFrequency() + sensor2->getFrequency()) / 2.0) * (speed_value_t)STD_DISTANCE_PER_REVOLUTION * (speed_value_t)0.06;
+            return ((sensor1->getFrequency() * 0.5) + (sensor2->getFrequency() * 0.5)) * (speed_value_t)WHEEL_RPM_TO_KMH;
         }
 
         speed_value_t _getSpeed(IMotorController* sensor) {

@@ -20,6 +20,8 @@ class IRpmSensor : public ICommunication {
 
         virtual uint8_t getMeasurementsPerRevolution() = 0;
         virtual rpm_sensor_frequency_t getFrequency() = 0;
+
+        virtual float getAge() = 0;
 };
 
 #endif // IRPMSENSOR_H

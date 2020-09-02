@@ -87,6 +87,10 @@ class HardwareRpmSensor : public IRpmSensor {
             return MESSAGE_PARSE_ERROR;
         }
 
+        float getAge() {
+            return 0;
+        }
+
     protected:
         InterruptIn _pin;
         rpm_sensor_status_t _status = 0;

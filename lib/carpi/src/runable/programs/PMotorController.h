@@ -46,6 +46,13 @@
 // Recuperation
 #define STD_MAX_RECUPERATION_PERCENTAGE 0.2 // % of current maximum Ampere (whether Max Power or Max Ampere is lower)
 
+// Basic ASR
+#define ASR_MAX_SPEED_AGE 0.1 // s -> If any speed Value is older than this, ASR is deactivated
+#define ASR_MIN_SPEED 3 // km/h -> Before ASR is Off
+#define ASR_LOWER_BOUNDARY 1.10 // % -> if rear axel is this amount faster then front, ASR begins throttleing
+#define ASR_UPPER_BOUNDARY 1.18 // % -> if rear axel is this amount faster then front, Motor Output is 0
+#define ASR_TRANSFER_FUNCTION(x) (x*x)
+
 // Gets calculated at compilation
 #define MOTOR_VOLTAGE_TO_RPM_MULTIPLYER (MOTOR_MAX_VOLTAGE_SPEED_UNDER_LOAD / MOTOR_MAX_VOLTAGE)
 #define ROOT_3 1.73205080757 // Needed for the chain factor
@@ -146,6 +153,15 @@ class PMotorController : public IProgram {
             #endif
 
             returnValue *= _getMaxAmpere();
+
+            #ifdef EXPERIMENTELL_ASR_ACTIVE
+                if (returnValue >= 0) {
+                    float maxTorqueByASR = _getMaxTorqueByASR();
+
+                    if (returnValue > maxTorqueByASR)
+                        returnValue = maxTorqueByASR;
+                }
+            #endif
 
             #ifndef PMOTORCONTROLLER_DISABLE_MOTOR_POWER_OUTPUT
                 _motorController->setTorque(returnValue);
@@ -354,8 +370,62 @@ class PMotorController : public IProgram {
                 else if (powerLimit < 0.0) powerLimit = 0.0;
             }
 
+            #ifdef PMOTORCONTROLLER_PRINT_CURRENTLY_MAX_CURRENT
+                pcSerial.printf("Currently Max Current: %.1f RMS\t %.2f%%\t%.0f RPM\t%.2f V DC\n", INVERTER_MAX_ALLOWED_PHASE_CURRENT * powerLimit, powerLimit, rpmSpeed, dcVoltage);
+            #endif
+
             return powerLimit;
         }
+
+        #ifdef EXPERIMENTELL_ASR_ACTIVE
+
+        float _getFrontSpeed() {
+            float middleRpm = (_rpm.frontLeft->getFrequency() * 0.5) + (_rpm.frontRight->getFrequency() * 0.5);
+            return middleRpm * WHEEL_RPM_TO_KMH;
+        }
+
+        float _getFrontSpeedAge() {
+            float left = _rpm.frontLeft->getAge();
+            float right = _rpm.frontRight->getAge();
+
+            if (left > right)
+                return left;
+            else
+                return right;
+        }
+
+        float _getRearSpeed() {
+            return _motorController->getSpeed() * MOTOR_RPM_TO_KMH;
+        }
+
+        float _getMaxTorqueByASR() {
+            if (_getFrontSpeedAge() > ASR_MAX_SPEED_AGE || _motorController->getSpeedAge() > ASR_MAX_SPEED_AGE)
+                return 1.0f;
+            
+            float frontSpeed = _getFrontSpeed();
+            
+            if (frontSpeed < ASR_MIN_SPEED)
+                return 1.0f;
+
+            float rearSpeed = _getRearSpeed();
+            float speedRatio = rearSpeed / frontSpeed;
+
+            float torqueReduction = 0;
+            if (speedRatio >= ASR_LOWER_BOUNDARY &&
+                speedRatio <= ASR_UPPER_BOUNDARY) {
+                torqueReduction = _map(speedRatio, ASR_LOWER_BOUNDARY, ASR_UPPER_BOUNDARY, 0.0f, 1.0f);
+                torqueReduction = ASR_TRANSFER_FUNCTION(torqueReduction);
+            }
+
+            if (torqueReduction > 1.0f)
+                torqueReduction = 1.0f;
+            else if (torqueReduction < 0.0f)
+                torqueReduction = 0.0f;
+
+            return 1.0f - torqueReduction;
+        }
+
+        #endif
 };
 
 #endif // PMOTORCONTROLLER_H

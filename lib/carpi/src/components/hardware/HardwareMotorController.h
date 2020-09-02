@@ -5,7 +5,7 @@
 #include "../interface/IMotorController.h"
 
 #define STD_SPEED_REFRESH_TIME 240 // Hz
-#define STD_CURRENT_REFRESH_TIME 240 // Hz
+//#define STD_CURRENT_REFRESH_TIME 240 // Hz
 #define STD_CURRENT_DEVICE_REFRESH_TIME 240 // Hz
 #define STD_MOTOR_TEMP_REFRESH_TIME 12 // Hz
 #define STD_CONTROLLER_TEMP_REFRESH_TIME 12 // Hz

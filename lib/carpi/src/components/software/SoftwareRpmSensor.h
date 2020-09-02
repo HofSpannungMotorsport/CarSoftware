@@ -8,6 +8,8 @@ class SoftwareRpmSensor : public IRpmSensor {
         SoftwareRpmSensor() {
             setComponentType(COMPONENT_RPM_SENSOR);
             setObjectType(OBJECT_SOFTWARE);
+            _age.reset();
+            _age.start();
         }
 
         SoftwareRpmSensor(id_sub_component_t componentSubId)
@@ -63,14 +65,21 @@ class SoftwareRpmSensor : public IRpmSensor {
 
                 rpm_sensor_frequency_t frequency = *((rpm_sensor_frequency_t*)&frequencyBinary);
                 this->setFrequency(frequency);
+                _age.reset();
+                _age.start();
             }
             
             return result;
         }
 
+        float getAge() {
+            return _age.read();
+        }
+
     private:
         rpm_sensor_frequency_t _frequency = 0;
         rpm_sensor_status_t _status = 0;
+        Timer _age;
 };
 
 #endif // SOFTWARERPMSENSOR_H

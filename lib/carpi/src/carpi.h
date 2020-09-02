@@ -4,7 +4,7 @@
     With this, all components, services and programs are included in the actual CarSoftware.
 */
 
-#define CARPI_VERSION "V0.1.6-C"
+#define CARPI_VERSION "V0.1.6-C-ASR"
 
 // Prior include Platform-specific Components
 
