@@ -6,14 +6,14 @@
 #include "../hardware/HardwareAnalogSensor.h"
 
 // Hardcoded Calibration. Can be overwritten by recalibration if any fault
-#define STD_GAS_1_MIN 18196
-#define STD_GAS_1_MAX 45250
+#define STD_GAS_1_MIN 1332
+#define STD_GAS_1_MAX 51539
 
-#define STD_GAS_2_MIN 12663
-#define STD_GAS_2_MAX 42444
+#define STD_GAS_2_MIN 2298
+#define STD_GAS_2_MAX 51816
 
-#define STD_BRAKE_MIN 12684
-#define STD_BRAKE_MAX 20113
+#define STD_BRAKE_MIN 41011
+#define STD_BRAKE_MAX 51068
 
 // Devinance Settings
 #define STD_MAX_DEVIANCE 0.35 // 10%
