@@ -43,7 +43,6 @@ class PCooling : public IProgram {
             _hvEnabled = hvEnabled;
 
             _pump->setSpeed(0);
-            _pump->setEnable(1);
             _fan->setState(FAN_OFF);
         }
 

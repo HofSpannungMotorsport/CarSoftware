@@ -14,7 +14,7 @@
 class HardwarePump : public IPump {
     public:
         HardwarePump(PinName pwmPort, PinName enablePort) : _pwmPort(pwmPort), _enablePort(enablePort) {
-            _enablePort = 0;
+            _enablePort = 1;
             _pwmPort = 1; // -> pump pwm off
 
             setComponentType(COMPONENT_COOLING);
@@ -35,11 +35,9 @@ class HardwarePump : public IPump {
                 _lastSetSpeed = speed;
             #endif
 
-            if (_enabled) {
+            if (_currentSpeed != speed && !_tickerAttached) {
+                _tickerAttached = true;
                 _runUpTicker.attach(callback(this, &HardwarePump::_updateSpeed), PUMP_RUN_UP_UPDATE_INTERVAL);
-            } else {
-                _pwmPort.write(1);
-                _currentSpeed = 0;
             }
         }
 
@@ -47,42 +45,37 @@ class HardwarePump : public IPump {
             return _currentSpeed;
         }
 
-        virtual void setEnable(bool enable) {
-            #ifndef DISABLE_PUMP
-                if (!enable) {
-                    _pwmPort.write(1);
-                    _currentSpeed = 0;
-                }
-
-                _enablePort.write(enable);
-                _enabled = enable;
-
-                if (enable) {
-                    setSpeed(_lastSetSpeed);
-                }
-            #endif
-        }
-
-        virtual bool getEnable() {
-            return _enabled;
-        }
-
     protected:
         PwmOut _pwmPort;
         DigitalOut _enablePort;
 
-        bool _enabled = false;
         pump_speed_t _currentSpeed = 0; // Important for the startup ramp
         pump_speed_t _lastSetSpeed = 0; // Last set Speed with setSpeed()
 
         Ticker _runUpTicker;
+        bool _tickerAttached = false;
 
         void _updateSpeed() {
-            _currentSpeed += PUMP_RUN_UP_UPDATE_INTERVAL / PUMP_MAX_RUN_UP_TIME;
+            if (_currentSpeed < _lastSetSpeed) {
+                _currentSpeed += PUMP_RUN_UP_UPDATE_INTERVAL / PUMP_MAX_RUN_UP_TIME;
 
-            if (_currentSpeed > _lastSetSpeed) {
+                if (_currentSpeed >= _lastSetSpeed) {
+                    _runUpTicker.detach();
+                    _tickerAttached = false;
+                    _currentSpeed = _lastSetSpeed;
+                }
+
+            } else if (_currentSpeed > _lastSetSpeed) {
+                _currentSpeed -= PUMP_RUN_UP_UPDATE_INTERVAL / PUMP_MAX_RUN_UP_TIME;
+
+                if (_currentSpeed <= _lastSetSpeed) {
+                    _runUpTicker.detach();
+                    _tickerAttached = false;
+                    _currentSpeed = _lastSetSpeed;
+                }
+            } else {
                 _runUpTicker.detach();
-                _currentSpeed = _lastSetSpeed;
+                _tickerAttached = false;
             }
             
             _pwmPort.write(1 - (_currentSpeed * PUMP_MAX_SPEED));
