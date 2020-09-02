@@ -42,6 +42,7 @@
 #define ACCU_MAX_ALLOWED_CURRENT 250 // A !!! Also change the value at PMotorController for the max allowed Recuperation % !!!
 #define INVERTER_MAX_ALLOWED_PHASE_CURRENT 300.0 // A
 #define MOTOR_KN 0.0478 // Vrms/RPM
+#define CURRENT_REGULATOR_REPORT_INTERVAL 0.33 // s
 
 // Recuperation
 #define STD_MAX_RECUPERATION_PERCENTAGE 0.2 // % of current maximum Ampere (whether Max Power or Max Ampere is lower)
@@ -72,6 +73,11 @@ class PMotorController : public IProgram {
             _brakePedal = brakePedal;
             _rpm.frontLeft = _rpmFrontLeft;
             _rpm.frontRight = _rpmFrontRight;
+
+            #ifdef PMOTORCONTROLLER_PRINT_CURRENTLY_MAX_CURRENT
+                _regulatorReportTimer.reset();
+                _regulatorReportTimer.start();
+            #endif
         }
 
         virtual void run() {
@@ -191,6 +197,10 @@ class PMotorController : public IProgram {
         bool _gasPedalPrimed = false;
         Timer _hardBrakeingSince;
         bool _hardBrakeingStarted = false;
+
+        #ifdef PMOTORCONTROLLER_PRINT_CURRENTLY_MAX_CURRENT
+            Timer _regulatorReportTimer;
+        #endif
 
         struct {
             IRpmSensor* frontLeft;
@@ -371,7 +381,11 @@ class PMotorController : public IProgram {
             }
 
             #ifdef PMOTORCONTROLLER_PRINT_CURRENTLY_MAX_CURRENT
-                pcSerial.printf("Currently Max Current: %.1f RMS\t %.2f%%\t%.0f RPM\t%.2f V DC\n", INVERTER_MAX_ALLOWED_PHASE_CURRENT * powerLimit, powerLimit, rpmSpeed, dcVoltage);
+                if (_regulatorReportTimer.read() >= CURRENT_REGULATOR_REPORT_INTERVAL) {
+                    _regulatorReportTimer.reset();
+                    _regulatorReportTimer.start();
+                    pcSerial.printf("Currently Max Current: %.1f RMS\t %.2f%%\t%.0f RPM\t%.2f V DC\n", INVERTER_MAX_ALLOWED_PHASE_CURRENT * powerLimit, powerLimit, rpmSpeed, dcVoltage);
+                }
             #endif
 
             return powerLimit;
