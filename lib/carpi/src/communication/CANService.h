@@ -13,7 +13,7 @@
 #include "CarMessage.h"
 
 
-#define STD_CAN_FREQUENCY 250000
+#define STD_CAN_FREQUENCY 100000
 #define TELEGRAM_IN_BUFFER_SIZE 64
 
 #define CAN_TIMEOUT 0.100 // s

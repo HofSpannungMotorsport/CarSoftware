@@ -14,7 +14,7 @@
 #define PMOTORCONTROLLER_USE_BRAKE_FOR_RECUPERATION
 //#define PMOTORCONTROLLER_PRINT_CURRENTLY_MAX_CURRENT
 //#define DISABLE_PUMP
-#define EXPERIMENTELL_ASR_ACTIVE
+//#define EXPERIMENTELL_ASR_ACTIVE
 #include "carpi.h"
 
 #define HIGH_DEMAND_SERVICE_REFRESH_RATE 120 // Hz
@@ -27,6 +27,9 @@
     #include "hardware/Pins_Master_PCB.h"
 #endif
 
+#ifdef EXPERIMENTELL_ASR_ACTIVE
+    #warning "Don't forget to activate ASR on PedalSlave too!!!"
+#endif
 
 CANService canService(MASTER_PIN_CAR_INTERN_CAN_RD, MASTER_PIN_CAR_INTERN_CAN_TD);
 

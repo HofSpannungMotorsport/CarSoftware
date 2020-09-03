@@ -163,7 +163,7 @@ class SCar : public IService {
             return _state;
         }
 
-        void calibrationNeeded() {
+        void calibrationNeeded(bool errorByCommunication = false) {
             if (_state == READY_TO_DRIVE) {
                 _motorController->setRUN(MOTOR_CONTROLLER_RUN_DISABLE);
                 _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
@@ -173,6 +173,12 @@ class SCar : public IService {
             _resetLeds();
             _led.yellow->setState(LED_ON);
             _led.yellow->setBlinking(BLINKING_NORMAL);
+
+            if (errorByCommunication) {
+                _led.red->setState(LED_ON);
+                _led.red->setBlinking(BLINKING_FAST);
+            }
+
             _sendLedsOverCan();
         }
 
