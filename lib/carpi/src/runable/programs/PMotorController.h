@@ -173,6 +173,17 @@ class PMotorController : public IProgram {
                 }
             #endif
 
+            // Age Errors
+            if (_brakePedal->getValueAge() > STD_PEDAL_VALUE_AGE_LIMIT) {
+                _pedalAgeError(_brakePedal);
+                returnValue = 0;
+            }
+
+            if (_gasPedal->getValueAge() > STD_PEDAL_VALUE_AGE_LIMIT) {
+                _pedalAgeError(_gasPedal);
+                returnValue = 0;
+            }
+
             #ifndef PMOTORCONTROLLER_DISABLE_MOTOR_POWER_OUTPUT
                 _motorController->setTorque(returnValue);
             #else
@@ -233,16 +244,8 @@ class PMotorController : public IProgram {
                 _pedalError(_gasPedal);
             }
 
-            if (_gasPedal->getValueAge() > STD_PEDAL_VALUE_AGE_LIMIT) {
-                _pedalAgeError(_gasPedal);
-            }
-
             if (_brakePedal->getStatus() > 0) {
                 _pedalError(_brakePedal);
-            }
-
-            if (_brakePedal->getValueAge() > STD_PEDAL_VALUE_AGE_LIMIT) {
-                _pedalAgeError(_brakePedal);
             }
 
             _carService.run();
@@ -260,8 +263,8 @@ class PMotorController : public IProgram {
 
         void _pedalAgeError(IPedal* sensorId) {
             _carService.addError(Error(sensorId->getComponentId(), sensorId->getStatus(), ERROR_ISSUE));
-            _carService.calibrationNeeded(true);
-        } 
+            _carService.pedalCommunitactionInterference();
+        }
 
         void _updateValues() {
             if (!_communicationStarted) {

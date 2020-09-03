@@ -30,7 +30,9 @@
 #define BEEP_MULTI_BEEP_TIME 0.1 // s
 #define BEEP_MULTI_SILENT_TIME 0.08 // s
 
-#define LED_RESEND_INTERVAL_IN_RUN 0.33 // s;
+#define LED_RESEND_INTERVAL_IN_RUN 0.33 // s
+
+#define LED_RED_ON_TIME_PEDAL_COMM_INTERF 0.5 // s
 
 enum gas_curve_t : uint8_t {
     GAS_CURVE_LINEAR = 0x0,
@@ -134,7 +136,10 @@ class SCar : public IService {
             while(!_errorRegister.empty()) {
                 Error error;
                 _errorRegister.pop(error);
-                pcSerial.printf("[SCar]@processErrors: Got Error at 0x%x with error code 0x%x and error type 0x%x !\n", error.componentId, error.code, error.type);
+
+                #ifdef REPORT_ERRORS
+                    pcSerial.printf("[SCar]@processErrors: Got Error at 0x%x with error code 0x%x and error type 0x%x !\n", error.componentId, error.code, error.type);
+                #endif
 
                 if (error.type >= ERROR_CRITICAL) {
                     // Critical Error
@@ -253,6 +258,17 @@ class SCar : public IService {
             return _gasCurve;
         }
 
+        void pedalCommunitactionInterference() {
+            _redOffTicker.detach();
+
+            _led.red->setBlinking(BLINKING_OFF);
+            _led.red->setBrightness(1.0f);
+            _led.red->setState(LED_ON);
+
+            _canService.sendMessage((ICommunication*)_led.red, DEVICE_DASHBOARD);
+            _redOffTicker.attach(callback(this, &SCar::_redOff), (float)LED_RED_ON_TIME_PEDAL_COMM_INTERF);
+        }
+
     private:
         CANService &_canService;
 
@@ -290,6 +306,8 @@ class SCar : public IService {
 
         PCockpitIndicator &_ci;
         PBrakeLight &_brakeLightService;
+
+        Ticker _redOffTicker;
 
         id_component_t _calculateComponentId(IComponent* component) {
             id_component_t id = component->getComponentId();
@@ -344,6 +362,8 @@ class SCar : public IService {
         }
 
         void _resetLeds() {
+            _redOff();
+
             _led.red->setBrightness(1);
             _led.yellow->setBrightness(1);
             _led.green->setBrightness(1);
@@ -655,6 +675,12 @@ class SCar : public IService {
                 _buzzer->setState(BUZZER_OFF);
                 wait(beepOffTime);
             }
+        }
+
+        void _redOff() {
+            _redOffTicker.detach();
+            _led.red->setState(LED_OFF);
+            _canService.sendMessage((ICommunication*)_led.red, DEVICE_DASHBOARD);
         }
 };
 
