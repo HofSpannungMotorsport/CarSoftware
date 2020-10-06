@@ -28,7 +28,7 @@
     #define STD_BRAKE_RECU_START 0.15 // % where the Brake-Pedal will activate recuperation
     #define STD_BRAKE_RECU_MAX 0.25 // % where the Brake-Pedal reaches recuperation max
 #else
-    #define STD_GAS_RECU_THRESHHOLD 0.10 // % where the gas pedal will enter recuperation down below and power up above
+    #define STD_GAS_RECU_THRESHHOLD 0.15 // % where the gas pedal will enter recuperation down below and power up above
 #endif
 
 // Age Values
@@ -37,15 +37,20 @@
 
 // Values to Calculate the Power for the Adaptive Power Control
 #define ACCU_MIN_VOLTAGE 290 // V -> is only used, if the Voltage got from Inverter is too old
-#define MOTOR_MAX_RPM 6600 // rpm -> i only used, if the RPM got from Inverter is too old
-#define ACCU_MAX_ALLOWED_POWER 80000 // W -> 80 kW
-#define ACCU_MAX_ALLOWED_CURRENT 250 // A !!! Also change the value at PMotorController for the max allowed Recuperation % !!!
+#define MOTOR_MAX_RPM 6600 // rpm -> is only used, if the RPM got from Inverter is too old
+#define ACCU_MAX_ALLOWED_POWER 50000 // W -> 50 kW
+#define ACCU_MAX_ALLOWED_CURRENT 200 // A
+#define MOTOR_MAX_ALLOWED_TORQUE 230 // Nm
 #define INVERTER_MAX_ALLOWED_PHASE_CURRENT 300.0 // A
 #define MOTOR_KN 0.0478 // Vrms/RPM
+#define MOTOR_I_TO_TORQUE 0.75 // Nm/Aph rms
 #define CURRENT_REGULATOR_REPORT_INTERVAL 0.33 // s
 
 // Recuperation
-#define STD_MAX_RECUPERATION_PERCENTAGE 0.2 // % of current maximum Ampere (whether Max Power or Max Ampere is lower)
+#define RECU_USE_GAS_CURVE // Applies the Curve for positive power also for negative (recuperation) power
+#define RECU_MAX_ALLOWED_POWER 20160 // W -> 20,16 kW
+#define RECU_MAX_ALLOWED_CURRENT 50 // A
+#define RECU_MAX_ALLOWED_TORQUE 80 // Nm
 
 // Basic ASR
 #define ASR_MAX_SPEED_AGE 0.1 // s -> If any speed Value is older than this, ASR is deactivated
@@ -59,7 +64,6 @@
 #define ASR_TRANSFER_FUNCTION(x) (x*x)
 
 // Gets calculated at compilation
-#define MOTOR_VOLTAGE_TO_RPM_MULTIPLYER (MOTOR_MAX_VOLTAGE_SPEED_UNDER_LOAD / MOTOR_MAX_VOLTAGE)
 #define ROOT_3 1.73205080757 // Needed for the chain factor
 #define ROOT_2 1.41421356237 // Needed for AC to DC conversion
 
@@ -111,23 +115,23 @@ class PMotorController : public IProgram {
                         pedal_value_t brakePosition = _brakePedal->getValue();
                         if (brakePosition > STD_BRAKE_RECU_START) {
                             if (brakePosition > STD_BRAKE_RECU_MAX) {
-                                returnValue = -STD_MAX_RECUPERATION_PERCENTAGE;
+                                returnValue = -1.0f;
                             } else {
-                                returnValue = -STD_MAX_RECUPERATION_PERCENTAGE * _map(brakePosition, STD_BRAKE_RECU_START, STD_BRAKE_RECU_MAX, 0.0, 1.0);
+                                returnValue = _map(brakePosition, STD_BRAKE_RECU_START, STD_BRAKE_RECU_MAX, 0.0f, -1.0f);
                             }
                         } else {
-                            returnValue = 0;
+                            returnValue = 0.0f;
                         }
                     }
                 #else
                     if (returnValue < STD_GAS_RECU_THRESHHOLD) {
-                        returnValue = _map(returnValue, 0.0, STD_GAS_RECU_THRESHHOLD, -STD_MAX_RECUPERATION_PERCENTAGE, 0.0);
-                        if (returnValue < -STD_MAX_RECUPERATION_PERCENTAGE) returnValue = -STD_MAX_RECUPERATION_PERCENTAGE;
-                        if (returnValue > 0.0) returnValue = 0.0;
+                        returnValue = _map(returnValue, 0.0f, STD_GAS_RECU_THRESHHOLD, -1.0f, 0.0f);
+                        if (returnValue < -1.0f) returnValue = -1.0f;
+                        if (returnValue > 0.0) returnValue = 0.0f;
                     } else {
-                        returnValue = _map(returnValue, STD_GAS_RECU_THRESHHOLD, 1.0, 0.0, 1.0);
-                        if (returnValue < 0.0) returnValue = 0.0;
-                        if (returnValue > 1.0) returnValue = 1.0;
+                        returnValue = _map(returnValue, STD_GAS_RECU_THRESHHOLD, 1.0f, 0.0f, 1.0f);
+                        if (returnValue < 0.0f) returnValue = 0.0f;
+                        if (returnValue > 1.0f) returnValue = 1.0f;
                     }
                 #endif
             #endif
@@ -137,6 +141,11 @@ class PMotorController : public IProgram {
                 returnValue = _applyGasCurve(returnValue);
                 returnValue = _setLaunchControl(returnValue);
             }
+            #ifdef RECU_USE_GAS_CURVE
+            else {
+                returnValue = _applyNegativeGasCurve(returnValue);
+            }
+            #endif
 
 
             #ifdef PMOTORCONTROLLER_ACTIVATE_RECUPERATION
@@ -155,14 +164,18 @@ class PMotorController : public IProgram {
                         }
                     }
 
-                    if (returnValue < -STD_MAX_RECUPERATION_PERCENTAGE)
-                        returnValue = -STD_MAX_RECUPERATION_PERCENTAGE;
+                    if (returnValue < -1.0f)
+                        returnValue = -1.0f;
                 }
             #else
-                if (returnValue < 0) returnValue = 0;
+                if (returnValue < 0.0f) returnValue = 0.0f;
             #endif
 
-            returnValue *= _getMaxAmpere();
+            if (returnValue >= 0.0f) {
+                returnValue *= _getMaxAmpere(ACCU_MAX_ALLOWED_CURRENT, ACCU_MAX_ALLOWED_POWER, MOTOR_MAX_ALLOWED_TORQUE);
+            } else {
+                returnValue *= _getMaxAmpere(RECU_MAX_ALLOWED_CURRENT, RECU_MAX_ALLOWED_POWER, RECU_MAX_ALLOWED_TORQUE);
+            }
 
             #ifdef EXPERIMENTELL_ASR_ACTIVE
                 if (returnValue >= 0) {
@@ -351,8 +364,29 @@ class PMotorController : public IProgram {
                 gasValue = pedalPosition * pedalPosition * pedalPosition * pedalPosition;
             }
 
-            if (gasValue > 1.0) gasValue = 1.0;
-            else if (gasValue < 0.0) gasValue = 0.0;
+            if (gasValue > 1.0f) gasValue = 1.0f;
+            else if (gasValue < 0.0f) gasValue = 0.0f;
+
+            return gasValue;
+        }
+
+        float _applyNegativeGasCurve(float pedalPosition) {
+            float gasValue = pedalPosition;
+
+            gas_curve_t gasCurve = _carService.getGasCurve();
+
+            if (gasCurve == GAS_CURVE_LINEAR) {
+                gasValue = pedalPosition;
+            } else if (gasCurve == GAS_CURVE_X_POW_2) {
+                gasValue = pedalPosition * pedalPosition * -1.0f;
+            } else if (gasCurve == GAS_CURVE_X_POW_3) {
+                gasValue = pedalPosition * pedalPosition * pedalPosition;
+            } else if (gasCurve == GAS_CURVE_X_POW_4) {
+                gasValue = pedalPosition * pedalPosition * pedalPosition * pedalPosition * -1.0f;
+            }
+
+            if (gasValue > 0.0f) gasValue = 0.0f;
+            else if (gasValue < -1.0f) gasValue = -1.0f;
 
             return gasValue;
         }
@@ -365,7 +399,7 @@ class PMotorController : public IProgram {
             return pedalPosition;
         }
 
-        float _getMaxAmpere() {
+        float _getMaxAmpere(float maxAllowedCurrent, float maxAllowedPower, float maxAllowedTorque) {
             float rpmSpeed = _motorController->getSpeed();
             float dcVoltage = _motorController->getDcVoltage();
 
@@ -389,15 +423,13 @@ class PMotorController : public IProgram {
 
             float powerLimit = 1.0;
             if (maxPossiblePower > 0) {
-                // Now limit the power either by the allowed current OR by the allowed Power
-                float powerLimitByCurrent = (dcVoltage * (float)ACCU_MAX_ALLOWED_CURRENT) / maxPossiblePower;
-                float powerLimitByPower = (float)ACCU_MAX_ALLOWED_POWER / maxPossiblePower;
+                // Now limit the power either by the allowed current OR by the allowed Power OR by the allowed Torque
+                float powerLimitByCurrent = (dcVoltage * maxAllowedCurrent) / maxPossiblePower;
+                float powerLimitByPower = maxAllowedPower / maxPossiblePower;
+                float powerLimitByTorque = maxAllowedTorque / (INVERTER_MAX_ALLOWED_PHASE_CURRENT * MOTOR_I_TO_TORQUE);
 
                 // Check the lower power setting
-                if (powerLimitByCurrent > powerLimitByPower)
-                    powerLimit = powerLimitByPower;
-                else
-                    powerLimit = powerLimitByCurrent;
+                powerLimit = _min(powerLimitByCurrent, _min(powerLimitByPower, powerLimitByTorque));
 
                 // Limit to boundary
                 if (powerLimit > 1.0) powerLimit = 1.0;
@@ -413,6 +445,13 @@ class PMotorController : public IProgram {
             #endif
 
             return powerLimit;
+        }
+
+        inline float _min(float x, float y) {
+            if (x < y)
+                return x;
+            else
+                return y;
         }
 
         #ifdef EXPERIMENTELL_ASR_ACTIVE
