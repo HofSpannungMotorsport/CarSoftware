@@ -44,13 +44,13 @@
 #define INVERTER_MAX_ALLOWED_PHASE_CURRENT 300.0 // A
 #define MOTOR_KN 0.0478 // Vrms/RPM
 #define MOTOR_I_TO_TORQUE 0.75 // Nm/Aph rms
-#define CURRENT_REGULATOR_REPORT_INTERVAL 0.33 // s
+#define CURRENT_REGULATOR_REPORT_INTERVAL 2.0 // s
 
 // Recuperation
-#define RECU_USE_GAS_CURVE // Applies the Curve for positive power also for negative (recuperation) power
+//#define RECU_USE_GAS_CURVE // Applies the Curve for positive power also for negative (recuperation) power
 #define RECU_MAX_ALLOWED_POWER 20160 // W -> 20,16 kW
 #define RECU_MAX_ALLOWED_CURRENT 50 // A
-#define RECU_MAX_ALLOWED_TORQUE 80 // Nm
+#define RECU_MAX_ALLOWED_TORQUE 10 // Nm
 
 // Basic ASR
 #define ASR_MAX_SPEED_AGE 0.1 // s -> If any speed Value is older than this, ASR is deactivated
@@ -127,7 +127,7 @@ class PMotorController : public IProgram {
                     if (returnValue < STD_GAS_RECU_THRESHHOLD) {
                         returnValue = _map(returnValue, 0.0f, STD_GAS_RECU_THRESHHOLD, -1.0f, 0.0f);
                         if (returnValue < -1.0f) returnValue = -1.0f;
-                        if (returnValue > 0.0) returnValue = 0.0f;
+                        if (returnValue > 0.0f) returnValue = 0.0f;
                     } else {
                         returnValue = _map(returnValue, STD_GAS_RECU_THRESHHOLD, 1.0f, 0.0f, 1.0f);
                         if (returnValue < 0.0f) returnValue = 0.0f;
@@ -137,7 +137,7 @@ class PMotorController : public IProgram {
             #endif
 
 
-            if (returnValue >= 0) {
+            if (returnValue >= 0.0f) {
                 returnValue = _applyGasCurve(returnValue);
                 returnValue = _setLaunchControl(returnValue);
             }
@@ -150,7 +150,7 @@ class PMotorController : public IProgram {
 
             #ifdef PMOTORCONTROLLER_ACTIVATE_RECUPERATION
                 // If Recuperating, apply speed settings
-                if (returnValue < 0) {
+                if (returnValue < 0.0f) {
                     if (speed < STD_RECU_SPEED_THRESHHOLD) {
                         // Too slow for recu -> disable it
                         returnValue = 0;
@@ -204,7 +204,7 @@ class PMotorController : public IProgram {
             #endif
 
             #ifdef MOTORCONTROLLER_OUTPUT
-                pcSerial.printf("%f\n", returnValue);
+                printf("%f\n", returnValue);
             #endif
         }
 
@@ -421,33 +421,38 @@ class PMotorController : public IProgram {
 
             float maxPossiblePower = motorVoltage * (float)INVERTER_MAX_ALLOWED_PHASE_CURRENT * (float)ROOT_3;
 
-            float powerLimit = 1.0;
-            if (maxPossiblePower > 0) {
+            if (maxPossiblePower < 0.0f) {
+                maxPossiblePower *= -1.0f;
+            }
+
+            float powerLimit = 1.0f;
+            if (maxPossiblePower > 0.0f) {
                 // Now limit the power either by the allowed current OR by the allowed Power OR by the allowed Torque
                 float powerLimitByCurrent = (dcVoltage * maxAllowedCurrent) / maxPossiblePower;
                 float powerLimitByPower = maxAllowedPower / maxPossiblePower;
-                float powerLimitByTorque = maxAllowedTorque / (INVERTER_MAX_ALLOWED_PHASE_CURRENT * MOTOR_I_TO_TORQUE);
+                float powerLimitByTorque = maxAllowedTorque / ((float)INVERTER_MAX_ALLOWED_PHASE_CURRENT * (float)MOTOR_I_TO_TORQUE);
 
-                // Check the lower power setting
+                // Check for lowest power setting
                 powerLimit = _min(powerLimitByCurrent, _min(powerLimitByPower, powerLimitByTorque));
 
                 // Limit to boundary
-                if (powerLimit > 1.0) powerLimit = 1.0;
-                else if (powerLimit < 0.0) powerLimit = 0.0;
+                if (powerLimit > 1.0f) powerLimit = 1.0f;
+                else if (powerLimit < 0.0f) powerLimit = 0.0f;
+                
+                #ifdef PMOTORCONTROLLER_PRINT_CURRENTLY_MAX_CURRENT
+                    if (_regulatorReportTimer.read() >= CURRENT_REGULATOR_REPORT_INTERVAL) {
+                        _regulatorReportTimer.reset();
+                        _regulatorReportTimer.start();
+                        printf("Currently Max Current: %.1f RMS\t %.2f\t %.2f\t %.2f\t %.2f\t%.0f RPM\t%.2f V DC\n", INVERTER_MAX_ALLOWED_PHASE_CURRENT * powerLimit, powerLimit, powerLimitByCurrent, powerLimitByPower, powerLimitByTorque, rpmSpeed, dcVoltage);
+                    }
+                #endif
             }
 
-            #ifdef PMOTORCONTROLLER_PRINT_CURRENTLY_MAX_CURRENT
-                if (_regulatorReportTimer.read() >= CURRENT_REGULATOR_REPORT_INTERVAL) {
-                    _regulatorReportTimer.reset();
-                    _regulatorReportTimer.start();
-                    pcSerial.printf("Currently Max Current: %.1f RMS\t %.2f%%\t%.0f RPM\t%.2f V DC\n", INVERTER_MAX_ALLOWED_PHASE_CURRENT * powerLimit, powerLimit, rpmSpeed, dcVoltage);
-                }
-            #endif
 
             return powerLimit;
         }
 
-        inline float _min(float x, float y) {
+        float _min(float x, float y) {
             if (x < y)
                 return x;
             else
