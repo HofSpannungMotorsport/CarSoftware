@@ -20,7 +20,7 @@ void setLed(led_blinking_t mode) {
 void LEDUnitTest() {
     // LED Unit Test
     // Go throu the different LED Modes by pressing the button
-    printf("LED Unit Test\n");
+    pcSerial.printf("LED Unit Test\n");
 
     CANMessage msg;
     led.setState(LED_ON);

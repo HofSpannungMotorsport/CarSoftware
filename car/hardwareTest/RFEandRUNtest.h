@@ -15,12 +15,12 @@ void waitForClick() {
 
 void testPin(string deviceName, DigitalOut &device) {
     string message = "Click button to turn On:  " + deviceName + "\n";
-    printf("%s", message.c_str());
+    pcSerial.printf("%s", message.c_str());
     waitForClick();
     device = 1;
 
     message = "Click button to turn Off: " + deviceName + "\n";
-    printf("%s", message.c_str());
+    pcSerial.printf("%s", message.c_str());
     waitForClick();
     device = 0;
 }
@@ -30,15 +30,15 @@ void RFEandRUNtest() {
     enableRFE = 0;
     enableRUN = 0;
 
-    printf("Click button to turn On:  RFE\n");
+    pcSerial.printf("Click button to turn On:  RFE\n");
     waitForClick();
     enableRFE = 1;
 
-    printf("Click button to turn On:  RUN\n");
+    pcSerial.printf("Click button to turn On:  RUN\n");
     waitForClick();
     enableRUN = 1;
 
-    printf("Click button to turn Off: RFE and RUN\n\n");
+    pcSerial.printf("Click button to turn Off: RFE and RUN\n\n");
     waitForClick();
     enableRFE = 0;
     enableRUN = 0;

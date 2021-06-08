@@ -67,7 +67,7 @@ class SoftwarePedal : public IPedal {
             subMessage.data[0] = valueToSent;
 
             #ifdef PEDAL_MESSAGE_HANDLER_DEBUG
-                printf("[SoftwarePedal]@buildMessage: SoftwareObject calibrationStatus: 0x%x\tmsg.data[0]: 0x%x\tvalueToSent: %i\n", calibrationStatus, subMessage.data[0], valueToSent);
+                pcSerial.printf("[SoftwarePedal]@buildMessage: SoftwareObject calibrationStatus: 0x%x\tmsg.data[0]: 0x%x\tvalueToSent: %i\n", calibrationStatus, subMessage.data[0], valueToSent);
             #endif
 
             carMessage.addSubMessage(subMessage);
@@ -92,7 +92,7 @@ class SoftwarePedal : public IPedal {
                 _valueAge.start();
 
                 #ifdef PEDAL_MESSAGE_HANDLER_DEBUG
-                    printf("[SoftwarePedal]@parseMessage: HardwareObject (float)pedalValue: %.3f\t(uint16_t)pedalValue: %i\tmsg.data[1]: 0x%x\tmsg.data[2]: 0x%x\n", newValue, newValue16, subMessage.data[1], subMessage.data[2]);
+                    pcSerial.printf("[SoftwarePedal]@parseMessage: HardwareObject (float)pedalValue: %.3f\t(uint16_t)pedalValue: %i\tmsg.data[1]: 0x%x\tmsg.data[2]: 0x%x\n", newValue, newValue16, subMessage.data[1], subMessage.data[2]);
                 #endif
 
             }

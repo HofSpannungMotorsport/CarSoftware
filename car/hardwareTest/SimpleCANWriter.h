@@ -12,11 +12,11 @@ CAN can1(CAN1_CONF, 500000);
 void receivedMessage() {
     CANMessage msg;
     while (can1.read(msg)) {
-        printf("Message Received:\n\tm.id: 0x%x\n\tm.len: %i", msg.id, msg.len);
+        pcSerial.printf("Message Received:\n\tm.id: 0x%x\n\tm.len: %i", msg.id, msg.len);
         for (uint8_t i = 0; i < msg.len; i++) {
-            printf("\n\tm.data[%i]: 0x%x", i, msg.data[i]);
+            pcSerial.printf("\n\tm.data[%i]: 0x%x", i, msg.data[i]);
         }
-        printf("\n\n");
+        pcSerial.printf("\n\n");
     }
 }
 

@@ -31,7 +31,7 @@ void CANServiceUnitTest() {
 
     // CANService Unit Test
     // Printout the different States for the Button
-    printf("CANService Button Unit Test with LED Output\n\n");
+    pcSerial.printf("CANService Button Unit Test with LED Output\n\n");
 
     canService.addComponent((void*)&testButton, (IMessageHandler<CANMessage>*)&buttonHandler);
     canService.addComponent((void*)&led, (IMessageHandler<CANMessage>*)&ledMessageHandler);
@@ -55,21 +55,21 @@ void CANServiceUnitTest() {
             while (testButton.getStateChanged()) {
                 button_state_t currentState = testButton.getState();
 
-                printf("Button ");
+                pcSerial.printf("Button ");
 
                 if (currentState == NOT_PRESSED) {
-                    printf("NOT_PRESSED!\n");
+                    pcSerial.printf("NOT_PRESSED!\n");
                     led.setState(LED_OFF);
                 }
 
                 if (currentState == PRESSED) {
-                    printf("PRESSED!\n");
+                    pcSerial.printf("PRESSED!\n");
                     led.setState(LED_ON);
                     led.setBlinking(BLINKING_OFF);
                 }
 
                 if (currentState == LONG_CLICKED) {
-                    printf("LONG_CLICKED!\n");
+                    pcSerial.printf("LONG_CLICKED!\n");
                     led.setState(LED_ON);
                     led.setBlinking(BLINKING_FAST);
                 }

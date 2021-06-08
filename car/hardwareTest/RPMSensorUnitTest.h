@@ -8,14 +8,14 @@ SoftwareRpmSensor softwareRpmSensor(RPM_FRONT_LEFT);
 RpmSensorMessageHandler rpmSensorMessageHandler;
 
 void RPMSensorUnitTest() {
-    printf("RPM Sensor Unit Test\n\n");
+    pcSerial.printf("RPM Sensor Unit Test\n\n");
 
     while(1) {
         CANMessage message = CANMessage();
         rpmSensorMessageHandler.buildMessage((void*)&rpmSensor, message);
         rpmSensorMessageHandler.parseMessage((void*)&softwareRpmSensor, message);
 
-        printf("Speed: %.6f\n", softwareRpmSensor.getFrequency());
+        pcSerial.printf("Speed: %.6f\n", softwareRpmSensor.getFrequency());
         wait(1.0/(float)REFRESH_RATE);
     }
 }

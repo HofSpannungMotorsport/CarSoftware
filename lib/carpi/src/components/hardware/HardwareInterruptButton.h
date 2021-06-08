@@ -37,7 +37,7 @@ class HardwareInterruptButton : public IButton {
                 _interruptPin.rise(callback(this, &HardwareInterruptButton::_pressed));
             } else {
                 #ifdef MESSAGE_REPORT
-                    printf("Cannot assign method to a button-state. Wrong button-type choosen?");
+                    pcSerial.printf("Cannot assign method to a button-state. Wrong button-type choosen?");
                 #endif
             }
         }
