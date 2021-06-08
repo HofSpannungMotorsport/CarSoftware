@@ -30,16 +30,16 @@ void releaseAll() {
 void PumpRefill() {
     releaseAll();
 
-    pcSerial.printf("Waiting for Button Click on Master (blue Button) to start Pump...\n\n");
+    printf("Waiting for Button Click on Master (blue Button) to start Pump...\n\n");
     waitForClick();
 
-    pcSerial.printf("Setting Pump Enable now\n");
+    printf("Setting Pump Enable now\n");
     pumpEnable = 1;
 
-    pcSerial.printf("Pump now primed. Starting pump in 2 Seconds... ");
+    printf("Pump now primed. Starting pump in 2 Seconds... ");
     wait(2.0);
 
-    pcSerial.printf("Starting now\n");
+    printf("Starting now\n");
 
     {
         Timer timer;
@@ -55,18 +55,18 @@ void PumpRefill() {
                 currentTime = timer.read();
             }
 
-            pcSerial.printf("%i0%%\n", i);
+            printf("%i0%%\n", i);
         }
     }
 
     pumpPWM = 0;
 
-    pcSerial.printf("Pump now now fully throtteled\nClick Button to start Fan\n");
+    printf("Pump now now fully throtteled\nClick Button to start Fan\n");
     waitForClick();
 
     coolingFan = 1;
 
-    pcSerial.printf("Fan on\n\n");
+    printf("Fan on\n\n");
 
     waitForClick();
 }

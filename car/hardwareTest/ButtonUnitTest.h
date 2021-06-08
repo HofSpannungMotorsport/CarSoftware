@@ -9,7 +9,7 @@ void ButtonUnitTest() {
     // Button Unit Test
     // Printout the different Stats for the Button
     // Testing HardwareInterruptButton and SoftwareButton
-    pcSerial.printf("Button Unit Test\n");
+    printf("Button Unit Test\n");
     while(1) {
         Timer test;
         test.start();
@@ -27,21 +27,21 @@ void ButtonUnitTest() {
         if (testSoftwareButton.getStateChanged()) {
             button_state_t currentState = testSoftwareButton.getState();
 
-            pcSerial.printf("Button ");
+            printf("Button ");
 
             if (currentState == NOT_PRESSED) {
-                pcSerial.printf("Released!\n");
+                printf("Released!\n");
             }
 
             if (currentState == LONG_CLICKED) {
-                pcSerial.printf("LongClickStarted!\n");
+                printf("LongClickStarted!\n");
             }
 
             if (currentState == PRESSED) {
-                pcSerial.printf("Pressed!\n");
+                printf("Pressed!\n");
             }
 
-            pcSerial.printf("Time to generate Message: %f\n", test.read());
+            printf("Time to generate Message: %f\n", test.read());
         }
     }
 }

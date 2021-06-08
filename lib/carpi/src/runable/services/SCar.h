@@ -138,7 +138,7 @@ class SCar : public IService {
                 _errorRegister.pop(error);
 
                 #ifdef REPORT_ERRORS
-                    pcSerial.printf("[SCar]@processErrors: Got Error at 0x%x with error code 0x%x and error type 0x%x !\n", error.componentId, error.code, error.type);
+                    printf("[SCar]@processErrors: Got Error at 0x%x with error code 0x%x and error type 0x%x !\n", error.componentId, error.code, error.type);
                 #endif
 
                 if (error.type >= ERROR_CRITICAL) {

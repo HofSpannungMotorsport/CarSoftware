@@ -203,14 +203,14 @@ class HardwarePedal : public IPedal {
             uint16_t pedalValue = ((float)pedalValueFloat * 65535);
 
             #ifdef PEDAL_MESSAGE_HANDLER_DEBUG
-                pcSerial.printf("[HardwarePedal]@buildMessage: HardwareObject (float)pedalValue: %.3f\t(uint16_t)pedalValue: %i\t", pedalValueFloat, pedalValue);
+                printf("[HardwarePedal]@buildMessage: HardwareObject (float)pedalValue: %.3f\t(uint16_t)pedalValue: %i\t", pedalValueFloat, pedalValue);
             #endif
 
             subMessage.data[1] = pedalValue & 0xFF;
             subMessage.data[2] = (pedalValue >> 8) & 0xFF;
 
             #ifdef PEDAL_MESSAGE_HANDLER_DEBUG
-                pcSerial.printf("msg.data[1]: 0x%x\tmsg.data[2]: 0x%x\n", subMessage.data[1], subMessage.data[2]);
+                printf("msg.data[1]: 0x%x\tmsg.data[2]: 0x%x\n", subMessage.data[1], subMessage.data[2]);
             #endif
 
             carMessage.addSubMessage(subMessage);
@@ -236,7 +236,7 @@ class HardwarePedal : public IPedal {
                 this->setCalibrationStatus(calibrationStatus);
 
                 #ifdef PEDAL_MESSAGE_HANDLER_DEBUG
-                    pcSerial.printf("[HardwarePedal]@parseMessage: SoftwareObject calibrationStatus: 0x%x\tmsg.data[0]: 0x%x\tgotValue: %i\n", calibrationStatus, subMessage.data[0], gotValue);
+                    printf("[HardwarePedal]@parseMessage: SoftwareObject calibrationStatus: 0x%x\tmsg.data[0]: 0x%x\tgotValue: %i\n", calibrationStatus, subMessage.data[0], gotValue);
                 #endif
             }
             

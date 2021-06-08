@@ -19,7 +19,7 @@ void syncLed() {
 void LEDPWMUnitTest() {
     // LED Unit Test
     // Go throu the different LED Modes by pressing the button
-    pcSerial.printf("LED PWM Unit Test\n");
+    printf("LED PWM Unit Test\n");
 
     led.setState(LED_ON);
     syncLed();

@@ -52,7 +52,7 @@ class PCooling : public IProgram {
                 speed_value_t currentSpeed = _speedService.getSpeed();
 
                 #ifdef PRINT_SPEED
-                    pcSerial.printf("%.3f\n", currentSpeed);
+                    printf("%.3f\n", currentSpeed);
                 #endif
 
                 // Activate Fan according to driving speed

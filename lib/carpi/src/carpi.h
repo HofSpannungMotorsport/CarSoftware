@@ -11,9 +11,13 @@
 #ifdef USE_MBED
     // Include Framework
     #include "mbed.h"
+
+    // For compatibility, as V0.1 of CarSoftware is really old but still in use,
+    // the wait function got deprecated and needs to be replaced
+    #define wait(seconds) ThisThread::sleep_for((uint32_t)((float)seconds * 1000.0f))
+
     #ifndef MESSAGE_REPORT
         #define MESSAGE_REPORT
-        Serial pcSerial(USBTX, USBRX); // Connection to PC over Serial
     #endif
 
     // Communication
@@ -24,7 +28,7 @@
     // Include Framework
     #include "Arduino.h"
     #include "crossplatform/arduinoToMbed/arduinoToMbed.h"
-    HardwareSerial &pcSerial = Serial;
+    #define printf(text) Serial.printf(text)
 #endif
 
 // ---------------------------------------------------------------------
@@ -105,18 +109,18 @@
 class Carpi {
     public:
         Carpi() {
-            // Print out the current Verison of Carpi
+            // Print out the current Version of Carpi
             printInfo();
         }
 
         void printInfo() {
             #ifdef USE_ARDUINO
-                pcSerial.print("Carpi Version: "); pcSerial.println(_version.c_str());
-                pcSerial.print("Environment: "); pcSerial.println(_environment.c_str());
+                print("Carpi Version: "); println(_version.c_str());
+                print("Environment: "); println(_environment.c_str());
             #endif
 
             #ifdef USE_MBED
-                pcSerial.printf("Carpi Version: %s\nEnvironment: %s\n", _version.c_str(), _environment.c_str());
+                printf("Carpi Version: %s\nEnvironment: %s\n", _version.c_str(), _environment.c_str());
             #endif
         }
 

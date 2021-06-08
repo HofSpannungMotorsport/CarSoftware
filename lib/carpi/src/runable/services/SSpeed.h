@@ -71,7 +71,7 @@ class SSpeed : public IService {
             }
 
             #ifdef SSPEED_REPORT_SPEED
-                pcSerial.printf("[SSpeed]@run: Current Speed: %.3f kM/h\n", _speed);
+                printf("[SSpeed]@run: Current Speed: %.3f kM/h\n", _speed);
             #endif
         }
 
@@ -104,7 +104,7 @@ class SSpeed : public IService {
             float motorControllerRpm = sensor->getSpeed();
 
             #ifdef SSPEED_REPORT_MOTOR_RPM
-                pcSerial.printf("[SSpeed]@run: Current Motor RPM: %.3f RPM\n", motorControllerRpm);
+                printf("[SSpeed]@run: Current Motor RPM: %.3f RPM\n", motorControllerRpm);
             #endif
 
             return (motorControllerRpm * MOTOR_RPM_TO_KMH);
