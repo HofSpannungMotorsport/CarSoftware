@@ -8,7 +8,8 @@
 
 #define DISABLE_UNITY
 #define MESSAGE_REPORT
-#include "../lib/carpi/src/test/test_Sync.h"
+#include <stdio.h>
+#include "../lib/carpi/src/test/test_AdvancedCircularBuffer.h"
 
 
 #else // DESKTOP_NATIVE

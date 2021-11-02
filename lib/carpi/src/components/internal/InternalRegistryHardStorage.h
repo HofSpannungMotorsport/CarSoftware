@@ -2,7 +2,7 @@
 #define INTERNAL_REGISTRY_HARD_STORAGE_H
 
 #include "../interface/IRegistry.h"
-#include "communication/Sync.h"
+#include "communication/Sync/Sync.h"
 
 // static -> only in this file needed (and visible)
 // const -> values will not be changed -> const makes them also only stored in Program-Memory, not RAM

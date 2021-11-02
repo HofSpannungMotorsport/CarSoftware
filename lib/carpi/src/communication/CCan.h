@@ -7,7 +7,7 @@
     #error "CAN is not supported or disabled on this device!"
 #endif
 
-#include "Sync.h"
+#include "Sync/Sync.h"
 #include "CarMessage.h"
 
 class CCan : public IChannel {
@@ -95,7 +95,7 @@ class CCan : public IChannel {
          * 
          * @param canMessage Reference to CANMessage
          * @param carMessage Reference to empty CarMessage
-         * @return true If bild was successfull
+         * @return true If build was successfull
          * @return false If build failed
          */
         bool _getCarMessage(CANMessage &canMessage, CarMessage &carMessage) {

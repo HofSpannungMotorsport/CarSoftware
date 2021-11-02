@@ -26,7 +26,7 @@ class CarMessage {
          * @param index The index for the wanted data
          * @return uint8_t Returns the Value at the given index
          */
-        uint8_t get(uint8_t index) {
+        uint8_t get(uint8_t index) const {
             if (index >= STD_CARMESSAGE_DATA_SIZE)
                 return 0;
 
@@ -51,7 +51,7 @@ class CarMessage {
          * 
          * @return uint8_t Returns the current set Length of the Message
          */
-        uint8_t getLength() {
+        inline uint8_t getLength() const {
             return _length;
         }
 
@@ -71,11 +71,11 @@ class CarMessage {
         // ------------------- Message header -------------------
 
         /**
-         * @brief Set the senderId for the device which sends the message
+         * @brief Set the senderId for the device which sends the message. Normally set by the Syncer
          * 
          * @param senderId Set the senderId for this message
          */
-        void setSenderId(id_device_t senderId) {
+        inline void setSenderId(id_device_t senderId) {
             _senderId = senderId;
         }
 
@@ -84,16 +84,16 @@ class CarMessage {
          * 
          * @return id_device_t Returns the senderId for this message
          */
-        id_device_t getSenderId() {
+        inline id_device_t getSenderId() const {
             return _senderId;
         }
 
         /**
-         * @brief Set the receiverId for the device which should reveive the message
+         * @brief Set the receiverId for the device which should receive the message. Normally set by the Syncer
          * 
          * @param receiverId Set the receiverId for this message
          */
-        void setReceiverId(id_device_t receiverId) {
+        inline void setReceiverId(id_device_t receiverId) {
             _receiverId = receiverId;
         }
 
@@ -102,16 +102,16 @@ class CarMessage {
          * 
          * @return id_device_t Returns the receiverId for this message
          */
-        id_device_t getReceiverId() {
+        inline id_device_t getReceiverId() const {
             return _receiverId;
         }
 
         /**
-         * @brief Set the Message ID (important for sending). Should be set automatically by the syncer
+         * @brief Set the Message ID (important for sending). Is automatically set by the Syncer
          * 
          * @param messageId The new Message ID for the Message (uint8_t)
          */
-        void setMessageId(uint8_t messageId) {
+        inline void setMessageId(uint8_t messageId) {
             _messageId = messageId;
         }
 
@@ -120,16 +120,16 @@ class CarMessage {
          * 
          * @return uint8_t Returns the Message ID of this Message
          */
-        uint8_t getMessageId() {
+        inline uint8_t getMessageId() const {
             return _messageId;
         }
 
         /**
-         * @brief Set the Component ID the message is dedicated to
+         * @brief Set the Component ID the message is dedicated to. Must be set by the component (SelfSyncable does this automatically).
          * 
          * @param componentId The Component ID this message is dedicated to
          */
-        void setComponentId(id_component_t componentId) {
+        inline void setComponentId(id_component_t componentId) {
             _componentId = componentId;
         }
 
@@ -138,18 +138,18 @@ class CarMessage {
          * 
          * @return id_component_t Returns the Component ID this message is dedicated to
          */
-        id_component_t getComponentId() {
+        inline id_component_t getComponentId() const {
             return _componentId;
         }
 
         /**
          * @brief Set if this Message should be prioritised before others on a given Channel
          * This means, the Message is sent faster then other messages of other devices
-         * on the same Bus
+         * on the same Bus. Normally set by the Syncer automatically
          * 
          * @param prioritise prioritise Set wether this message should be prioritised or not
          */
-        void setPrioritise(bool prioritise) {
+        inline void setPrioritise(bool prioritise) {
             _prioritise = prioritise;
         }
 
@@ -158,7 +158,7 @@ class CarMessage {
          * 
          * @return Returns the current Prioritise status
          */
-        bool getPrioritise() {
+        inline bool getPrioritise() const {
             return _prioritise;
         }
 

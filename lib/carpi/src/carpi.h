@@ -34,7 +34,7 @@
 // All Platform Components
 
 // Communication
-#include "communication/Sync.h"
+#include "communication/Sync/Sync.h"
 #include "communication/CarMessage.h"
 #include "communication/componentIds.h"
 #include "communication/deviceIds.h"

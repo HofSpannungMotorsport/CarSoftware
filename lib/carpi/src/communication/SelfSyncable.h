@@ -1,7 +1,7 @@
 #ifndef SELF_SYNCABLE_H
 #define SELF_SYNCABLE_H
 
-#include "Sync.h"
+#include "Sync/Sync.h"
 #include "../components/interface/ICommunication.h"
 
 class SelfSyncable : public ICommunication {

@@ -14,7 +14,7 @@
 #include "components/interface/IHvEnabled.h"
 #include "components/interface/ISDCard.h"
 #include "components/interface/IAlive.h"
-#include "communication/Sync.h"
+#include "communication/Sync/Sync.h"
 #include "HardConfig.h"
 
 enum car_state_t : uint8_t {
