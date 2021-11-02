@@ -11,26 +11,17 @@
 #include "../steroido/src/Steroido.h"
 #include "../steroido/src/Common/ITimer.h"
 
-
-#define SYNC_USE_STACK_VECTOR
-
+// #define SYNC_USE_STACK_VECTOR
 #ifdef SYNC_USE_STACK_VECTOR
     #define SYNC_MAX_DEVICES_COUNT 3
     #define SYNC_MAX_CHANNELS_COUNT 3
     #define SYNC_MAX_COMPONENTS_COUNT 5
 #endif
 
-unsigned long globalMillis = 0;
+#define SYNC_DEBUG_IN_BUFFER_DROPPED_MESSAGES
 
-
-class Timer : public ITimer {
-    protected:
-        unsigned long getMillis() {
-            return globalMillis;
-        }
-};
-
-#include "../communication/Sync.h"
+#include "TestingTimer.h"
+#include "../communication/Sync/Sync.h"
 #include "../communication/IChannel.h"
 #include "../communication/SelfSyncable.h"
 #include "../communication/CarMessage.h"
@@ -99,6 +90,33 @@ class TestNetworkNode : public IVirtualChannel {
         ChannelId _channelId;
 };
 
+template <uint16_t bufferSize>
+class EmptyChannel : public IChannel {
+    public:
+        EmptyChannel() {}
+
+        bool send(CarMessage &carMessage) {
+            _buffer.push(carMessage);
+            return true;
+        }
+
+        bool pop(CarMessage &carMessage) {
+            return _buffer.pop(carMessage);
+        }
+
+
+        void setStatus(status_t status) {} // No implementation needed
+
+        status_t getStatus() {
+            return 0;
+        }
+
+        void run() {} // No implementation needed
+    
+    private:
+        CircularBuffer<CarMessage, bufferSize> _buffer;
+};
+
 
 
 /**
@@ -108,7 +126,7 @@ class TestNetworkNode : public IVirtualChannel {
 class ITestComponent : public SelfSyncable {
     public:
         ITestComponent() {
-            setComponentType((id_component_type_t)1);
+            setComponentType(COMPONENT_PEDAL);
         }
 
         void setStatus(status_t status) {} // No implementation needed
@@ -169,39 +187,139 @@ uint8_t compareBuffers(std::vector<CarMessage> &buffer1, std::vector<CarMessage>
     return 0;
 }
 
-/**
- * @brief Create a more or less random CarMessage. Only Data gets filled randomly
- * 
- * @param seed the Seed the randomness should be based on
- * @return CarMessage 
- */
-CarMessage createRandomMessage(uint16_t seed) {
-    CarMessage carMessage;
 
-    carMessage.setLength(seed % STD_CARMESSAGE_DATA_SIZE + 1);
-
-    for (uint8_t i = 0; i < carMessage.getLength(); i++) {
-        carMessage.set(i * i * (uint8_t)seed, i);
-    }
-
-    return carMessage;
-}
-
-/**
- * @brief Create some example/random messages
- * 
- * @param _exampleMessages 
- * @param count 
- * @param customStartSeed 
- */
-void createExampleMessages(std::vector<CarMessage> &_exampleMessages, uint16_t count, uint16_t customStartSeed = 1) {
-    for (uint16_t i = 0; i < count; i++) {
-        uint16_t currentSeed = i + customStartSeed;
-        _exampleMessages.push_back(createRandomMessage(currentSeed));
+void createNumberedMessages(std::vector<CarMessage>& _messages, uint16_t count, uint16_t startNumber, id_component_t componentId) {
+    for (uint16_t i = 0; i < count; ++i) {
+        CarMessage carMessage;
+        carMessage.setLength(1);
+        carMessage.set(i, 0);
+        carMessage.setComponentId(componentId);
+        _messages.push_back(carMessage);
     }
 }
 
 
+
+// ------------------------------------------- SyncedOutBuffer -------------------------------------------
+
+std::vector<CarMessage> syncedOutBufferMessages;
+
+bool testSyncedOutBuffer() {
+    printf("Begin with SyncedOutBuffer\n");
+
+
+    // ############################################
+
+    // First, test standard "Sending"
+
+    // ############################################
+
+
+    bool success = true;
+    SyncedOutBuffer syncedOutBuffer;
+
+    // Create some messages
+    
+    createNumberedMessages(syncedOutBufferMessages, STD_SYNCED_BUFFER_MESSAGES_BUFFER_SIZE * 3, 0, componentId::getComponentId(COMPONENT_PEDAL, COMPONENT_PEDAL_GAS));
+
+    uint16_t count = STD_SYNCED_BUFFER_MESSAGES_BUFFER_SIZE + 1;
+    uint16_t index = 0;
+    while(count--) {
+        syncedOutBufferMessages[index].setComponentId(componentId::getComponentId(COMPONENT_PEDAL, COMPONENT_PEDAL_GAS));
+        syncedOutBufferMessages[index].setSenderId(DEVICE_PEDAL);
+        syncedOutBufferMessages[index].setReceiverId(DEVICE_MASTER);
+
+        if (!syncedOutBuffer.add(syncedOutBufferMessages[index++])) {
+            if (index != STD_SYNCED_BUFFER_MESSAGES_BUFFER_SIZE + 1) {
+                printf("@testSyncedOutBuffer: Can't push message to buffer. index: %i\n", index);
+                success = false;
+            }
+
+            break;
+        }
+
+        if (index > STD_SYNCED_BUFFER_MESSAGES_BUFFER_SIZE) {
+            printf("@testSyncedOutBuffer: pushed more than possbile messages!\n");
+            success = false;
+        }
+    }
+
+    // -> Buffer filled completely
+    // Now empty it by sending
+
+    printf("Filled up -> now emptying\n");
+
+    EmptyChannel<STD_SYNCED_BUFFER_MESSAGES_BUFFER_SIZE * 10> loopbackChannel;
+
+    while (syncedOutBuffer.sendNext(loopbackChannel)) {}
+
+    CarMessage newestMessage;
+    uint16_t poppedMessagesCount = 0;
+
+    uint16_t reconstructedIndex = 0;
+    while (true) {
+        CarMessage poppedMessage;
+        if (loopbackChannel.pop(poppedMessage)) {
+            newestMessage = poppedMessage;
+            poppedMessagesCount++;
+
+            if (poppedMessage.get(0) != reconstructedIndex++) {
+                printf("@testSynceedOutBuffer: Wrong Message Number!\n");
+            }
+        } else {
+            break;
+        }
+    }
+
+    if (syncedOutBuffer.add(syncedOutBufferMessages[index-1])) {
+        printf("@testSyncedOutBuffer: Can push without confirming before!\n");
+        success = false;
+    }
+
+    syncedOutBuffer.confirm(newestMessage.getMessageId());
+    if (poppedMessagesCount != STD_SYNCED_BUFFER_MESSAGES_BUFFER_SIZE) {
+        printf("@testSyncedOutBuffer: Wrong amount of Messages sent over channel!\n");
+        success = false;
+    }
+
+    count = STD_SYNCED_BUFFER_MESSAGES_BUFFER_SIZE + 1;
+    index -= 1;
+    while(count--) {
+        syncedOutBufferMessages[index].setComponentId(componentId::getComponentId(COMPONENT_PEDAL, COMPONENT_PEDAL_GAS));
+        syncedOutBufferMessages[index].setSenderId(DEVICE_PEDAL);
+        syncedOutBufferMessages[index].setReceiverId(DEVICE_MASTER);
+
+        if (!syncedOutBuffer.add(syncedOutBufferMessages[index++])) {
+            if (index != STD_SYNCED_BUFFER_MESSAGES_BUFFER_SIZE * 2 + 1) {
+                printf("@testSyncedOutBuffer: Can't push message to buffer. index: %i (2)\n", index);
+                success = false;
+            }
+
+            break;
+        }
+
+        if (index > STD_SYNCED_BUFFER_MESSAGES_BUFFER_SIZE * 2) {
+            printf("@testSyncedOutBuffer: pushed more than possbile messages! (2)\n");
+            success = false;
+        }
+    }
+
+    // -> Pushing, confirming and re-pushing correct
+
+    if (success) {
+        printf("SyncedOutBuffer Test Success!\n");
+    } else {
+        printf("SyncedOutBuffer Test Error!\n");
+    }
+
+    return success;
+}
+
+
+
+
+
+// ------------------------------------------- Sync -------------------------------------------
 
 Sync pedalSync(DEVICE_PEDAL);
 Sync dashboardSync(DEVICE_DASHBOARD);
@@ -211,8 +329,8 @@ TestNetworkNode pedalChannel(pedalSync, CHANNEL_PEDAL);
 TestNetworkNode dashboardChannel(dashboardSync, CHANNEL_DASHBOARD);
 TestNetworkNode masterChannel(masterSync, CHANNEL_MASTER);
 
-HardwareTestComponent hardwareTestComponent((id_sub_component_t)2);
-SoftwareTestComponent softwareTestComponent((id_sub_component_t)2);
+HardwareTestComponent hardwareTestComponent(COMPONENT_PEDAL_GAS);
+SoftwareTestComponent softwareTestComponent(COMPONENT_PEDAL_GAS);
 
 std::vector<CarMessage> exampleMessages;
 
@@ -259,7 +377,10 @@ void testSimpleStableSyncing() {
             unsyncedMessagesCount++;
         }
 
+        ++globalMillis;
+
         if (unsyncedMessagesCount >= TEST_MESSAGES_CLUSTER_SIZE) {
+            globalMillis += STD_SYNC_INTERVAL_MESSAGE_TIME;
             pedalSync.run();
             masterSync.run();
             unsyncedMessagesCount = 0;
@@ -286,16 +407,12 @@ void testSimpleStableSyncing() {
  * 
  */
 void testSimpleFloodSyncing() {
-    printf("Begin with SimpoleFloodSyncing\n");
+    printf("Begin with SimpleFloodSyncing\n");
 
     for (CarMessage &carMessage : exampleMessages) {
+        globalMillis++;
         if (!hardwareTestComponent.syntheticSend(carMessage)) {
-            printf("Buffer full, flooding now\n");
-            pedalSync.run();
-            masterSync.run();
-
-            if (!hardwareTestComponent.syntheticSend(carMessage))
-                printf("[testSimpleFloodSyncing]: Still cant't send out new Message!\n");
+            printf("[testSimpleFloodSyncing]: Still cant't send out new Message!\n");
         }
     }
 
@@ -324,12 +441,13 @@ void setup() {
 
     printf("Created Network\n");
 
-    createExampleMessages(exampleMessages, TEST_MESSAGES_COUNT);
+    createNumberedMessages(exampleMessages, TEST_MESSAGES_COUNT, 0, componentId::getComponentId(COMPONENT_PEDAL, COMPONENT_PEDAL_GAS));
 
     printf("Prepared Example Messages\n");
 
     #ifdef DISABLE_UNITY
 
+    //testSyncedOutBuffer();
     testSimpleStableSyncing();
     softwareTestComponent.receivedMessages.clear();
     testSimpleFloodSyncing();
@@ -337,6 +455,7 @@ void setup() {
     #else // DISABLE_UNITY
 
     UNITY_BEGIN();
+    RUN_TEST(testSyncedOutBuffer);
     RUN_TEST(testSimpleStableSyncing);
     softwareTestComponent.receivedMessages.clear();
     RUN_TEST(testSimpleFloodSyncing);
