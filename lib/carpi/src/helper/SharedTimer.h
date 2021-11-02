@@ -26,6 +26,7 @@ class SharedTimer {
         }
 
         SharedTimer& operator=(const SharedTimer& otherTimer) {
+            this->~SharedTimer();
             copy(otherTimer);
             return *this;
         }
