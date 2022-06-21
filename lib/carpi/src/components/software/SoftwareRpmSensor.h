@@ -52,14 +52,14 @@ class SoftwareRpmSensor : public IRpmSensor {
         virtual message_parse_result_t parseMessage(CarMessage &carMessage) {
             message_parse_result_t result = MESSAGE_PARSE_OK;
             for (car_sub_message_t &subMessage : carMessage.subMessages) {
-                if(subMessage.length != 4) // not a valid message
+                if(subMessage.length != 5) // not a valid message
                     result = MESSAGE_PARSE_ERROR;
 
                 this->setStatus(subMessage.data[0]);
 
                 uint32_t frequencyBinary = 0;
 
-                for (uint8_t i = 1; i < 4; i++) {
+                for (uint8_t i = 1; i < 5; i++) {
                     frequencyBinary |= (((uint32_t)subMessage.data[i]) << ((i - 1) * 8));
                 }
 

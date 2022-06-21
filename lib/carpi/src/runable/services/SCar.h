@@ -12,6 +12,7 @@
 #include "components/interface/IBuzzer.h"
 #include "components/interface/IMotorController.h"
 #include "components/interface/IHvEnabled.h"
+#include "PowerModes.h"
 
 
 #define STARTUP_WAIT 1 // s wait before system gets started
@@ -269,6 +270,26 @@ class SCar : public IService {
             _redOffTicker.attach(callback(this, &SCar::_redOff), (float)LED_RED_ON_TIME_PEDAL_COMM_INTERF);
         }
 
+        #ifdef ENABLE_POWER_MENU
+        float getMaxPower() {
+            return maxAllowedPower;
+        }
+
+        float getMaxAmpere() {
+            return maxAllowedAmpere;
+        }
+
+        float getMaxTorque() {
+            return maxAllowedTorque;
+        }
+
+        #ifdef EXPERIMENTELL_ASR_ACTIVE
+        bool getAsrOn() {
+            return asrOn;
+        }
+        #endif
+        #endif
+
     private:
         CANService &_canService;
 
@@ -277,9 +298,18 @@ class SCar : public IService {
         car_state_t _state = CAR_OFF;
 
         gas_curve_t _gasCurve = GAS_CURVE_X_POW_2;
-        float _currentPower = 1.0;
 
         Timer _ledRunResentTimer;
+
+        #ifdef ENABLE_POWER_MENU
+        // Settings for Power Modes (driving, recu is static)
+        float maxAllowedAmpere = MODE_0_ACCU_MAX_ALLOWED_CURRENT;
+        float maxAllowedPower = MODE_0_ACCU_MAX_ALLOWED_POWER;
+        float maxAllowedTorque = MODE_0_MOTOR_MAX_ALLOWED_TORQUE;
+        #ifdef EXPERIMENTELL_ASR_ACTIVE
+            bool asrOn = false;
+        #endif
+        #endif
 
         struct _button {
             IButton* reset;
@@ -512,6 +542,10 @@ class SCar : public IService {
             wait(0.1);
         }
 
+        #ifdef ENABLE_POWER_MENU
+        bool resetWasPressedBefore = false;
+        bool resetWasNotPressedBefore = false;
+        #endif
         void _checkInput() {
             // [QF]
             if (_state == ALMOST_READY_TO_DRIVE) {
@@ -610,10 +644,41 @@ class SCar : public IService {
                 }
 
                 if (_button.reset->getState() == LONG_CLICKED && _button.reset->getStateAge() < MAX_BUTTON_STATE_AGE) {
+                    #ifdef ENABLE_POWER_MENU
+                    resetWasPressedBefore = false;
+                    #endif
                     _calibratePedals();
                 }
 
+                #ifdef ENABLE_POWER_MENU
+                if (_button.reset->getState() == PRESSED && _button.reset->getStateAge() < MAX_BUTTON_STATE_AGE) {
+                    resetWasPressedBefore = true;
+                }
+
+                if (_button.reset->getState() == NOT_PRESSED && _button.reset->getStateAge() < MAX_BUTTON_STATE_AGE) {
+                    if (!resetWasNotPressedBefore) {
+                        resetWasPressedBefore = false;
+                        resetWasNotPressedBefore = true;
+                    } else {
+                        if (resetWasPressedBefore) {
+                            resetWasPressedBefore = false;
+
+                            if (resetWasNotPressedBefore) {
+                                resetWasNotPressedBefore = false;
+
+                                _sycleModes();
+                            }
+                        } else {
+                            resetWasNotPressedBefore = true;
+                        }
+                    }
+                }
+                #endif
+
                 return;
+            } else {
+                resetWasNotPressedBefore = false;
+                resetWasPressedBefore = false;
             }
 
             if (_state == CALIBRATION_NEEDED) {
@@ -682,6 +747,86 @@ class SCar : public IService {
             _led.red->setState(LED_OFF);
             _canService.sendMessage((ICommunication*)_led.red, DEVICE_DASHBOARD);
         }
+
+        #ifdef ENABLE_POWER_MENU
+    	uint8_t _currentModeId = 0;
+        void _sycleModes() {
+            _currentModeId++;
+
+            #ifdef EXPERIMENTELL_ASR_ACTIVE
+                if (_currentModeId > 4) _currentModeId = 0;
+            #else
+                if (_currentModeId > 2) _currentModeId = 0;
+            #endif
+
+            _beepTimes(_currentModeId + 1);
+
+            switch (_currentModeId) {
+                case 0:
+                    maxAllowedPower = MODE_0_ACCU_MAX_ALLOWED_POWER;
+                    maxAllowedAmpere = MODE_0_ACCU_MAX_ALLOWED_CURRENT;
+                    maxAllowedTorque = MODE_0_MOTOR_MAX_ALLOWED_TORQUE;
+                    
+                    #ifdef EXPERIMENTELL_ASR_ACTIVE
+                    asrOn = false;
+                    #endif
+                    break;
+                
+                case 1:
+                    maxAllowedPower = MODE_1_ACCU_MAX_ALLOWED_POWER;
+                    maxAllowedAmpere = MODE_1_ACCU_MAX_ALLOWED_CURRENT;
+                    maxAllowedTorque = MODE_1_MOTOR_MAX_ALLOWED_TORQUE;
+                    
+                    #ifdef EXPERIMENTELL_ASR_ACTIVE
+                    asrOn = false;
+                    #endif
+                    break;
+                
+                case 2:
+                    maxAllowedPower = MODE_2_ACCU_MAX_ALLOWED_POWER;
+                    maxAllowedAmpere = MODE_2_ACCU_MAX_ALLOWED_CURRENT;
+                    maxAllowedTorque = MODE_2_MOTOR_MAX_ALLOWED_TORQUE;
+
+                    #ifdef EXPERIMENTELL_ASR_ACTIVE
+                    asrOn = false;
+                    #endif
+                    break;
+                
+                #ifdef EXPERIMENTELL_ASR_ACTIVE
+
+                    case 3:
+                        maxAllowedPower = MODE_3_ACCU_MAX_ALLOWED_POWER;
+                        maxAllowedAmpere = MODE_3_ACCU_MAX_ALLOWED_CURRENT;
+                        maxAllowedTorque = MODE_3_MOTOR_MAX_ALLOWED_TORQUE;
+
+                        asrOn = true;
+                        break;
+                
+                    case 4:
+                        maxAllowedPower = MODE_4_ACCU_MAX_ALLOWED_POWER;
+                        maxAllowedAmpere = MODE_4_ACCU_MAX_ALLOWED_CURRENT;
+                        maxAllowedTorque = MODE_4_MOTOR_MAX_ALLOWED_TORQUE;
+
+                        asrOn = true;
+                        break;
+                
+                #endif
+            
+                default:
+                    // What??
+                    break;
+            }
+        }
+        #endif
+
+        /*
+            Modes:
+                0: Normal mode. 60kW, 200A max, 230 Nm
+                1: Baby mode. 40kW, 120A max, 120 Nm
+                2: High Power mode. 80kW, 250A max, 230 Nm
+                3: ASR Easy Test. 60kW, 200A max, 180 Nm, ASR On
+                4: ASR High Power Test. 80kW, 250A max, 230 Nm, ASR On
+        */
 };
 
 #endif // SCAR_H

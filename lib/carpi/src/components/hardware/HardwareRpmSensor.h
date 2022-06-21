@@ -65,7 +65,7 @@ class HardwareRpmSensor : public IRpmSensor {
 
         virtual message_build_result_t buildMessage(CarMessage &carMessage) {
             car_sub_message_t subMessage;
-            subMessage.length = 4;
+            subMessage.length = 5;
 
             subMessage.data[0] = this->getStatus();
 

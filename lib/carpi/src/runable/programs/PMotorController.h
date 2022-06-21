@@ -8,6 +8,7 @@
 #include "components/interface/IPedal.h"
 #include "components/interface/IRpmSensor.h"
 #include "runable/services/SSpeed.h" // Only for Value-Constants
+#include "services/PowerModes.h"
 
 #define STD_PEDAL_VALUE_AGE_LIMIT 0.3 // s
 #define STD_BRAKE_POWER_LOCK_THRESHHOLD 0.40 // 40% -> if brake is put down only this amount, the Gas Pedal will be blocked
@@ -38,10 +39,8 @@
 // Values to Calculate the Power for the Adaptive Power Control
 #define ACCU_MIN_VOLTAGE 290 // V -> is only used, if the Voltage got from Inverter is too old
 #define MOTOR_MAX_RPM 6600 // rpm -> is only used, if the RPM got from Inverter is too old
-#define ACCU_MAX_ALLOWED_POWER 50000 // W -> 50 kW
-#define ACCU_MAX_ALLOWED_CURRENT 200 // A
-#define MOTOR_MAX_ALLOWED_TORQUE 230 // Nm
-#define INVERTER_MAX_ALLOWED_PHASE_CURRENT 300.0 // A
+// Power, Current and Torque Settings moved to PowerModes.h in services/
+#define INVERTER_MAX_ALLOWED_PHASE_CURRENT 300.0 // A -> based on inverter settings
 #define MOTOR_KN 0.0478 // Vrms/RPM
 #define MOTOR_I_TO_TORQUE 0.75 // Nm/Aph rms
 #define CURRENT_REGULATOR_REPORT_INTERVAL 2.0 // s
@@ -49,7 +48,7 @@
 // Recuperation
 //#define RECU_USE_GAS_CURVE // Applies the Curve for positive power also for negative (recuperation) power
 #define RECU_MAX_ALLOWED_POWER 20160 // W -> 20,16 kW
-#define RECU_MAX_ALLOWED_CURRENT 50 // A
+#define RECU_MAX_ALLOWED_CURRENT 18 // A
 #define RECU_MAX_ALLOWED_TORQUE 10 // Nm
 
 // Basic ASR
@@ -60,7 +59,7 @@
 #define ASR_MIN_SPEED_UPPER_BOUNDARY 10 // km/h -> The Speed the Output is 0 if the front Wheels under min speed
 #define ASR_LOWER_BOUNDARY 1.10 // % -> if rear axel is this amount faster then front, ASR begins throttleing
 #define ASR_UPPER_BOUNDARY 1.18 // % -> if rear axel is this amount faster then front, Motor Output is 0
-#define ASR_MAX_TORQUE_REDUCTION 0.9 // % -> The maximum reduction of torque if ASR is throttleing completely
+#define ASR_MAX_TORQUE_REDUCTION 0.95 // % -> The maximum reduction of torque if ASR is throttleing completely
 #define ASR_TRANSFER_FUNCTION(x) (x*x)
 
 // Gets calculated at compilation
@@ -172,17 +171,23 @@ class PMotorController : public IProgram {
             #endif
 
             if (returnValue >= 0.0f) {
-                returnValue *= _getMaxAmpere(ACCU_MAX_ALLOWED_CURRENT, ACCU_MAX_ALLOWED_POWER, MOTOR_MAX_ALLOWED_TORQUE);
+                #ifdef ENABLE_POWER_MENU
+                    returnValue *= _getMaxAmpere(_carService.getMaxAmpere(), _carService.getMaxPower(), _carService.getMaxTorque());
+                #else
+                    returnValue *= _getMaxAmpere(MODE_0_ACCU_MAX_ALLOWED_CURRENT, MODE_0_ACCU_MAX_ALLOWED_POWER, MODE_0_MOTOR_MAX_ALLOWED_TORQUE);
+                #endif
             } else {
                 returnValue *= _getMaxAmpere(RECU_MAX_ALLOWED_CURRENT, RECU_MAX_ALLOWED_POWER, RECU_MAX_ALLOWED_TORQUE);
             }
 
             #ifdef EXPERIMENTELL_ASR_ACTIVE
-                if (returnValue >= 0) {
-                    float maxTorqueByASR = _getMaxTorqueByASR();
+                if (_carService.getAsrOn()) {
+                    if (returnValue >= 0) {
+                        float maxTorqueByASR = _getMaxTorqueByASR();
 
-                    if (returnValue > maxTorqueByASR)
-                        returnValue = maxTorqueByASR;
+                        if (returnValue > maxTorqueByASR)
+                            returnValue = maxTorqueByASR;
+                    }
                 }
             #endif
 
@@ -204,7 +209,7 @@ class PMotorController : public IProgram {
             #endif
 
             #ifdef MOTORCONTROLLER_OUTPUT
-                printf("%f\n", returnValue);
+                pcSerial.printf("%f\n", returnValue);
             #endif
         }
 
@@ -443,7 +448,7 @@ class PMotorController : public IProgram {
                     if (_regulatorReportTimer.read() >= CURRENT_REGULATOR_REPORT_INTERVAL) {
                         _regulatorReportTimer.reset();
                         _regulatorReportTimer.start();
-                        printf("Currently Max Current: %.1f RMS\t %.2f\t %.2f\t %.2f\t %.2f\t%.0f RPM\t%.2f V DC\n", INVERTER_MAX_ALLOWED_PHASE_CURRENT * powerLimit, powerLimit, powerLimitByCurrent, powerLimitByPower, powerLimitByTorque, rpmSpeed, dcVoltage);
+                        pcSerial.printf("Currently Max Current: %.1f RMS\t %.2f\t %.2f\t %.2f\t %.2f\t%.0f RPM\t%.2f V DC\n", INVERTER_MAX_ALLOWED_PHASE_CURRENT * powerLimit, powerLimit, powerLimitByCurrent, powerLimitByPower, powerLimitByTorque, rpmSpeed, dcVoltage);
                     }
                 #endif
             }
@@ -462,17 +467,21 @@ class PMotorController : public IProgram {
         #ifdef EXPERIMENTELL_ASR_ACTIVE
 
         float _getFrontSpeed() {
-            float middleRpm = (_rpm.frontLeft->getFrequency() * 0.5) + (_rpm.frontRight->getFrequency() * 0.5);
+            //float middleRpm = (_rpm.frontLeft->getFrequency() * 0.5) + (_rpm.frontRight->getFrequency() * 0.5);
+
+            // Because only one of the two front sensors is working, for testing, we use only one sensor
+            float middleRpm = _rpm.frontRight->getFrequency();
+
             return middleRpm * WHEEL_RPM_TO_KMH;
         }
 
         float _getFrontSpeedAge() {
-            float left = _rpm.frontLeft->getAge();
+            //float left = _rpm.frontLeft->getAge();
             float right = _rpm.frontRight->getAge();
 
-            if (left > right)
-                return left;
-            else
+            //if (left > right)
+            //    return left;
+            //else
                 return right;
         }
 
@@ -481,11 +490,16 @@ class PMotorController : public IProgram {
         }
 
         float _getMaxTorqueByASR() {
-            if (_getFrontSpeedAge() > (float)ASR_MAX_SPEED_AGE || _motorController->getSpeedAge() > (float)ASR_MAX_SPEED_AGE)
+            float frontAge = _getFrontSpeedAge();
+            float rearAge = _motorController->getSpeedAge();
+
+            if (frontAge > (float)ASR_MAX_SPEED_AGE || rearAge > (float)ASR_MAX_SPEED_AGE)
                 return 1.0f;
             
             float frontSpeed = _getFrontSpeed();
             float rearSpeed = _getRearSpeed();
+
+            //pcSerial.printf("%f\t%f\t%f\t%f\n", frontSpeed, rearSpeed, frontAge, rearAge);
 
             if (_asrMinSpeedMode) {
                 if (frontSpeed >= (float)ASR_MIN_SPEED_EXIT) {
