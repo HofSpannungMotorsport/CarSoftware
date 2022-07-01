@@ -81,9 +81,8 @@ class SCar : public IService {
              IMotorController* motorController,
              IHvEnabled* hvEnabled,
              IHvEnabled* tsms,
-             PCockpitIndicator &ci,
              PBrakeLight &brakeLightService)
-            : _canService(canService), _ci(ci), _brakeLightService(brakeLightService) {
+            : _canService(canService), _brakeLightService(brakeLightService) {
             _button.reset = buttonReset;
             _button.start = buttonStart;
 
@@ -190,12 +189,12 @@ class SCar : public IService {
 
         void startUp() {
             wait(STARTUP_WAIT);
-            _ci.run();
+            
             _brakeLightService.run();
 
             for (uint8_t i = 0; i < STARTUP_ANIMATION_PLAYBACKS; i++) {
                 _startupAnimation();
-                _ci.run();
+                
                 _brakeLightService.run();
             }
 
@@ -219,7 +218,7 @@ class SCar : public IService {
                     _ledResendWaitTimer.reset();
                     _ledResendWaitTimer.start();
                     _sendLedsOverCan();
-                    _ci.run();
+                    
                 }
 
                 wait(0.001);
@@ -243,7 +242,7 @@ class SCar : public IService {
                 _led.green->setState(LED_OFF);
                 _sendLedsOverCan();
                 while(1) {
-                    _ci.run();
+                    
                     _brakeLightService.run();
                     _sendLedsOverCan();
                     wait(0.3);
@@ -334,7 +333,6 @@ class SCar : public IService {
         IHvEnabled* _hvEnabled;
         IHvEnabled* _tsms;
 
-        PCockpitIndicator &_ci;
         PBrakeLight &_brakeLightService;
 
         Ticker _redOffTicker;
@@ -470,7 +468,6 @@ class SCar : public IService {
                     ledSendTimer.reset();
                     ledSendTimer.start();
                     _sendLedsOverCan();
-                    _ci.run();
                 }
 
                 wait(0.001);
@@ -498,7 +495,7 @@ class SCar : public IService {
                     ledSendTimer.reset();
                     ledSendTimer.start();
                     _sendLedsOverCan();
-                    _ci.run();
+                    
                 }
                 
                 wait(0.001);
@@ -580,7 +577,7 @@ class SCar : public IService {
                             ledSendTimer.reset();
                             ledSendTimer.start();
                             _sendLedsOverCan();
-                            _ci.run();
+                            
                         }
 
                         if (_state != ALMOST_READY_TO_DRIVE) {
@@ -596,7 +593,7 @@ class SCar : public IService {
                             // Stop beeping!
                             _buzzer->setState(BUZZER_OFF);
 
-                            _ci.run();
+                            
                             _brakeLightService.run();
                             wait(1);
 
@@ -625,7 +622,7 @@ class SCar : public IService {
                         _led.red->setBlinking(BLINKING_NORMAL);
                         _sendLedsOverCan();
                         
-                        _ci.run();
+                        
                         _brakeLightService.run();
                         wait(1);
 
@@ -677,8 +674,10 @@ class SCar : public IService {
 
                 return;
             } else {
+                #ifdef ENABLE_POWER_MENU
                 resetWasNotPressedBefore = false;
                 resetWasPressedBefore = false;
+                #endif
             }
 
             if (_state == CALIBRATION_NEEDED) {
