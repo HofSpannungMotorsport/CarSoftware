@@ -13,15 +13,14 @@
 
 class HardwarePump : public IPump {
     public:
-        HardwarePump(PinName pwmPort, PinName enablePort) : _pwmPort(pwmPort), _enablePort(enablePort) {
-            _enablePort = 1;
+        HardwarePump(PinName pwmPort) : _pwmPort(pwmPort) {
             _pwmPort = 1; // -> pump pwm off
 
             setComponentType(COMPONENT_COOLING);
             setObjectType(OBJECT_HARDWARE);
         }
 
-        HardwarePump(PinName pwmPort, PinName enablePort, id_sub_component_t componentSubId) : HardwarePump(pwmPort, enablePort) {
+        HardwarePump(PinName pwmPort, id_sub_component_t componentSubId) : HardwarePump(pwmPort) {
             setComponentSubId(componentSubId);
         }
 
@@ -47,7 +46,6 @@ class HardwarePump : public IPump {
 
     protected:
         PwmOut _pwmPort;
-        DigitalOut _enablePort;
 
         pump_speed_t _currentSpeed = 0; // Important for the startup ramp
         pump_speed_t _lastSetSpeed = 0; // Last set Speed with setSpeed()
