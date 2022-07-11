@@ -23,6 +23,7 @@
 //#define DISABLE_PUMP
 #define EXPERIMENTELL_ASR_ACTIVE
 #define ENABLE_POWER_MENU
+#define REPORT_CAN_ERROR
 #include "carpi.h"
 
 #define HIGH_DEMAND_SERVICE_REFRESH_RATE 120  // Hz
@@ -47,6 +48,7 @@ SoftwareLed ledGreen(COMPONENT_LED_READY_TO_DRIVE);
 //       Buttons
 SoftwareButton buttonReset(COMPONENT_BUTTON_RESET);
 SoftwareButton buttonStart(COMPONENT_BUTTON_START);
+//SoftwareButton buttonCal(COMPONENT_BUTTON_CAL);
 
 //     Pedal
 //       Pedals
@@ -61,12 +63,12 @@ SoftwareRpmSensor rpmFrontRight(COMPONENT_RPM_FRONT_RIGHT);
 HardwareLed brakeLight(MASTER_PIN_BRAKE_LIGHT, COMPONENT_LED_BRAKE);
 HardwareMotorController motorController(MASTER_PIN_MOTOR_CONTROLLER_CAN_RD,
                                         MASTER_PIN_MOTOR_CONTROLLER_CAN_TD, MASTER_PIN_RFE_ENABLE,
-                                        MASTER_PIN_RUN_ENABLE, BAMOCAR_D3_700V,
-                                        COMPONENT_MOTOR_MAIN);
+                                        MASTER_PIN_RUN_ENABLE, BAMOCAR_D3_400V,
+                                        COMPONENT_MOTOR_MAIN, true);
 HardwareFan coolingFan(MASTER_PIN_FAN, COMPONENT_COOLING_FAN);
 HardwarePump coolingPump(MASTER_PIN_PUMP_PWM, COMPONENT_COOLING_PUMP);
 HardwareBuzzer buzzer(MASTER_PIN_BUZZER, COMPONENT_BUZZER_STARTUP);
-HardwareHvEnabled hvEnabled(MASTER_PIN_60V_OK, COMPONENT_SYSTEM_60V_OK, HV_ENABLED_ON_AT_LOW);
+HardwareHvEnabled hvEnabled(MASTER_PIN_HV_ALL_READY, COMPONENT_SYSTEM_60V_OK);
 HardwareHvEnabled tsms(MASTER_PIN_TSMS, COMPONENT_SYSTEM_TSMS);
 
 // INTEGRATE BETTER LATER
