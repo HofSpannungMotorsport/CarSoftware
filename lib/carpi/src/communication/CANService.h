@@ -269,9 +269,16 @@ class CANService : public IService {
                 processSendLoop();
             #endif
 
-            if (_can.tderror() > 0 || _can.rderror() > 0) {
-                //pcSerial.printf("[CANService]@run: Detected CAN Error: td: %i\t rd: %i\n", _can.tderror(), _can.rderror());
-                _can.reset();
+            uint8_t tdError = _can.tderror();
+            uint8_t rdError = _can.rderror();
+            if (tdError > 0 || rdError > 0) {
+                #ifdef REPORT_CAN_ERROR
+                pcSerial.printf("[CANService]@run: Detected CAN Error: td: %i\t rd: %i\n", tdError, rdError);
+                #endif
+
+                // Reset to recover from passive mode
+                if (tdError >= 127 || rdError >= 127)
+                    _can.reset();
             }
         }
 
@@ -299,8 +306,17 @@ class CANService : public IService {
         void _messageReceived() {
             // Put received Message in a Buffer to process later
             CANMessage m = CANMessage();
+            bool second = false;
+
             while(_can.read(m)) {
                 _telegramsIn.push(m);
+
+                // Wait for preemption if multiple messages are received at once
+                if (!second) {
+                    second = true;
+                } else {
+                    wait(0.000001);
+                }
             }
         }
 };
