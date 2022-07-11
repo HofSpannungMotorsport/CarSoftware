@@ -53,6 +53,7 @@ enum id_sub_component_t : uint8_t {
     // Buttons
     COMPONENT_BUTTON_RESET = 0x0,
     COMPONENT_BUTTON_START = 0x1,
+    COMPONENT_BUTTON_CAL =   0x2,
 
     // LEDs
     COMPONENT_LED_BRAKE =          0x0, // The braking light on the back of the car
