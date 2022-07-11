@@ -14,8 +14,8 @@
 
 class HardwareMotorController : public IMotorController {
     public:
-        HardwareMotorController(PinName canRD, PinName canTD, PinName RFE, PinName RUN, model_type_t modelType)
-            : _bamocar(canRD, canTD, modelType), _rfe(RFE), _run(RUN) {
+        HardwareMotorController(PinName canRD, PinName canTD, PinName RFE, PinName RUN, model_type_t modelType, bool invertTorque)
+            : _bamocar(canRD, canTD, invertTorque, modelType), _rfe(RFE), _run(RUN) {
             _rfe = 0;
             _run = 0;
 
@@ -23,8 +23,8 @@ class HardwareMotorController : public IMotorController {
             setObjectType(OBJECT_HARDWARE);
         }
 
-        HardwareMotorController(PinName canRD, PinName canTD, PinName RFE, PinName RUN, model_type_t modelType, id_sub_component_t componentSubId)
-            : HardwareMotorController(canRD, canTD, RFE, RUN, modelType) {
+        HardwareMotorController(PinName canRD, PinName canTD, PinName RFE, PinName RUN, model_type_t modelType, id_sub_component_t componentSubId, bool invertTorque)
+            : HardwareMotorController(canRD, canTD, RFE, RUN, modelType, invertTorque) {
             setComponentSubId(componentSubId);
         }
 
