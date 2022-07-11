@@ -18,9 +18,8 @@
 #define MASTER_PIN_FAN                      PA_9
 
 // Din HV Enable
-#define MASTER_PIN_TSMS                     PC_2
-#define MASTER_PIN_AIR                      PA_10
-#define MASTER_PIN_60V_OK                   PD_2
+#define MASTER_PIN_TSMS                     PA_1
+#define MASTER_PIN_HV_ALL_READY             PD_2
 
 // Dout TS On Enable
 #define MASTER_PIN_TS_ON_ENABLE             PA_3
