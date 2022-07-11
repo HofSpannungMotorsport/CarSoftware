@@ -2,6 +2,8 @@
 #define PEDALSLAVECONF_H
 
 #define EXPERIMENTELL_ASR_ACTIVE
+//#define DEBUG_PRINT_RAW_ANALOG
+#define REPORT_CAN_ERROR
 
 // Automatic
 #ifdef EXPERIMENTELL_ASR_ACTIVE
@@ -48,14 +50,36 @@ class Pedal : public Carpi {
             #endif
 
             wait(0.1);
+
+            #ifdef DEBUG_PRINT_RAW_ANALOG
+            reportTimer.start();
+            #endif
         }
     
         // Called repeately after bootup
         void loop() {
+            #ifdef DEBUG_PRINT_RAW_ANALOG
+            if (reportTimer.read_ms() > 200) {
+                reportTimer.reset();
+                reportTimer.start();
+
+                two_raw_values_t gasRaw = gasPedal.getRaw();
+                two_raw_values_t brakeRaw = brakePedal.getRaw();
+
+                pcSerial.printf("Raw Values: GAS 1: %i - GAS 2: %i - BRAKE: %i\n", gasRaw.a, gasRaw.b, brakeRaw.a);
+            }
+            #endif
+
             canService.run();
 
             wait(1.0/(float)PEDAL_SEND_RATE);
         }
+    
+    #ifdef DEBUG_PRINT_RAW_ANALOG
+    private:
+            Timer reportTimer;
+    #endif
+
 };
 
 Pedal runtime;
