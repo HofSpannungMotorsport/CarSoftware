@@ -24,17 +24,23 @@
 
 #define STD_CALIBRATION_REFRESH_TIME        0.010 // 10ms
 #define STD_CALIBRATION_MIN_DEVIANCE        200 // Raw analog
-#define STD_CALIBRATION_MAX_DEVIANCE        64480 // Raw analog
+#define STD_CALIBRATION_MAX_DEVIANCE        65535 // Raw analog
 #define STD_CALIBRATION_SAMPLE_BUFFER_SIZE  20 // How many values should be combined during calibration to get the fu***** deviance away
 
-#define STD_ANALOG_LOWER_BOUNDARY   300 // uint16_t min ->     0
-#define STD_ANALOG_UPPER_BOUNDARY 64880 // uint16_t max -> 65535
+#define STD_ANALOG_LOWER_BOUNDARY     0 // uint16_t min ->     0
+#define STD_ANALOG_UPPER_BOUNDARY 65535 // uint16_t max -> 65535
 
 #define STD_PEDAL_THRESHHOLD 0.15 // 15%
 
 struct pedal_calibration_data_t {
     uint16_t min[2] = {0,0}, max[2] = {0,0};
     bool secondSensor = false;
+};
+
+struct two_raw_values_t {
+    uint16_t a, b;
+
+    two_raw_values_t(uint16_t _a, uint16_t _b) : a(_a), b(_b) {}
 };
 
 class HardwarePedal : public IPedal {
@@ -144,6 +150,14 @@ class HardwarePedal : public IPedal {
             }
 
             return 0;
+        }
+
+        two_raw_values_t getRaw() {
+            if (_secondSensor) {
+                return two_raw_values_t(_pin1.getRawValue(), _pin2.getRawValue());
+            }
+
+            return two_raw_values_t(_pin1.getRawValue(), 0);
         }
 
         virtual void setCalibrationStatus(pedal_calibration_t calibrationStatus) {
