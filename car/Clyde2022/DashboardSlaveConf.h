@@ -7,6 +7,8 @@
 
 #define BUTTON_RESEND_INTERVAL 3 // hz
 
+#define REPORT_CAN_ERROR
+
 CANService canService(DASHBOARD_CAN);
 
 //LED's
@@ -17,6 +19,7 @@ HardwareLed ledGreen(DASHBOARD_PIN_LED_GREEN, COMPONENT_LED_READY_TO_DRIVE);
 // Buttons
 HardwareInterruptButton buttonReset(DASHBOARD_PIN_BUTTON_RESET, COMPONENT_BUTTON_RESET);
 HardwareInterruptButton buttonStart(DASHBOARD_PIN_BUTTON_START, COMPONENT_BUTTON_START);
+HardwareInterruptButton buttonCal(DASHBOARD_PIN_CAL, COMPONENT_BUTTON_CAL);
 
 class Dashboard : public Carpi {
     public:
@@ -29,6 +32,7 @@ class Dashboard : public Carpi {
             canService.addComponent((ICommunication*)&ledGreen);
             canService.addComponent((ICommunication*)&buttonReset);
             canService.addComponent((ICommunication*)&buttonStart);
+            canService.addComponent((ICommunication*)&buttonCal);
 
             _resendTimer.reset();
             _resendTimer.start();
