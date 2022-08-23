@@ -21,9 +21,9 @@
 #define PMOTORCONTROLLER_USE_BRAKE_FOR_RECUPERATION
 //#define PMOTORCONTROLLER_PRINT_CURRENTLY_MAX_CURRENT
 //#define DISABLE_PUMP
-#define EXPERIMENTELL_ASR_ACTIVE
+//#define EXPERIMENTELL_ASR_ACTIVE
 #define ENABLE_POWER_MENU
-#define REPORT_CAN_ERROR
+//#define REPORT_CAN_ERROR
 #include "carpi.h"
 
 #define HIGH_DEMAND_SERVICE_REFRESH_RATE 120  // Hz
@@ -48,7 +48,7 @@ SoftwareLed ledGreen(COMPONENT_LED_READY_TO_DRIVE);
 //       Buttons
 SoftwareButton buttonReset(COMPONENT_BUTTON_RESET);
 SoftwareButton buttonStart(COMPONENT_BUTTON_START);
-//SoftwareButton buttonCal(COMPONENT_BUTTON_CAL);
+SoftwareButton buttonCal(COMPONENT_BUTTON_CAL);
 
 //     Pedal
 //       Pedals
@@ -72,7 +72,21 @@ HardwareHvEnabled hvEnabled(MASTER_PIN_HV_ALL_READY, COMPONENT_SYSTEM_60V_OK);
 HardwareHvEnabled tsms(MASTER_PIN_TSMS, COMPONENT_SYSTEM_TSMS);
 
 // INTEGRATE BETTER LATER
-DigitalOut tsOnEnable(MASTER_PIN_TS_ON_ENABLE);
+DigitalOut bspdTestOut(MASTER_PIN_BSPD_TEST);
+
+DigitalIn x1(MASTER_PIN_RPM_RL, OpenDrain);
+DigitalIn x2(MASTER_PIN_RPM_RR, OpenDrain);
+DigitalIn x3(MASTER_PIN_SHUTDOWN_PRE_BSPD, OpenDrain);
+DigitalIn x4(MASTER_PIN_SHUTDOWN_AFTER_BSPD, OpenDrain);
+DigitalIn x5(MASTER_PIN_SHUTDOWN_AT_TS_ON, OpenDrain);
+DigitalIn x7(MASTER_PIN_SHUTDOWN_AT_BOTS, OpenDrain);
+DigitalIn x8(MASTER_PIN_SHUTDOWN_ERROR_STORAGE, OpenDrain);
+DigitalIn x9(MASTER_PIN_SHUTDOWN_TSMS_IN, OpenDrain);
+DigitalIn x10(MASTER_PIN_IMD_OK, OpenDrain);
+DigitalIn x11(MASTER_PIN_BMS_OK, OpenDrain);
+DigitalIn x12(MASTER_PIN_TS_ON_STATE, OpenDrain);
+DigitalIn x13(MASTER_PIN_TSAL_MC_OUT, OpenDrain);
+DigitalIn x14(MASTER_PIN_BRAKE_FRONT, OpenDrain);
 
 DigitalIn inverterDin1(MASTER_PIN_INVERTER_DOUT_1);
 DigitalIn inverterDin2(MASTER_PIN_INVERTER_DOUT_2);
@@ -101,9 +115,9 @@ class Master : public Carpi {
    public:
     // Called once at bootup
     void setup() {
-        wait(2);
+        bspdTestOut.write(0);
 
-        tsOnEnable.write(1);
+        wait(2);
 
         canService.setSenderId(DEVICE_MASTER);
 
@@ -114,6 +128,7 @@ class Master : public Carpi {
         canService.addComponent((ICommunication*)&ledGreen);
         canService.addComponent((ICommunication*)&buttonReset);
         canService.addComponent((ICommunication*)&buttonStart);
+        canService.addComponent((ICommunication*)&buttonCal);
 
         // Pedal
         canService.addComponent((ICommunication*)&gasPedal);
@@ -150,6 +165,13 @@ class Master : public Carpi {
             stopPrechargeOut.write(1);
         } else {
             stopPrechargeOut.write(0);
+        }
+
+        // BSPD Test hotfix
+        if (buttonCal.getState() == LONG_CLICKED) {
+            bspdTestOut.write(1);
+        } else {
+            bspdTestOut.write(0);
         }
 
         wait(0.001);

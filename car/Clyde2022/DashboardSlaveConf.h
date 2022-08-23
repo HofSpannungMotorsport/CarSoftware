@@ -1,13 +1,13 @@
 #ifndef DASHBOARDSLAVECONF_H
 #define DASHBOARDSLAVECONF_H
 
+// #define REPORT_CAN_ERROR
+
 #include "carpi.h"
 
 #include "hardware/Pins_Dashboard.h"
 
 #define BUTTON_RESEND_INTERVAL 3 // hz
-
-#define REPORT_CAN_ERROR
 
 CANService canService(DASHBOARD_CAN);
 
@@ -44,6 +44,7 @@ class Dashboard : public Carpi {
 
             canService.sendMessage((ICommunication*)&buttonReset, DEVICE_MASTER);
             canService.sendMessage((ICommunication*)&buttonStart, DEVICE_MASTER);
+            canService.sendMessage((ICommunication*)&buttonCal, DEVICE_MASTER);
 
             _resendTimer.reset();
             _resendTimer.start();
@@ -62,6 +63,12 @@ class Dashboard : public Carpi {
                     canService.sendMessage((ICommunication*)&buttonReset, DEVICE_MASTER);
                 }
 
+                button_state_t calState = buttonCal.getState();
+                if (calState != _lastSentCal) {
+                    _lastSentCal = resetState;
+                    canService.sendMessage((ICommunication*)&buttonCal, DEVICE_MASTER);
+                }
+
                 wait(0.01);
             }
         }
@@ -71,6 +78,7 @@ class Dashboard : public Carpi {
 
         button_state_t _lastSentStart = NOT_PRESSED;
         button_state_t _lastSentReset = NOT_PRESSED;
+        button_state_t _lastSentCal = NOT_PRESSED;
 };
 
 Dashboard runtime;
