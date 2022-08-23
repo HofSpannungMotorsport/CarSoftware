@@ -22,7 +22,7 @@
 #define MASTER_PIN_HV_ALL_READY             PD_2
 
 // Dout TS On Enable
-#define MASTER_PIN_TS_ON_ENABLE             PA_3
+//#define MASTER_PIN_TS_ON_ENABLE             PA_3 -> Removed
 
 // Precharge Pins
 #define MASTER_PIN_STOP_PRECHARGE_OUT       PB_7
@@ -39,5 +39,27 @@
 
 // Din User Button (Normally closed)
 #define MASTER_PIN_USER_BUTTON              USER_BUTTON
+
+// --------- At this point unused pins
+#define MASTER_PIN_RPM_RL                  PH_0
+#define MASTER_PIN_RPM_RR                  PH_1
+
+#define MASTER_PIN_SHUTDOWN_PRE_BSPD       PC_2
+#define MASTER_PIN_SHUTDOWN_AFTER_BSPD     PC_3
+#define MASTER_PIN_SHUTDOWN_AT_TS_ON       PB_3
+//#define MASTER_PIN_SHUTDOWN_AT_HVD         PA_2 -> Removed
+#define MASTER_PIN_SHUTDOWN_AT_BOTS        PC_5
+#define MASTER_PIN_SHUTDOWN_ERROR_STORAGE  PB_15
+#define MASTER_PIN_SHUTDOWN_TSMS_IN        PB_14
+
+#define MASTER_PIN_IMD_OK                  PB_2
+#define MASTER_PIN_BMS_OK                  PB_1
+
+#define MASTER_PIN_TS_ON_STATE             PA_10
+
+#define MASTER_PIN_TSAL_MC_OUT             PC_11
+#define MASTER_PIN_BRAKE_FRONT             PB_0
+
+#define MASTER_PIN_BSPD_TEST               PB_4
 
 #endif // PINS_MASTER_H
