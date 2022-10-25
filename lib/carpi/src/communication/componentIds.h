@@ -29,12 +29,20 @@ enum id_component_type_t : uint8_t {
     COMPONENT_ACCELERATION =      0x9,
     COMPONENT_GYROSCOPE =         0xA,
     COMPONENT_BUZZER =            0xB,
+    COMPONENT_DISPLAY =           0xC,
     COMPONENT_SYSTEM =            0xF
 };
 
 enum id_sub_component_t : uint8_t {
     // Motor
     COMPONENT_MOTOR_MAIN = 0x0,
+
+    //Display
+    COMPONENT_BATTERY_VOLTAGE = 0x0,
+    COMPONENT_MIN_CELL_VOLTAGE = 0x1,
+    COMPONENT_MAX_CELL_VOLTAGE = 0x2,
+    COMPONENT_MIN_CELL_TEMPERATURE = 0x3,
+    COMPONENT_MAX_CELL_TEMPERATURE = 0x4,
 
     // Pedals
     COMPONENT_PEDAL_BRAKE = 0x0,

@@ -59,6 +59,9 @@ SoftwarePedal brakePedal(COMPONENT_PEDAL_BRAKE);
 SoftwareRpmSensor rpmFrontLeft(COMPONENT_RPM_FRONT_LEFT);
 SoftwareRpmSensor rpmFrontRight(COMPONENT_RPM_FRONT_RIGHT);
 
+// Battery
+SoftwareBattery batteryVoltage(COMPONENT_BATTERY_VOLTAGE);
+
 //   Hardware
 HardwareLed brakeLight(MASTER_PIN_BRAKE_LIGHT, COMPONENT_LED_BRAKE);
 HardwareMotorController motorController(MASTER_PIN_MOTOR_CONTROLLER_CAN_RD,
@@ -95,7 +98,7 @@ DigitalOut stopPrechargeOut(MASTER_PIN_STOP_PRECHARGE_OUT);
 PBrakeLight brakeLightService((IPedal*)&brakePedal, (ILed*)&brakeLight);
 
 SCar carService(canService, (IButton*)&buttonReset, (IButton*)&buttonStart, (ILed*)&ledRed,
-                (ILed*)&ledYellow, (ILed*)&ledGreen, (IPedal*)&gasPedal, (IPedal*)&brakePedal,
+                (ILed*)&ledYellow, (ILed*)&ledGreen, (IBattery*)&batteryVoltage, (IPedal*)&gasPedal, (IPedal*)&brakePedal,
                 (IBuzzer*)&buzzer, (IMotorController*)&motorController, (IHvEnabled*)&hvEnabled,
                 (IHvEnabled*)&tsms, brakeLightService);
 
@@ -129,6 +132,9 @@ class Master : public Carpi {
         canService.addComponent((ICommunication*)&buttonReset);
         canService.addComponent((ICommunication*)&buttonStart);
         canService.addComponent((ICommunication*)&buttonCal);
+
+        //Display
+        canService.addComponent((ICommunication*)&batteryVoltage);
 
         // Pedal
         canService.addComponent((ICommunication*)&gasPedal);
