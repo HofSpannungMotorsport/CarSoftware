@@ -76,6 +76,7 @@ class SCar : public IService {
         SCar(CANService &canService,
              IButton* buttonReset, IButton* buttonStart,
              ILed* ledRed, ILed* ledYellow, ILed* ledGreen,
+             IBattery* battery,
              IPedal* gasPedal, IPedal* brakePedal,
              IBuzzer* buzzer,
              IMotorController* motorController,
@@ -326,6 +327,8 @@ class SCar : public IService {
             IPedal* brake;
         } _pedal;
 
+        IBattery* _batteryVoltage;
+
         IBuzzer* _buzzer;
 
         IMotorController* _motorController;
@@ -355,9 +358,15 @@ class SCar : public IService {
             _canService.sendMessage((ICommunication*)_pedal.brake, DEVICE_PEDAL);
         }
 
+        void _sendBatteryOverCan() {
+            // Battery
+            _canService.sendMessage((ICommunication*)_batteryVoltage, DEVICE_DISPLAY);
+        }
+
         void _sendComponentsOverCan() {
             _sendLedsOverCan();
             _sendPedalsOverCan();
+            _sendBatteryOverCan();
         }
 
         void _startupAnimation() {
