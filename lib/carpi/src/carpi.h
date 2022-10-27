@@ -64,7 +64,6 @@
     #include "components/interface/IMotorController.h"
     #include "components/interface/IRpmSensor.h"
     #include "components/interface/IHvEnabled.h"
-    #include "components/interface/IBattery.h"
     //   Hardware
     #include "components/hardware/HardwareBuzzer.h"
     #include "components/hardware/HardwarePwmBuzzer.h"
@@ -81,7 +80,6 @@
     #include "components/software/SoftwareLed.h"
     #include "components/software/SoftwarePedal.h"
     #include "components/software/SoftwareRpmSensor.h"
-    #include "components/software/SoftwareMotorController.h"
 
     // Services
     #include "runable/services/IService.h"
