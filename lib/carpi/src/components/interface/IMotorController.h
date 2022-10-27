@@ -1,7 +1,7 @@
 #ifndef IMOTORCONTROLLER_H
 #define IMOTORCONTROLLER_H
 
-#include "IComponent.h"
+#include "ICommunication.h"
 
 typedef uint8_t motor_controller_status_t;
 enum motor_controller_error_type_t : motor_controller_status_t {
@@ -11,6 +11,12 @@ enum motor_controller_error_type_t : motor_controller_status_t {
 };
 
 typedef uint8_t motor_controller_state_t;
+typedef float motor_controller_speed_t;
+typedef float motor_controller_current_t;
+typedef int16_t motor_controller_motor_temp_t;
+typedef int16_t motor_controller_servo_temp_t;
+typedef int16_t motor_controller_air_temp_t;
+typedef float motor_controller_dc_voltage_t;
 
 enum motor_controller_rfe_enable_t : bool {
     MOTOR_CONTROLLER_RFE_DISABLE = false,

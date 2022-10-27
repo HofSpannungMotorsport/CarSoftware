@@ -76,7 +76,6 @@ class SCar : public IService {
         SCar(CANService &canService,
              IButton* buttonReset, IButton* buttonStart,
              ILed* ledRed, ILed* ledYellow, ILed* ledGreen,
-             IBattery* battery,
              IPedal* gasPedal, IPedal* brakePedal,
              IBuzzer* buzzer,
              IMotorController* motorController,

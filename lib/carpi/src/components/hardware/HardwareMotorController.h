@@ -137,6 +137,130 @@ class HardwareMotorController : public IMotorController {
             }
         }
 
+        #ifdef EXPERIMENTAL_DISPLAY_ACTIVE
+        virtual void setStatus(motor_controller_status_t status) {
+            _status = status;
+        }
+
+        virtual message_build_result_t buildMessage(CarMessage &carMessage) {
+            car_sub_message_t subMessage;
+
+            subMessage.length = 11;
+
+            subMessage.data[0] = this->getStatus();
+            subMessage.data[1] = this->getState();
+
+            // change line below when type of pedal_value_t changes
+            float speedFloat = this->getSpeed();
+            uint16_t speed = ((float)speedFloat * 65535);
+
+            #ifdef PEDAL_MESSAGE_HANDLER_DEBUG
+                pcSerial.printf("[HardwarePedal]@buildMessage: HardwareObject (float)pedalValue: %.3f\t(uint16_t)pedalValue: %i\t", pedalValueFloat, pedalValue);
+            #endif
+
+            subMessage.data[2] = speed & 0xFF;
+            subMessage.data[3] = (speed >> 8) & 0xFF;
+
+            #ifdef PEDAL_MESSAGE_HANDLER_DEBUG
+                pcSerial.printf("msg.data[1]: 0x%x\tmsg.data[2]: 0x%x\n", subMessage.data[1], subMessage.data[2]);
+            #endif
+
+            float currentFloat = this->getCurrent();
+            uint16_t current = ((float)currentFloat* 65535);
+
+            #ifdef PEDAL_MESSAGE_HANDLER_DEBUG
+                pcSerial.printf("[HardwarePedal]@buildMessage: HardwareObject (float)pedalValue: %.3f\t(uint16_t)pedalValue: %i\t", pedalValueFloat, pedalValue);
+            #endif
+
+            subMessage.data[4] = current & 0xFF;
+            subMessage.data[5] = (current >> 8) & 0xFF;
+
+            #ifdef PEDAL_MESSAGE_HANDLER_DEBUG
+                pcSerial.printf("msg.data[1]: 0x%x\tmsg.data[2]: 0x%x\n", subMessage.data[1], subMessage.data[2]);
+            #endif
+
+            int16_t motorTemp = this->getMotorTemp();
+
+            #ifdef PEDAL_MESSAGE_HANDLER_DEBUG
+                pcSerial.printf("[HardwarePedal]@buildMessage: HardwareObject (float)pedalValue: %.3f\t(uint16_t)pedalValue: %i\t", pedalValueFloat, pedalValue);
+            #endif
+
+            subMessage.data[6] = motorTemp;
+
+            #ifdef PEDAL_MESSAGE_HANDLER_DEBUG
+                pcSerial.printf("msg.data[1]: 0x%x\tmsg.data[2]: 0x%x\n", subMessage.data[1], subMessage.data[2]);
+            #endif
+
+            int16_t servoTemp = this->getServoTemp();
+
+            #ifdef PEDAL_MESSAGE_HANDLER_DEBUG
+                pcSerial.printf("[HardwarePedal]@buildMessage: HardwareObject (float)pedalValue: %.3f\t(uint16_t)pedalValue: %i\t", pedalValueFloat, pedalValue);
+            #endif
+
+            subMessage.data[7] = servoTemp;
+
+            #ifdef PEDAL_MESSAGE_HANDLER_DEBUG
+                pcSerial.printf("msg.data[1]: 0x%x\tmsg.data[2]: 0x%x\n", subMessage.data[1], subMessage.data[2]);
+            #endif
+
+            
+            int16_t airTemp = this->getAirTemp();
+
+            #ifdef PEDAL_MESSAGE_HANDLER_DEBUG
+                pcSerial.printf("[HardwarePedal]@buildMessage: HardwareObject (float)pedalValue: %.3f\t(uint16_t)pedalValue: %i\t", pedalValueFloat, pedalValue);
+            #endif
+
+            subMessage.data[8] = airTemp;
+
+            #ifdef PEDAL_MESSAGE_HANDLER_DEBUG
+                pcSerial.printf("msg.data[1]: 0x%x\tmsg.data[2]: 0x%x\n", subMessage.data[1], subMessage.data[2]);
+            #endif
+
+            float dcVoltageFloat = this->getDcVoltage();
+            uint16_t dcVoltage = ((float)dcVoltageFloat* 65535);
+
+            #ifdef PEDAL_MESSAGE_HANDLER_DEBUG
+                pcSerial.printf("[HardwarePedal]@buildMessage: HardwareObject (float)pedalValue: %.3f\t(uint16_t)pedalValue: %i\t", pedalValueFloat, pedalValue);
+            #endif
+
+            subMessage.data[9] = dcVoltage & 0xFF;
+            subMessage.data[10] = (dcVoltage >> 8) & 0xFF;
+
+            #ifdef PEDAL_MESSAGE_HANDLER_DEBUG
+                pcSerial.printf("msg.data[1]: 0x%x\tmsg.data[2]: 0x%x\n", subMessage.data[1], subMessage.data[2]);
+            #endif
+
+            carMessage.addSubMessage(subMessage);
+
+            return MESSAGE_BUILD_OK;
+        }
+
+        virtual message_parse_result_t parseMessage(CarMessage &carMessage) {
+            message_parse_result_t result = MESSAGE_PARSE_OK;
+            for (car_sub_message_t &subMessage : carMessage.subMessages) {
+                if(subMessage.length != 1) // not a valid message
+                    result = MESSAGE_PARSE_ERROR;
+
+                uint8_t status = subMessage.data[0];
+                motor_controller_status_t motorStatus = MOTOR_CONTROLLER_OK;
+
+                if (status == 1) {
+                    motorStatus = MOTOR_CONTROLLER_BAD_VAR_GIVEN;
+                } else if (status == 2) {
+                    motorStatus = MOTOR_CONTROLLER_ERROR;
+                }
+
+                this->setStatus(motorStatus);
+
+                #ifdef PEDAL_MESSAGE_HANDLER_DEBUG
+                    pcSerial.printf("[HardwarePedal]@parseMessage: SoftwareObject calibrationStatus: 0x%x\tmsg.data[0]: 0x%x\tgotValue: %i\n", calibrationStatus, subMessage.data[0], gotValue);
+                #endif
+            }
+            
+            return result;
+        }
+        #endif
+
     protected:
         BamocarD3 _bamocar;
         DigitalOut _rfe;

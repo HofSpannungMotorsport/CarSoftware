@@ -9,7 +9,7 @@
 
 #define SEND_RATE 2 // hz
 
-SoftwareBattery batteryVoltage(COMPONENT_BATTERY_VOLTAGE);
+SoftwareMotorController motorController(COMPONENT_MOTOR_MAIN);
 CANService canService(DISPLAY_CAN);
 
 class Display : public Carpi {
@@ -17,7 +17,7 @@ class Display : public Carpi {
         // Called once at bootup
         void setup() {
             canService.setSenderId(DEVICE_DISPLAY);
-            canService.addComponent((ICommunication*)&batteryVoltage);
+            canService.addComponent((ICommunication*)&motorController);
         }
 
         // Called repeately after bootup
