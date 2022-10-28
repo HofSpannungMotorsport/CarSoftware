@@ -7,10 +7,11 @@
 
 #include "hardware/Pins_Display.h"
 
-#define SEND_RATE 2 // hz
+#define SEND_RATE 5 // hz
+
 
 SoftwareMotorController motorController(COMPONENT_MOTOR_MAIN);
-CANService canService(DISPLAY_CAN);
+CANService canService(DISPLAY_CAN_RD, DISPLAY_CAN_TD);
 
 class Display : public Carpi {
     public:
@@ -24,7 +25,6 @@ class Display : public Carpi {
         void loop() {
             canService.run();
             wait(1.0/(float) SEND_RATE);
-            
         }
 };
 

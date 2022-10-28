@@ -34,7 +34,9 @@
 #define DISPLAY_LED4_R D22
 #define DISPLAY_LED4_G D23
 
-#define DISPLAY_CAN D3,D4
+//#define DISPLAY_CAN D8,D9
+#define DISPLAY_CAN_RD        PB_8
+#define DISPLAY_CAN_TD        PB_9
 //#define CAN_TX 3
 //#define CAN_RX 4
 

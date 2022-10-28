@@ -7,7 +7,7 @@ class SoftwareMotorController : public IMotorController {
     
     public:
         SoftwareMotorController() {
-            setComponentType(COMPONENT_DISPLAY);
+            setComponentType(COMPONENT_MOTOR);
             setObjectType(OBJECT_SOFTWARE);
             _valueAge.start();
         }
@@ -126,6 +126,13 @@ class SoftwareMotorController : public IMotorController {
                 uint16_t dcVoltage16 = subMessage.data[9] | (subMessage.data[10] << 8);
                 float dcVoltage = (float)dcVoltage16 / 65535.0;
                 this->setDCVoltage(dcVoltage);
+
+                pcSerial.printf("DCVoltage = %x ", _status);
+                pcSerial.printf("DCVoltage = %x ", _airTemp);
+                pcSerial.printf("DCVoltage = %x ", _motorTemp);
+                pcSerial.printf("DCVoltage = %x ", _servoTemp);
+                pcSerial.printf("DCVoltage = %x ", _current);
+                pcSerial.printf("DCVoltage = %x ", _dcVoltage);
 
                 _valueAge.reset();
                 _valueAge.start();
