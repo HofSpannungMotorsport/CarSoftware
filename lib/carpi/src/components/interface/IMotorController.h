@@ -56,6 +56,10 @@ class IMotorController : public IComponent {
         virtual void setRFE(motor_controller_rfe_enable_t state) = 0;
         virtual void setRUN(motor_controller_run_enable_t state) = 0;
 
+
+        virtual bool getRFE() = 0;
+        virtual bool getRUN() = 0;
+
         // Method to send interval times
         virtual void beginCommunication() = 0;
 };
