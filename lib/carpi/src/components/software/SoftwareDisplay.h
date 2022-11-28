@@ -25,8 +25,60 @@ class SoftwareDisplay : public IDisplay {
             setComponentSubId(componentSubId);
         }
 
-        virtual display_status_t getStatus() {
+        uint16_t setMinCellVoltage(uint16_t value){
+            _minCellVoltage = value;
+        }
+
+        uint16_t setMaxCellVoltage(uint16_t value){
+             _maxCellVoltage = value;
+        }
+
+        uint16_t setMinCellTemperature(uint16_t value){
+             _minCellTemperature = value;
+        }
+
+        uint16_t setMaxCellTemperature(uint16_t value){
+            _maxCellTemperature = value;
+        }
+        
+        float setSpeed(float value){
+            _speed = value;
+        }
+
+        float setCurrent(float value){
+             _current = value;
+        }
+
+        uint16_t setMotorTemp(uint16_t value){
+             _motorTemp = value;
+        }
+
+        uint16_t setAirTemp(uint16_t value){
+            _airTemp = value;
+        }
+
+        float setDcVoltage(float value){
+             _dcVoltage = value;
+        }
+        
+        display_status_t getStatus(){
             return _status;
+        }
+
+        uint16_t getMinCellVoltage(){
+            return _minCellVoltage;
+        }
+
+        uint16_t getMaxCellVoltage(){
+            return _maxCellVoltage;
+        }
+
+        uint16_t getMinCellTemperature(){
+            return _minCellTemperature;
+        }
+
+        uint16_t getMaxCellTemperature(){
+            return _maxCellTemperature;
         }
 
         virtual message_build_result_t buildMessage(CarMessage &carMessage) {
@@ -158,6 +210,29 @@ class SoftwareDisplay : public IDisplay {
         IMotorController* _motorController;
         IPedal* _gasPedal;
         IPedal* _brakePedal;
+
+        bool _ready = false;
+        bool _calibrationSet = false;
+
+        //ACCUMULATOR
+        uint16_t _minCellVoltage = 0;
+        uint16_t _maxCellVoltage = 0;
+        uint16_t _minCellTemperature = 0;
+        uint16_t _maxCellTemperature = 0;
+
+
+        //MOTORCONTROLLER
+        float _speed = 0.0;
+        float _current = 0.0;
+        uint16_t _motorTemp = 0;
+        uint16_t _airTemp = 0;
+        float _dcVoltage = 0.0;
+
+        /*
+        HARDWAREMOTORCONTROLLER
+        -rfe
+        -run        
+        */
 };
 
 #endif
