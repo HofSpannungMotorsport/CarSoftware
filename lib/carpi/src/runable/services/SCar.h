@@ -9,7 +9,6 @@
 #include "communication/CANService.h"
 #include "components/interface/IButton.h"
 #include "components/interface/ILed.h"
-#include "components/interface/IPedal.h"
 #include "components/interface/IBuzzer.h"
 #include "components/interface/IMotorController.h"
 #include "components/interface/IHvEnabled.h"

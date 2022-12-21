@@ -75,17 +75,11 @@
     #include "components/hardware/HardwareMotorController.h"
     #include "components/hardware/HardwareRpmSensor.h"
     #include "components/hardware/HardwareHvEnabled.h"
-    #include "components/hardware/HardwareDisplay.h"
-    #include "components/hardware/HardwareAccumulator.h"
-
     //   Software
     #include "components/software/SoftwareButton.h"
     #include "components/software/SoftwareLed.h"
     #include "components/software/SoftwarePedal.h"
     #include "components/software/SoftwareRpmSensor.h"
-    #include "components/software/SoftwareAccumulator.h"
-    #include "components/software/SoftwareDisplay.h"
-
 
     // Services
     #include "runable/services/IService.h"

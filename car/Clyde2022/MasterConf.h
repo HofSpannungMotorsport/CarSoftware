@@ -50,9 +50,6 @@ SoftwareButton buttonReset(COMPONENT_BUTTON_RESET);
 SoftwareButton buttonStart(COMPONENT_BUTTON_START);
 SoftwareButton buttonCal(COMPONENT_BUTTON_CAL);
 
-//Accumulator
-SoftwareAccumulator accumulator(COMPONENT_ACCUMULATOR_MAIN);
-
 //     Pedal
 //       Pedals
 SoftwarePedal gasPedal(COMPONENT_PEDAL_GAS);
@@ -73,9 +70,6 @@ HardwarePump coolingPump(MASTER_PIN_PUMP_PWM, COMPONENT_COOLING_PUMP);
 HardwareBuzzer buzzer(MASTER_PIN_BUZZER, COMPONENT_BUZZER_STARTUP);
 HardwareHvEnabled hvEnabled(MASTER_PIN_HV_ALL_READY, COMPONENT_SYSTEM_60V_OK);
 HardwareHvEnabled tsms(MASTER_PIN_TSMS, COMPONENT_SYSTEM_TSMS);
-
-// Display
-SoftwareDisplay display((IAccumulator*)&accumulator, (IMotorController*)&motorController, (IPedal*)&gasPedal, (IPedal*)&brakePedal,COMPONENT_DISPLAY_MAIN);
 
 // INTEGRATE BETTER LATER
 DigitalOut bspdTestOut(MASTER_PIN_BSPD_TEST);
@@ -135,13 +129,6 @@ class Master : public Carpi {
         canService.addComponent((ICommunication*)&buttonReset);
         canService.addComponent((ICommunication*)&buttonStart);
         canService.addComponent((ICommunication*)&buttonCal);
-
-        //Display
-        canService.addComponent((ICommunication*)&display);
-        canService.addComponentToSendLoop((ICommunication*)&display);
-
-        //Accumulator
-        canService.addComponent((ICommunication*)&accumulator);
 
         // Pedal
         canService.addComponent((ICommunication*)&gasPedal);

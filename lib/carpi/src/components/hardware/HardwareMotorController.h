@@ -121,31 +121,19 @@ class HardwareMotorController : public IMotorController {
             return _bamocar.getDcVoltageAge();
         }
 
-        bool getRUN(){
-            return _runState;
-        }
-
-        bool getRFE(){
-            return _rfeState;
-        }
-
         void setRFE(motor_controller_rfe_enable_t state) {
             if (state == MOTOR_CONTROLLER_RFE_ENABLE) {
                 _rfe = 1;
-                _rfeState = true;
             } else {
                 _rfe = 0;
-                _rfeState = false;
             }
         }
 
         void setRUN(motor_controller_run_enable_t state) {
             if (state == MOTOR_CONTROLLER_RUN_ENABLE) {
                 _run = 1;
-                _runState = true;
             } else {
                 _run = 0;
-                _runState = false;
             }
         }
 
@@ -153,9 +141,6 @@ class HardwareMotorController : public IMotorController {
         BamocarD3 _bamocar;
         DigitalOut _rfe;
         DigitalOut _run;
-
-        bool _runState = false;
-        bool _rfeState = false;
 
         motor_controller_status_t _status = 0;
 };
