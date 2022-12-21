@@ -14,43 +14,7 @@ class HardwareDisplay : public IDisplay {
             : HardwareDisplay(){
                 setComponentSubId(componentSubId);
         }
-        
-        uint16_t setMinCellVoltage(uint16_t value){
-            _minCellVoltage = value;
-        }
 
-        uint16_t setMaxCellVoltage(uint16_t value){
-             _maxCellVoltage = value;
-        }
-
-        uint16_t setMinCellTemperature(uint16_t value){
-             _minCellTemperature = value;
-        }
-
-        uint16_t setMaxCellTemperature(uint16_t value){
-            _maxCellTemperature = value;
-        }
-        
-        float setSpeed(float value){
-            _speed = value;
-        }
-
-        float setCurrent(float value){
-             _current = value;
-        }
-
-        uint16_t setMotorTemp(uint16_t value){
-             _motorTemp = value;
-        }
-
-        uint16_t setAirTemp(uint16_t value){
-            _airTemp = value;
-        }
-
-        float setDcVoltage(float value){
-             _dcVoltage = value;
-        }
-        
         display_status_t getStatus(){
             return _status;
         }
@@ -157,6 +121,43 @@ class HardwareDisplay : public IDisplay {
         -rfe
         -run        
         */
+
+
+        uint16_t setMinCellVoltage(uint16_t value){
+            _minCellVoltage = value;
+        }
+
+        uint16_t setMaxCellVoltage(uint16_t value){
+             _maxCellVoltage = value;
+        }
+
+        uint16_t setMinCellTemperature(uint16_t value){
+             _minCellTemperature = value;
+        }
+
+        uint16_t setMaxCellTemperature(uint16_t value){
+            _maxCellTemperature = value;
+        }
+        
+        float setSpeed(float value){
+            _speed = value;
+        }
+
+        float setCurrent(float value){
+             _current = value;
+        }
+
+        uint16_t setMotorTemp(uint16_t value){
+             _motorTemp = value;
+        }
+
+        uint16_t setAirTemp(uint16_t value){
+            _airTemp = value;
+        }
+
+        float setDcVoltage(float value){
+             _dcVoltage = value;
+        }
 };
 
 #endif
