@@ -1,6 +1,7 @@
 #ifndef PINS_DASHBOARD_H
 #define PINS_DASHBOARD_H
 
-#define DISPLAY_CAN D4, D3
+#define CAN_RX_PIN D3
+#define CAN_TX_PIN D4
 
 #endif // PINS_DASHBOARD_H

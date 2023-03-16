@@ -74,17 +74,18 @@ public:
 
         subMessage.data[0] = this->getStatus();
 
-        float speedFloat = this->getSpeed();
-        uint16_t speed = ((float)speedFloat * 10);
-        subMessage.data[1] = speed & 0xFF;
+        uint8_t speed = (int)this->getSpeed();
+        subMessage.data[1] = speed;
+
+        /*
         subMessage.data[2] = (speed >> 8) & 0xFF;
 
         float batteryVoltageFloat = this->getBatteryVoltage();
         float batteryPercentFloat = ((float)(batteryVoltageFloat - 240.0f) * (255.0f / (403.0f - 240.0f)));
-        /*
+
         subMessage.data[3] = batteryVoltage & 0xFF;
         subMessage.data[4] = (batteryVoltage >> 8) & 0xFF;
-        */
+
         uint8_t batteryPercent = ((uint8_t)batteryPercentFloat);
         subMessage.data[3] = batteryPercent;
         subMessage.data[4] = batteryPercent;
@@ -99,17 +100,16 @@ public:
         pcSerial.printf("5: %x", subMessage.data[5]);
         pcSerial.printf("6: %x", subMessage.data[6]);
 
-        /*
-                float _cellTemperatureFloat = this->getCellTemperature();
-                uint16_t _cellTemperature = ((float)cellTemperatureFloat * 10);
-                subMessage.data[5] = cellTemperature & 0xFF;
-                subMessage.data[6] = (cellTemperature >> 8) & 0xFF;
+        float _cellTemperatureFloat = this->getCellTemperature();
+        uint16_t _cellTemperature = ((float)cellTemperatureFloat * 10);
+        subMessage.data[5] = cellTemperature & 0xFF;
+        subMessage.data[6] = (cellTemperature >> 8) & 0xFF;
 
-                subMessage.data[9] = this->getIMD();
-                subMessage.data[10] = this->getBMS();
-                subMessage.data[11] = this->getShutdown();
+        subMessage.data[9] = this->getIMD();
+        subMessage.data[10] = this->getBMS();
+        subMessage.data[11] = this->getShutdown();
+        */
 
-          */
         carMessage.addSubMessage(subMessage);
 
         return MESSAGE_BUILD_OK;

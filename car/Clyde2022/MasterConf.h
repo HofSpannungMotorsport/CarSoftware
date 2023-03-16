@@ -123,6 +123,9 @@ public:
 
         canService.setSenderId(DEVICE_MASTER);
 
+        // Motorcontroller
+        canService.addComponent((ICommunication *)&motorController);
+
         // Add all Software Components to the CAN Service
         // Dashboard
         canService.addComponent((ICommunication *)&ledRed);

@@ -55,41 +55,43 @@ public:
     virtual message_parse_result_t parseMessage(CarMessage &carMessage)
     {
         message_parse_result_t result = MESSAGE_PARSE_OK;
-        /*
-        for (car_sub_message_t &subMessage : carMessage.subMessages) {
-            if(subMessage.length != 7) // not a valid message
+        for (car_sub_message_t &subMessage : carMessage.subMessages)
+        {
+            if (subMessage.length != 7) // not a valid message
                 result = MESSAGE_PARSE_ERROR;
 
             this->setStatus(subMessage.data[0]);
 
-            uint16_t newValue16 = subMessage.data[1] | (subMessage.data[2] << 8);
-            float newValue = (float)newValue16 / 65535.0;
+            uint16_t newValue = subMessage.data[1];
 
             this->setSpeed(newValue);
 
-             newValue16 = subMessage.data[3] | (subMessage.data[4] << 8);
-             newValue = (float)newValue16 / 65535.0;
+            /*
 
-            this->setBatteryVoltage(newValue);
+                 newValue16 = subMessage.data[3] | (subMessage.data[4] << 8);
+                 newValue = (float)newValue16 / 65535.0;
+
+                this->setBatteryVoltage(newValue);
 
 
-             newValue16 = subMessage.data[5] | (subMessage.data[6] << 8);
-             newValue = (float)newValue16 / 65535.0;
+                 newValue16 = subMessage.data[5] | (subMessage.data[6] << 8);
+                 newValue = (float)newValue16 / 65535.0;
 
-            this->setCellVoltage(newValue);
+                this->setCellVoltage(newValue);
 
-            float batteryTemperatureFloat = this->getBatteryTemperature();
-            uint16_t batteryTemperature = ((float)batteryTemperatureFloat * 10);
-            subMessage.data[5] = batteryTemperature & 0xFF;
-            subMessage.data[6] = (batteryTemperature >> 8) & 0xFF;
+                float batteryTemperatureFloat = this->getBatteryTemperature();
+                uint16_t batteryTemperature = ((float)batteryTemperatureFloat * 10);
+                subMessage.data[5] = batteryTemperature & 0xFF;
+                subMessage.data[6] = (batteryTemperature >> 8) & 0xFF;
 
-            subMessage.data[9] = this->getIMD();
-            subMessage.data[10] = this->getBMS();
-            subMessage.data[11] = this->getShutdown();
+                subMessage.data[9] = this->getIMD();
+                subMessage.data[10] = this->getBMS();
+                subMessage.data[11] = this->getShutdown();
 
-        */
+            */
 
-        return result;
+            return result;
+        }
     }
 
 private:
