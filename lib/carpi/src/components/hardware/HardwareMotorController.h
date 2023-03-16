@@ -5,7 +5,7 @@
 #include "../interface/IMotorController.h"
 
 #define STD_SPEED_REFRESH_TIME 240 // Hz
-// #define STD_CURRENT_REFRESH_TIME 240 // Hz
+#define STD_CURRENT_REFRESH_TIME 30 // Hz
 #define STD_CURRENT_DEVICE_REFRESH_TIME 240 // Hz
 #define STD_MOTOR_TEMP_REFRESH_TIME 12      // Hz
 #define STD_CONTROLLER_TEMP_REFRESH_TIME 12 // Hz
@@ -34,7 +34,7 @@ public:
     void beginCommunication()
     {
         _bamocar.requestSpeed(1000 / (float)STD_SPEED_REFRESH_TIME);
-        //_bamocar.requestCurrent(1000 / (float)STD_CURRENT_REFRESH_TIME);
+        _bamocar.requestCurrent(1000 / (float)STD_CURRENT_REFRESH_TIME);
         _bamocar.requestTemp(1000 / (float)STD_MOTOR_TEMP_REFRESH_TIME);
         _bamocar.requestDcVoltage(1000 / (float)STD_MOTOR_VOLTAGE_REFRESH_TIME);
 

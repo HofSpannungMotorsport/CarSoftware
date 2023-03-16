@@ -75,6 +75,7 @@ HardwareSerial &pcSerial = Serial;
 #include "components/hardware/HardwareMotorController.h"
 #include "components/hardware/HardwareRpmSensor.h"
 #include "components/hardware/HardwareHvEnabled.h"
+#include "components/hardware/HardwareDigitalIn.h"
 //   Software
 #include "components/software/SoftwareDisplay.h"
 #include "components/software/SoftwareButton.h"
@@ -89,6 +90,7 @@ HardwareSerial &pcSerial = Serial;
 #include "runable/RunableScheduler.h"
 #include "runable/services/SCar.h"
 #include "runable/services/SSpeed.h"
+#include "runable/services/SDisplay.h"
 
 // Programs
 #include "runable/programs/IProgram.h"

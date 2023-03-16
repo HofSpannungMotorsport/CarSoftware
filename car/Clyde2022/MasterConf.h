@@ -82,8 +82,8 @@ DigitalIn x5(MASTER_PIN_SHUTDOWN_AT_TS_ON, OpenDrain);
 DigitalIn x7(MASTER_PIN_SHUTDOWN_AT_BOTS, OpenDrain);
 DigitalIn x8(MASTER_PIN_SHUTDOWN_ERROR_STORAGE, OpenDrain);
 DigitalIn x9(MASTER_PIN_SHUTDOWN_TSMS_IN, OpenDrain);
-DigitalIn x10(MASTER_PIN_IMD_OK, OpenDrain);
-DigitalIn x11(MASTER_PIN_BMS_OK, OpenDrain);
+HardwareDigitalIn imdOk(MASTER_PIN_IMD_OK, PullUp, COMPONENT_SHUTDOWN_IMD);
+HardwareDigitalIn bmsOk(MASTER_PIN_BMS_OK, PullUp, COMPONENT_SHUTDOWN_BMS);
 DigitalIn x12(MASTER_PIN_TS_ON_STATE, OpenDrain);
 DigitalIn x13(MASTER_PIN_TSAL_MC_OUT, OpenDrain);
 DigitalIn x14(MASTER_PIN_BRAKE_FRONT, OpenDrain);
@@ -102,6 +102,7 @@ SCar carService(canService, (IButton *)&buttonReset, (IButton *)&buttonStart, (I
 SSpeed speedService(carService, (IRpmSensor *)&rpmFrontLeft, (IRpmSensor *)&rpmFrontRight,
                     /* (IRpmSensor*)&rpmRearLeft, (IRpmSensor*)&rpmRearRight, */ // [il]
                     (IMotorController *)&motorController);
+SDisplay displayService(canService, speedService, (IMotorController *)&motorController, (IDigitalIn *)&bmsOk, (IDigitalIn *)&imdOk);
 
 PMotorController motorControllerService(carService, (IMotorController *)&motorController,
                                         (IPedal *)&gasPedal, (IPedal *)&brakePedal,
@@ -125,6 +126,8 @@ public:
 
         // Motorcontroller
         canService.addComponent((ICommunication *)&motorController);
+        canService.addComponent((ICommunication *)&bmsOk);
+        canService.addComponent((ICommunication *)&imdOk);
 
         // Add all Software Components to the CAN Service
         // Dashboard
@@ -134,6 +137,10 @@ public:
         canService.addComponent((ICommunication *)&buttonReset);
         canService.addComponent((ICommunication *)&buttonStart);
         canService.addComponent((ICommunication *)&buttonCal);
+
+        // DigitalIn
+        canService.addComponent((ICommunication *)&imdOk);
+        canService.addComponent((ICommunication *)&bmsOk);
 
         // Pedal
         canService.addComponent((ICommunication *)&gasPedal);
@@ -149,6 +156,7 @@ public:
         highDemandServices.addRunable((IRunable *)&speedService);
         highDemandServices.addRunable((IRunable *)&motorControllerService);
         highDemandServices.addRunable((IRunable *)&brakeLightService);
+        highDemandServices.addRunable((IRunable *)&displayService);
 
         // Add all low demand Services to our Service list
         lowDemandServices.addRunable((IRunable *)&coolingService);

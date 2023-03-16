@@ -375,19 +375,12 @@ private:
         return id;
     }
 
-    void _sendMotorControllerOverCan()
-    {
-        // Motorcontroller
-        _canService.sendMessage((ICommunication *)_motorController, DEVICE_DISPLAY);
-    }
-
     void _sendLedsOverCan()
     {
         // LED's
         _canService.sendMessage((ICommunication *)_led.red, DEVICE_DASHBOARD);
         _canService.sendMessage((ICommunication *)_led.yellow, DEVICE_DASHBOARD);
         _canService.sendMessage((ICommunication *)_led.green, DEVICE_DASHBOARD);
-        _sendMotorControllerOverCan();
     }
 
     void _sendPedalsOverCan()

@@ -31,6 +31,7 @@ enum id_component_type_t : uint8_t
     COMPONENT_GYROSCOPE = 0xA,
     COMPONENT_BUZZER = 0xB,
     COMPONENT_DISPLAY = 0xC,
+    COMPONENT_SHUTDOWN = 0xD,
     COMPONENT_SYSTEM = 0xF
 };
 
@@ -41,6 +42,11 @@ enum id_sub_component_t : uint8_t
 
     // Display
     COMPONENT_DISPLAY_MAIN = 0x0,
+
+    // Shutdown
+    COMPONENT_SHUTDOWN_BMS = 0x0,
+    COMPONENT_SHUTDOWN_IMD = 0x1,
+
 
     // Pedals
     COMPONENT_PEDAL_BRAKE = 0x0,
