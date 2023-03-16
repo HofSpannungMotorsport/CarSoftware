@@ -199,14 +199,14 @@ public:
         uint8_t state = (uint8_t)this->getState();
         subMessage.data[2] = state;
 
-        // float speedFloat = this->getSpeed();
-        float speedFloat = 80.37f;
+        float speedFloat = this->getSpeed();
+        // float speedFloat = 80.37f;
         uint16_t speed = (uint16_t)(speedFloat * 100);
         subMessage.data[3] = (uint8_t)(speed >> 8) & 0xFF;
         subMessage.data[4] = (uint8_t)(speed & 0xFF);
 
-        // float currentFloat = this->getCurrent();
-        float currentFloat = 180.7f;
+        float currentFloat = this->getCurrent();
+        // float currentFloat = 180.7f;
         uint16_t current = ((float)currentFloat * 100);
         subMessage.data[5] = (uint8_t)(current >> 8) & 0xFF;
         subMessage.data[6] = (uint8_t)(current & 0xFF);
@@ -249,8 +249,8 @@ public:
         int8_t airTemp = this->getAirTemp();
         subMessage.data[2] = airTemp;
 
-        // float dcVoltageFloat = this->getDcVoltage();
-        float dcVoltageFloat = 403.2f;
+        float dcVoltageFloat = this->getDcVoltage();
+        // float dcVoltageFloat = 403.21f;
         uint16_t dcVoltage = (uint16_t)(dcVoltageFloat * 100);
         subMessage.data[3] = (uint8_t)(dcVoltage >> 8) & 0xFF;
         subMessage.data[4] = (uint8_t)(dcVoltage & 0xFF);
