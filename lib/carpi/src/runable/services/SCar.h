@@ -79,21 +79,17 @@ class SCar : public IService
 public:
     SCar(CANService &canService,
          IButton *buttonReset, IButton *buttonStart,
-         ILed *ledRed, ILed *ledYellow, ILed *ledGreen,
+         SLed &ledService,
          IPedal *gasPedal, IPedal *brakePedal,
          IBuzzer *buzzer,
          IMotorController *motorController,
          IHvEnabled *hvEnabled,
          IHvEnabled *tsms,
          PBrakeLight &brakeLightService)
-        : _canService(canService), _brakeLightService(brakeLightService)
+        : _canService(canService), _ledService(ledService), _brakeLightService(brakeLightService)
     {
         _button.reset = buttonReset;
         _button.start = buttonStart;
-
-        _led.red = ledRed;
-        _led.yellow = ledYellow;
-        _led.green = ledGreen;
 
         _pedal.gas = gasPedal;
         _pedal.brake = brakePedal;
@@ -104,9 +100,6 @@ public:
 
         _hvEnabled = hvEnabled;
         _tsms = tsms;
-
-        _ledRunResentTimer.reset();
-        _ledRunResentTimer.start();
     }
 
     virtual void run()
@@ -128,13 +121,6 @@ public:
         if (!(_errorRegister.empty()))
         {
             processErrors();
-        }
-
-        if (_ledRunResentTimer >= LED_RESEND_INTERVAL_IN_RUN)
-        {
-            _ledRunResentTimer.reset();
-            _ledRunResentTimer.start();
-            _sendLedsOverCan();
         }
     }
 
@@ -161,13 +147,13 @@ public:
                 // Green -> Off
                 // Car -> Error -> No driving anymore, Error must be solved
 
-                _resetLeds();
+                _ledService.resetLeds();
 
-                _led.red->setState(LED_ON);
-                _led.red->setBrightness(1);
-                _led.red->setBlinking(BLINKING_FAST);
+                _ledService._led.red->setState(LED_ON);
+                _ledService._led.red->setBrightness(1);
+                _ledService._led.red->setBlinking(BLINKING_FAST);
 
-                _led.green->setState(LED_OFF);
+                _ledService._led.green->setState(LED_OFF);
                 _state = CAR_ERROR;
 
                 _motorController->setRUN(MOTOR_CONTROLLER_RUN_DISABLE);
@@ -192,19 +178,94 @@ public:
         }
 
         _state = CALIBRATION_NEEDED;
-        _resetLeds();
-        _led.yellow->setState(LED_ON);
-        _led.yellow->setBlinking(BLINKING_NORMAL);
+        _ledService.resetLeds();
+        _ledService._led.yellow->setState(LED_ON);
+        _ledService._led.yellow->setBlinking(BLINKING_NORMAL);
 
         if (errorByCommunication)
         {
-            _led.red->setState(LED_ON);
-            _led.red->setBlinking(BLINKING_FAST);
+            _ledService._led.red->setState(LED_ON);
+            _ledService._led.red->setBlinking(BLINKING_FAST);
         }
 
         _sendLedsOverCan();
     }
 
+    void startUp()
+    {
+        wait(STARTUP_WAIT);
+
+        _brakeLightService.run();
+
+        for (uint8_t i = 0; i < STARTUP_ANIMATION_PLAYBACKS; i++)
+        {
+            _ledService.startupAnimation();
+
+            _brakeLightService.run();
+        }
+
+        wait(STARTUP_ANIMATION_WAIT_AFTER);
+
+        // Turn on red LED while HV-Circuite is off
+        _ledService.resetLeds();
+        _ledService._led.red->setState(LED_ON);
+        _sendLedsOverCan();
+    }
+
+    void boot(){
+        // [QF]
+        Timer _ledResendWaitTimer;
+        _ledResendWaitTimer.reset();
+        _ledResendWaitTimer.start();
+        while ((!(_hvEnabled->read()) || !(_tsms->read())) && !(_button.start->getState() == LONG_CLICKED && _button.start->getStateAge() < MAX_BUTTON_STATE_AGE))
+        {
+            _canService.processInbound();
+            processErrors();
+            _brakeLightService.run();
+
+            if (_ledResendWaitTimer.read() >= 0.3)
+            {
+                _ledResendWaitTimer.reset();
+                _ledResendWaitTimer.start();
+                _sendLedsOverCan();
+            }
+
+            wait(0.001);
+        }
+
+        _ledService.resetLeds();
+        _sendLedsOverCan();
+
+        wait(0.1);
+
+        _canService.processInbound();
+        _checkHvEnabled();
+        _state = ALMOST_READY_TO_DRIVE;
+        processErrors();
+        if (_state != ALMOST_READY_TO_DRIVE)
+        {
+            // If an Error occured, stop continuing and glow Red
+            // Red   -> Blinking Fast
+            // Green -> Off
+            _ledService._led.red->setState(LED_ON);
+            _ledService._led.red->setBlinking(BLINKING_FAST);
+            _ledService._led.green->setState(LED_OFF);
+            _sendLedsOverCan();
+            while (1)
+            {
+
+                _brakeLightService.run();
+                _sendLedsOverCan();
+                wait(0.3);
+            }
+        }
+
+        _ledService._led.green->setState(LED_ON);
+        _ledService._led.green->setBlinking(BLINKING_FAST);
+        _sendLedsOverCan();
+    }
+
+    /*
     void startUp()
     {
         wait(STARTUP_WAIT);
@@ -276,22 +337,11 @@ public:
         _led.green->setBlinking(BLINKING_FAST);
         _sendLedsOverCan();
     }
+    */
 
     gas_curve_t getGasCurve()
     {
         return _gasCurve;
-    }
-
-    void pedalCommunitactionInterference()
-    {
-        _redOffTicker.detach();
-
-        _led.red->setBlinking(BLINKING_OFF);
-        _led.red->setBrightness(1.0f);
-        _led.red->setState(LED_ON);
-
-        _canService.sendMessage((ICommunication *)_led.red, DEVICE_DASHBOARD);
-        _redOffTicker.attach(callback(this, &SCar::_redOff), (float)LED_RED_ON_TIME_PEDAL_COMM_INTERF);
     }
 
 #ifdef ENABLE_POWER_MENU
@@ -320,14 +370,13 @@ public:
 
 private:
     CANService &_canService;
+    SLed &_ledService;
 
     CircularBuffer<Error, ERROR_REGISTER_SIZE, uint8_t> _errorRegister;
 
     car_state_t _state = CAR_OFF;
 
     gas_curve_t _gasCurve = GAS_CURVE_X_POW_2;
-
-    Timer _ledRunResentTimer;
 
 #ifdef ENABLE_POWER_MENU
     // Settings for Power Modes (driving, recu is static)
@@ -345,13 +394,6 @@ private:
         IButton *start;
     } _button;
 
-    struct _led
-    {
-        ILed *red;
-        ILed *yellow;
-        ILed *green;
-    } _led;
-
     struct _pedal
     {
         IPedal *gas;
@@ -367,8 +409,6 @@ private:
 
     PBrakeLight &_brakeLightService;
 
-    Ticker _redOffTicker;
-
     id_component_t _calculateComponentId(IComponent *component)
     {
         id_component_t id = component->getComponentId();
@@ -377,10 +417,7 @@ private:
 
     void _sendLedsOverCan()
     {
-        // LED's
-        _canService.sendMessage((ICommunication *)_led.red, DEVICE_DASHBOARD);
-        _canService.sendMessage((ICommunication *)_led.yellow, DEVICE_DASHBOARD);
-        _canService.sendMessage((ICommunication *)_led.green, DEVICE_DASHBOARD);
+       _ledService.run();
     }
 
     void _sendPedalsOverCan()
@@ -394,53 +431,6 @@ private:
     {
         _sendLedsOverCan();
         _sendPedalsOverCan();
-    }
-
-    void _startupAnimation()
-    {
-        _resetLeds();
-        _led.red->setState(LED_ON);
-        _sendLedsOverCan();
-
-        wait(STARTUP_ANIMATION_SPEED);
-
-        _led.yellow->setState(LED_ON);
-        _sendLedsOverCan();
-
-        wait(STARTUP_ANIMATION_SPEED);
-
-        _led.green->setState(LED_ON);
-        _led.red->setState(LED_OFF);
-        _sendLedsOverCan();
-
-        wait(STARTUP_ANIMATION_SPEED);
-
-        _led.yellow->setState(LED_OFF);
-        _sendLedsOverCan();
-
-        wait(STARTUP_ANIMATION_SPEED);
-
-        _led.green->setState(LED_OFF);
-        _sendLedsOverCan();
-
-        wait(STARTUP_ANIMATION_SPEED);
-    }
-
-    void _resetLeds()
-    {
-        _redOff();
-
-        _led.red->setBrightness(1);
-        _led.yellow->setBrightness(1);
-        _led.green->setBrightness(1);
-
-        _led.red->setState(LED_OFF);
-        _led.yellow->setState(LED_OFF);
-        _led.green->setState(LED_OFF);
-
-        _led.red->setBlinking(BLINKING_OFF);
-        _led.yellow->setBlinking(BLINKING_OFF);
-        _led.green->setBlinking(BLINKING_OFF);
     }
 
     void _pedalError(IPedal *sensorId)
@@ -462,7 +452,7 @@ private:
                 _state = ALMOST_READY_TO_DRIVE;
                 _motorController->setRUN(MOTOR_CONTROLLER_RUN_DISABLE);
                 _motorController->setRFE(MOTOR_CONTROLLER_RFE_DISABLE);
-                _led.green->setBlinking(BLINKING_FAST);
+                _ledService._led.green->setBlinking(BLINKING_FAST);
                 _sendLedsOverCan();
             }
 
@@ -490,13 +480,13 @@ private:
         // Yellow -> On
         // Green  -> Normal Blinking
         _state = BOOT;
-        _resetLeds();
-        _led.yellow->setState(LED_ON);
-        _led.green->setState(LED_ON);
+        _ledService.resetLeds();
+        _ledService._led.yellow->setState(LED_ON);
+        _ledService._led.green->setState(LED_ON);
 
-        _led.yellow->setBlinking(BLINKING_OFF);
-        _led.yellow->setBrightness(0.76);
-        _led.green->setBlinking(BLINKING_NORMAL);
+        _ledService._led.yellow->setBlinking(BLINKING_OFF);
+        _ledService._led.yellow->setBrightness(0.76);
+        _ledService._led.green->setBlinking(BLINKING_NORMAL);
 
         _pedal.gas->setCalibrationStatus(CURRENTLY_CALIBRATING);
         _pedal.brake->setCalibrationStatus(CURRENTLY_CALIBRATING);
@@ -528,7 +518,7 @@ private:
 
         wait(0.1);
         _canService.processInbound();
-        _led.yellow->setState(LED_OFF);
+        _ledService._led.yellow->setState(LED_OFF);
         _sendLedsOverCan();
 
         // Wait till the Button got released again
@@ -570,8 +560,8 @@ private:
         }
         else
         {
-            _resetLeds();
-            _led.red->setState(LED_ON);
+            _ledService.resetLeds();
+            _ledService._led.red->setState(LED_ON);
             _sendLedsOverCan();
             wait(0.5);
             calibrationNeeded();
@@ -580,9 +570,9 @@ private:
 
         // If no Error, start blinking fast to show ready, but need to start car
         // Green -> Fast Blinking
-        _resetLeds();
-        _led.green->setState(LED_ON);
-        _led.green->setBlinking(BLINKING_FAST);
+        _ledService.resetLeds();
+        _ledService._led.green->setState(LED_ON);
+        _ledService._led.green->setBlinking(BLINKING_FAST);
         _sendLedsOverCan();
 
         wait(0.1);
@@ -639,9 +629,9 @@ private:
                         // If an Error occured, stop continuing and glow Red
                         // Red   -> Blinking Normal
                         // Green -> Off
-                        _resetLeds();
-                        _led.red->setState(LED_ON);
-                        _led.red->setBlinking(BLINKING_NORMAL);
+                        _ledService.resetLeds();
+                        _ledService._led.red->setState(LED_ON);
+                        _ledService._led.red->setBlinking(BLINKING_NORMAL);
                         _sendLedsOverCan();
 
                         // Stop beeping!
@@ -673,9 +663,9 @@ private:
                     // If an Error occured, stop continuing and glow Red
                     // Red   -> Blinking Normal
                     // Green -> Off
-                    _resetLeds();
-                    _led.red->setState(LED_ON);
-                    _led.red->setBlinking(BLINKING_NORMAL);
+                    _ledService.resetLeds();
+                    _ledService._led.red->setState(LED_ON);
+                    _ledService._led.red->setBlinking(BLINKING_NORMAL);
                     _sendLedsOverCan();
 
                     _brakeLightService.run();
@@ -689,8 +679,8 @@ private:
                 _state = READY_TO_DRIVE;
 
                 // Stop blinking greed to show car is primed
-                _resetLeds();
-                _led.green->setState(LED_ON);
+                _ledService.resetLeds();
+                _ledService._led.green->setState(LED_ON);
                 _sendLedsOverCan();
                 wait(0.01);
             }
@@ -766,7 +756,7 @@ private:
 
                 _state = ALMOST_READY_TO_DRIVE;
 
-                _led.green->setBlinking(BLINKING_FAST);
+                _ledService._led.green->setBlinking(BLINKING_FAST);
                 _sendLedsOverCan();
 
                 return;
@@ -796,7 +786,7 @@ private:
 
                 _state = ALMOST_READY_TO_DRIVE;
 
-                _led.green->setBlinking(BLINKING_FAST);
+                _ledService._led.green->setBlinking(BLINKING_FAST);
                 _sendLedsOverCan();
 
                 return;
@@ -816,13 +806,6 @@ private:
             _buzzer->setState(BUZZER_OFF);
             wait(beepOffTime);
         }
-    }
-
-    void _redOff()
-    {
-        _redOffTicker.detach();
-        _led.red->setState(LED_OFF);
-        _canService.sendMessage((ICommunication *)_led.red, DEVICE_DASHBOARD);
     }
 
 #ifdef ENABLE_POWER_MENU

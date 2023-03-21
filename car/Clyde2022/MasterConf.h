@@ -107,6 +107,8 @@ SSpeed speedService(carService, (IRpmSensor *)&rpmFrontLeft, (IRpmSensor *)&rpmF
                     (IMotorController *)&motorController);
 SDisplay displayService(canService, speedService, (IMotorController *)&motorController, (IDisplay *)&display, (IDigitalIn *)&x11, (IDigitalIn *)&x10, (IDigitalIn *)&x3, (IDigitalIn *)&x4, (IDigitalIn *)&x5, (IDigitalIn *)&x7, (IDigitalIn *)&x8,(IDigitalIn *)&x9);
 
+SLed ledService(canService, (ILed *)&ledRed, (ILed *)&ledYellow, (ILed *)&ledGreen);
+
 PMotorController motorControllerService(carService, (IMotorController *)&motorController,
                                         (IPedal *)&gasPedal, (IPedal *)&brakePedal,
                                         (IRpmSensor *)&rpmFrontLeft, (IRpmSensor *)&rpmFrontRight,
@@ -157,6 +159,7 @@ public:
 
         // Add all low demand Services to our Service list
         lowDemandServices.addRunable((IRunable *)&coolingService);
+        lowDemandServices.addRunable((IRunable *)&ledService);
 
         // Add all Services and ServiceLists to our ServiceScheduler
         services.addRunable((IRunable *)&highDemandServices, HIGH_DEMAND_SERVICE_REFRESH_RATE);

@@ -91,6 +91,7 @@ HardwareSerial &pcSerial = Serial;
 #include "runable/services/SCar.h"
 #include "runable/services/SSpeed.h"
 #include "runable/services/SDisplay.h"
+#include "runable/services/SLed.h"
 
 // Programs
 #include "runable/programs/IProgram.h"
