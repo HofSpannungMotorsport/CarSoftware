@@ -201,7 +201,6 @@ public:
         _ledService.run();
     }
 
-    /*
     gas_curve_t getGasCurve()
     {
         return _gasCurve;
