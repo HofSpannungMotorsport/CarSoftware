@@ -51,7 +51,8 @@ public:
     {
         _power = power;
     }
-    void setPowermode(uint16_t powermode)
+    
+    void setPowermode(uint8_t powermode)
     {
         _powermode = powermode;
     }
@@ -148,7 +149,7 @@ public:
         subMessage.data[6] = (uint8_t)(dcVoltage & 0xFF);
         carMessage.addSubMessage(subMessage);
 
-        subMessage.length = 5;
+        subMessage.length = 6;
         msgId = 2;
         subMessage.data[0] = msgId;
 
@@ -156,6 +157,7 @@ public:
         subMessage.data[2]  = (uint8_t)((_power >> 16) & 0xFF);
         subMessage.data[3]  = (uint8_t)((_power >> 8) & 0xFF);
         subMessage.data[4]  = (uint8_t)(_power & 0xFF);
+        subMessage.data[5]  = _powermode;
 
         carMessage.addSubMessage(subMessage);
 

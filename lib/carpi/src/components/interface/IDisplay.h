@@ -20,6 +20,7 @@ public:
     virtual void setCurrent(float) = 0;
     virtual void setPower(uint32_t) = 0;
     virtual void setShutdownError(uint8_t) = 0;
+    virtual void setPowermode(uint8_t) = 0;
 };
 
 #endif // IDISPLAY_H

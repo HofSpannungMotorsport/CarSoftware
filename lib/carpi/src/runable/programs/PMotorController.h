@@ -8,6 +8,7 @@
 #include "components/interface/IPedal.h"
 #include "components/interface/IRpmSensor.h"
 #include "runable/services/SSpeed.h" // Only for Value-Constants
+#include "runable/services/SLed.h" // Only for Value-Constants
 #include "services/PowerModes.h"
 
 #define STD_PEDAL_VALUE_AGE_LIMIT 0.3 // s
@@ -69,12 +70,12 @@
 
 class PMotorController : public IProgram {
     public:
-        PMotorController(SCar &carService,
+        PMotorController(SCar &carService, SLed &ledService,
                                IMotorController* motorController,
                                IPedal* gasPedal, IPedal* brakePedal,
                                IRpmSensor* _rpmFrontLeft, IRpmSensor* _rpmFrontRight,
                                SSpeed &speedService)
-            : _carService(carService), _speedService(speedService) {
+            : _carService(carService), _ledService(ledService), _speedService(speedService) {
             _motorController = motorController;
             _gasPedal = gasPedal;
             _brakePedal = brakePedal;
@@ -219,6 +220,7 @@ class PMotorController : public IProgram {
 
     protected:
         SCar &_carService;
+        SLed &_ledService;
         SSpeed &_speedService;
         IMotorController* _motorController;
         bool _ready = false;
@@ -281,7 +283,7 @@ class PMotorController : public IProgram {
 
         void _pedalAgeError(IPedal* sensorId) {
             _carService.addError(Error(sensorId->getComponentId(), sensorId->getStatus(), ERROR_ISSUE));
-            _carService.pedalCommunitactionInterference();
+            _ledService.pedalCommunitactionInterference();
         }
 
         void _updateValues() {

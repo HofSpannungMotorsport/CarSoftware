@@ -22,7 +22,7 @@
 // #define PMOTORCONTROLLER_PRINT_CURRENTLY_MAX_CURRENT
 // #define DISABLE_PUMP
 // #define EXPERIMENTELL_ASR_ACTIVE
-// #define ENABLE_POWER_MENU
+#define ENABLE_POWER_MENU
 // #define REPORT_CAN_ERROR
 #include "carpi.h"
 
@@ -97,19 +97,19 @@ DigitalOut stopPrechargeOut(MASTER_PIN_STOP_PRECHARGE_OUT);
 
 PBrakeLight brakeLightService((IPedal *)&brakePedal, (ILed *)&brakeLight);
 
-SCar carService(canService, (IButton *)&buttonReset, (IButton *)&buttonStart, (ILed *)&ledRed,
-                (ILed *)&ledYellow, (ILed *)&ledGreen, (IPedal *)&gasPedal, (IPedal *)&brakePedal,
+SLed ledService(canService, (ILed *)&ledRed, (ILed *)&ledYellow, (ILed *)&ledGreen);
+
+SCar carService(canService, ledService, (IButton *)&buttonReset, (IButton *)&buttonStart, (IPedal *)&gasPedal, (IPedal *)&brakePedal,
                 (IBuzzer *)&buzzer, (IMotorController *)&motorController, (IHvEnabled *)&hvEnabled,
                 (IHvEnabled *)&tsms, brakeLightService);
 
 SSpeed speedService(carService, (IRpmSensor *)&rpmFrontLeft, (IRpmSensor *)&rpmFrontRight,
                     /* (IRpmSensor*)&rpmRearLeft, (IRpmSensor*)&rpmRearRight, */ // [il]
                     (IMotorController *)&motorController);
-SDisplay displayService(canService, speedService, (IMotorController *)&motorController, (IDisplay *)&display, (IDigitalIn *)&x11, (IDigitalIn *)&x10, (IDigitalIn *)&x3, (IDigitalIn *)&x4, (IDigitalIn *)&x5, (IDigitalIn *)&x7, (IDigitalIn *)&x8,(IDigitalIn *)&x9);
+SDisplay displayService(canService, carService, speedService, (IMotorController *)&motorController, (IDisplay *)&display, (IDigitalIn *)&x11, (IDigitalIn *)&x10, (IDigitalIn *)&x3, (IDigitalIn *)&x4, (IDigitalIn *)&x5, (IDigitalIn *)&x7, (IDigitalIn *)&x8,(IDigitalIn *)&x9);
 
-SLed ledService(canService, (ILed *)&ledRed, (ILed *)&ledYellow, (ILed *)&ledGreen);
 
-PMotorController motorControllerService(carService, (IMotorController *)&motorController,
+PMotorController motorControllerService(carService, ledService, (IMotorController *)&motorController,
                                         (IPedal *)&gasPedal, (IPedal *)&brakePedal,
                                         (IRpmSensor *)&rpmFrontLeft, (IRpmSensor *)&rpmFrontRight,
                                         speedService);

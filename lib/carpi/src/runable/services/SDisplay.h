@@ -8,8 +8,8 @@
 
 class SDisplay: public IService {
     public:
-        SDisplay(CANService &canService, SSpeed &speedService, IMotorController* motorController, IDisplay* display, IDigitalIn* bmsOk, IDigitalIn* imdOk, IDigitalIn* a , IDigitalIn* b , IDigitalIn* c , IDigitalIn* d , IDigitalIn* e , IDigitalIn* f)
-            : _canService(canService), _speedService(speedService){
+        SDisplay(CANService &canService, SCar &carService, SSpeed &speedService, IMotorController* motorController, IDisplay* display, IDigitalIn* bmsOk, IDigitalIn* imdOk, IDigitalIn* a , IDigitalIn* b , IDigitalIn* c , IDigitalIn* d , IDigitalIn* e , IDigitalIn* f)
+            : _canService(canService), _carService(carService), _speedService(speedService){
             _motorController = motorController;
             _display = display;
             _bmsOk = bmsOk;
@@ -36,6 +36,9 @@ class SDisplay: public IService {
             _display->setAirTemperature(_motorController->getAirTemp());
             _display->setBatteryVoltage(_motorController->getDcVoltage());
             _display->setPower(_motorController->getDcVoltage());
+        #ifdef ENABLE_POWER_MENU
+            _display->setPowermode(_carService.getCurrentModeId());
+        #endif
 
             
             if(_f->read() == 0)
@@ -63,6 +66,7 @@ class SDisplay: public IService {
     protected:
         CANService &_canService;
         SSpeed &_speedService;
+        SCar &_carService;
         IDigitalIn* _bmsOk;
         IDigitalIn* _imdOk;
         IDigitalIn* _a;

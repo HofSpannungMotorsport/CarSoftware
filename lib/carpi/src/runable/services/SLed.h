@@ -5,6 +5,10 @@
 #include "communication/CANService.h"
 #include "components/interface/ILed.h"
 
+#define STARTUP_ANIMATION_SPEED 0.075    // s between led-changes
+#define STARTUP_ANIMATION_PLAYBACKS 3    // times the animation should be played
+#define LED_RED_ON_TIME_PEDAL_COMM_INTERF 0.5 // s
+
 class SLed: public IService {
     public:
         SLed(CANService &canService,ILed *ledRed, ILed *ledYellow, ILed *ledGreen)
@@ -58,34 +62,36 @@ class SLed: public IService {
             _redOffTicker.attach(callback(this, &SLed::redOff), (float)LED_RED_ON_TIME_PEDAL_COMM_INTERF);
         }
 
-        void startupAnimation()
-        {
-            resetLeds();
-            _led.red->setState(LED_ON);
-            run();
+        void startupAnimation(){
+            for (uint8_t i = 0; i < STARTUP_ANIMATION_PLAYBACKS; i++)
+            {
+                resetLeds();
+                _led.red->setState(LED_ON);
+                run();
 
-            wait(STARTUP_ANIMATION_SPEED);
+                wait(STARTUP_ANIMATION_SPEED);
 
-            _led.yellow->setState(LED_ON);
-            run();
+                _led.yellow->setState(LED_ON);
+                run();
 
-            wait(STARTUP_ANIMATION_SPEED);
+                wait(STARTUP_ANIMATION_SPEED);
 
-            _led.green->setState(LED_ON);
-            _led.red->setState(LED_OFF);
-            run();
+                _led.green->setState(LED_ON);
+                _led.red->setState(LED_OFF);
+                run();
 
-            wait(STARTUP_ANIMATION_SPEED);
+                wait(STARTUP_ANIMATION_SPEED);
 
-            _led.yellow->setState(LED_OFF);
-            run();
+                _led.yellow->setState(LED_OFF);
+                run();
 
-            wait(STARTUP_ANIMATION_SPEED);
+                wait(STARTUP_ANIMATION_SPEED);
 
-            _led.green->setState(LED_OFF);
-            run();
+                _led.green->setState(LED_OFF);
+                run();
 
-            wait(STARTUP_ANIMATION_SPEED);
+                wait(STARTUP_ANIMATION_SPEED);
+            }
         }
 
         virtual void run() {
