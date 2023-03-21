@@ -224,6 +224,81 @@ public:
         _resetLeds();
         _led.red->setState(LED_ON);
         _sendLedsOverCan();
+    }
+
+    void boot(){
+        // [QF]
+        Timer _ledResendWaitTimer;
+        _ledResendWaitTimer.reset();
+        _ledResendWaitTimer.start();
+        while ((!(_hvEnabled->read()) || !(_tsms->read())) && !(_button.start->getState() == LONG_CLICKED && _button.start->getStateAge() < MAX_BUTTON_STATE_AGE))
+        {
+            _canService.processInbound();
+            processErrors();
+            _brakeLightService.run();
+
+            if (_ledResendWaitTimer.read() >= 0.3)
+            {
+                _ledResendWaitTimer.reset();
+                _ledResendWaitTimer.start();
+                _sendLedsOverCan();
+            }
+
+            wait(0.001);
+        }
+
+        _resetLeds();
+        _sendLedsOverCan();
+
+        wait(0.1);
+
+        _canService.processInbound();
+        _checkHvEnabled();
+        _state = ALMOST_READY_TO_DRIVE;
+        processErrors();
+        if (_state != ALMOST_READY_TO_DRIVE)
+        {
+            // If an Error occured, stop continuing and glow Red
+            // Red   -> Blinking Fast
+            // Green -> Off
+            _led.red->setState(LED_ON);
+            _led.red->setBlinking(BLINKING_FAST);
+            _led.green->setState(LED_OFF);
+            _sendLedsOverCan();
+            while (1)
+            {
+
+                _brakeLightService.run();
+                _sendLedsOverCan();
+                wait(0.3);
+            }
+        }
+
+        _led.green->setState(LED_ON);
+        _led.green->setBlinking(BLINKING_FAST);
+        _sendLedsOverCan();
+    }
+
+    /*
+    void startUp()
+    {
+        wait(STARTUP_WAIT);
+
+        _brakeLightService.run();
+
+        for (uint8_t i = 0; i < STARTUP_ANIMATION_PLAYBACKS; i++)
+        {
+            _startupAnimation();
+
+            _brakeLightService.run();
+        }
+
+        wait(STARTUP_ANIMATION_WAIT_AFTER);
+
+        // Turn on red LED while HV-Circuite is off
+        _resetLeds();
+        _led.red->setState(LED_ON);
+        _sendLedsOverCan();
 
         // [QF]
         Timer _ledResendWaitTimer;
@@ -276,6 +351,7 @@ public:
         _led.green->setBlinking(BLINKING_FAST);
         _sendLedsOverCan();
     }
+    */
 
     gas_curve_t getGasCurve()
     {

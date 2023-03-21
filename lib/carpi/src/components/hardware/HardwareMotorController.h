@@ -108,7 +108,7 @@ public:
         return _bamocar.getCurrent();
     }
 
-    int16_t getMotorTemp()
+    float getMotorTemp()
     {
         return _bamocar.getMotorTemp();
     }
@@ -118,7 +118,7 @@ public:
         return _bamocar.getMotorTempAge();
     }
 
-    int16_t getServoTemp()
+    float getServoTemp()
     {
         return _bamocar.getServoTemp();
     }
@@ -128,7 +128,7 @@ public:
         return _bamocar.getServoTempAge();
     }
 
-    int16_t getAirTemp()
+    float getAirTemp()
     {
         return _bamocar.getAirTemp();
     }
@@ -189,7 +189,7 @@ public:
                 subMessage.data[2] = 99;
                 subMessage.data[3] = 45;
                 pcSerial.printf("[HardwarePedal]@buildMessage: HardwareObject [0]: %x\t[1]: %x\t[2]: %x\t[3]: %x\n", subMessage.data[0], subMessage.data[1], subMessage.data[2], subMessage.data[3]);
-        */
+        *//*
         uint8_t msgId = 0;
         subMessage.data[0] = msgId;
 
@@ -213,31 +213,6 @@ public:
 
         carMessage.addSubMessage(subMessage);
 
-        /*
-                pcSerial.printf("[HardwarePedal]@buildMessage: HardwareObject (uint8_t)speed: %i\t", status);
-                pcSerial.printf("msg.data[2]: 0x%x\n", subMessage.data[0]);
-                pcSerial.printf("[HardwarePedal]@buildMessage: HardwareObject (uint8_t)speed: %i\t", state);
-                pcSerial.printf("msg.data[2]: 0x%x\n", subMessage.data[1]);
-                pcSerial.printf("[HardwarePedal]@buildMessage: HardwareObject (uint8_t)speed: %i\t", speed);
-                pcSerial.printf("msg.data[2]: 0x%x\n", subMessage.data[2]);
-                pcSerial.printf("[HardwarePedal]@buildMessage: HardwareObject (uint8_t)motorTemp: %i\t", current);
-                pcSerial.printf("msg.data[3]: 0x%x\n", subMessage.data[3]);
-                pcSerial.printf("[HardwarePedal]@buildMessage: HardwareObject (uint8_t)motorTemp: %i\t", motorTemp);
-                pcSerial.printf("msg.data[4]: 0x%x\n", subMessage.data[4]);
-                pcSerial.printf("[HardwarePedal]@buildMessage: HardwareObject (uint8_t)servoTemp: %i\t", airTemp);
-                pcSerial.printf("msg.data[5]: 0x%x\n", subMessage.data[5]);
-                pcSerial.printf("[HardwarePedal]@buildMessage: HardwareObject (uint8_t)dcVoltage: %i\t", dcVoltage);
-                pcSerial.printf("msg.data[6]: 0x%x\n", subMessage.data[6]);
-        */
-        /*
-
-                subMessage.data[0] = 4;
-                subMessage.data[1] = 334;
-                subMessage.data[2] = 99;
-                subMessage.data[3] = 45;
-                pcSerial.printf("[HardwarePedal]@buildMessage: HardwareObject [0]: %x\t[1]: %x\t[2]: %x\t[3]: %x\n", subMessage.data[0], subMessage.data[1], subMessage.data[2], subMessage.data[3]);
-        */
-
         subMessage.length = 5;
 
         msgId = 1;
@@ -254,23 +229,8 @@ public:
         uint16_t dcVoltage = (uint16_t)(dcVoltageFloat * 100);
         subMessage.data[3] = (uint8_t)(dcVoltage >> 8) & 0xFF;
         subMessage.data[4] = (uint8_t)(dcVoltage & 0xFF);
-        /*
-                pcSerial.printf("[HardwarePedal]@buildMessage: HardwareObject (uint8_t)speed: %i\t", status);
-                pcSerial.printf("msg.data[2]: 0x%x\n", subMessage.data[0]);
-                pcSerial.printf("[HardwarePedal]@buildMessage: HardwareObject (uint8_t)speed: %i\t", state);
-                pcSerial.printf("msg.data[2]: 0x%x\n", subMessage.data[1]);
-                pcSerial.printf("[HardwarePedal]@buildMessage: HardwareObject (uint8_t)speed: %i\t", speed);
-                pcSerial.printf("msg.data[2]: 0x%x\n", subMessage.data[2]);
-                pcSerial.printf("[HardwarePedal]@buildMessage: HardwareObject (uint8_t)motorTemp: %i\t", current);
-                pcSerial.printf("msg.data[3]: 0x%x\n", subMessage.data[3]);
-                pcSerial.printf("[HardwarePedal]@buildMessage: HardwareObject (uint8_t)motorTemp: %i\t", motorTemp);
-                pcSerial.printf("msg.data[4]: 0x%x\n", subMessage.data[4]);
-                pcSerial.printf("[HardwarePedal]@buildMessage: HardwareObject (uint8_t)servoTemp: %i\t", airTemp);
-                pcSerial.printf("msg.data[5]: 0x%x\n", subMessage.data[5]);
-                pcSerial.printf("[HardwarePedal]@buildMessage: HardwareObject (uint8_t)dcVoltage: %i\t", dcVoltage);
-                pcSerial.printf("msg.data[6]: 0x%x\n", subMessage.data[6]);
-          */
-        carMessage.addSubMessage(subMessage);
+       
+        carMessage.addSubMessage(subMessage);*/
         return MESSAGE_BUILD_OK;
     }
 

@@ -45,11 +45,11 @@ public:
     virtual float getCurrent() = 0;
 
     // Temperature
-    virtual int16_t getMotorTemp() = 0;
+    virtual float getMotorTemp() = 0;
     virtual float getMotorTempAge() = 0;
-    virtual int16_t getServoTemp() = 0;
+    virtual float getServoTemp() = 0;
     virtual float getServoTempAge() = 0;
-    virtual int16_t getAirTemp() = 0;
+    virtual float getAirTemp() = 0;
     virtual float getAirTempAge() = 0;
 
     // Voltage

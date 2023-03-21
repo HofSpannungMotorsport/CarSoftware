@@ -55,6 +55,9 @@ SoftwareButton buttonCal(COMPONENT_BUTTON_CAL);
 SoftwarePedal gasPedal(COMPONENT_PEDAL_GAS);
 SoftwarePedal brakePedal(COMPONENT_PEDAL_BRAKE);
 
+//     Display
+SoftwareDisplay display(COMPONENT_DISPLAY_MAIN);
+
 //       RPM Sensors (at Pedal Box)
 SoftwareRpmSensor rpmFrontLeft(COMPONENT_RPM_FRONT_LEFT);
 SoftwareRpmSensor rpmFrontRight(COMPONENT_RPM_FRONT_RIGHT);
@@ -82,11 +85,11 @@ DigitalIn x5(MASTER_PIN_SHUTDOWN_AT_TS_ON, OpenDrain);
 DigitalIn x7(MASTER_PIN_SHUTDOWN_AT_BOTS, OpenDrain);
 DigitalIn x8(MASTER_PIN_SHUTDOWN_ERROR_STORAGE, OpenDrain);
 DigitalIn x9(MASTER_PIN_SHUTDOWN_TSMS_IN, OpenDrain);
-HardwareDigitalIn imdOk(MASTER_PIN_IMD_OK, PullUp, COMPONENT_SHUTDOWN_IMD);
-HardwareDigitalIn bmsOk(MASTER_PIN_BMS_OK, PullUp, COMPONENT_SHUTDOWN_BMS);
-DigitalIn x12(MASTER_PIN_TS_ON_STATE, OpenDrain);
-DigitalIn x13(MASTER_PIN_TSAL_MC_OUT, OpenDrain);
-DigitalIn x14(MASTER_PIN_BRAKE_FRONT, OpenDrain);
+DigitalIn x10(MASTER_PIN_IMD_OK, OpenDrain);
+DigitalIn x11(MASTER_PIN_BMS_OK, OpenDrain);
+HardwareDigitalIn x12(MASTER_PIN_TS_ON_STATE, OpenDrain);
+HardwareDigitalIn x13(MASTER_PIN_TSAL_MC_OUT, OpenDrain);
+HardwareDigitalIn x14(MASTER_PIN_BRAKE_FRONT, OpenDrain);
 
 DigitalIn inverterDin1(MASTER_PIN_INVERTER_DOUT_1);
 DigitalIn inverterDin2(MASTER_PIN_INVERTER_DOUT_2);
@@ -102,7 +105,7 @@ SCar carService(canService, (IButton *)&buttonReset, (IButton *)&buttonStart, (I
 SSpeed speedService(carService, (IRpmSensor *)&rpmFrontLeft, (IRpmSensor *)&rpmFrontRight,
                     /* (IRpmSensor*)&rpmRearLeft, (IRpmSensor*)&rpmRearRight, */ // [il]
                     (IMotorController *)&motorController);
-SDisplay displayService(canService, speedService, (IMotorController *)&motorController, (IDigitalIn *)&bmsOk, (IDigitalIn *)&imdOk);
+SDisplay displayService(canService, speedService, (IMotorController *)&motorController, (IDisplay *)&display, (IDigitalIn *)&x11, (IDigitalIn *)&x10, (IDigitalIn *)&x3, (IDigitalIn *)&x4, (IDigitalIn *)&x5, (IDigitalIn *)&x7, (IDigitalIn *)&x8,(IDigitalIn *)&x9);
 
 PMotorController motorControllerService(carService, (IMotorController *)&motorController,
                                         (IPedal *)&gasPedal, (IPedal *)&brakePedal,
@@ -124,10 +127,8 @@ public:
 
         canService.setSenderId(DEVICE_MASTER);
 
-        // Motorcontroller
-        canService.addComponent((ICommunication *)&motorController);
-        canService.addComponent((ICommunication *)&bmsOk);
-        canService.addComponent((ICommunication *)&imdOk);
+        // Display
+        canService.addComponent((ICommunication *)&display);
 
         // Add all Software Components to the CAN Service
         // Dashboard
@@ -137,10 +138,6 @@ public:
         canService.addComponent((ICommunication *)&buttonReset);
         canService.addComponent((ICommunication *)&buttonStart);
         canService.addComponent((ICommunication *)&buttonCal);
-
-        // DigitalIn
-        canService.addComponent((ICommunication *)&imdOk);
-        canService.addComponent((ICommunication *)&bmsOk);
 
         // Pedal
         canService.addComponent((ICommunication *)&gasPedal);
