@@ -106,8 +106,7 @@ SCar carService(canService, ledService, (IButton *)&buttonReset, (IButton *)&but
 SSpeed speedService(carService, (IRpmSensor *)&rpmFrontLeft, (IRpmSensor *)&rpmFrontRight,
                     /* (IRpmSensor*)&rpmRearLeft, (IRpmSensor*)&rpmRearRight, */ // [il]
                     (IMotorController *)&motorController);
-SDisplay displayService(canService, carService, speedService, (IMotorController *)&motorController, (IDisplay *)&display, (IDigitalIn *)&x11, (IDigitalIn *)&x10, (IDigitalIn *)&x3, (IDigitalIn *)&x4, (IDigitalIn *)&x5, (IDigitalIn *)&x7, (IDigitalIn *)&x8,(IDigitalIn *)&x9);
-
+SDisplay displayService(canService, carService, speedService, (IMotorController *)&motorController, (IDisplay *)&display, (IDigitalIn *)&x11, (IDigitalIn *)&x10, (IDigitalIn *)&x3, (IDigitalIn *)&x4, (IDigitalIn *)&x5, (IDigitalIn *)&x7, (IDigitalIn *)&x8, (IDigitalIn *)&x9);
 
 PMotorController motorControllerService(carService, ledService, (IMotorController *)&motorController,
                                         (IPedal *)&gasPedal, (IPedal *)&brakePedal,

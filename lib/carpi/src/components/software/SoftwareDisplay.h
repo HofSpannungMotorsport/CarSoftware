@@ -51,7 +51,7 @@ public:
     {
         _power = power;
     }
-    
+
     void setPowermode(uint8_t powermode)
     {
         _powermode = powermode;
@@ -76,7 +76,7 @@ public:
     {
         _cellTemperatureMax = cellTemperatureMax;
     }
-    
+
     void setCellTemperatureMin(float cellTemperatureMin)
     {
         _cellTemperatureMin = cellTemperatureMin;
@@ -102,7 +102,6 @@ public:
         return _cellTemperatureMin;
     }
 
-
     float getSpeed()
     {
         return _speed;
@@ -116,9 +115,9 @@ public:
         uint8_t msgId = 0;
         subMessage.data[0] = msgId;
 
-        subMessage.data[1] = (uint8_t) _status;
+        subMessage.data[1] = (uint8_t)_status;
 
-        subMessage.data[2] = (uint8_t) _shutdown;
+        subMessage.data[2] = (uint8_t)_shutdown;
 
         // float speedFloat = 80.37f;
         uint16_t speed = (uint16_t)(_speed * 100);
@@ -129,7 +128,6 @@ public:
         uint16_t current = ((float)_current * 100);
         subMessage.data[5] = (uint8_t)(current >> 8) & 0xFF;
         subMessage.data[6] = (uint8_t)(current & 0xFF);
-
 
         carMessage.addSubMessage(subMessage);
 
@@ -153,11 +151,11 @@ public:
         msgId = 2;
         subMessage.data[0] = msgId;
 
-        subMessage.data[1]  = (uint8_t)((_power >> 24) & 0xFF);
-        subMessage.data[2]  = (uint8_t)((_power >> 16) & 0xFF);
-        subMessage.data[3]  = (uint8_t)((_power >> 8) & 0xFF);
-        subMessage.data[4]  = (uint8_t)(_power & 0xFF);
-        subMessage.data[5]  = _powermode;
+        subMessage.data[1] = (uint8_t)((_power >> 24) & 0xFF);
+        subMessage.data[2] = (uint8_t)((_power >> 16) & 0xFF);
+        subMessage.data[3] = (uint8_t)((_power >> 8) & 0xFF);
+        subMessage.data[4] = (uint8_t)(_power & 0xFF);
+        subMessage.data[5] = _powermode;
 
         carMessage.addSubMessage(subMessage);
 

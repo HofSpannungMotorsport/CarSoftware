@@ -97,7 +97,7 @@ public:
         _hvEnabled = hvEnabled;
         _tsms = tsms;
     }
-  
+
     virtual void run()
     {
         _checkHvEnabled();
@@ -190,7 +190,7 @@ public:
     void startUp()
     {
         wait(STARTUP_WAIT);
-        
+
         _ledService.startupAnimation();
 
         wait(STARTUP_ANIMATION_WAIT_AFTER);
@@ -285,7 +285,7 @@ private:
 
     void _sendLedsOverCan()
     {
-       _ledService.run();
+        _ledService.run();
     }
 
     void _sendPedalsOverCan()
@@ -452,43 +452,47 @@ private:
 #endif
     void _checkInput()
     {
-        if (_state == CAR_OFF){
+        if (_state == CAR_OFF)
+        {
             // [QF]
             Timer _ledResendWaitTimer;
             _ledResendWaitTimer.reset();
             _ledResendWaitTimer.start();
-            
-            if ((!(_hvEnabled->read()) || !(_tsms->read())) && !(_button.start->getState() == LONG_CLICKED && _button.start->getStateAge() < MAX_BUTTON_STATE_AGE)){
-                 _canService.processInbound();
+
+            if ((!(_hvEnabled->read()) || !(_tsms->read())) && !(_button.start->getState() == LONG_CLICKED && _button.start->getStateAge() < MAX_BUTTON_STATE_AGE))
+            {
+                _canService.processInbound();
                 processErrors();
-                _brakeLightService.run();           
-            }else{
+                _brakeLightService.run();
+            }
+            else
+            {
                 _canService.processInbound();
                 _checkHvEnabled();
                 _state = ALMOST_READY_TO_DRIVE;
                 processErrors();
-            if (_state != ALMOST_READY_TO_DRIVE){
-                // If an Error occured, stop continuing and glow Red
-                // Red   -> Blinking Fast
-                // Green -> Off
-                _ledService._led.red->setState(LED_ON);
-                _ledService._led.red->setBlinking(BLINKING_FAST);
-                _ledService._led.green->setState(LED_OFF);
-                _ledService.run();
-                while (1)
+                if (_state != ALMOST_READY_TO_DRIVE)
                 {
-
-                    _brakeLightService.run();
+                    // If an Error occured, stop continuing and glow Red
+                    // Red   -> Blinking Fast
+                    // Green -> Off
+                    _ledService._led.red->setState(LED_ON);
+                    _ledService._led.red->setBlinking(BLINKING_FAST);
+                    _ledService._led.green->setState(LED_OFF);
                     _ledService.run();
-                    wait(0.3);
+                    while (1)
+                    {
+
+                        _brakeLightService.run();
+                        _ledService.run();
+                        wait(0.3);
+                    }
                 }
-            }
 
                 _ledService._led.green->setState(LED_ON);
                 _ledService._led.green->setBlinking(BLINKING_FAST);
                 _ledService.run();
             }
-            
         }
         // [QF]
         if (_state == ALMOST_READY_TO_DRIVE)
@@ -727,7 +731,7 @@ private:
             _currentModeId = 0;
 #endif
 
-        _beepTimes(_currentModeId + 1);
+        // _beepTimes(_currentModeId + 1); Remove Comment for BEEP when switching between powermodes
 
         switch (_currentModeId)
         {
