@@ -26,9 +26,8 @@ class SDisplay: public IService {
 
         virtual void run() {
             if(tim.read()> 0.03){
-            tim.reset();
-            tim.start();
-            }
+                tim.reset();
+                tim.start();
 
             _display->setSpeed(_speedService.getSpeed());
             _display->setCurrent(_motorController->getCurrent());
@@ -61,6 +60,7 @@ class SDisplay: public IService {
             #ifdef SDISPLAY_REPORT_DISPLAY
                 pcSerial.printf("[SSpeed]@run: Current Speed: %.3f kM/h\n", _speed);
             #endif
+            }
         }
 
     protected:

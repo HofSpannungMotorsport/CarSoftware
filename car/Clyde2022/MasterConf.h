@@ -79,17 +79,17 @@ DigitalOut bspdTestOut(MASTER_PIN_BSPD_TEST);
 
 DigitalIn x1(MASTER_PIN_RPM_RL, OpenDrain);
 DigitalIn x2(MASTER_PIN_RPM_RR, OpenDrain);
-DigitalIn x3(MASTER_PIN_SHUTDOWN_PRE_BSPD, OpenDrain);
-DigitalIn x4(MASTER_PIN_SHUTDOWN_AFTER_BSPD, OpenDrain);
-DigitalIn x5(MASTER_PIN_SHUTDOWN_AT_TS_ON, OpenDrain);
-DigitalIn x7(MASTER_PIN_SHUTDOWN_AT_BOTS, OpenDrain);
-DigitalIn x8(MASTER_PIN_SHUTDOWN_ERROR_STORAGE, OpenDrain);
-DigitalIn x9(MASTER_PIN_SHUTDOWN_TSMS_IN, OpenDrain);
+HardwareDigitalIn x3(MASTER_PIN_SHUTDOWN_PRE_BSPD, OpenDrain);
+HardwareDigitalIn x4(MASTER_PIN_SHUTDOWN_AFTER_BSPD, OpenDrain);
+HardwareDigitalIn x5(MASTER_PIN_SHUTDOWN_AT_TS_ON, OpenDrain);
+HardwareDigitalIn x7(MASTER_PIN_SHUTDOWN_AT_BOTS, OpenDrain);
+HardwareDigitalIn x8(MASTER_PIN_SHUTDOWN_ERROR_STORAGE, OpenDrain);
+HardwareDigitalIn x9(MASTER_PIN_SHUTDOWN_TSMS_IN, OpenDrain);
 DigitalIn x10(MASTER_PIN_IMD_OK, OpenDrain);
 DigitalIn x11(MASTER_PIN_BMS_OK, OpenDrain);
-HardwareDigitalIn x12(MASTER_PIN_TS_ON_STATE, OpenDrain);
-HardwareDigitalIn x13(MASTER_PIN_TSAL_MC_OUT, OpenDrain);
-HardwareDigitalIn x14(MASTER_PIN_BRAKE_FRONT, OpenDrain);
+DigitalIn x12(MASTER_PIN_TS_ON_STATE, OpenDrain);
+DigitalIn x13(MASTER_PIN_TSAL_MC_OUT, OpenDrain);
+DigitalIn x14(MASTER_PIN_BRAKE_FRONT, OpenDrain);
 
 DigitalIn inverterDin1(MASTER_PIN_INVERTER_DOUT_1);
 DigitalIn inverterDin2(MASTER_PIN_INVERTER_DOUT_2);
