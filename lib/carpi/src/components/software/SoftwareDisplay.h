@@ -57,6 +57,16 @@ public:
         _powermode = powermode;
     }
 
+    void setGas(float gas)
+    {
+        _gas = gas;
+    }
+
+    void setBrake(float brake)
+    {
+        _brake = brake;
+    }
+
     void setCellVoltage(float cellVoltage)
     {
         _cellVoltage = cellVoltage;
@@ -159,6 +169,21 @@ public:
 
         carMessage.addSubMessage(subMessage);
 
+        subMessage.length = 5;
+        msgId = 3;
+        subMessage.data[0] = msgId;
+
+        uint16_t pedalValue = ((float)_gas * 65535);
+
+        subMessage.data[1] = pedalValue & 0xFF;
+        subMessage.data[2] = (pedalValue >> 8) & 0xFF;
+
+        pedalValue = ((float)_brake * 65535);
+
+        subMessage.data[3] = pedalValue & 0xFF;
+        subMessage.data[4] = (pedalValue >> 8) & 0xFF;
+        carMessage.addSubMessage(subMessage);
+
         return MESSAGE_BUILD_OK;
     }
 
@@ -186,6 +211,8 @@ private:
     float _airTemperature;
     float _speed;
     float _current;
+    float _gas;
+    float _brake;
     uint32_t _power;
     uint8_t _shutdown;
     uint8_t _powermode;

@@ -21,6 +21,8 @@ public:
     virtual void setPower(uint32_t) = 0;
     virtual void setShutdownError(uint8_t) = 0;
     virtual void setPowermode(uint8_t) = 0;
+    virtual void setGas(float) = 0;
+    virtual void setBrake(float) = 0;
 };
 
 #endif // IDISPLAY_H

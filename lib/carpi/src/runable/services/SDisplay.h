@@ -9,10 +9,12 @@
 class SDisplay : public IService
 {
 public:
-    SDisplay(CANService &canService, SCar &carService, SSpeed &speedService, IMotorController *motorController, IDisplay *display, IDigitalIn *bmsOk, IDigitalIn *imdOk, IDigitalIn *a, IDigitalIn *b, IDigitalIn *c, IDigitalIn *d, IDigitalIn *e, IDigitalIn *f)
+    SDisplay(CANService &canService, SCar &carService, SSpeed &speedService, IMotorController *motorController, IDisplay *display, IPedal *gasPedal, IPedal *brakePedal, IDigitalIn *bmsOk, IDigitalIn *imdOk, IDigitalIn *a, IDigitalIn *b, IDigitalIn *c, IDigitalIn *d, IDigitalIn *e, IDigitalIn *f)
         : _canService(canService), _carService(carService), _speedService(speedService)
     {
         _motorController = motorController;
+        _gasPedal = gasPedal;
+        _brakePedal = brakePedal;
         _display = display;
         _bmsOk = bmsOk;
         _imdOk = imdOk;
@@ -39,6 +41,9 @@ public:
             _display->setAirTemperature(_motorController->getAirTemp());
             _display->setBatteryVoltage(_motorController->getDcVoltage());
             _display->setPower(_motorController->getDcVoltage());
+            _display->setGas((float)_gasPedal->getValue());
+            _display->setBrake((float)_brakePedal->getValue());
+
 #ifdef ENABLE_POWER_MENU
             _display->setPowermode(_carService.getCurrentModeId());
 #endif
@@ -47,7 +52,7 @@ public:
             pcSerial.printf("Mainhoop or HVD: %d\n", _d->read());
             pcSerial.printf("Dashboard or Inertia or BOTS: %d\n", _c->read());
             pcSerial.printf("BMS: %d\n", _e->read());
-            // pcSerial.printf("IMD: %d\n", _f->read());
+            pcSerial.printf("IMD: %d\n", _f->read());
             pcSerial.printf("\n\n");
 
             if (_b->read() == 0)
@@ -95,6 +100,8 @@ protected:
     IMotorController *_motorController;
     IDisplay *_display;
     Timer tim;
+    IPedal *_gasPedal;
+    IPedal *_brakePedal;
 };
 
 #endif // DISPLAYSERVICE_H

@@ -82,7 +82,7 @@ DigitalIn x2(MASTER_PIN_RPM_RR, OpenDrain);
 HardwareDigitalIn x3(MASTER_PIN_SHUTDOWN_PRE_BSPD, OpenDrain);
 HardwareDigitalIn x4(MASTER_PIN_SHUTDOWN_AFTER_BSPD, OpenDrain);
 HardwareDigitalIn x5(MASTER_PIN_SHUTDOWN_AT_TS_ON, OpenDrain);
-HardwareDigitalIn x7(MASTER_PIN_SHUTDOWN_AT_BOTS, OpenDrain);
+HardwareDigitalIn x7(MASTER_PIN_SHUTDOWN_AT_BOTS, PullNone);
 HardwareDigitalIn x8(MASTER_PIN_SHUTDOWN_ERROR_STORAGE, OpenDrain);
 HardwareDigitalIn x9(MASTER_PIN_SHUTDOWN_TSMS_IN, OpenDrain);
 DigitalIn x10(MASTER_PIN_IMD_OK, OpenDrain);
@@ -106,7 +106,7 @@ SCar carService(canService, ledService, (IButton *)&buttonReset, (IButton *)&but
 SSpeed speedService(carService, (IRpmSensor *)&rpmFrontLeft, (IRpmSensor *)&rpmFrontRight,
                     /* (IRpmSensor*)&rpmRearLeft, (IRpmSensor*)&rpmRearRight, */ // [il]
                     (IMotorController *)&motorController);
-SDisplay displayService(canService, carService, speedService, (IMotorController *)&motorController, (IDisplay *)&display, (IDigitalIn *)&x11, (IDigitalIn *)&x10, (IDigitalIn *)&x3, (IDigitalIn *)&x4, (IDigitalIn *)&x5, (IDigitalIn *)&x7, (IDigitalIn *)&x8, (IDigitalIn *)&x9);
+SDisplay displayService(canService, carService, speedService, (IMotorController *)&motorController, (IDisplay *)&display, (IPedal *)&gasPedal, (IPedal *)&brakePedal, (IDigitalIn *)&x11, (IDigitalIn *)&x10, (IDigitalIn *)&x3, (IDigitalIn *)&x4, (IDigitalIn *)&x5, (IDigitalIn *)&x7, (IDigitalIn *)&x8, (IDigitalIn *)&x9);
 
 PMotorController motorControllerService(carService, ledService, (IMotorController *)&motorController,
                                         (IPedal *)&gasPedal, (IPedal *)&brakePedal,
