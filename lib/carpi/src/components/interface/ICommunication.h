@@ -7,6 +7,7 @@
 class ICommunication : public IComponent {
     public:
         virtual void receive(CarMessage &carMessage) = 0;
+        virtual void resetCallback(id_device_t deviceId) = 0;
 };
 
 #endif // ICOMMUNICATION_H

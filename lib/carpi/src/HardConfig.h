@@ -39,14 +39,10 @@
 
 
 // Communication
-//   Sync
-#define STD_SYNC_INTERVAL_MESSAGE_TIMEOUT 500 // ms
-#define STD_SYNC_INTERVAL_MESSAGE_TIME    248 // ms
-//   SyncedBuffer
-#define STD_SYNCED_BUFFER_MESSAGES_BUFFER_SIZE      32 // max 127
-//   SyncedInBuffer
-#define STD_SYNCED_IN_BUFFER_ALMOST_FULL_LEFT_CAPACITY 5 // elements
-#define STD_SYNCED_IN_BUFFER_ALMOST_FULL_MESSAGE_COOLDOWN 2 // ms
+//   sTCP
+#define STD_STCP_BUFFER_SIZE 32
+#define STD_STCP_MESSAGE_TIMEOUT 0.2 // s -> after which the message without OK gets resend
+#define STD_STCP_INIT_TIMEOUT 1.0 // s -> every x s the init msg will be sent
 
 //   CCAN
 #define STD_CCAN_FREQUENCY 250000

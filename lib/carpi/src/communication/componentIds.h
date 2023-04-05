@@ -89,18 +89,18 @@ enum id_sub_component_t : uint8_t {
     COMPONENT_BUZZER_STARTUP = 0x0,
     
     // System messages
-    COMPONENT_SYSTEM_BMS =              0x0,
-    COMPONENT_SYSTEM_MASTER =           0x1,
-    COMPONENT_SYSTEM_DASHBOARD =        0x2,
-    COMPONENT_SYSTEM_PEDAL =            0x3,
-    COMPONENT_SYSTEM_MOTOR_CONTROLLER = 0x4,
-    COMPONENT_SYSTEM_SPEED =            0x5,
-    COMPONENT_SYSTEM_COOLING =          0x6,
-    COMPONENT_SYSTEM_TSMS =             0x7,
-    COMPONENT_SYSTEM_60V_OK =           0x8,
-    COMPONENT_SYSTEM_REGISTRY =         0x9,
-    COMPONENT_SYSTEM_SD_CARD =          0xA,
-    COMPONENT_SYSTEM_SYNC_OK =          0xB
+    COMPONENT_SYSTEM_STCP =             0x0,
+    COMPONENT_SYSTEM_BMS =              0x1,
+    COMPONENT_SYSTEM_MASTER =           0x2,
+    COMPONENT_SYSTEM_DASHBOARD =        0x3,
+    COMPONENT_SYSTEM_PEDAL =            0x4,
+    COMPONENT_SYSTEM_MOTOR_CONTROLLER = 0x5,
+    COMPONENT_SYSTEM_SPEED =            0x6,
+    COMPONENT_SYSTEM_COOLING =          0x7,
+    COMPONENT_SYSTEM_TSMS =             0x8,
+    COMPONENT_SYSTEM_60V_OK =           0x9,
+    COMPONENT_SYSTEM_REGISTRY =         0xA,
+    COMPONENT_SYSTEM_SD_CARD =          0xB
 };
 
 /**
