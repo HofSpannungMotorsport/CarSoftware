@@ -44,6 +44,8 @@ CANService canService(MASTER_PIN_CAR_INTERN_CAN_RD, MASTER_PIN_CAR_INTERN_CAN_TD
 SoftwareLed ledRed(COMPONENT_LED_ERROR);
 SoftwareLed ledYellow(COMPONENT_LED_ISSUE);
 SoftwareLed ledGreen(COMPONENT_LED_READY_TO_DRIVE);
+SoftwareLed ledImd(COMPONENT_LED_READY_TO_DRIVE);
+SoftwareLed ledGreen(COMPONENT_LED_READY_TO_DRIVE);
 
 //       Buttons
 SoftwareButton buttonReset(COMPONENT_BUTTON_RESET);
@@ -144,10 +146,11 @@ public:
         canService.addComponent((ICommunication *)&gasPedal);
         canService.addComponent((ICommunication *)&brakePedal);
 
+#ifdef EXPERIMENTELL_ASR_ACTIVE
         // RPM
         canService.addComponent((ICommunication *)&rpmFrontLeft);
         canService.addComponent((ICommunication *)&rpmFrontRight);
-
+#endif
         // Add all high demand Services to our Service list
         highDemandServices.addRunable((IRunable *)&canService);
         highDemandServices.addRunable((IRunable *)&carService);
@@ -165,7 +168,6 @@ public:
         services.addRunable((IRunable *)&lowDemandServices, LOW_DEMAND_SERVICE_REFRESH_RATE);
 
         // Start the Car
-        // microcontrollerOk = 1;
         carService.startUp();
     }
 

@@ -47,6 +47,7 @@ public:
 #ifdef ENABLE_POWER_MENU
             _display->setPowermode(_carService.getCurrentModeId());
 #endif
+#ifdef DEBUG_SHUTDOWN
             //_display->setShutdownError(0);
             pcSerial.printf("BSPD: %d \n", _b->read());
             pcSerial.printf("Mainhoop or HVD: %d\n", _d->read());
@@ -54,7 +55,7 @@ public:
             pcSerial.printf("BMS: %d\n", _e->read());
             pcSerial.printf("IMD: %d\n", _f->read());
             pcSerial.printf("\n\n");
-
+#endif
             if (_b->read() == 0)
             {
                 _display->setShutdownError(1);
