@@ -47,7 +47,6 @@ enum id_sub_component_t : uint8_t
     COMPONENT_SHUTDOWN_BMS = 0x0,
     COMPONENT_SHUTDOWN_IMD = 0x1,
 
-
     // Pedals
     COMPONENT_PEDAL_BRAKE = 0x0,
     COMPONENT_PEDAL_GAS = 0x1,
@@ -65,19 +64,25 @@ enum id_sub_component_t : uint8_t
     // Buttons
     COMPONENT_BUTTON_RESET = 0x0,
     COMPONENT_BUTTON_START = 0x1,
-    COMPONENT_BUTTON_CAL = 0x2,
+    COMPONENT_BUTTON_CAL = 0x2, // green LED on the board PCB (pedal)
+    COMPONENT_BUTTON_TS_ON = 0x3,
 
     // LEDs
     COMPONENT_LED_BRAKE = 0x0,          // The braking light on the back of the car
     COMPONENT_LED_CI = 0x1,             // The Cockpit indicator light (green)
-    COMPONENT_LED_ERROR = 0x2,          // red LED dashboard
-    COMPONENT_LED_ISSUE = 0x3,          // yellow LED dashboard
+    COMPONENT_LED_RED = 0x2,            // red LED dashboard
+    COMPONENT_LED_CAL = 0x3,            // yellow LED dashboard
     COMPONENT_LED_READY_TO_DRIVE = 0x4, // greed LED dashboard
     COMPONENT_LED_MASTER_RED = 0x5,     // red LED on the board PCB (master)
     COMPONENT_LED_MASTER_BLUE = 0x6,    // blue LED on the board PCB (master)
     COMPONENT_LED_MASTER_GREEN = 0x7,   // green LED on the board PCB (master)
     COMPONENT_LED_DASHBOARD = 0x8,      // green LED on the board PCB (dashboard)
-    COMPONENT_LED_PEDAL = 0x9,          // green LED on the board PCB (pedal)
+    COMPONENT_LED_PEDAL = 0x9,          // green LED on the board PCB (master)
+    COMPONENT_LED_IMD = 0xA,            // red LED on the board PCB (dashboard)
+    COMPONENT_LED_BMS = 0xB,            // red LED on the board PCB (dashboard)
+    COMPONENT_LED_LAUNCH_CONTROL = 0xC, // green LED dashboard
+    COMPONENT_LED_GREEN = 0xD,          // green LED dashboard
+    COMPONENT_LED_BLUE = 0xE,           // blue LED dashboard
 
     // Suspension travel sensors
     COMPONENT_SUSPENSION_TRAVEL_FR = 0x0,

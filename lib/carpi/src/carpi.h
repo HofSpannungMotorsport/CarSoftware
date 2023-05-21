@@ -30,6 +30,7 @@ HardwareSerial &pcSerial = Serial;
 // ---------------------------------------------------------------------
 
 // All Platform Components
+#include "globals.h"
 
 // Communication
 #include "communication/CarMessage.h"

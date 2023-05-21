@@ -13,8 +13,13 @@ CANService canService(DASHBOARD_CAN);
 
 // LED's
 HardwareLed ledRed(DASHBOARD_PIN_LED_RED, COMPONENT_LED_RED);
+HardwareLed ledGreen(DASHBOARD_PIN_LED_GREEN, COMPONENT_LED_GREEN);
+HardwareLed ledBlue(DASHBOARD_PIN_LED_BLUE, COMPONENT_LED_BLUE);
 HardwareLed ledCal(DASHBOARD_PIN_LED_CAL, COMPONENT_LED_CAL);
 HardwareLed ledRtd(DASHBOARD_PIN_LED_RTD, COMPONENT_LED_READY_TO_DRIVE);
+HardwareLed ledLct(DASHBOARD_PIN_LED_LCT, COMPONENT_LED_LAUNCH_CONTROL);
+// HardwareLed ledImd(DASHBOARD_PIN_LED_IMD, COMPONENT_LED_IMD);
+// HardwareLed ledBms(DASHBOARD_PIN_LED_BMS, COMPONENT_LED_BMS);
 
 // Buttons
 HardwareInterruptButton buttonReset(DASHBOARD_PIN_BUTTON_RESET, COMPONENT_BUTTON_RESET);
@@ -30,11 +35,17 @@ public:
         canService.setSenderId(DEVICE_DASHBOARD);
 
         canService.addComponent((ICommunication *)&ledRed);
+        canService.addComponent((ICommunication *)&ledGreen);
+        canService.addComponent((ICommunication *)&ledBlue);
         canService.addComponent((ICommunication *)&ledCal);
         canService.addComponent((ICommunication *)&ledRtd);
+        canService.addComponent((ICommunication *)&ledLct);
         canService.addComponent((ICommunication *)&buttonReset);
         canService.addComponent((ICommunication *)&buttonStart);
         canService.addComponent((ICommunication *)&buttonCal);
+        // canService.addComponent((ICommunication *)&buttonTsOn);
+        //       canService.addComponent((ICommunication *)&ledImd);
+        //         canService.addComponent((ICommunication *)&ledBms);
 
         _resendTimer.reset();
         _resendTimer.start();
@@ -48,6 +59,7 @@ public:
         canService.sendMessage((ICommunication *)&buttonReset, DEVICE_MASTER);
         canService.sendMessage((ICommunication *)&buttonStart, DEVICE_MASTER);
         canService.sendMessage((ICommunication *)&buttonCal, DEVICE_MASTER);
+        //        canService.sendMessage((ICommunication *)&buttonTsOn, DEVICE_MASTER);
 
         _resendTimer.reset();
         _resendTimer.start();
@@ -76,7 +88,15 @@ public:
                 canService.sendMessage((ICommunication *)&buttonCal, DEVICE_MASTER);
             }
 
-            wait(0.01);
+            /*
+                button_state_t tsOnState = buttonTsOn.getState();
+                if (tsOnState != _lastSentCal)
+                {
+                    _lastSentTsOn = resetState;
+                    canService.sendMessage((ICommunication *)&buttonCal, DEVICE_MASTER);
+                }
+            */
+            wait_ms(10);
         }
     }
 
@@ -86,6 +106,7 @@ private:
     button_state_t _lastSentStart = NOT_PRESSED;
     button_state_t _lastSentReset = NOT_PRESSED;
     button_state_t _lastSentCal = NOT_PRESSED;
+    button_state_t _lastSentTsOn = NOT_PRESSED;
 };
 
 Dashboard runtime;

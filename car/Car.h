@@ -8,4 +8,8 @@
 #include "Clyde2022/Clyde2022.h"
 #endif
 
+#ifdef CAR_BUD_2023
+#include "Bud2023/Bud2023.h"
+#endif
+
 #endif

@@ -1,0 +1,12 @@
+#ifndef PINS_PEDAL_H
+#define PINS_PEDAL_H
+
+#define PEDAL_PIN_ROTATION_ANGLE_GAS_1    A1
+#define PEDAL_PIN_ROTATION_ANGLE_GAS_2    A2
+#define PEDAL_PIN_ROTATION_ANGLE_BRAKE    A0
+#define PEDAL_PIN_RPM_SENSOR_FL           D1
+#define PEDAL_PIN_RPM_SENSOR_FR           D3
+
+#define PEDAL_CAN D10,D2
+
+#endif // PINS_PEDAL_H
