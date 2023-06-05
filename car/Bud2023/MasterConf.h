@@ -78,7 +78,7 @@ HardwareMotorController motorController(MASTER_PIN_MOTOR_CONTROLLER_CAN_RD,
                                         COMPONENT_MOTOR_MAIN, true);
 HardwareFan coolingFan(MASTER_PIN_FAN, COMPONENT_COOLING_FAN);
 HardwarePump coolingPump(MASTER_PIN_PUMP_PWM, COMPONENT_COOLING_PUMP);
-HardwareBuzzer buzzer(MASTER_PIN_BUZZER, COMPONENT_BUZZER_STARTUP);
+HardwarePwmBuzzer buzzer(MASTER_PIN_BUZZER, COMPONENT_BUZZER_STARTUP);
 HardwareHvEnabled hvEnabled(MASTER_PIN_HV_ALL_READY, COMPONENT_SYSTEM_60V_OK);
 HardwareHvEnabled tsms(MASTER_PIN_TSMS, COMPONENT_SYSTEM_TSMS);
 
@@ -219,7 +219,7 @@ public:
         }
 
         // BSPD Test hotfix
-        if (buttonCal.getState() == LONG_CLICKED)
+        if (buttonReset.getState() == LONG_CLICKED)
         {
             bspdTestOut.write(1);
         }
@@ -228,7 +228,7 @@ public:
             bspdTestOut.write(0);
         }
 
-        wait_us(0.001);
+        wait_us(124);
     }
 
 protected:

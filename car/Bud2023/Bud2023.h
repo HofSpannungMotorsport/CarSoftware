@@ -15,6 +15,10 @@
 #include "MasterConf.h"
 #endif
 
+#ifdef TEST_BOARD_MASTER
+#include "MasterTestConf.h"
+#endif
+
 #ifdef BOARD_DISPLAY
 #include "DisplaySlaveConf.h"
 #endif

@@ -36,6 +36,7 @@ public:
 
     // Torque
     virtual void setTorque(float torque) = 0; // from 0 to 1.0
+    virtual void setSentCurrent(uint16_t current) = 0;
 
     // Speed
     virtual float getSpeed() = 0;
@@ -43,6 +44,7 @@ public:
 
     // Current
     virtual float getCurrent() = 0;
+    virtual uint16_t getSentCurrent() = 0;
 
     // Temperature
     virtual float getMotorTemp() = 0;

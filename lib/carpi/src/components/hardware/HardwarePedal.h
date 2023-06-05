@@ -175,6 +175,7 @@ public:
 
             // Add Threshhold
             returnValue = (returnValue - _pedalThreshhold) * 1 / (1 - _pedalThreshhold);
+
             if (returnValue < 0)
                 returnValue = 0;
 

@@ -254,6 +254,8 @@ public:
 
 #ifndef PMOTORCONTROLLER_DISABLE_MOTOR_POWER_OUTPUT
         _motorController->setTorque(returnValue);
+        uint16_t sentCurrent = (uint16_t)returnValue * (float)INVERTER_MAX_ALLOWED_PHASE_CURRENT;
+        _motorController->setSentCurrent(sentCurrent);
 #else
         _motorController->setTorque(0);
 #endif
@@ -326,7 +328,7 @@ protected:
         }
 
         _carService.run();
-        if (_carService.getState() == READY_TO_DRIVE || _carService.getState() == LAUNCH_CONTROL)
+        if (_carService.getState() == DRIVE || _carService.getState() == LAUNCH_CONTROL)
         {
             _ready = true;
         }
@@ -411,6 +413,7 @@ protected:
                 // If APPS (gas pedal) was unprimed before throu this,
                 // it will be unlocked at the next Part of this Method
                 _hardBrakeingStarted = false;
+                _hardBrakeingSince.stop();
             }
         }
 

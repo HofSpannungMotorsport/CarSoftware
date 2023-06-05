@@ -67,7 +67,6 @@ HardwareSerial &pcSerial = Serial;
 //   Hardware
 #include "components/hardware/HardwareBuzzer.h"
 #include "components/hardware/HardwarePwmBuzzer.h"
-#include "components/hardware/HardwareDisplay.h"
 #include "components/hardware/HardwareFan.h"
 #include "components/hardware/HardwareInterruptButton.h"
 #include "components/hardware/HardwareLed.h"

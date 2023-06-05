@@ -36,13 +36,15 @@ public:
             tim.start();
 
             _display->setSpeed(_speedService.getSpeed());
-            _display->setCurrent(_motorController->getCurrent());
+            _display->setCurrent(_motorController->getSentCurrent());
             _display->setMotorTemperature(_motorController->getMotorTemp());
             _display->setAirTemperature(_motorController->getAirTemp());
             _display->setBatteryVoltage(_motorController->getDcVoltage());
-            _display->setPower(_motorController->getDcVoltage());
             _display->setGas((float)_gasPedal->getValue());
             _display->setBrake((float)_brakePedal->getValue());
+            //_display->setBmsOk((uint8_t)_bmsOk->read());
+            //_display->setImdOk((uint8_t)_imdOk->read());
+            _display->setState((uint8_t)_carService.getState());
 
 #ifdef ENABLE_POWER_MENU
             _display->setPowermode(_carService.getCurrentModeId());
@@ -56,6 +58,8 @@ public:
             pcSerial.printf("IMD: %d\n", _f->read());
             pcSerial.printf("\n\n");
 #endif
+            _display->setShutdownError(0);
+
             if (_b->read() == 0)
             {
                 _display->setShutdownError(1);
@@ -74,10 +78,6 @@ public:
             }
             // else if (_f->read() == 0){
             //_display->setShutdownError(5); }
-            else
-            {
-                _display->setShutdownError(0);
-            }
             _canService.sendMessage((ICommunication *)_display, DEVICE_DISPLAY);
 
 #ifdef SDISPLAY_REPORT_DISPLAY
@@ -88,8 +88,13 @@ public:
 
 protected:
     CANService &_canService;
-    SSpeed &_speedService;
     SCar &_carService;
+    SSpeed &_speedService;
+    IMotorController *_motorController;
+    IPedal *_gasPedal;
+    IPedal *_brakePedal;
+    IDisplay *_display;
+    Timer tim;
     IDigitalIn *_bmsOk;
     IDigitalIn *_imdOk;
     IDigitalIn *_a;
@@ -98,11 +103,6 @@ protected:
     IDigitalIn *_d;
     IDigitalIn *_e;
     IDigitalIn *_f; // TS-ON
-    IMotorController *_motorController;
-    IDisplay *_display;
-    Timer tim;
-    IPedal *_gasPedal;
-    IPedal *_brakePedal;
 };
 
 #endif // DISPLAYSERVICE_H

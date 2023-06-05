@@ -41,16 +41,19 @@ CANService canService(MASTER_PIN_CAR_INTERN_CAN_RD, MASTER_PIN_CAR_INTERN_CAN_TD
 //   Software
 //     Dashboard
 //       LED's
-SoftwareLed ledRed(COMPONENT_LED_ERROR);
-SoftwareLed ledYellow(COMPONENT_LED_ISSUE);
-SoftwareLed ledGreen(COMPONENT_LED_READY_TO_DRIVE);
-SoftwareLed ledImd(COMPONENT_LED_READY_TO_DRIVE);
-SoftwareLed ledGreen(COMPONENT_LED_READY_TO_DRIVE);
+SoftwareLed ledRed(COMPONENT_LED_RED);
+SoftwareLed ledGreen(COMPONENT_LED_GREEN);
+SoftwareLed ledBlue(COMPONENT_LED_BLUE);
+SoftwareLed ledCal(COMPONENT_LED_ISSUE);
+SoftwareLed ledRtd(COMPONENT_LED_READY_TO_DRIVE);
+SoftwareLed ledImd(COMPONENT_LED_IMD);
+SoftwareLed ledBms(COMPONENT_LED_BMS);
 
 //       Buttons
 SoftwareButton buttonReset(COMPONENT_BUTTON_RESET);
 SoftwareButton buttonStart(COMPONENT_BUTTON_START);
 SoftwareButton buttonCal(COMPONENT_BUTTON_CAL);
+SoftwareButton buttonTsOn(COMPONENT_BUTTON_TS_ON);
 
 //     Pedal
 //       Pedals
@@ -60,9 +63,11 @@ SoftwarePedal brakePedal(COMPONENT_PEDAL_BRAKE);
 //     Display
 SoftwareDisplay display(COMPONENT_DISPLAY_MAIN);
 
+#ifdef RPM_SENSOR
 //       RPM Sensors (at Pedal Box)
 SoftwareRpmSensor rpmFrontLeft(COMPONENT_RPM_FRONT_LEFT);
 SoftwareRpmSensor rpmFrontRight(COMPONENT_RPM_FRONT_RIGHT);
+#endif
 
 //   Hardware
 HardwareLed brakeLight(MASTER_PIN_BRAKE_LIGHT, COMPONENT_LED_BRAKE);
@@ -99,48 +104,59 @@ DigitalOut stopPrechargeOut(MASTER_PIN_STOP_PRECHARGE_OUT);
 
 PBrakeLight brakeLightService((IPedal *)&brakePedal, (ILed *)&brakeLight);
 
-SLed ledService(canService, (ILed *)&ledRed, (ILed *)&ledYellow, (ILed *)&ledGreen);
+SLed ledService(canService, (ILed *)&ledRed, (ILed *)&ledCal, (ILed *)&ledRtd);
 
-SCar carService(canService, ledService, (IButton *)&buttonReset, (IButton *)&buttonStart, (IPedal *)&gasPedal, (IPedal *)&brakePedal,
+SCar carService(canService, ledService, (IButton *)&buttonReset, (IButton *)&buttonStart, (IButton *)&buttonTsOn, (IPedal *)&gasPedal, (IPedal *)&brakePedal,
                 (IBuzzer *)&buzzer, (IMotorController *)&motorController, (IHvEnabled *)&hvEnabled,
                 (IHvEnabled *)&tsms, brakeLightService);
 
+#ifdef RPM_SENSOR
 SSpeed speedService(carService, (IRpmSensor *)&rpmFrontLeft, (IRpmSensor *)&rpmFrontRight,
                     /* (IRpmSensor*)&rpmRearLeft, (IRpmSensor*)&rpmRearRight, */ // [il]
                     (IMotorController *)&motorController);
-SDisplay displayService(canService, carService, speedService, (IMotorController *)&motorController, (IDisplay *)&display, (IPedal *)&gasPedal, (IPedal *)&brakePedal, (IDigitalIn *)&x11, (IDigitalIn *)&x10, (IDigitalIn *)&x3, (IDigitalIn *)&x4, (IDigitalIn *)&x5, (IDigitalIn *)&x7, (IDigitalIn *)&x8, (IDigitalIn *)&x9);
+#else
+SSpeed speedService(carService, (IMotorController *)&motorController);
+#endif
+
+#ifdef RPM_SENSOR
 
 PMotorController motorControllerService(carService, ledService, (IMotorController *)&motorController,
                                         (IPedal *)&gasPedal, (IPedal *)&brakePedal,
                                         (IRpmSensor *)&rpmFrontLeft, (IRpmSensor *)&rpmFrontRight,
                                         speedService);
+#else
+PMotorController motorControllerService(carService, ledService, (IMotorController *)&motorController,
+                                        (IPedal *)&gasPedal, (IPedal *)&brakePedal,
+                                        speedService);
+#endif
 
 PCooling coolingService(carService, speedService, (IFan *)&coolingFan, (IPump *)&coolingPump,
                         (IMotorController *)&motorController, (IHvEnabled *)&hvEnabled);
 
+SDisplay displayService(canService, carService, speedService, (IMotorController *)&motorController, (IDisplay *)&display, (IPedal *)&gasPedal, (IPedal *)&brakePedal, (IDigitalIn *)&x11, (IDigitalIn *)&x10, (IDigitalIn *)&x3, (IDigitalIn *)&x4, (IDigitalIn *)&x5, (IDigitalIn *)&x7, (IDigitalIn *)&x8, (IDigitalIn *)&x9);
+
 class Master : public Carpi
 {
 public:
-    // Called once at bootup
-    void setup()
+    /**
+     * Adds Components to Can
+     */
+    void addToCan()
     {
-        bspdTestOut.write(0);
-
-        wait(2);
-
-        canService.setSenderId(DEVICE_MASTER);
-
         // Display
         canService.addComponent((ICommunication *)&display);
 
         // Add all Software Components to the CAN Service
         // Dashboard
         canService.addComponent((ICommunication *)&ledRed);
-        canService.addComponent((ICommunication *)&ledYellow);
-        canService.addComponent((ICommunication *)&ledGreen);
+        canService.addComponent((ICommunication *)&ledCal);
+        canService.addComponent((ICommunication *)&ledRtd);
+        canService.addComponent((ICommunication *)&ledImd);
+        canService.addComponent((ICommunication *)&ledBms);
         canService.addComponent((ICommunication *)&buttonReset);
         canService.addComponent((ICommunication *)&buttonStart);
         canService.addComponent((ICommunication *)&buttonCal);
+        canService.addComponent((ICommunication *)&buttonTsOn);
 
         // Pedal
         canService.addComponent((ICommunication *)&gasPedal);
@@ -151,6 +167,18 @@ public:
         canService.addComponent((ICommunication *)&rpmFrontLeft);
         canService.addComponent((ICommunication *)&rpmFrontRight);
 #endif
+    }
+    // Called once at bootup
+    void setup()
+    {
+        bspdTestOut.write(0);
+
+        wait(2);
+
+        canService.setSenderId(DEVICE_MASTER);
+
+        addToCan();
+
         // Add all high demand Services to our Service list
         highDemandServices.addRunable((IRunable *)&canService);
         highDemandServices.addRunable((IRunable *)&carService);

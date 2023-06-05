@@ -3,12 +3,14 @@
 
 #include "IComponent.h"
 
-enum buzzer_state_t : bool {
+enum buzzer_state_t : bool
+{
     BUZZER_OFF = false,
-    BUZZER_ON  = true
+    BUZZER_ON = true
 };
 
-enum buzzer_beep_type_t : uint8_t {
+enum buzzer_beep_type_t : uint8_t
+{
     BUZZER_MONO_TONE = 0x0,
     BUZZER_BEEP_ON_BEEP_OFF = 0x1,
     BUZZER_BEEP_HIGH_BEEP_LOW = 0x2,
@@ -18,26 +20,30 @@ enum buzzer_beep_type_t : uint8_t {
 typedef uint16_t buzzer_hz_t;
 
 typedef uint8_t buzzer_status_t;
-enum buzzer_error_type_t : buzzer_status_t {
+enum buzzer_error_type_t : buzzer_status_t
+{
     BUZZER_OK = 0x0,
     BUZZER_ERROR_UNKNOWN = 0x1,
     BUZZER_WRONG_STATE = 0x2,
     BUZZER_WRONG_BEEP = 0x4
 };
 
-class IBuzzer : public IComponent {
-    public:
-        virtual void setStatus(buzzer_status_t status) = 0;
-        virtual buzzer_status_t getStatus() = 0;
+class IBuzzer : public IComponent
+{
+public:
+    virtual void setStatus(buzzer_status_t status) = 0;
+    virtual buzzer_status_t getStatus() = 0;
 
-        virtual void setState(buzzer_state_t state) = 0;
-        virtual buzzer_state_t getState() = 0;
+    virtual void setState(buzzer_state_t state) = 0;
+    virtual buzzer_state_t getState() = 0;
 
-        virtual void setBeep(buzzer_beep_type_t beep) = 0;
-        virtual buzzer_beep_type_t getBeep() = 0;
+    virtual void setBeep(buzzer_beep_type_t beep) = 0;
+    virtual buzzer_beep_type_t getBeep() = 0;
 
-        virtual void setHz(buzzer_hz_t hz) = 0;
-        virtual buzzer_hz_t getHz() = 0;
+    virtual void setHz(buzzer_hz_t hz) = 0;
+    virtual buzzer_hz_t getHz() = 0;
+    virtual void playTone(float frequency, float duration) = 0;
+    virtual void playRtdTone() = 0;
 };
 
 #endif // IBUZZER_H

@@ -108,6 +108,16 @@ public:
         return _bamocar.getCurrent();
     }
 
+    uint16_t getSentCurrent()
+    {
+        return _sentCurrent;
+    }
+
+    void setSentCurrent(uint16_t current)
+    {
+        _sentCurrent = current;
+    }
+
     float getMotorTemp()
     {
         return _bamocar.getMotorTemp();
@@ -179,59 +189,6 @@ public:
 
     virtual message_build_result_t buildMessage(CarMessage &carMessage)
     {
-        /*
-        car_sub_message_t subMessage;
-
-        subMessage.length = 7;
-
-                subMessage.data[0] = 4;
-                subMessage.data[1] = 334;
-                subMessage.data[2] = 99;
-                subMessage.data[3] = 45;
-                debug("[HardwarePedal]@buildMessage: HardwareObject [0]: %x\t[1]: %x\t[2]: %x\t[3]: %x\n", subMessage.data[0], subMessage.data[1], subMessage.data[2], subMessage.data[3]);
-        */
-        /*
-      uint8_t msgId = 0;
-      subMessage.data[0] = msgId;
-
-      uint8_t status = (uint8_t)this->getStatus();
-      subMessage.data[1] = status;
-
-      uint8_t state = (uint8_t)this->getState();
-      subMessage.data[2] = state;
-
-      float speedFloat = this->getSpeed();
-      // float speedFloat = 80.37f;
-      uint16_t speed = (uint16_t)(speedFloat * 100);
-      subMessage.data[3] = (uint8_t)(speed >> 8) & 0xFF;
-      subMessage.data[4] = (uint8_t)(speed & 0xFF);
-
-      float currentFloat = this->getCurrent();
-      // float currentFloat = 180.7f;
-      uint16_t current = ((float)currentFloat * 100);
-      subMessage.data[5] = (uint8_t)(current >> 8) & 0xFF;
-      subMessage.data[6] = (uint8_t)(current & 0xFF);
-
-      carMessage.addSubMessage(subMessage);
-
-      subMessage.length = 5;
-
-      msgId = 1;
-      subMessage.data[0] = msgId;
-
-      int8_t motorTemp = this->getMotorTemp();
-      subMessage.data[1] = motorTemp;
-
-      int8_t airTemp = this->getAirTemp();
-      subMessage.data[2] = airTemp;
-
-      float dcVoltageFloat = this->getDcVoltage();
-      // float dcVoltageFloat = 403.21f;
-      uint16_t dcVoltage = (uint16_t)(dcVoltageFloat * 100);
-      subMessage.data[3] = (uint8_t)(dcVoltage >> 8) & 0xFF;
-      subMessage.data[4] = (uint8_t)(dcVoltage & 0xFF);
-
-      carMessage.addSubMessage(subMessage);*/
         return MESSAGE_BUILD_OK;
     }
 
@@ -250,6 +207,7 @@ protected:
     BamocarD3 _bamocar;
     DigitalOut _rfe;
     DigitalOut _run;
+    uint32_t _sentCurrent = 0;
 
     motor_controller_status_t _status = 0;
 };

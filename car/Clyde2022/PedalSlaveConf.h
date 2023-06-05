@@ -21,7 +21,7 @@ CANService canService(PEDAL_CAN);
 
 // Pedals
 HardwarePedal gasPedal(PEDAL_PIN_ROTATION_ANGLE_GAS_2, PEDAL_PIN_ROTATION_ANGLE_GAS_2, COMPONENT_PEDAL_GAS, STD_GAS_1_MIN, STD_GAS_1_MAX, STD_GAS_2_MIN, STD_GAS_2_MAX);
-HardwarePedal brakePedal(PEDAL_PIN_ROTATION_ANGLE_BRAKE, COMPONENT_PEDAL_BRAKE, STD_BRAKE_MIN, STD_BRAKE_MAX, 500,0);
+HardwarePedal brakePedal(PEDAL_PIN_ROTATION_ANGLE_BRAKE, COMPONENT_PEDAL_BRAKE, STD_BRAKE_MIN, STD_BRAKE_MAX, 500, 0);
 
 // RPM Sensor
 #ifdef EXPERIMENTELL_ASR_ACTIVE
@@ -76,7 +76,7 @@ public:
         canService.run();
         // float pedalValueFloat = gasPedal.getValue();
 
-        // pcSerial.printf("Gas: %d\t%f\n", gasPedal.getRaw().a, pedalValueFloat);
+        pcSerial.printf("Gas: %d\t%f\n", gasPedal.getRaw().a, pedalValueFloat);
 
         wait(1.0 / (float)PEDAL_SEND_RATE);
     }
