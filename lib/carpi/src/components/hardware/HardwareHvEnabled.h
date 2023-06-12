@@ -4,11 +4,6 @@
 #include "../interface/IHvEnabled.h"
 #include "../../DelayedSwitch.h"
 
-enum hv_enabled_on_state_t : bool {
-    HV_ENABLED_ON_AT_HIGH = true,
-    HV_ENABLED_ON_AT_LOW = false
-};
-
 #define STD_HV_DISABELING_DEBOUNCE_TIME 100 // ms
 #define STD_HV_ENABLEING_DEBOUNCE_TIME 100 // ms
 

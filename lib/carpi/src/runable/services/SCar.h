@@ -75,7 +75,7 @@ public:
          IBuzzer *buzzer,
          IMotorController *motorController,
          IHvEnabled *hvEnabled,
-         IHvEnabled *tsms,
+         DigitalIn *tsms,
          PBrakeLight &brakeLightService)
         : _canService(canService), _ledService(ledService), _brakeLightService(brakeLightService)
     {
@@ -288,7 +288,7 @@ private:
 
     IMotorController *_motorController;
 
-    IHvEnabled *_tsms;
+    DigitalIn *_tsms;
 
     PBrakeLight &_brakeLightService;
 

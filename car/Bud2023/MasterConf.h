@@ -29,13 +29,13 @@
 #define HIGH_DEMAND_SERVICE_REFRESH_RATE 120 // Hz
 #define LOW_DEMAND_SERVICE_REFRESH_RATE 3    // Hz
 
-#include "hardware/Pins_Master.h"
+#include "hardware/Pins_MasterTest.h"
 
 #ifdef EXPERIMENTELL_ASR_ACTIVE
 #warning "Don't forget to activate ASR on PedalSlave too!!!"
 #endif
 
-CANService canService(MASTER_PIN_CAR_INTERN_CAN_RD, MASTER_PIN_CAR_INTERN_CAN_TD);
+CANService canService(MASTER_CAN_RX, MASTER_CAN_TX);
 
 // Components
 //   Software
@@ -71,37 +71,46 @@ SoftwareRpmSensor rpmFrontRight(COMPONENT_RPM_FRONT_RIGHT);
 #endif
 
 //   Hardware
-HardwareLed brakeLight(MASTER_PIN_BRAKE_LIGHT, COMPONENT_LED_BRAKE);
-HardwareMotorController motorController(MASTER_PIN_MOTOR_CONTROLLER_CAN_RD,
-                                        MASTER_PIN_MOTOR_CONTROLLER_CAN_TD, MASTER_PIN_RFE_ENABLE,
-                                        MASTER_PIN_RUN_ENABLE, BAMOCAR_D3_400V,
+HardwareLed brakeLight(MASTER_BRAKELIGHT_OUT, COMPONENT_LED_BRAKE);
+HardwareMotorController motorController(MASTER_INVERTER_CAN_RX,
+                                        MASTER_INVERTER_CAN_TX, MASTER_RFE_OUT,
+                                        MASTER_RUN_OUT, BAMOCAR_D3_400V,
                                         COMPONENT_MOTOR_MAIN, true);
-HardwareFan coolingFan(MASTER_PIN_FAN, COMPONENT_COOLING_FAN);
-HardwarePump coolingPump(MASTER_PIN_PUMP_PWM, COMPONENT_COOLING_PUMP);
-HardwarePwmBuzzer buzzer(MASTER_PIN_BUZZER, COMPONENT_BUZZER_STARTUP);
-HardwareHvEnabled hvEnabled(MASTER_PIN_HV_ALL_READY, COMPONENT_SYSTEM_60V_OK);
-HardwareHvEnabled tsms(MASTER_PIN_TSMS, COMPONENT_SYSTEM_TSMS);
+HardwareFan coolingFan(MASTER_FANS_PWM_OUT, COMPONENT_COOLING_FAN);
+HardwarePump coolingPump(MASTER_PUMP_PWM_OUT, COMPONENT_COOLING_PUMP);
+HardwarePwmBuzzer buzzer(MASTER_BUZZER_OUT, COMPONENT_BUZZER_STARTUP);
+
+// HardwareHvEnabled hvEnabled(MASTER_PIN_HV_ALL_READY, COMPONENT_SYSTEM_60V_OK);           Removed in new PCB
+// HardwareHvEnabled tsms(MASTER_SHUTDOWN_TSMS_MONITORING, COMPONENT_SYSTEM_TSMS); 	        // This or Shutdown Monitoring
 
 // INTEGRATE BETTER LATER
-DigitalOut bspdTestOut(MASTER_PIN_BSPD_TEST);
+DigitalOut bspdTestOut(MASTER_BSPD_TEST_OUT);
 
-DigitalIn x1(MASTER_PIN_RPM_RL, OpenDrain);
-DigitalIn x2(MASTER_PIN_RPM_RR, OpenDrain);
-HardwareDigitalIn x3(MASTER_PIN_SHUTDOWN_PRE_BSPD, OpenDrain);
-HardwareDigitalIn x4(MASTER_PIN_SHUTDOWN_AFTER_BSPD, OpenDrain);
-HardwareDigitalIn x5(MASTER_PIN_SHUTDOWN_AT_TS_ON, OpenDrain);
-HardwareDigitalIn x7(MASTER_PIN_SHUTDOWN_AT_BOTS, PullNone);
-HardwareDigitalIn x8(MASTER_PIN_SHUTDOWN_ERROR_STORAGE, OpenDrain);
-HardwareDigitalIn x9(MASTER_PIN_SHUTDOWN_TSMS_IN, OpenDrain);
-DigitalIn x10(MASTER_PIN_IMD_OK, OpenDrain);
-DigitalIn x11(MASTER_PIN_BMS_OK, OpenDrain);
-DigitalIn x12(MASTER_PIN_TS_ON_STATE, OpenDrain);
-DigitalIn x13(MASTER_PIN_TSAL_MC_OUT, OpenDrain);
-DigitalIn x14(MASTER_PIN_BRAKE_FRONT, OpenDrain);
+// RPM Sensors
 
-DigitalIn inverterDin1(MASTER_PIN_INVERTER_DOUT_1);
-DigitalIn inverterDin2(MASTER_PIN_INVERTER_DOUT_2);
-DigitalOut stopPrechargeOut(MASTER_PIN_STOP_PRECHARGE_OUT);
+// DigitalIn x1(MASTER_PIN_RPM_RL, OpenDrain);                                    // not used
+// DigitalIn x2(MASTER_PIN_RPM_RR, OpenDrain);                                    // not used
+
+// Shutdown Monitoring
+
+DigitalIn shutdownAfterAccu(MASTER_SHUTDOWN_ACCU_MONITORING, PullUp);
+DigitalIn shutdownAfterBSPD(MASTER_SHUTDOWN_BSPD_MONITORING, PullUp);
+DigitalIn shutdownAfterHvd(MASTER_SHUTDOWN_HVD_MONITORING, PullUp);
+DigitalIn shutdownAfterInverter(MASTER_SHUTDOWN_INVERTER_MONITORING, PullUp);
+DigitalIn shutdownAfterMainhoop(MASTER_SHUTDOWN_MAINHOOP_MONITORING, PullUp);
+DigitalIn shutdownAfterTSMS(MASTER_SHUTDOWN_TSMS_MONITORING, PullUp);
+SoftwareHvEnabled hvEnabled(COMPONENT_SYSTEM_60V_OK);
+
+// Brake pressure monitoring
+
+AnalogIn brakePressure(MASTER_BRAKE_PRESSURE_SENSOR);
+
+// Inverter monitoring
+
+DigitalIn inverterDin1(MASTER_DOUT1_IN);
+DigitalIn inverterDin2(MASTER_DOUT2_IN);
+
+// DigitalOut stopPrechargeOut(MASTER_PIN_STOP_PRECHARGE_OUT);                    // removed in new PCB
 
 PBrakeLight brakeLightService((IPedal *)&brakePedal, (ILed *)&brakeLight);
 
@@ -109,7 +118,7 @@ SLed ledService(canService, (ILed *)&ledRed, (ILed *)&ledGreen, (ILed *)&ledBlue
 
 SCar carService(canService, ledService, (IButton *)&buttonReset, (IButton *)&buttonCal, (IButton *)&buttonStart, (IButton *)&buttonTsOn, (IPedal *)&gasPedal, (IPedal *)&brakePedal,
                 (IBuzzer *)&buzzer, (IMotorController *)&motorController, (IHvEnabled *)&hvEnabled,
-                (IHvEnabled *)&tsms, brakeLightService);
+                (DigitalIn *)&shutdownAfterTSMS, brakeLightService);
 
 #ifdef RPM_SENSOR
 SSpeed speedService(carService, (IRpmSensor *)&rpmFrontLeft, (IRpmSensor *)&rpmFrontRight,
@@ -134,7 +143,7 @@ PMotorController motorControllerService(carService, ledService, (IMotorControlle
 PCooling coolingService(carService, speedService, (IFan *)&coolingFan, (IPump *)&coolingPump,
                         (IMotorController *)&motorController, (IHvEnabled *)&hvEnabled);
 
-SDisplay displayService(canService, carService, speedService, (IMotorController *)&motorController, (IDisplay *)&display, (IPedal *)&gasPedal, (IPedal *)&brakePedal, (IDigitalIn *)&x11, (IDigitalIn *)&x10, (IDigitalIn *)&x3, (IDigitalIn *)&x4, (IDigitalIn *)&x5, (IDigitalIn *)&x7, (IDigitalIn *)&x8, (IDigitalIn *)&x9);
+SDisplay displayService(canService, carService, speedService, (IMotorController *)&motorController, (IDisplay *)&display, (IPedal *)&gasPedal, (IPedal *)&brakePedal, (DigitalIn *)&shutdownAfterAccu, (DigitalIn *)&shutdownAfterBSPD, (DigitalIn *)&shutdownAfterHvd, (DigitalIn *)&shutdownAfterInverter, (DigitalIn *)&shutdownAfterMainhoop, (DigitalIn *)&shutdownAfterTSMS);
 
 class Master : public Carpi
 {
@@ -209,14 +218,16 @@ public:
         // Run all Services
         services.run();
 
-        if (inverterDin1.read() == 1 && inverterDin2.read() == 1)
-        {
-            stopPrechargeOut.write(1);
-        }
-        else
-        {
-            stopPrechargeOut.write(0);
-        }
+        // Send this via CAN now [il]
+
+        // if (inverterDin1.read() == 1 && inverterDin2.read() == 1)
+        // {
+        //     stopPrechargeOut.write(1);
+        // }
+        // else
+        // {
+        //     stopPrechargeOut.write(0);
+        // }
 
         // BSPD Test hotfix
         if (buttonReset.getState() == LONG_CLICKED)

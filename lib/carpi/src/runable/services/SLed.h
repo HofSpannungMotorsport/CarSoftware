@@ -144,7 +144,6 @@ public:
     void indicateCarState(car_state_t carState)
     {
         resetLeds();
-        printf("Indicating car state: %d\n", carState);
         switch (carState)
         {
         case CAR_OFF:

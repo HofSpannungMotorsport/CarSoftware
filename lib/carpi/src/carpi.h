@@ -82,6 +82,7 @@ HardwareSerial &pcSerial = Serial;
 #include "components/software/SoftwareLed.h"
 #include "components/software/SoftwarePedal.h"
 #include "components/software/SoftwareRpmSensor.h"
+#include "components/software/SoftwareHvEnabled.h"
 // #include "components/software/SoftwareMotorcontroller.h"
 
 // Services

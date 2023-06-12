@@ -9,21 +9,21 @@
 class SDisplay : public IService
 {
 public:
-    SDisplay(CANService &canService, SCar &carService, SSpeed &speedService, IMotorController *motorController, IDisplay *display, IPedal *gasPedal, IPedal *brakePedal, IDigitalIn *bmsOk, IDigitalIn *imdOk, IDigitalIn *a, IDigitalIn *b, IDigitalIn *c, IDigitalIn *d, IDigitalIn *e, IDigitalIn *f)
+    SDisplay(CANService &canService, SCar &carService, SSpeed &speedService, IMotorController *motorController, IDisplay *display, IPedal *gasPedal, IPedal *brakePedal, DigitalIn *shutdownAfterAccu, DigitalIn *shutdownAfterBSPD, DigitalIn *shutdownAfterHvd, DigitalIn *shutdownAfterInverter, DigitalIn *shutdownAfterMainhoop, DigitalIn *shutdownAfterTSMS)
         : _canService(canService), _carService(carService), _speedService(speedService)
     {
         _motorController = motorController;
         _gasPedal = gasPedal;
         _brakePedal = brakePedal;
         _display = display;
-        _bmsOk = bmsOk;
-        _imdOk = imdOk;
-        _a = a;
-        _b = b;
-        _c = c;
-        _d = d;
-        _e = e;
-        _f = f;
+
+        _shutdownAfterAccu = shutdownAfterAccu;
+        _shutdownAfterBSPD = shutdownAfterBSPD;
+        _shutdownAfterHvd = shutdownAfterHvd;
+        _shutdownAfterInverter = shutdownAfterInverter;
+        _shutdownAfterMainhoop = shutdownAfterMainhoop;
+        _shutdownAfterTSMS = shutdownAfterTSMS;
+
         tim.reset();
         tim.start();
     }
@@ -42,42 +42,62 @@ public:
             _display->setBatteryVoltage(_motorController->getDcVoltage());
             _display->setGas((float)_gasPedal->getValue());
             _display->setBrake((float)_brakePedal->getValue());
-            //_display->setBmsOk((uint8_t)_bmsOk->read());
-            //_display->setImdOk((uint8_t)_imdOk->read());
             _display->setState((uint8_t)_carService.getState());
 
 #ifdef ENABLE_POWER_MENU
             _display->setPowermode(_carService.getCurrentModeId());
 #endif
-#ifdef DEBUG_SHUTDOWN
-            //_display->setShutdownError(0);
-            pcSerial.printf("BSPD: %d \n", _b->read());
-            pcSerial.printf("Mainhoop or HVD: %d\n", _d->read());
-            pcSerial.printf("Dashboard or Inertia or BOTS: %d\n", _c->read());
-            pcSerial.printf("BMS: %d\n", _e->read());
-            pcSerial.printf("IMD: %d\n", _f->read());
-            pcSerial.printf("\n\n");
-#endif
+
             _display->setShutdownError(0);
 
-            if (_b->read() == 0)
+            if (_shutdownAfterTSMS->read() == 1)
             {
                 _display->setShutdownError(1);
+#ifdef DEBUG_SHUTDOWN
+                pcSerial.printf("TSMS not closed\n");
+#endif
             }
-            else if (_d->read() == 0)
+            else if (_shutdownAfterHvd->read() == 1)
             {
                 _display->setShutdownError(2);
+#ifdef DEBUG_SHUTDOWN
+                pcSerial.printf("HVD not closed\n");
+#endif
             }
-            else if (_c->read() == 0)
+            else if (_shutdownAfterMainhoop->read() == 1)
             {
                 _display->setShutdownError(3);
+#ifdef DEBUG_SHUTDOWN
+                pcSerial.printf("Mainhoop not closed\n");
+#endif
             }
-            else if (_e->read() == 0)
+            else if (_shutdownAfterBSPD->read() == 1)
             {
                 _display->setShutdownError(4);
+#ifdef DEBUG_SHUTDOWN
+                pcSerial.printf("BSPD not closed\n");
+#endif
             }
-            // else if (_f->read() == 0){
-            //_display->setShutdownError(5); }
+            else if (_shutdownAfterInverter->read() == 1)
+            {
+                _display->setShutdownError(5);
+#ifdef DEBUG_SHUTDOWN
+                pcSerial.printf("Inverter not closed\n");
+#endif
+            }
+            else if (_shutdownAfterAccu->read() == 1)
+            {
+                _display->setShutdownError(6);
+#ifdef DEBUG_SHUTDOWN
+                pcSerial.printf("Accu not closed\n");
+#endif
+            }
+            else
+            {
+#ifdef DEBUG_SHUTDOWN
+                pcSerial.printf("No shutdown error\n");
+#endif
+            }
             _canService.sendMessage((ICommunication *)_display, DEVICE_DISPLAY);
 
 #ifdef SDISPLAY_REPORT_DISPLAY
@@ -95,14 +115,12 @@ protected:
     IPedal *_brakePedal;
     IDisplay *_display;
     Timer tim;
-    IDigitalIn *_bmsOk;
-    IDigitalIn *_imdOk;
-    IDigitalIn *_a;
-    IDigitalIn *_b; // BSPD
-    IDigitalIn *_c;
-    IDigitalIn *_d;
-    IDigitalIn *_e;
-    IDigitalIn *_f; // TS-ON
+    DigitalIn *_shutdownAfterAccu;
+    DigitalIn *_shutdownAfterBSPD;
+    DigitalIn *_shutdownAfterHvd;
+    DigitalIn *_shutdownAfterInverter;
+    DigitalIn *_shutdownAfterMainhoop;
+    DigitalIn *_shutdownAfterTSMS;
 };
 
 #endif // DISPLAYSERVICE_H
