@@ -158,16 +158,22 @@ public:
 
                 // Look if it is outside of our boundary
                 if (mappedValue < (_map.to.min - maxDeviance))
+                {
                     // If is not in our boundary, save an error
                     outOfBoundary = true;
+                    //returnValue = 0;
+                }
             }
 
             // And now the same again, just for the other cases...
             if (mappedValue > _map.to.max)
             {
                 returnValue = _map.to.max;
-                // if (mappedValue > (_map.to.max + maxDeviance))
-                //   outOfBoundary = true;
+                if (mappedValue > (_map.to.max + maxDeviance))
+                {
+                    outOfBoundary = true; // Sensor disconnect full throttle if commented out
+                    //returnValue = 0;      // Sensor disconnect full throttle if commented out
+                }
             }
         }
         else if (_map.to.min > _map.to.max)
