@@ -25,6 +25,7 @@
 #define ENABLE_POWER_MENU
 // #define REPORT_CAN_ERROR
 #include "carpi.h"
+#include "DelayedSwitch.h"
 
 #define HIGH_DEMAND_SERVICE_REFRESH_RATE 120 // Hz
 #define LOW_DEMAND_SERVICE_REFRESH_RATE 3    // Hz
@@ -84,33 +85,26 @@ HardwarePwmBuzzer buzzer(MASTER_BUZZER_OUT, COMPONENT_BUZZER_STARTUP);
 // HardwareHvEnabled tsms(MASTER_SHUTDOWN_TSMS_MONITORING, COMPONENT_SYSTEM_TSMS); 	        // This or Shutdown Monitoring
 
 // INTEGRATE BETTER LATER
-DigitalOut bspdTestOut(MASTER_BSPD_TEST_OUT);
+DigitalOut bspdTestOut(MASTER_PIN_BSPD_TEST);
 
-// RPM Sensors
+DigitalIn x1(MASTER_PIN_RPM_RL, OpenDrain);
+DigitalIn x2(MASTER_PIN_RPM_RR, OpenDrain);
+HardwareDigitalIn x3(MASTER_PIN_SHUTDOWN_PRE_BSPD, OpenDrain);
+HardwareDigitalIn x4(MASTER_PIN_SHUTDOWN_AFTER_BSPD, OpenDrain);
+HardwareDigitalIn x5(MASTER_PIN_SHUTDOWN_AT_TS_ON, OpenDrain);
+HardwareDigitalIn x7(MASTER_PIN_SHUTDOWN_AT_BOTS, PullNone);
+HardwareDigitalIn x8(MASTER_PIN_SHUTDOWN_ERROR_STORAGE, OpenDrain);
+HardwareDigitalIn x9(MASTER_PIN_SHUTDOWN_TSMS_IN, OpenDrain);
+DigitalIn x10(MASTER_PIN_IMD_OK, OpenDrain);
+DigitalIn x11(MASTER_PIN_BMS_OK, OpenDrain);
+DigitalIn x12(MASTER_PIN_TS_ON_STATE, OpenDrain);
+DigitalIn x13(MASTER_PIN_TSAL_MC_OUT, OpenDrain);
+DigitalIn x14(MASTER_PIN_BRAKE_FRONT, OpenDrain);
 
-// DigitalIn x1(MASTER_PIN_RPM_RL, OpenDrain);                                    // not used
-// DigitalIn x2(MASTER_PIN_RPM_RR, OpenDrain);                                    // not used
-
-// Shutdown Monitoring
-
-DigitalIn shutdownAfterAccu(MASTER_SHUTDOWN_ACCU_MONITORING, PullUp);
-DigitalIn shutdownAfterBSPD(MASTER_SHUTDOWN_BSPD_MONITORING, PullUp);
-DigitalIn shutdownAfterHvd(MASTER_SHUTDOWN_HVD_MONITORING, PullUp);
-DigitalIn shutdownAfterInverter(MASTER_SHUTDOWN_INVERTER_MONITORING, PullUp);
-DigitalIn shutdownAfterMainhoop(MASTER_SHUTDOWN_MAINHOOP_MONITORING, PullUp);
-DigitalIn shutdownAfterTSMS(MASTER_SHUTDOWN_TSMS_MONITORING, PullUp);
-SoftwareHvEnabled hvEnabled(COMPONENT_SYSTEM_60V_OK);
-
-// Brake pressure monitoring
-
-AnalogIn brakePressure(MASTER_BRAKE_PRESSURE_SENSOR);
-
-// Inverter monitoring
-
-DigitalIn inverterDin1(MASTER_DOUT1_IN);
-DigitalIn inverterDin2(MASTER_DOUT2_IN);
-
-// DigitalOut stopPrechargeOut(MASTER_PIN_STOP_PRECHARGE_OUT);                    // removed in new PCB
+DigitalIn inverterDin1(MASTER_PIN_INVERTER_DOUT_1);
+DigitalIn inverterDin2(MASTER_PIN_INVERTER_DOUT_2);
+DigitalOut stopPrechargeOut(MASTER_PIN_STOP_PRECHARGE_OUT);
+DelayedSwitch stopPrechargeDelayed;
 
 PBrakeLight brakeLightService((IPedal *)&brakePedal, (ILed *)&brakeLight);
 
@@ -207,6 +201,10 @@ public:
         services.addRunable((IRunable *)&highDemandServices, HIGH_DEMAND_SERVICE_REFRESH_RATE);
         services.addRunable((IRunable *)&lowDemandServices, LOW_DEMAND_SERVICE_REFRESH_RATE);
 
+        // Delay for stop precharge
+        stopPrechargeDelayed.setEnableTime(4000);
+        stopPrechargeDelayed.setDisableTime(0);
+
         // Start the Car
         carService.startUp();
     }
@@ -218,16 +216,14 @@ public:
         // Run all Services
         services.run();
 
-        // Send this via CAN now [il]
-
-        // if (inverterDin1.read() == 1 && inverterDin2.read() == 1)
-        // {
-        //     stopPrechargeOut.write(1);
-        // }
-        // else
-        // {
-        //     stopPrechargeOut.write(0);
-        // }
+        if (inverterDin1.read() == 1 && inverterDin2.read() == 1)
+        {
+            stopPrechargeOut.write(stopPrechargeDelayed.set(1));
+        }
+        else
+        {
+            stopPrechargeOut.write(stopPrechargeDelayed.set(0));
+        }
 
         // BSPD Test hotfix
         if (buttonReset.getState() == LONG_CLICKED)
