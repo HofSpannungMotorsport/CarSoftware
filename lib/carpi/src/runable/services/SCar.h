@@ -709,7 +709,7 @@ private:
         if (_currentModeId > 4)
             _currentModeId = 0;
 #else
-        if (_currentModeId > 2)
+        if (_currentModeId > 1)
             _currentModeId = 0;
 #endif
 
